@@ -1,0 +1,10 @@
+faiss_gpu==1.7.2
+fschat==0.2.32
+numpy==1.26.4
+openai==0.28.1
+pyserini==0.22.1
+PyYAML==6.0.1
+PyYAML==6.0.1
+torch==2.1.2
+tqdm==4.66.1
+transformers==4.38.2

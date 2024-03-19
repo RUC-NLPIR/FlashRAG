@@ -1,0 +1,1 @@
+from flashrag.generator.generator import BaseGenerator, CausalLMGenerator
