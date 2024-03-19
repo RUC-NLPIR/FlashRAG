@@ -1,2 +1,4 @@
 **/.history
 *.pyc
+*.egg-info
+build/

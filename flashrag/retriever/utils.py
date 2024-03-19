@@ -49,7 +49,7 @@ def base_content_function(item):
         return item['text']
 
 def load_corpus(corpus_path: str):
-    return linecache.getlines(corpus_path)
+    return lambda x:linecache.getline(corpus_path,x)
     
 
 

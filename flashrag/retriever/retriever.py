@@ -115,7 +115,7 @@ class DenseRetriever(BaseRetriever):
         return query_emb
 
     def load_docs(self, doc_idxs, content_function=base_content_function):
-        results = [json.loads(self.corpus[idx]) for idx in doc_idxs]
+        results = [json.loads(self.corpus(idx)) for idx in doc_idxs]
         # add content field
         for item in results:
             if 'contents' not in item:
