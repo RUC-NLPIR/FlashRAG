@@ -12,7 +12,7 @@ from torch import Tensor
 import torch.nn.functional as F
 
 from transformers import AutoTokenizer, AutoModel
-from flashrag.retriever.utils import load_model, pooling, load_corpus, base_content_function
+from flashrag.retriever.utils import load_model, pooling, base_content_function, load_database
 
         
 class BaseRetriever(ABC):
@@ -24,7 +24,7 @@ class BaseRetriever(ABC):
         self.topk = config['retrieval_topk']
 
         self.index_path = config['index_path']
-        self.corpus_path = config['corpus_path']
+        self.corpus_database_path = config['corpus_database_path']
 
 
     @abstractmethod
@@ -50,7 +50,7 @@ class BM25Retriever(BaseRetriever):
         self.searcher = LuceneSearcher(self.index_path)
         self.contain_doc = self._check_contain_doc()
         if not self.contain_doc:
-            self.corpus, self.id2doc = load_corpus(self.corpus_path)
+            self.corpus = load_database(self.corpus_database_path)
         
     def _check_contain_doc(self):
         r"""Check if the index contains document content
@@ -68,7 +68,7 @@ class BM25Retriever(BaseRetriever):
                         'text': "\n".join(content.split("\n")[1:]),
                         'contents': content} for content in all_contents]
         else:
-            results = [self.id2doc[hits[i].docid] for i in range(num)]
+            results = [self.corpus.get(hits[i].docid) for i in range(num)]
 
         return results
 
@@ -79,9 +79,8 @@ class DenseRetriever(BaseRetriever):
     def __init__(self, config: dict):
         super().__init__(config)
         # TODO: adapt to pyserini index
-
         self.index = faiss.read_index(self.index_path)
-        self.corpus = load_corpus(self.corpus_path)
+        self.corpus = load_database(self.corpus_database_path)
         self.encoder, self.tokenizer = load_model(model_path = config['retrieval_model_path'], 
                                                   use_fp16 = config['retrieval_use_fp16'])
         self.topk = config['retrieval_topk']
@@ -115,7 +114,7 @@ class DenseRetriever(BaseRetriever):
         return query_emb
 
     def load_docs(self, doc_idxs, content_function=base_content_function):
-        results = [json.loads(self.corpus(idx)) for idx in doc_idxs]
+        results = [self.corpus.get(str(idx)) for idx in doc_idxs]
         # add content field
         for item in results:
             if 'contents' not in item:
@@ -128,7 +127,5 @@ class DenseRetriever(BaseRetriever):
         query_emb = self._encode(query)
         scores, idxs = self.index.search(query_emb, k=num)
         idxs = idxs[0]
-
         results = self.load_docs(idxs, content_function=base_content_function)
-        
         return results

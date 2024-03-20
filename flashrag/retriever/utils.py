@@ -5,6 +5,7 @@ from typing import List, Dict
 import numpy as np
 import torch
 import linecache
+from sqlite_utils import Database
 
 from torch import Tensor
 import torch.nn.functional as F
@@ -48,28 +49,27 @@ def base_content_function(item):
     else:
         return item['text']
 
-def load_corpus(corpus_path: str):
-    return lambda x:linecache.getline(corpus_path,x)
+def load_database(database_path: str):
+    db = Database(database_path)
+    corpus = db['docs']
+    return corpus
     
 
+def load_corpus(
+        corpus_path: str,
+        content_function: callable = lambda item: "\"{}\"\n{}".format(item['title'], item['text'])
+    ):
+    
+    corpus = []
+    with open(corpus_path, "r") as f:
+        if ".jsonl" in corpus_path:
+            for line in f:
+                corpus.append(json.loads(line))
+        else:
+            corpus = json.load(f)
+    
+    if 'contents' not in corpus[0]:
+        for item in corpus:
+            item['contents'] = content_function(item)
 
-# def load_corpus(
-#         corpus_path: str,
-#         content_function: callable = lambda item: "\"{}\"\n{}".format(item['title'], item['text'])
-#     ):
-    
-#     corpus = []
-#     with open(corpus_path, "r") as f:
-#         if ".jsonl" in corpus_path:
-#             for line in f:
-#                 corpus.append(json.loads(line))
-#         else:
-#             corpus = json.load(f)
-    
-#     if 'contents' not in corpus[0]:
-#         for item in corpus:
-#             item['contents'] = content_function(item)
-    
-#     id2doc = {item['id']:item for item in corpus}
-
-#     return corpus, id2doc
+    return corpus

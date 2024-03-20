@@ -1,5 +1,5 @@
 import os
-from flashrag.retriever.utils import load_model, load_corpus, pooling, base_content_function
+from flashrag.retriever.utils import load_model, load_corpus, pooling, base_content_function, load_database
 from flashrag.config.config import Config
 import faiss
 import json
@@ -12,7 +12,7 @@ import torch
 import shutil
 import subprocess
 from tqdm import tqdm
-
+from sqlite_utils import Database
 
 class Index_Builder:
     r"""A tool class used to build an index used in retrieval.
@@ -27,6 +27,7 @@ class Index_Builder:
         
         self.retrieval_method = config['retrieval_method']
         self.corpus_path = config['corpus_path']
+        self.database_path = config['corpus_database_save_path']
         self.save_dir = config['index_save_dir']
         self.device = config['device']
         self.retrieval_model_path = config['retrieval_model_path']
@@ -47,7 +48,7 @@ class Index_Builder:
         self.corpus = load_corpus(self.corpus_path)
         self.content_function = content_function
 
-        self.have_contents = 'contents' in json.loads(self.corpus[0])        
+        self.have_contents = 'contents' in self.corpus[0]       
         
         # TODO: 在config模块完成后自动将路径存入yaml中
 
@@ -125,9 +126,7 @@ class Index_Builder:
             self.batch_size = self.batch_size * self.gpu_num
 
         # get embeddings
-        doc_items = [json.loads(item) for item in self.corpus]
-        doc_content = [item['contents'] if 'contents' in item 
-                                        else self.content_function(item) for item in doc_items]
+        doc_content = [item['contents'] for item in self.corpus]
 
         if self.retrieval_method == "e5":
             doc_content = [f"passage: {doc}" for doc in doc_content]
@@ -164,40 +163,48 @@ class Index_Builder:
 
         # build index
         dim = all_embeddings.shape[-1]
-        faiss_index = faiss.index_factory(dim, 'Flat', faiss.METRIC_L2)
+        faiss_index = faiss.index_factory(dim, 'IVF100,PQ16', faiss.METRIC_L2)
+        #faiss_index = faiss.index_factory(dim, 'Flat', faiss.METRIC_L2)
+        faiss_index.train(all_embeddings)
         faiss_index.add(all_embeddings)
-        faiss.write_index(faiss_index, self.save_dir + "/faiss.index")
+        faiss.write_index(faiss_index, self.save_dir + "/faiss_ivf.index")
+        
+        # build corpus databse
+        db = Database(self.database_path)
+        docs = db['docs']
+        docs.insert_all(self.corpus, pk="id", batch_size=1000000, truncate=True)
+
         print("Finish!")
 
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description = "Creating index.")
+# if __name__ == "__main__":
+#     parser = argparse.ArgumentParser(description = "Creating index.")
 
-    # Basic parameters
-    parser.add_argument('--retrieval_method', type=str)
-    parser.add_argument('--corpus_path', type=str)
-    parser.add_argument('--save_dir', type=str)
+#     # Basic parameters
+#     parser.add_argument('--retrieval_method', type=str)
+#     parser.add_argument('--corpus_path', type=str)
+#     parser.add_argument('--save_dir', type=str)
 
-    # Parameters for building dense index
-    parser.add_argument('--device', type=str, default='cuda')
-    parser.add_argument('--gpu_num', type=int, default=1)
-    parser.add_argument('--doc_max_length', type=int, default=256)
-    parser.add_argument('--batch_size', type=int, default=512)
-    parser.add_argument('--use_fp16', type=bool, default=True)
+#     # Parameters for building dense index
+#     parser.add_argument('--device', type=str, default='cuda')
+#     parser.add_argument('--gpu_num', type=int, default=1)
+#     parser.add_argument('--doc_max_length', type=int, default=256)
+#     parser.add_argument('--batch_size', type=int, default=512)
+#     parser.add_argument('--use_fp16', type=bool, default=True)
     
-    args = parser.parse_args()
+#     args = parser.parse_args()
 
-    index_builder = Index_Builder(
-                        retrieval_method = args.retrieval_method,
-                        corpus_path = args.corpus_path,
-                        save_dir = args.save_dir,
-                        device = torch.device(args.device),
-                        gpu_num = args.gpu_num,
-                        doc_max_length = args.doc_max_length,
-                        batch_size = args.batch_size,
-                        retrieval_model_path = MODEL2PATH[args.retrieval_method],
-                        use_fp16 = args.use_fp16,
-                        pooling_method = MODEL2POOLING[args.retrieval_method],
-                    )
-    index_builder.build_index()
+#     index_builder = Index_Builder(
+#                         retrieval_method = args.retrieval_method,
+#                         corpus_path = args.corpus_path,
+#                         save_dir = args.save_dir,
+#                         device = torch.device(args.device),
+#                         gpu_num = args.gpu_num,
+#                         doc_max_length = args.doc_max_length,
+#                         batch_size = args.batch_size,
+#                         retrieval_model_path = MODEL2PATH[args.retrieval_method],
+#                         use_fp16 = args.use_fp16,
+#                         pooling_method = MODEL2POOLING[args.retrieval_method],
+#                     )
+#     index_builder.build_index()
