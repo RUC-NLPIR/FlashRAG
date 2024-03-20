@@ -115,6 +115,9 @@ class Config:
 
         if self.final_config['index_path'] is None:
             self.final_config['index_path'] = method2index.get(retrieval_method, None)
+        
+        if self.final_config['corpus_database_save_path'] is None:
+            self.final_config['corpus_database_save_path'] = os.path.join(self.final_config['index_save_dir'], 'corpus.db')
 
         self.final_config['retrieval_model_path'] = retriever_model2path.get(retrieval_method, retrieval_method)
         # TODO: not support when `retrieval_model` is path
