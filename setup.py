@@ -11,7 +11,7 @@ setup(
     packages=find_packages(),
     url='https://github.com/ignorejjj/FlashRAG',
     license='Apache License 2.0',
-    author='Jiajie Jin, Yutao Zhu, Shenghao Zhang, Xinyu Yang',
+    author='Jiajie Jin, Yutao Zhu, Chenghao Zhang, Xinyu Yang',
     author_email='jinjiajie@ruc.edu.cn',
     description='A library for efficient Retrieval-Augmented Generation research',
     long_description=long_description,
