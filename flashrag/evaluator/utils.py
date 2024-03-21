@@ -18,4 +18,8 @@ def normalize_answer(s):
     return white_space_fix(remove_articles(remove_punc(lower(s))))
 
 def is_regex(pattern):
-    return any(char in pattern for char in ".*?^$[]()\\")
+    try:
+        re.compile(pattern)
+        return True
+    except re.error:
+        return False

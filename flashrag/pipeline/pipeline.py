@@ -80,11 +80,11 @@ class NaiveRAG(BasicPipeline):
 
         # Retrieval
         # TODO: batch retrieval
-        print("begin search")
+
         for item in dataset:
             retrieval_result = self.retriever.search(item.question)
             item.update_output("retrieval_result", retrieval_result)
-        print("finish search")
+
         
         # Build prompt
         # TODO: modify into class
@@ -102,7 +102,8 @@ class NaiveRAG(BasicPipeline):
         # generate
         input_list = dataset.get_attr_data("prompt")
         pred_answer_list = self.generator.generate(input_list)
+        
         dataset.update_output("pred",pred_answer_list)
         # evaluate & save result
         eval_result = self.evaluator.evaluate(dataset)
-        return eval_result
+        return dataset, eval_result

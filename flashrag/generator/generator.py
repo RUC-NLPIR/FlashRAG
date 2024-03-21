@@ -21,7 +21,7 @@ class BaseGenerator:
         self.model_name = config['generator_model']
         self.model_path = config['generator_model_path']
 
-        self.input_max_len = config['generator_max_input_len']
+        self.max_input_len = config['generator_max_input_len']
         self.batch_size = config['generator_batch_size']
         self.device = config['device']
 
@@ -78,7 +78,12 @@ class CausalLMGenerator(BaseGenerator):
         responses = []
         for idx in tqdm(range(0, len(input_list), self.batch_size), desc='Generation process: '):
             batched_prompts = input_list[idx:idx+self.batch_size]
-            inputs = self.tokenizer(batched_prompts, return_tensors="pt", padding=True).to(self.model.device)
+            inputs = self.tokenizer(batched_prompts, 
+                                    return_tensors="pt", 
+                                    padding=True,
+                                    truncation=True,
+                                    max_length=self.max_input_len
+                                ).to(self.model.device)
             outputs = self.model.generate(
                 **inputs,
                 **self.generation_params

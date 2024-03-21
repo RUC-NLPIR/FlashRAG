@@ -47,8 +47,8 @@ class ExactMatch(BaseMetric):
             score = 0.0
             for golden_answer in golden_answers:
                 if is_regex(golden_answer):
-                    golden_answer = re.complie(golden_answer)
-                    match = re.fullmatch(golden_answer, normalized_prediction.lower(), re.IGNORECASE)
+                    golden_answer = re.compile(golden_answer, re.IGNORECASE)
+                    match = re.fullmatch(golden_answer, normalized_prediction.lower())
                     if match is not None:
                         score = 1.0
                         break
