@@ -25,19 +25,19 @@ method2index:
   contriever: ~
 
 # ----Environment Settings----
-gpu_id: "2"
+gpu_id: "0"
 dataset_name: "nq"
-split: ["train", "dev", "test"]
+split: ["test"] # train,dev,test
 
 # Sampling configurations for testing
-test_sample_num: 10
+test_sample_num: ~
 random_sample: False
 
 # Seed for reproducibility
 seed: 2024
 
 # Directory paths for data and outputs
-data_dir: "datasets/"
+data_dir: "dataset/"
 save_dir: "output/"
 
 # ----Retrieval Settings----
@@ -51,8 +51,8 @@ retrieval_query_max_length: 128
 
 # ----Generator Settings----
 generator_model: "llama2-7B-chat" # name or path of the generator model
-generator_input_max_len: 1024
-generator_batch_size: 4
+generator_max_input_len: 1024
+generator_batch_size: 2
 generation_params:
   max_new_tokens: 64
   do_sample: False
@@ -70,4 +70,4 @@ index_batch_size: 4096
 index_use_fp16: True
 index_save_dir: "indexes/"
 corpus_path: ~  # path to jsonl file, only used in building index
-corpus_database_save_dir: ~  
+corpus_database_save_path: ~  
