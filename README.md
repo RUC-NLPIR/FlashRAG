@@ -1,3 +1,34 @@
+# Quick Start
+
+The following steps can implement a simple RAG pipeline, using ```e5``` as the retriever and ```llama2-7B``` as the generator. Toy dataset and retrieval corpus are placed in  `flashrag/examples/`.
+
+## Step1: Prepare environment
+
+First need to install the source code.
+
+```bash
+git clone https://github.com/ignorejjj/FlashRAG.git
+cd FlashRAG
+pip install -e . --verbose
+```
+
+## Step2: Run the pipeline
+
+Switch to the examples folder.
+
+```bash
+cd examples
+```
+
+Run the sample code to get the generation result and evaluation score.
+
+```bash
+python test_pipeline.py --model_path=<LLAMA2-7B-PATH> --retriever_path=<E5-PATH>
+```
+
+**Note**: Due to the very small sample corpus used in retrieval, the result may not be good. Just an example. 
+
+
 # Usage 
 
 ## Build index
