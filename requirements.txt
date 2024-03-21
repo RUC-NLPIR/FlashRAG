@@ -5,6 +5,8 @@ openai==0.28.1
 pyserini==0.22.1
 PyYAML==6.0.1
 PyYAML==6.0.1
+setuptools==68.0.0
+sqlite_utils==3.36
 torch==2.1.2
 tqdm==4.66.1
 transformers==4.38.2
