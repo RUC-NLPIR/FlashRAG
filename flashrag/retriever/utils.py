@@ -3,11 +3,7 @@ import json
 from abc import ABC, abstractmethod
 from typing import List, Dict
 import numpy as np
-import torch
-import linecache
 from sqlite_utils import Database
-
-from torch import Tensor
 import torch.nn.functional as F
 
 from transformers import AutoTokenizer, AutoModel
@@ -28,10 +24,10 @@ def load_model(
 
 
 def pooling(
-        pooler_output: torch.Tensor,
-        last_hidden_state: torch.Tensor,
-        attention_mask: torch.Tensor = None,
-        pooling_method: str = "mean"
+        pooler_output,
+        last_hidden_state,
+        attention_mask = None,
+        pooling_method = "mean"
     ):
     if pooling_method == "mean":
         last_hidden = last_hidden_state.masked_fill(~attention_mask[..., None].bool(), 0.0)

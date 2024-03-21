@@ -1,16 +1,15 @@
 import os
-from flashrag.retriever.utils import load_model, load_corpus, pooling, base_content_function, load_database
-from flashrag.config.config import Config
+from flashrag.retriever.utils import load_model, load_corpus, pooling, base_content_function
 import faiss
 import json
 from abc import ABC, abstractmethod
 from typing import cast, List, Union, Tuple
 import warnings
 import numpy as np
-import argparse
-import torch
 import shutil
 import subprocess
+import argparse
+import torch
 from tqdm import tqdm
 from sqlite_utils import Database
 
@@ -21,21 +20,28 @@ class Index_Builder:
 
     def __init__(
             self, 
-            config,
+            retrieval_method,
+            model_path,
+            corpus_path,
+            save_dir,
+            max_length,
+            batch_size,
+            use_fp16,
+            pooling_method,
             content_function: callable = base_content_function
         ):
         
-        self.retrieval_method = config['retrieval_method']
-        self.corpus_path = config['corpus_path']
-        self.database_path = config['corpus_database_save_path']
-        self.save_dir = config['index_save_dir']
-        self.device = config['device']
-        self.retrieval_model_path = config['retrieval_model_path']
-        self.use_fp16 = config['index_use_fp16']
-        self.batch_size = config['index_batch_size']
-        self.pooling_method = config['retrieval_pooling_method']
-        self.doc_max_length = config['index_doc_max_length']
+        self.retrieval_method = retrieval_method.lower()
+        self.model_path = model_path
+        self.corpus_path = corpus_path
+        self.save_dir = save_dir
+        self.max_length = max_length
+        self.batch_size = batch_size
+        self.use_fp16 = use_fp16
+        self.pooling_method = pooling_method
 
+        self.gpu_num = torch.cuda.device_count()
+        
         # prepare save dir
         self.save_dir = os.path.join(self.save_dir, self.retrieval_method)
         print(self.save_dir)
@@ -44,6 +50,9 @@ class Index_Builder:
         else:
             if not self._check_dir(self.save_dir):
                 warnings.warn(f"Some files already exists in {self.save_dir} and may be overwritten.", UserWarning)
+
+        self.index_save_path = os.path.join(self.save_dir, "corpus.index")
+        self.database_save_path = os.path.join(self.save_dir, "corpus.db")
 
         self.corpus = load_corpus(self.corpus_path)
         self.content_function = content_function
@@ -107,20 +116,17 @@ class Index_Builder:
         
         print("Finish!")
 
-    @torch.no_grad()
     def build_dense_index(self):
         r"""Obtain the representation of documents based on the embedding model(BERT-based) and 
         construct a faiss index.
         
         """
-        import torch
-        self.gpu_num = torch.cuda.device_count()
         # TODO: disassembly overall process, use non open-source emebdding/ processed embedding
         # TODO: save embedding
         # prepare model
-        self.encoder, self.tokenizer = load_model(model_path = self.retrieval_model_path, 
+        self.encoder, self.tokenizer = load_model(model_path = self.model_path, 
                                                   use_fp16 = self.use_fp16)
-        self.encoder.to(self.device)
+        self.encoder.to('cuda')
         if self.gpu_num > 1:
             self.encoder = torch.nn.DataParallel(self.encoder)
             self.batch_size = self.batch_size * self.gpu_num
@@ -142,9 +148,10 @@ class Index_Builder:
                         padding=True,
                         truncation=True,
                         return_tensors='pt',
-                        max_length=self.doc_max_length,
-            ).to(self.device)
-            output = self.encoder(**inputs, return_dict=True)
+                        max_length=self.max_length,
+            ).to('cuda')
+            with torch.no_grad():
+                output = self.encoder(**inputs, return_dict=True)
             embeddings = pooling(output.pooler_output, 
                                  output.last_hidden_state, 
                                  inputs['attention_mask'],
@@ -167,10 +174,10 @@ class Index_Builder:
         #faiss_index = faiss.index_factory(dim, 'Flat', faiss.METRIC_L2)
         faiss_index.train(all_embeddings)
         faiss_index.add(all_embeddings)
-        faiss.write_index(faiss_index, self.save_dir + "/faiss_ivf.index")
+        faiss.write_index(faiss_index, self.index_save_path)
         
         # build corpus databse
-        db = Database(self.database_path)
+        db = Database(self.database_save_path)
         docs = db['docs']
         docs.insert_all(self.corpus, pk="id", batch_size=1000000, truncate=True)
 
@@ -178,33 +185,36 @@ class Index_Builder:
 
 
 
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser(description = "Creating index.")
+MODEL2POOLING = {
+    "e5": "mean",
+    "bge": "cls",
+    "contriever": "mean"
+}
 
-#     # Basic parameters
-#     parser.add_argument('--retrieval_method', type=str)
-#     parser.add_argument('--corpus_path', type=str)
-#     parser.add_argument('--save_dir', type=str)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description = "Creating index.")
 
-#     # Parameters for building dense index
-#     parser.add_argument('--device', type=str, default='cuda')
-#     parser.add_argument('--gpu_num', type=int, default=1)
-#     parser.add_argument('--doc_max_length', type=int, default=256)
-#     parser.add_argument('--batch_size', type=int, default=512)
-#     parser.add_argument('--use_fp16', type=bool, default=True)
+    # Basic parameters
+    parser.add_argument('--retrieval_method', type=str)
+    parser.add_argument('--model_path', type=str, default=None)
+    parser.add_argument('--corpus_path', type=str)
+    parser.add_argument('--save_dir', default= 'indexes/',type=str)
+
+    # Parameters for building dense index
+    parser.add_argument('--max_length', type=int, default=256)
+    parser.add_argument('--batch_size', type=int, default=512)
+    parser.add_argument('--use_fp16', default=False, action='store_true')
     
-#     args = parser.parse_args()
+    args = parser.parse_args()
 
-#     index_builder = Index_Builder(
-#                         retrieval_method = args.retrieval_method,
-#                         corpus_path = args.corpus_path,
-#                         save_dir = args.save_dir,
-#                         device = torch.device(args.device),
-#                         gpu_num = args.gpu_num,
-#                         doc_max_length = args.doc_max_length,
-#                         batch_size = args.batch_size,
-#                         retrieval_model_path = MODEL2PATH[args.retrieval_method],
-#                         use_fp16 = args.use_fp16,
-#                         pooling_method = MODEL2POOLING[args.retrieval_method],
-#                     )
-#     index_builder.build_index()
+    index_builder = Index_Builder(
+                        retrieval_method = args.retrieval_method,
+                        model_path = args.model_path,
+                        corpus_path = args.corpus_path,
+                        save_dir = args.save_dir,
+                        max_length = args.max_length,
+                        batch_size = args.batch_size,
+                        use_fp16 = args.use_fp16,
+                        pooling_method = MODEL2POOLING.get(args.retrieval_method.lower(), 'pooler'),
+                    )
+    index_builder.build_index()
