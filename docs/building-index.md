@@ -29,7 +29,6 @@ python -m flashrag.retriever.index_builder \
 
 
 
-
 If building a bm25 index, there is no need to specify `model_path`:
 ```bash
 python -m flashrag.retriever.index_builder \
@@ -39,7 +38,7 @@ python -m flashrag.retriever.index_builder \
 ```
 
 
-*For **sparse retrieval method (BM25)**, we construct corpus as Lucene inverted indexes based on `Pyserini`.
+For **sparse retrieval method (BM25)**, we construct corpus as Lucene inverted indexes based on `Pyserini`.
 
 For **dense retrieval methods**, especially the popular embedding models, we use `faiss` to build index and use `sqlite` for corpus storage to ensure extremely fast retrieval speed. After the construction is completed, the original corpus (in `jsonl` format) is no longer needed. We only need a sqlite database file and a faiss index file for subsequent retrieval.
 
