@@ -41,7 +41,6 @@ class Index_Builder:
         self.pooling_method = pooling_method
 
         self.gpu_num = torch.cuda.device_count()
-        
         # prepare save dir
         self.save_dir = os.path.join(self.save_dir, self.retrieval_method)
         print(self.save_dir)
@@ -191,7 +190,7 @@ MODEL2POOLING = {
     "contriever": "mean"
 }
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description = "Creating index.")
 
     # Basic parameters
@@ -204,8 +203,18 @@ if __name__ == "__main__":
     parser.add_argument('--max_length', type=int, default=256)
     parser.add_argument('--batch_size', type=int, default=512)
     parser.add_argument('--use_fp16', default=False, action='store_true')
+    parser.add_argument('--pooling_method', type=str, default=None)
     
     args = parser.parse_args()
+
+    if args.pooling_method is None:
+        pooling_method = MODEL2POOLING.get(args.retrieval_method.lower(), 'pooler')
+    else:
+        if args.pooling_method not in ['mean','cls','pooler']:
+            raise NotImplementedError
+        else:
+            pooling_method = args.pooling_method
+
 
     index_builder = Index_Builder(
                         retrieval_method = args.retrieval_method,
@@ -215,6 +224,10 @@ if __name__ == "__main__":
                         max_length = args.max_length,
                         batch_size = args.batch_size,
                         use_fp16 = args.use_fp16,
-                        pooling_method = MODEL2POOLING.get(args.retrieval_method.lower(), 'pooler'),
+                        pooling_method = pooling_method,
                     )
     index_builder.build_index()
+
+
+if __name__ == "__main__":
+    main()
