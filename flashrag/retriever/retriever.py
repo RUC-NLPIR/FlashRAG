@@ -62,6 +62,12 @@ class BM25Retriever(BaseRetriever):
         if num is None:
             num = self.topk
         hits = self.searcher.search(query, num)
+        if len(hits) < 1:
+            if self.return_score:
+                return [],[]
+            else:
+                return []
+            
         scores = [hit.score for hit in hits]
         # TODO: Supplement the situation when there are not enough results recalled
         if self.contain_doc:
@@ -71,6 +77,7 @@ class BM25Retriever(BaseRetriever):
                         'contents': content} for content in all_contents]
         else:
             results = [self.corpus.get(hits[i].docid) for i in range(num)]
+
         if self.return_score:
             return results, scores
         else:
