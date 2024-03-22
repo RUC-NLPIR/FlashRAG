@@ -97,15 +97,19 @@ class DenseRetriever(BaseRetriever):
         self.topk = config['retrieval_topk']
         self.pooling_method = self.config['retrieval_pooling_method'] 
         self.query_max_length = self.config['retrieval_query_max_length']
+        self.batch_size = self.config['retrieval_batch_size']
 
     
     @torch.no_grad()
-    def _encode(self, query: str) -> np.ndarray:
+    def _encode(self, query_list) -> np.ndarray:
         # processing query for different encoders
-        if self.retrieval_method == "e5":
-            query = f"query: {query}"
+        if isinstance(query_list, str):
+            query_list = [query_list]
 
-        inputs = self.tokenizer(query, 
+        if self.retrieval_method == "e5":
+            query_list = [f"query: {query}" for query in query_list]
+
+        inputs = self.tokenizer(query_list, 
                                 max_length = self.query_max_length, 
                                 padding = True, 
                                 truncation = True, 
@@ -118,7 +122,7 @@ class DenseRetriever(BaseRetriever):
                             inputs['attention_mask'],
                             self.pooling_method)
         if  "dpr" in self.retrieval_method:
-            query_emb = query.detach().cpu().numpy()
+            query_emb = query_emb.detach().cpu().numpy()
         else:
             query_emb = torch.nn.functional.normalize(query_emb, dim=-1).detach().cpu().numpy()
         query_emb = query_emb.astype(np.float32)
@@ -132,15 +136,44 @@ class DenseRetriever(BaseRetriever):
                 item['contents'] = content_function(item)
         return results
 
-    def search(self, query: str, num: int = None) -> List[Dict[str, str]]:
+    def search(self, query, num: int = None):
         if num is None:
             num = self.topk
         query_emb = self._encode(query)
         scores, idxs = self.index.search(query_emb, k=num)
         idxs = idxs[0]
+        scores = scores[0]
+
         results = self.load_docs(idxs, content_function=base_content_function)
 
         if self.return_score:
             return results, scores
         else:
             return results
+
+
+    def batch_search(self, query_list, num: int = None, batch_size = None):
+        if num is None:
+            num = self.topk
+        if batch_size is None:
+            batch_size = self.batch_size
+
+        results = []
+        scores = []
+
+        for start_idx in range(0, len(query_list), batch_size):
+            query_batch = query_list[start_idx:start_idx + batch_size]
+            batch_emb = self._encode(query_batch)
+            batch_scores, batch_idxs = self.index.search(batch_emb, k=num)
+            batch_results = [self.load_docs(idxs, content_function=base_content_function) for idxs in batch_idxs]
+
+            scores.extend(batch_scores.tolist())
+            results.extend(batch_results)
+        
+        
+        if self.return_score:
+            return results, scores
+        else:
+            return results
+        
+        
