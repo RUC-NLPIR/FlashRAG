@@ -42,7 +42,6 @@ class Index_Builder:
 
         self.gpu_num = torch.cuda.device_count()
         # prepare save dir
-        self.save_dir = os.path.join(self.save_dir, self.retrieval_method)
         print(self.save_dir)
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
@@ -50,7 +49,7 @@ class Index_Builder:
             if not self._check_dir(self.save_dir):
                 warnings.warn(f"Some files already exists in {self.save_dir} and may be overwritten.", UserWarning)
 
-        self.index_save_path = os.path.join(self.save_dir, "corpus.index")
+        self.index_save_path = os.path.join(self.save_dir, f"{self.retrieval_method}.index")
         self.database_save_path = os.path.join(self.save_dir, "corpus.db")
 
         self.corpus = load_corpus(self.corpus_path)
@@ -89,6 +88,8 @@ class Index_Builder:
         """
 
         # to use pyserini pipeline, we first need to place jsonl file in the folder 
+        self.save_dir = os.path.join(self.save_dir, "bm25")
+        os.makedirs(self.save_dir,exist_ok=True)
         temp_dir = self.save_dir + "/temp"
         temp_file_path = temp_dir + "/temp.jsonl"
         os.makedirs(temp_dir)
@@ -175,10 +176,14 @@ class Index_Builder:
         faiss_index.add(all_embeddings)
         faiss.write_index(faiss_index, self.index_save_path)
         
-        # build corpus databse
-        db = Database(self.database_save_path)
-        docs = db['docs']
-        docs.insert_all(self.corpus, pk="id", batch_size=1000000, truncate=True)
+
+        if os.path.exists(self.database_save_path):
+           print("The database already exists and will not be written.") 
+        else:
+            # build corpus databse
+            db = Database(self.database_save_path)
+            docs = db['docs']
+            docs.insert_all(self.corpus, pk="id", batch_size=1000000, truncate=True)
 
         print("Finish!")
 
