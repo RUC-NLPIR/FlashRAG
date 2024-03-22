@@ -69,7 +69,7 @@ class BM25Retriever(BaseRetriever):
                 return []
             
         scores = [hit.score for hit in hits]
-        # TODO: Supplement the situation when there are not enough results recalled
+
         if self.contain_doc:
             all_contents = [json.loads(self.searcher.doc(hits[i].docid).raw())['contents'] for i in range(num)]
             results = [{'title': content.split("\n")[0].strip("\""), 
