@@ -22,7 +22,8 @@ class BaseRetriever(ABC):
         self.config = config
         self.retrieval_method = config['retrieval_method']
         self.topk = config['retrieval_topk']
-
+        self.return_score = config['retrieval_return_score']
+        
         self.index_path = config['index_path']
         self.corpus_database_path = config['corpus_database_path']
 
@@ -61,6 +62,7 @@ class BM25Retriever(BaseRetriever):
         if num is None:
             num = self.topk
         hits = self.searcher.search(query, num)
+        scores = [hit.score for hit in hits]
         # TODO: Supplement the situation when there are not enough results recalled
         if self.contain_doc:
             all_contents = [json.loads(self.searcher.doc(hits[i].docid).raw())['contents'] for i in range(num)]
@@ -69,8 +71,10 @@ class BM25Retriever(BaseRetriever):
                         'contents': content} for content in all_contents]
         else:
             results = [self.corpus.get(hits[i].docid) for i in range(num)]
-
-        return results
+        if self.return_score:
+            return results, scores
+        else:
+            return results
 
 
 class DenseRetriever(BaseRetriever):
@@ -128,4 +132,8 @@ class DenseRetriever(BaseRetriever):
         scores, idxs = self.index.search(query_emb, k=num)
         idxs = idxs[0]
         results = self.load_docs(idxs, content_function=base_content_function)
-        return results
+
+        if self.return_score:
+            return results, scores
+        else:
+            return results

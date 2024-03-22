@@ -45,6 +45,7 @@ retrieval_method: "e5"  # name or path of the retrieval model
 index_path: ~ # set automatically if not provided
 corpus_database_path: ~  # path to database that store the documents
 
+retrieval_return_score: False
 retrieval_topk: 5
 retrieval_use_fp16: True
 retrieval_query_max_length: 128
