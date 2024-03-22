@@ -124,6 +124,9 @@ class Index_Builder:
         # TODO: disassembly overall process, use non open-source emebdding/ processed embedding
         # TODO: save embedding
         # prepare model
+        if os.path.exists(self.index_save_path):
+            print("The index file already exists and will be overwritten.")
+
         self.encoder, self.tokenizer = load_model(model_path = self.model_path, 
                                                   use_fp16 = self.use_fp16)
         self.encoder.to('cuda')
