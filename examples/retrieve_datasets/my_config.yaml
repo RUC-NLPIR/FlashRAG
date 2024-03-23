@@ -1,0 +1,75 @@
+# ----Global Paths----
+# Paths to retrieval models
+retriever_model2path:
+  e5: "intfloat/e5-base-v2"
+  bge: "intfloat/e5-base-v2"
+  contriever: "facebook/contriever"
+  
+# Paths to generation models
+generator_model2path:
+  llama2-7B-chat: "meta-llama/Llama-2-7b-chat-hf"
+  llama2-7B: "meta-llama/Llama-2-7b-hf"
+  llama2-13B: "meta-llama/Llama-2-13b-hf"
+  llama2-13B-chat: "meta-llama/Llama-2-13b-chat-hf"
+  
+# Pooling methods for each embedding model
+model2pooling:
+  e5: "mean"
+  bge: "cls"
+  contriever: "mean"
+
+# Indexes path for retrieval models
+method2index:
+  e5: ~
+  bm25: ~
+  contriever: ~
+
+# ----Environment Settings----
+gpu_id: "0"
+dataset_name: "nq"
+split: ["train","dev","test"] # train,dev,test
+
+# Sampling configurations for testing
+test_sample_num: ~
+random_sample: False
+
+# Seed for reproducibility
+seed: 2024
+
+# Directory paths for data and outputs
+data_dir: "dataset/"
+save_dir: "output/"
+
+# ----Retrieval Settings----
+retrieval_method: "e5"  # name or path of the retrieval model
+index_path: ~ # set automatically if not provided
+corpus_database_path: ~  # path to database that store the documents
+
+retrieval_return_score: False
+retrieval_batch_size: 2048
+retrieval_topk: 5
+retrieval_use_fp16: True
+retrieval_query_max_length: 128
+
+# ----Generator Settings----
+generator_model: "llama2-7B-chat" # name or path of the generator model
+generator_max_input_len: 1024
+generator_batch_size: 2
+generation_params:
+  max_new_tokens: 64
+  do_sample: False
+  temperature: 1.0
+  top_p: 1.0
+
+# ----Evaluation Settings----
+metrics: ['em']
+save_metric_score: True
+
+
+# ----Index build settings(only use when building index)----
+index_doc_max_length: 256
+index_batch_size: 4096
+index_use_fp16: True
+index_save_dir: "indexes/"
+corpus_path: ~  # path to jsonl file, only used in building index
+corpus_database_save_path: ~  
