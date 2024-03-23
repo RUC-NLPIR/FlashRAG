@@ -69,3 +69,20 @@ def load_corpus(
             item['contents'] = content_function(item)
 
     return corpus
+
+def load_docs(corpus, doc_idxs, content_function=base_content_function):
+    doc_ids =  [str(idx) for idx in doc_idxs]
+    query = 'id IN ({})'.format(','.join('?' * len(doc_ids)))
+    results = corpus.rows_where(query, doc_ids)
+    results = list(results)
+
+    # match the corresponding idx
+    id2item = {item['id']:item for item in results}
+    results = [id2item[id] for id in doc_ids]
+
+    # add content field
+    for item in results:
+        if 'contents' not in item:
+            item['contents'] = content_function(item)
+
+    return results

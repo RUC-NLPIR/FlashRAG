@@ -12,7 +12,7 @@ from torch import Tensor
 import torch.nn.functional as F
 
 from transformers import AutoTokenizer, AutoModel
-from flashrag.retriever.utils import load_model, pooling, base_content_function, load_database
+from flashrag.retriever.utils import load_model, pooling, base_content_function, load_database, load_docs
 
         
 class BaseRetriever(ABC):
@@ -76,7 +76,7 @@ class BM25Retriever(BaseRetriever):
                         'text': "\n".join(content.split("\n")[1:]),
                         'contents': content} for content in all_contents]
         else:
-            results = [self.corpus.get(hits[i].docid) for i in range(num)]
+            results = load_docs(self.corpus, [hits[i].docid for i in range(num)])
 
         if self.return_score:
             return results, scores
@@ -128,14 +128,7 @@ class DenseRetriever(BaseRetriever):
         query_emb = query_emb.astype(np.float32)
         return query_emb
 
-    def load_docs(self, doc_idxs, content_function=base_content_function):
-        results = [self.corpus.get(str(idx)) for idx in doc_idxs]
-        # add content field
-        for item in results:
-            if 'contents' not in item:
-                item['contents'] = content_function(item)
-        return results
-
+    
     def search(self, query, num: int = None):
         if num is None:
             num = self.topk
@@ -144,7 +137,7 @@ class DenseRetriever(BaseRetriever):
         idxs = idxs[0]
         scores = scores[0]
 
-        results = self.load_docs(idxs, content_function=base_content_function)
+        results = load_docs(self.corpus, idxs, content_function=base_content_function)
 
         if self.return_score:
             return results, scores
@@ -165,9 +158,15 @@ class DenseRetriever(BaseRetriever):
             query_batch = query_list[start_idx:start_idx + batch_size]
             batch_emb = self._encode(query_batch)
             batch_scores, batch_idxs = self.index.search(batch_emb, k=num)
-            batch_results = [self.load_docs(idxs, content_function=base_content_function) for idxs in batch_idxs]
+            batch_scores.tolist()
+            batch_idxs = batch_idxs.tolist()
 
-            scores.extend(batch_scores.tolist())
+            flat_idxs = sum(batch_idxs, [])
+            batch_results = load_docs(self.corpus, flat_idxs, content_function=base_content_function)
+            
+            batch_results = [batch_results[i*num : (i+1)*num] for i in range(len(batch_idxs))]
+            
+            scores.extend(batch_scores)
             results.extend(batch_results)
         
         

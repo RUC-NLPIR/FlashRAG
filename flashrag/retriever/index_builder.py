@@ -186,7 +186,11 @@ class Index_Builder:
             # build corpus databse
             db = Database(self.database_save_path)
             docs = db['docs']
-            docs.insert_all(self.corpus, pk="id", batch_size=1000000, truncate=True)
+            docs.create({
+                'id': {'type': str, 'index': True},
+                'contents': str
+            }, pk='id')
+            docs.insert_all(self.corpus, batch_size=1000000, truncate=True)
 
         print("Finish!")
 
