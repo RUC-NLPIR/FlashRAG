@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import List, Dict
 import numpy as np
 import torch
-
+from tqdm import tqdm
 from pyserini.search.lucene import LuceneSearcher
 from pyserini.index.lucene import IndexReader
 
@@ -161,7 +161,7 @@ class DenseRetriever(BaseRetriever):
         results = []
         scores = []
 
-        for start_idx in range(0, len(query_list), batch_size):
+        for start_idx in tqdm(range(0, len(query_list), batch_size), desc='Retrieval process: '):
             query_batch = query_list[start_idx:start_idx + batch_size]
             batch_emb = self._encode(query_batch)
             batch_scores, batch_idxs = self.index.search(batch_emb, k=num)
