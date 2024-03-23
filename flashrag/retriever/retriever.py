@@ -89,7 +89,6 @@ class DenseRetriever(BaseRetriever):
 
     def __init__(self, config: dict):
         super().__init__(config)
-        # TODO: adapt to pyserini index
         self.index = faiss.read_index(self.index_path)
         self.corpus = load_database(self.corpus_database_path)
         self.encoder, self.tokenizer = load_model(model_path = config['retrieval_model_path'], 
