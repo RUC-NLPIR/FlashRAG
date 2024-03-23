@@ -1,5 +1,4 @@
 import os
-from flashrag.retriever.utils import load_model, load_corpus, pooling, base_content_function
 import faiss
 import json
 from abc import ABC, abstractmethod
@@ -12,6 +11,7 @@ import argparse
 import torch
 from tqdm import tqdm
 from sqlite_utils import Database
+from flashrag.retriever.utils import load_model, load_corpus, pooling, base_content_function
 
 class Index_Builder:
     r"""A tool class used to build an index used in retrieval.
@@ -220,7 +220,11 @@ def main():
     args = parser.parse_args()
 
     if args.pooling_method is None:
-        pooling_method = MODEL2POOLING.get(args.retrieval_method.lower(), 'pooler')
+        pooling_method = 'pooler'
+        for k,v in MODEL2POOLING.items():
+            if k in args.retrieval_method.lower():
+                pooling_method = v
+                break
     else:
         if args.pooling_method not in ['mean','cls','pooler']:
             raise NotImplementedError
