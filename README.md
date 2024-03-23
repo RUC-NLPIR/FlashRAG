@@ -17,7 +17,7 @@ pip install -e . --verbose
 Switch to the examples folder.
 
 ```bash
-cd examples
+cd examples/quick_start
 ```
 
 Run the sample code to get the generation result and evaluation score.
