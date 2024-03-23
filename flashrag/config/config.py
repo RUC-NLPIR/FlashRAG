@@ -57,11 +57,30 @@ class Config:
                 )
         return file_config
 
+    @staticmethod
+    def _update_dict(old_dict, new_dict):
+        # Update the original update method of the dictionary:
+        # If there is the same key in `old_dict` and `new_dict`, and value is of type dict, update the key in dict
+        
+        same_keys = []
+        for key,value in new_dict.items():
+            if key in old_dict and isinstance(value, dict):
+                same_keys.append(key)
+        for key in same_keys:
+            old_item = old_dict[key]
+            new_item = new_dict[key]
+            old_item.update(new_item)
+            new_dict[key] = old_item
+
+        old_dict.update(new_dict)
+        return old_dict
+        
+
     def _merge_external_config(self):
         external_config = dict()
-        external_config.update(self.file_config)
-        external_config.update(self.variable_config)
-        
+        external_config = self._update_dict(external_config, self.file_config)
+        external_config = self._update_dict(external_config, self.variable_config)
+
         return external_config
 
     def _get_internal_config(self):
@@ -73,8 +92,8 @@ class Config:
         
     def _get_final_config(self):
         final_config = dict()
-        final_config.update(self.internal_config)
-        final_config.update(self.external_config)
+        final_config = self._update_dict(final_config, self.internal_config)
+        final_config = self._update_dict(final_config, self.external_config)
 
         return final_config
 
