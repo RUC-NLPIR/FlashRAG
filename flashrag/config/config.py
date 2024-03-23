@@ -133,7 +133,13 @@ class Config:
 
 
         if self.final_config['index_path'] is None:
-            self.final_config['index_path'] = method2index.get(retrieval_method, None)
+            try:
+                self.final_config['index_path'] = method2index[retrieval_method]
+            except:
+                print("Index is empty!!")
+                assert False
+            
+
         
         # if self.final_config['corpus_database_save_path'] is None:
         #     self.final_config['corpus_database_save_path'] = os.path.join(self.final_config['index_save_dir'], 'corpus.db')
