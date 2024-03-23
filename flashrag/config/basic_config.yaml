@@ -45,6 +45,7 @@ retrieval_method: "e5"  # name or path of the retrieval model
 index_path: ~ # set automatically if not provided
 corpus_database_path: ~  # path to database that store the documents
 
+retrieval_pooling_method: ~ # set automatically if not provided
 retrieval_return_score: False
 retrieval_batch_size: 256
 retrieval_topk: 5
