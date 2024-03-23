@@ -29,11 +29,16 @@ def get_dataset(config):
 
 def get_generator(config):
     r"""Automatically select generator class based on config."""
-    # TODO: add more generators
-    return getattr(
+    if "t5" in config['generator_model'] or "bart" in config['generator_model']:
+        return getattr(
             importlib.import_module("flashrag.generator"), 
-            "CausalLMGenerator"
+            "EncoderDecoderGenerator"
         )(config)
+    else:
+        return getattr(
+                importlib.import_module("flashrag.generator"), 
+                "CausalLMGenerator"
+            )(config)
 
 def get_retriever(config):
     r"""Automatically select retriever class based on config's retrieval method
