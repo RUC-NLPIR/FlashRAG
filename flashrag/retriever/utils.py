@@ -6,14 +6,18 @@ import numpy as np
 from sqlite_utils import Database
 import torch.nn.functional as F
 
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoTokenizer, AutoModel, AutoConfig, T5EncoderModel
 
 
 def load_model(
         model_path: str, 
         use_fp16: bool = False
     ):
-    model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
+    model_config = AutoConfig.from_pretrained(model_path)
+    model_class = AutoModel
+    #model_class = T5EncoderModel if "t5" in model_config.architectures[0].lower() else AutoModel
+
+    model = model_class.from_pretrained(model_path, trust_remote_code=True)
     model.eval()
     model.cuda()
     if use_fp16: 
