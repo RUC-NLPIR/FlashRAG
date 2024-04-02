@@ -149,7 +149,7 @@ class Config:
         if self.final_config['retrieval_pooling_method'] is None:
             self.final_config['retrieval_pooling_method'] = 'pooler'
             for key,value in model2pooling.items():
-                if key in retrieval_method.lower():
+                if key.lower() in retrieval_method.lower():
                     self.final_config['retrieval_pooling_method'] = value
                     break
 
