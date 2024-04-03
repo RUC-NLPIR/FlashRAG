@@ -100,13 +100,16 @@ class DenseRetriever(BaseRetriever):
 
     
     @torch.no_grad()
-    def _encode(self, query_list) -> np.ndarray:
+    def _encode(self, query_list, is_query=True) -> np.ndarray:
         # processing query for different encoders
         if isinstance(query_list, str):
             query_list = [query_list]
 
         if "e5" in self.retrieval_method.lower():
-            query_list = [f"query: {query}" for query in query_list]
+            if is_query:
+                query_list = [f"query: {query}" for query in query_list]
+            else:
+                query_list = [f"passage: {query}" for query in query_list]
 
         inputs = self.tokenizer(query_list, 
                                 max_length = self.query_max_length, 
