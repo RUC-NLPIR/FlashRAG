@@ -66,6 +66,15 @@ generation_params:
 metrics: ['em']
 save_metric_score: True
 
+# ----Refiner Settings----
+
+# Used for extractive method
+refiner_topk: 5
+refiner_pooling_method: 'mean'
+refiner_encode_max_length: 256
+# Used for abstractive method
+refiner_max_input_length: 1024
+refiner_max_output_length: 512
 
 # ----Index build settings(only use when building index)----
 index_doc_max_length: 256

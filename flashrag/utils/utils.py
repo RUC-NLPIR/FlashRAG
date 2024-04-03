@@ -89,7 +89,7 @@ def get_refiner(config):
         else:
             return getattr(
                 importlib.import_module("flashrag.refiner"), 
-                "ExtractiveRecompRefiner"
+                "ExtractiveRefiner"
             )(config)
         
     else:

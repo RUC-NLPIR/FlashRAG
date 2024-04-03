@@ -1,8 +1,12 @@
 from typing import List, Dict
 from transformers import AutoModelForSeq2SeqLM,AutoTokenizer
+from flashrag.retriever.utils import load_model, pooling
 from tqdm import tqdm
+import re
+import torch
+import numpy as np
 
-class BasicRefiner:
+class BaseRefiner:
     r"""Base object of Refiner method"""
 
     def __init__(self, config):
@@ -24,9 +28,97 @@ class BasicRefiner:
     def batch_run(self, dataset, batch_size = None) -> List[str]:
         return [self.run(item) for item in dataset]
 
+class ExtractiveRefiner(BaseRefiner):
+    """Implementation for Extractive compressor.
+    Using retrieval method to select sentences or other granularity data.
+    """
+    def __init__(self, config):
+        super().__init__(config)
+        # number of keeping sentences 
+        self.topk = config['refiner_topk']
+        self.pooling_method = config['refiner_pooling_method']
+
+        self.encode_max_length = config['refiner_encode_max_length']
+
+        # load model
+        self.encoder, self.tokenizer = load_model(self.model_path, use_fp16=True)
+
+    def encode(self, query_list: List[str], is_query=True):
+        if "e5" in self.model_path.lower():
+            if is_query:
+                query_list = [f"query: {query}" for query in query_list]
+            else:
+                query_list = [f"passage: {query}" for query in query_list]
+        
+        inputs = self.tokenizer(query_list, 
+                                max_length = self.encode_max_length, 
+                                padding = True, 
+                                truncation = True, 
+                                return_tensors = "pt"
+                            )
+        inputs = {k: v.cuda() for k, v in inputs.items()}
+
+        if "T5" in type(self.encoder).__name__:
+            # T5-based retrieval model
+            decoder_input_ids = torch.zeros(
+                (inputs['input_ids'].shape[0], 1), dtype=torch.long
+            ).to(inputs['input_ids'].device)
+            output = self.encoder(
+                **inputs, decoder_input_ids=decoder_input_ids, return_dict=True
+            )
+            query_emb = output.last_hidden_state[:, 0, :]
+
+        else:
+            output = self.encoder(**inputs, return_dict=True)
+            query_emb = pooling(output.pooler_output, 
+                                output.last_hidden_state, 
+                                inputs['attention_mask'],
+                                self.pooling_method)
+            if  "dpr" not in self.model_path.lower():
+                query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
+
+        query_emb = query_emb.detach().cpu().numpy()
+        query_emb = query_emb.astype(np.float32)
+        return query_emb
+
+    def batch_run(self, dataset, batch_size=16):
+        questions = dataset.question
+        retrieval_results = dataset.retrieval_result
+        retrieval_results = ["\n".join(res) for res in retrieval_results]
+        
+        # split into sentences: [[sent1, sent2,...], [...]]
+        #spliter = re.compile('[。\!\?；;\n\r]+|[.?!]+')
+        #sent_lists = [spliter.split(res) for res in retrieval_results]
+        sent_lists = [[i.strip() for i in re.split(r'(?<=[.!?])\s+', res) if len(i.strip())>5] for res in retrieval_results]
+        score_lists = [] # matching scores, size == sent_lists
+        for idx in tqdm(range(0, len(questions), batch_size), desc='Refining process: '):
+            batch_questions = questions[idx:idx+batch_size]
+            batch_sents = sent_lists[idx:idx+batch_size]
+
+            question_embs = self.encode(batch_questions, is_query=True)
+            sent_embs = self.encode(sum(batch_sents, []), is_query=False) # n*d
+            scores = question_embs @ sent_embs.T
+            start_idx = 0
+            for row_score, single_list in zip(scores,sent_lists):
+                row_score = row_score.tolist()
+                score_lists.append(row_score[start_idx:start_idx+len(single_list)])
+                start_idx += len(single_list)
+
+        # select topk sents
+        retain_lists = []
+        for sent_scores, sent_list in zip(score_lists, sent_lists):
+            if len(sent_scores) < self.topk:
+                retain_lists.append(sent_list)
+                continue
+            topk_idxs = torch.topk(torch.Tensor(sent_scores), self.topk).indices.tolist()
+            retain_lists.append(
+                [sent_list[idx] for idx in sorted(topk_idxs)]
+            )
+
+        return [' '.join(sents) for sents in retain_lists]
 
 
-class AbstractiveRecompRefiner(BasicRefiner):
+class AbstractiveRecompRefiner(BaseRefiner):
     """Implementation for Abstractive RECOMP compressor: 
         RECOMP: Improving Retrieval-Augmented LMs with Compression and Selective Augmentation.
     """
@@ -34,16 +126,14 @@ class AbstractiveRecompRefiner(BasicRefiner):
     def __init__(self, config):
         super().__init__(config)
         
-        self.max_input_length = 1024
-        self.max_output_length = 512
+        self.max_input_length = config['refiner_max_input_length']
+        self.max_output_length = config['refiner_max_output_length']
         
         # load model
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_path)
         self.model.cuda()
         self.model.eval()
-
-
     
     def batch_run(self, dataset, batch_size = 2):
         # input processing in recomp training format

@@ -146,12 +146,17 @@ class Config:
 
         self.final_config['retrieval_model_path'] = retriever_model2path.get(retrieval_method, retrieval_method)
         # TODO: not support when `retrieval_model` is path
-        if self.final_config['retrieval_pooling_method'] is None:
-            self.final_config['retrieval_pooling_method'] = 'pooler'
+
+        def set_pooling_method(method, model2pooling):
             for key,value in model2pooling.items():
-                if key.lower() in retrieval_method.lower():
-                    self.final_config['retrieval_pooling_method'] = value
-                    break
+                if key.lower() in method.lower():
+                    return value
+            return 'pooler'
+
+        if self.final_config['retrieval_pooling_method'] is None:
+            self.final_config['retrieval_pooling_method'] = set_pooling_method(retrieval_method, model2pooling)
+        
+
 
         self.final_config['generator_model_path'] = generator_model2path.get(generator_model, generator_model)
         
