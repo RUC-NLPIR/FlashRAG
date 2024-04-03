@@ -1,6 +1,7 @@
 import warnings
 import os
 import importlib
+from transformers import AutoConfig
 from flashrag.dataset.dataset import Dataset
 
 def get_dataset(config):
@@ -59,3 +60,37 @@ def get_retriever(config):
             importlib.import_module("flashrag.retriever"), 
             "DenseRetriever"
         )(config)
+
+
+def get_refiner(config):
+    refiner_name = config['refiner_name']
+    refiner_path = config['refiner_model_path']
+
+    default_path_dict = {
+        'recomp_abstractive_nq': 'fangyuan/nq_abstractive_compressor',
+        'recomp:abstractive_tqa': 'fangyuan/tqa_abstractive_compressor',
+        'recomp:abstractive_hotpotqa': 'fangyuan/hotpotqa_abstractive',
+    }
+
+    if refiner_path is None:
+        if refiner_name in default_path_dict:
+            refiner_path = default_path_dict[refiner_name]
+        else:
+            assert False, "refiner_model_path is empty!"
+    
+    model_config = AutoConfig.from_pretrained(refiner_path)
+
+    if "recomp" in refiner_name.lower() or "recomp" in refiner_path:
+        if model_config.model_type == "t5" :
+            return getattr(
+                importlib.import_module("flashrag.refiner"), 
+                "AbstractiveRecompRefiner"
+            )(config)
+        else:
+            return getattr(
+                importlib.import_module("flashrag.refiner"), 
+                "ExtractiveRecompRefiner"
+            )(config)
+        
+    else:
+        assert False, "No implementation!"

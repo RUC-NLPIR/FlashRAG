@@ -134,11 +134,11 @@ class Dataset:
             batch_items = self.data[i:i+batch_size]
             yield [item[attr_name] for item in batch_items]
     
-    def __getattr__(self, name):
+    def __getattr__(self, attr_name):
         try:
-            return [item[name] for item in self.data]
+            return [item[attr_name] for item in self.data]
         except:
-            super().__getattr__(name)
+            super().__getattr__(attr_name)
 
     def get_attr_data(self, attr_name):
         r"""For the attributes constructed later (not implemented using property), 

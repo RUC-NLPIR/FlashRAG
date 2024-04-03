@@ -1,5 +1,5 @@
 from flashrag.evaluator import Evaluator
-from flashrag.utils import get_retriever, get_generator
+from flashrag.utils import get_retriever, get_generator, get_refiner
 
 
 class BasicPipeline:
@@ -30,7 +30,7 @@ class SequentialPipeline(BasicPipeline):
         else:
             self.rewriter = None
         
-        if config['refiner_path'] is not None:
+        if config['refiner_name'] is not None:
             self.refiner = get_refiner(config)
         else:
             self.refiner = None
@@ -39,11 +39,14 @@ class SequentialPipeline(BasicPipeline):
         input_query = dataset.question
         if self.rewriter:
             input_query = self.rewriter.batch_run(input_query)
-            dataset.update('rewrite_query', input_query)
+            dataset.update_output('rewrite_query', input_query)
   
-        # TODO: batch search
         retrieval_results = self.retriever.batch_search(input_query)
-        dataset.update('retrieval_result', retrieval_results)
+        dataset.update_output('retrieval_result', retrieval_results)
+
+        if self.refiner:
+            retrieval_results = self.refiner.batch_run(dataset)
+            dataset.update_output('retrieval_result', retrieval_results)
 
         prompt_templete = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n\n{reference}\n\nQuestion:{question}\nAnswer:'
         # TODO: batch prompt building
@@ -58,9 +61,7 @@ class SequentialPipeline(BasicPipeline):
             item.update_output("prompt", prompt)
         
         input_prompts = dataset.get_attr_data("prompt")
-        if self.refiner:
-            # TODO: fix more items into input
-            input_prompts = self.refiner.batch_run(input_prompts)
+    
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred",pred_answer_list)
 
