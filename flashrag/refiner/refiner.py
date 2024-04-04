@@ -136,11 +136,15 @@ class AbstractiveRecompRefiner(BaseRefiner):
         self.model.eval()
     
     def batch_run(self, dataset, batch_size = 2):
+        # only use text
+        retrieval_results = dataset.retrieval_result
+        retrieval_results = [["\n".join(doc_item['contents'].split("\n")[1:]) for doc_item in item_result]for item_result in retrieval_results]
+        
         # input processing in recomp training format
         format_inputs = ['Question: {question}\n Document: {document}\n Summary: '.format(
             question = item.question,
-            document = "\n".join(item.retrieval_result)
-        ) for item in dataset]
+            document = "\n".join(docs)
+        ) for item,docs in zip(dataset,retrieval_results)]
 
         results = []
         for idx in tqdm(range(0, len(format_inputs), batch_size), desc='Refining process: '):
