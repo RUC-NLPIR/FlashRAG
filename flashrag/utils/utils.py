@@ -96,5 +96,10 @@ def get_refiner(config):
                 importlib.import_module("flashrag.refiner"), 
                 "LLMLinguaRefiner"
             )(config)
+    elif "selective-context" in refiner_name.lower() or "sc" in refiner_name.lower():
+        return getattr(
+                importlib.import_module("flashrag.refiner"), 
+                "SelectiveContextRefiner"
+            )(config)
     else:
         assert False, "No implementation!"

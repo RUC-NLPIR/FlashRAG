@@ -68,7 +68,30 @@ class LLMLinguaRefiner(BaseRefiner):
             )
             output.append(item_output['compressed_prompt'])
         return output
+
+class SelectiveContextRefiner(BaseRefiner):
+    """Implementation for Selective Context"""
+    def __init__(self, config):
+        super().__init__(config)
+
+        from selective_context_compressor import SelectiveContext
+        default_config = {
+            'reduce_ratio': 0.5
+        }
+
+        self.refiner = SelectiveContext(model_type="gpt2", model_path=self.model_path, lang="en")
+        self.compress_config = config['sc_config'] if 'sc_config' in config else default_config
     
+    def batch_run(self, dataset):
+        # only use text
+        retrieval_results = dataset.retrieval_result
+        retrieval_results = [["\n".join(doc_item['contents'].split("\n")[1:]) for doc_item in item_result]for item_result in retrieval_results]
+
+        output =[]
+        for text in retrieval_results:
+            compress_text,_ = self.refiner(text,**self.compress_config)
+            output.append(compress_text)
+        return output
 
 class ExtractiveRefiner(BaseRefiner):
     """Implementation for Extractive compressor.
@@ -125,8 +148,9 @@ class ExtractiveRefiner(BaseRefiner):
 
     def batch_run(self, dataset, batch_size=16):
         questions = dataset.question
+        # only use text
         retrieval_results = dataset.retrieval_result
-        retrieval_results = ["\n".join(res) for res in retrieval_results]
+        retrieval_results = [["\n".join(doc_item['contents'].split("\n")[1:]) for doc_item in item_result]for item_result in retrieval_results]
         
         # split into sentences: [[sent1, sent2,...], [...]]
         #spliter = re.compile('[。\!\?；;\n\r]+|[.?!]+')
