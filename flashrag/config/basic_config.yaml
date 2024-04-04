@@ -67,6 +67,8 @@ metrics: ['em']
 save_metric_score: True
 
 # ----Refiner Settings----
+refiner_name: ~
+refiner_model_path: ~
 
 # Used for extractive method
 refiner_topk: 5

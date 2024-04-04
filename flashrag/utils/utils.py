@@ -91,6 +91,10 @@ def get_refiner(config):
                 importlib.import_module("flashrag.refiner"), 
                 "ExtractiveRefiner"
             )(config)
-        
+    elif "lingua" in refiner_name.lower():
+        return getattr(
+                importlib.import_module("flashrag.refiner"), 
+                "LLMLinguaRefiner"
+            )(config)
     else:
         assert False, "No implementation!"

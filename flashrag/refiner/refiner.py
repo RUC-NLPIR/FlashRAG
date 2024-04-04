@@ -11,6 +11,7 @@ class BaseRefiner:
 
     def __init__(self, config):
         self.config = config
+        self.name = config['refiner_name']
         self.model_path = config['refiner_model_path']
         self.device = config['device']
     
@@ -27,6 +28,47 @@ class BaseRefiner:
 
     def batch_run(self, dataset, batch_size = None) -> List[str]:
         return [self.run(item) for item in dataset]
+
+class LLMLinguaRefiner(BaseRefiner):
+    """Implementation for (Long)LLMLingua.
+    """
+    def __init__(self, config):
+        super().__init__(config)
+        default_config = {
+            'ratio': 0.55,
+            'condition_in_question': 'after_condition',
+            'reorder_context': 'sort',
+            'dynamic_context_compression_ratio': 0.3,
+            'condition_compare': True,
+            'context_budget': "+100",
+            'rank_method': 'longllmlingua'
+        }
+
+        self.compress_config = config['llmlingua_config'] if 'llmlingua_config' in config else default_config
+        
+        # load model
+        from llmlingua_compressor import PromptCompressor
+        self.refiner = PromptCompressor(model_name = self.model_path)
+    
+    def batch_run(self, dataset):
+        output = []
+        for item in dataset:
+            input_prompt = item.prompt
+            question = item.question
+
+            prompt_split = input_prompt.split("\n\n")
+            # only supports fixed format prompt: instr + demon(retrieval results) + question
+            instruction, question = prompt_split[0], prompt_split[-1]
+            demonstration = "\n".join(prompt_split[1:-1])
+            item_output = self.refiner.compress_prompt(
+                demonstration.split("\n"),
+                instruction=instruction,
+                question=question,
+                **self.compress_config
+            )
+            output.append(item_output['compressed_prompt'])
+        return output
+    
 
 class ExtractiveRefiner(BaseRefiner):
     """Implementation for Extractive compressor.
