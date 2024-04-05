@@ -3,6 +3,15 @@ Reference:
     Yucheng Li et al. "Compressing Context to Enhance Inference Efficiency of Large Language Models"
     in EMNLP 2023.
     Official repo: https://github.com/liyucheng09/Selective_Context
+
+Note: 
+    Need to install spacy:
+        ```python -m spacy download en_core_web_sm```
+    or 
+        ```
+        wget https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0.tar.gz  
+        pip install en_core_web_sm-3.6.0.tar.gz
+        ```
 """
 
 from flashrag.config import Config
