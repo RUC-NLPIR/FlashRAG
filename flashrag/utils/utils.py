@@ -61,6 +61,15 @@ def get_retriever(config):
             "DenseRetriever"
         )(config)
 
+def get_judger(config):
+    judger_name = config['judger_name']
+    if 'skr' in judger_name.lower():
+        return getattr(
+                importlib.import_module("flashrag.judger"), 
+                "SKRJudger"
+            )(config)
+    else:
+        assert False, "No implementation!"
 
 def get_refiner(config):
     refiner_name = config['refiner_name']

@@ -1,6 +1,6 @@
 from flashrag.evaluator import Evaluator
 from flashrag.dataset.utils import split_dataset, merge_dataset
-from flashrag.utils import get_retriever, get_generator, get_refiner
+from flashrag.utils import get_retriever, get_generator, get_refiner, get_judger
 
 
 class BasicPipeline:
@@ -128,9 +128,9 @@ class ConditionalPipeline(BasicPipeline):
 
         self.sequential_pipeline = SequentialPipeline(config)
     
-    def run(self, dataset):
+    def run(self, dataset, do_eval=False):
         # judge_result: list of bool element, representing whether to use retrieval
-        judge_result = self.judger(dataset)
+        judge_result = self.judger.judge(dataset)
 
         # split dataset based on judge_result
         pos_dataset, neg_dataset = split_dataset(dataset, judge_result)
@@ -140,6 +140,11 @@ class ConditionalPipeline(BasicPipeline):
 
         # merge datasets into original format
         dataset = merge_dataset(pos_dataset, neg_dataset, judge_result)
+
+        if do_eval:
+            # evaluate & save result
+            eval_result = self.evaluator.evaluate(dataset)
+            print(eval_result)
 
         return dataset
 

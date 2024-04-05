@@ -19,11 +19,6 @@ from flashrag.utils import get_dataset
 from flashrag.pipeline import SequentialPipeline
 
 
-from flashrag.config import Config
-from flashrag.utils import get_dataset
-from flashrag.pipeline import SequentialPipeline
-
-
 # ###### Specified parameters ######
 refiner_name = "selective-context"  
 refiner_model_path = "openai-community/gpt2"
