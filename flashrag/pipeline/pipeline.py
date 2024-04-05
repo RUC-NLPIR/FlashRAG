@@ -1,4 +1,5 @@
 from flashrag.evaluator import Evaluator
+from flashrag.dataset.utils import split_dataset, merge_dataset
 from flashrag.utils import get_retriever, get_generator, get_refiner
 
 
@@ -17,30 +18,39 @@ class BasicPipeline:
         """
         pass
 
-    def build_prompt(self, dataset, prompt_templete=None, reference = None):
-        base_templete = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n{reference}\nQuestion:{question}\nAnswer:'
+    def build_prompt(self, dataset, prompt_templete=None, use_reference = True, reference = None):
+        base_templete_rag = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n{reference}\nQuestion:{question}\nAnswer:'
+        base_templete_standard = 'Write a high-quality answer for the given question.\nQuestion:{question}\nAnswer:'
+        
         if prompt_templete is None:
-            prompt_templete = base_templete
+            if use_reference:
+                prompt_templete = base_templete_rag
+            else:
+                prompt_templete = base_templete_standard
         prompt_list = []    
 
         if reference is not None:
             assert len(reference) == len(dataset)
             
         for idx,item in enumerate(dataset):
-            if reference is not None:
-                # use provided reference
-                format_reference = reference[idx]
-            else:
-                format_reference = ''
-                for idx, doc_item in enumerate(item.retrieval_result):
-                    content = doc_item['contents']
-                    title = content.split("\n")[0]
-                    text = "\n".join(content.split("\n")[1:])
-                    format_reference += f"{idx+1}(Title: {title}) {text}\n"
+            if use_reference:
+                if reference is not None:
+                    # use provided reference
+                    format_reference = reference[idx]
+                else:
+                    format_reference = ''
+                    for idx, doc_item in enumerate(item.retrieval_result):
+                        content = doc_item['contents']
+                        title = content.split("\n")[0]
+                        text = "\n".join(content.split("\n")[1:])
+                        format_reference += f"{idx+1}(Title: {title}) {text}\n"
 
-            prompt = prompt_templete.format(question = item.question, reference = format_reference)
+                prompt = prompt_templete.format(question = item.question, reference = format_reference)
+            else:
+                prompt = prompt_templete.format(question = item.question)
             prompt_list.append(prompt)
-        
+
+        return prompt_list
 
     
 class SequentialPipeline(BasicPipeline):
@@ -62,7 +72,17 @@ class SequentialPipeline(BasicPipeline):
         else:
             self.refiner = None
     
-    def run(self, dataset):
+    def standard_run(self, dataset):
+        # direct generation without RAG
+        input_prompts = self.build_prompt(dataset, use_reference=False)
+        dataset.update_output('prompt', input_prompts)
+
+        pred_answer_list = self.generator.generate(input_prompts)
+        dataset.update_output("pred",pred_answer_list)
+
+        return dataset
+
+    def run(self, dataset, do_eval=False):
         input_query = dataset.question
         if self.rewriter:
             input_query = self.rewriter.batch_run(input_query)
@@ -89,4 +109,40 @@ class SequentialPipeline(BasicPipeline):
     
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred",pred_answer_list)
+
+        if do_eval:
+            # evaluate & save result
+            eval_result = self.evaluator.evaluate(dataset)
+            print(eval_result)
+
+        return dataset
+
+class ConditionalPipeline(BasicPipeline):
+    def __init__(self, config):
+        """
+        inference stage:
+            query -> judger -> sequential pipeline or naive generate
+        """
+        super().__init__(config)
+        self.judger = get_judger(config)
+
+        self.sequential_pipeline = SequentialPipeline(config)
+    
+    def run(self, dataset):
+        # judge_result: list of bool element, representing whether to use retrieval
+        judge_result = self.judger(dataset)
+
+        # split dataset based on judge_result
+        pos_dataset, neg_dataset = split_dataset(dataset, judge_result)
+
+        pos_dataset = self.sequential_pipeline.run(pos_dataset)
+        neg_dataset = self.sequential_pipeline.standard_run(neg_dataset)
+
+        # merge datasets into original format
+        dataset = merge_dataset(pos_dataset, neg_dataset, judge_result)
+
+        return dataset
+
+
+
 
