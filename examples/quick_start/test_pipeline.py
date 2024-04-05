@@ -1,7 +1,7 @@
 import argparse
 from flashrag.config import Config
 from flashrag.utils import get_dataset
-from flashrag.pipeline import NaiveRAG
+from flashrag.pipeline import SequentialPipeline
 
 
 parser = argparse.ArgumentParser()
@@ -19,7 +19,7 @@ config_dict = {
 config = Config(config_dict = config_dict)
 all_split = get_dataset(config)
 test_data = all_split['test']
-pipeline = NaiveRAG(config)
+pipeline = SequentialPipeline(config)
 
 output_dataset, result = pipeline.run(test_data)
 print("---evaluation result---")
