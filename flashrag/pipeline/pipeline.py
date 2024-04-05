@@ -51,6 +51,7 @@ class SequentialPipeline(BasicPipeline):
         """
         super().__init__(config)
         self.retriever = get_retriever(config)
+        self.generator = get_generator(config)
         if config['rewriter_path'] is not None:
             self.rewriter = get_rewriter(config)
         else:
