@@ -10,6 +10,7 @@ class BasicPipeline:
     """
     def __init__(self, config):
         self.config = config
+        self.device = config['device']
         self.evaluator = Evaluator(config)
 
     def run(self, dataset):

@@ -160,11 +160,13 @@ class DenseRetriever(BaseRetriever):
             return results
 
 
-    def batch_search(self, query_list, num: int = None, batch_size = None):
+    def batch_search(self, query_list, num: int = None, batch_size = None, return_score = None):
         if num is None:
             num = self.topk
         if batch_size is None:
             batch_size = self.batch_size
+        if return_score is None:
+            return_score = self.return_score
 
         results = []
         scores = []
@@ -185,7 +187,7 @@ class DenseRetriever(BaseRetriever):
             results.extend(batch_results)
         
         
-        if self.return_score:
+        if return_score:
             return results, scores
         else:
             return results

@@ -28,18 +28,18 @@ def get_dataset(config):
      
     return split_dict
 
-def get_generator(config):
+def get_generator(config, **params):
     r"""Automatically select generator class based on config."""
     if "t5" in config['generator_model'] or "bart" in config['generator_model']:
         return getattr(
             importlib.import_module("flashrag.generator"), 
             "EncoderDecoderGenerator"
-        )(config)
+        )(config, **params)
     else:
         return getattr(
                 importlib.import_module("flashrag.generator"), 
                 "CausalLMGenerator"
-            )(config)
+            )(config, **params)
 
 def get_retriever(config):
     r"""Automatically select retriever class based on config's retrieval method

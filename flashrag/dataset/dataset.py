@@ -98,6 +98,7 @@ class Dataset:
                 data.append(item)
         if self.sample_num is not None:
             if self.random_sample:
+                print(f"Random sample {self.sample_num} items in test set.")
                 data = random.sample(data, self.sample_num)
             else:
                 data = data[:self.sample_num]

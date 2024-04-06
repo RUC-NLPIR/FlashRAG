@@ -7,6 +7,7 @@ import re
 import openai
 from tqdm import tqdm
 import torch
+from copy import deepcopy
 from torch import Tensor
 from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM, T5ForConditionalGeneration, BartForConditionalGeneration
 from fastchat.model import load_model
@@ -48,17 +49,24 @@ class EncoderDecoderGenerator(BaseGenerator):
             self.model = T5ForConditionalGeneration.from_pretrained(self.model_path)
         else:
             self.model = BartForConditionalGeneration.from_pretrained(self.model_path)
+        self.model.cuda()
+        self.model.eval()
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
 
 
     @torch.no_grad()
-    def generate(self, input_list: List):
+    def generate(self, input_list: List, batch_size=None, **params):
         if isinstance(input_list, str):
             input_list = [input_list]
+        if batch_size is None:
+            batch_size = self.batch_size
         
+        generation_params = deepcopy(self.generation_params)
+        generation_params.update(params)
+
         responses = []
-        for idx in tqdm(range(0, len(input_list), self.batch_size), desc='Generation process: '):
-            batched_prompts = input_list[idx:idx+self.batch_size]
+        for idx in tqdm(range(0, len(input_list), batch_size), desc='Generation process: '):
+            batched_prompts = input_list[idx:idx+batch_size]
             inputs = self.tokenizer(batched_prompts, 
                                     return_tensors="pt", 
                                     padding=True,
@@ -69,7 +77,7 @@ class EncoderDecoderGenerator(BaseGenerator):
             # TODO: multi-gpu inference
             outputs = self.model.generate(
                 **inputs,
-                **self.generation_params
+                **generation_params
             )
 
             outputs = self.tokenizer.batch_decode(outputs, 
@@ -86,11 +94,11 @@ class CausalLMGenerator(BaseGenerator):
     r"""Class for decoder-only generator. 
     
     """
-    def __init__(self, config):
+    def __init__(self, config, model=None):
         super().__init__(config)
-        self.model, self.tokenizer = self._load_model()
+        self.model, self.tokenizer = self._load_model(model=model)
     
-    def _load_model(self):
+    def _load_model(self, model=None):
         r"""Load model and tokenizer for generator.
         
         """
@@ -98,29 +106,38 @@ class CausalLMGenerator(BaseGenerator):
         # model = AutoModelForCausalLM.from_pretrained(self.model_path)
         # model = model.to(self.device)
         # tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-        model, tokenizer = load_model(self.model_path,
-                                        device = 'cuda', 
-                                        num_gpus = self.gpu_num,
-                                        load_8bit = False,
-                                        cpu_offloading = False,
-                                        debug = False,)
-
+        if model is None:
+            model, tokenizer = load_model(self.model_path,
+                                            device = 'cuda', 
+                                            num_gpus = self.gpu_num,
+                                            load_8bit = False,
+                                            cpu_offloading = False,
+                                            debug = False,)
+        else:
+            model.cuda()
+            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        model.eval()
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "left"
 
         return model, tokenizer
     
     @torch.no_grad()
-    def generate(self, input_list):
+    def generate(self, input_list, batch_size=None, **params):
         r"""Generate batches one by one. The generated content needs to exclude input.
     
         """
         if isinstance(input_list, str):
             input_list = [input_list]
+        if batch_size is None:
+            batch_size = self.batch_size
+
+        generation_params = deepcopy(self.generation_params)
+        generation_params.update(params)
 
         responses = []
-        for idx in tqdm(range(0, len(input_list), self.batch_size), desc='Generation process: '):
-            batched_prompts = input_list[idx:idx+self.batch_size]
+        for idx in tqdm(range(0, len(input_list), batch_size), desc='Generation process: '):
+            batched_prompts = input_list[idx:idx+batch_size]
             inputs = self.tokenizer(batched_prompts, 
                                     return_tensors="pt", 
                                     padding=True,
@@ -129,7 +146,7 @@ class CausalLMGenerator(BaseGenerator):
                                 ).to(self.model.device)
             outputs = self.model.generate(
                 **inputs,
-                **self.generation_params
+                **generation_params
             )
             for i, generated_sequence in enumerate(outputs):
                 input_ids = inputs['input_ids'][i]
