@@ -96,7 +96,11 @@ class CausalLMGenerator(BaseGenerator):
     """
     def __init__(self, config, model=None):
         super().__init__(config)
+        lora_path = None if 'generator_lora_path' not in config else config['generator_lora_path']
         self.model, self.tokenizer = self._load_model(model=model)
+        if lora_path is not None:
+            import peft
+            self.model.load_adapter(lora_path)
     
     def _load_model(self, model=None):
         r"""Load model and tokenizer for generator.
