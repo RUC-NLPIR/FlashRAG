@@ -5,7 +5,7 @@ def retrobust_pred_parse(pred):
     FINAL_ANSWER_PREFIX = "So the final answer is: "
 
     lines = pred.split("\n")
-    answer = None
+    answer = ""
     for line in lines:
         if line.startwith(FINAL_ANSWER_PREFIX):
             answer = line.split(FINAL_ANSWER_PREFIX)[1].strip()
