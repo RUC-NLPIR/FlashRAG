@@ -19,6 +19,21 @@ class BasicPipeline:
         """
         pass
 
+    def evaluate(self, dataset, do_eval=False, pred_process_fun=None):
+        r"""The evaluation process after finishing overall generation"""
+        if pred_process_fun is not None:
+            raw_pred = dataset.pred
+            processed_pred = [pred_process_fun(pred) for pred in raw_pred]
+            dataset.update_output('raw_pred',raw_pred)
+            dataset.update_output('pred', processed_pred)
+
+        if do_eval:
+            # evaluate & save result
+            eval_result = self.evaluator.evaluate(dataset)
+            print(eval_result)
+        return dataset
+        
+
     def build_prompt(self, dataset, prompt_templete=None, use_reference = True, reference = None):
         base_templete_rag = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n{reference}\nQuestion:{question}\nAnswer:'
         base_templete_standard = 'Write a high-quality answer for the given question.\nQuestion:{question}\nAnswer:'
@@ -83,7 +98,7 @@ class SequentialPipeline(BasicPipeline):
 
         return dataset
 
-    def run(self, dataset, do_eval=False):
+    def run(self, dataset, do_eval=False, pred_process_fun=None):
         input_query = dataset.question
         if self.rewriter:
             input_query = self.rewriter.batch_run(input_query)
@@ -111,10 +126,7 @@ class SequentialPipeline(BasicPipeline):
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred",pred_answer_list)
 
-        if do_eval:
-            # evaluate & save result
-            eval_result = self.evaluator.evaluate(dataset)
-            print(eval_result)
+        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
 
         return dataset
 
@@ -129,7 +141,7 @@ class ConditionalPipeline(BasicPipeline):
 
         self.sequential_pipeline = SequentialPipeline(config)
     
-    def run(self, dataset, do_eval=False):
+    def run(self, dataset, do_eval=False, pred_process_fun=None):
         # judge_result: list of bool element, representing whether to use retrieval
         judge_result = self.judger.judge(dataset)
 
@@ -142,11 +154,8 @@ class ConditionalPipeline(BasicPipeline):
         # merge datasets into original format
         dataset = merge_dataset(pos_dataset, neg_dataset, judge_result)
 
-        if do_eval:
-            # evaluate & save result
-            eval_result = self.evaluator.evaluate(dataset)
-            print(eval_result)
-
+        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
+        
         return dataset
 
 

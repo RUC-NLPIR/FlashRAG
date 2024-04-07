@@ -25,7 +25,7 @@ class REPLUGPipeline(BasicPipeline):
         return [prompt_templete.format(reference = doc, question = question) for doc in doc_list]
 
 
-    def run(self, dataset , do_eval=False):
+    def run(self, dataset, do_eval=False, pred_process_fun=None):
         input_query = dataset.question
 
         retrieval_results, doc_scores = self.retriever.batch_search(input_query, return_score=True)
@@ -48,9 +48,6 @@ class REPLUGPipeline(BasicPipeline):
         
         dataset.update_output("pred",pred_answer_list)
 
-        if do_eval:
-            # evaluate & save result
-            eval_result = self.evaluator.evaluate(dataset)
-            print(eval_result)
+        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
 
         return dataset
