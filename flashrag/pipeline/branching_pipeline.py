@@ -4,7 +4,7 @@ import torch
 from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
 from flashrag.pipeline import BasicPipeline
-from FlashRAG.flashrag.pipeline.replug_utils import REPLUGLogitsProcessor, load_replug_model
+from flashrag.pipeline.replug_utils import REPLUGLogitsProcessor, load_replug_model
 
 
 class REPLUGPipeline(BasicPipeline):
