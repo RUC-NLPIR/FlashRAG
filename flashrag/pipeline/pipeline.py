@@ -33,8 +33,17 @@ class BasicPipeline:
             print(eval_result)
         return dataset
         
+    def format_reference(self, retrieval_result):
+        format_reference = ''
+        for idx, doc_item in enumerate(retrieval_result):
+            content = doc_item['contents']
+            title = content.split("\n")[0]
+            text = "\n".join(content.split("\n")[1:])
+            format_reference += f"{idx+1}(Title: {title}) {text}\n"
 
-    def build_prompt(self, dataset, prompt_templete=None, use_reference = True, reference = None):
+        return format_reference
+
+    def build_prompt(self, question_list, retrieval_results, prompt_templete=None, use_reference = True, reference = None):
         base_templete_rag = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n{reference}\nQuestion:{question}\nAnswer:'
         base_templete_standard = 'Write a high-quality answer for the given question.\nQuestion:{question}\nAnswer:'
         
@@ -46,24 +55,21 @@ class BasicPipeline:
         prompt_list = []    
 
         if reference is not None:
-            assert len(reference) == len(dataset)
-            
-        for idx,item in enumerate(dataset):
+            assert len(reference) == len(question_list)
+
+        for idx in range(len(question_list)):
+            question = question_list[idx]
+            retrieval_result = retrieval_results[idx]
             if use_reference:
                 if reference is not None:
                     # use provided reference
                     format_reference = reference[idx]
                 else:
-                    format_reference = ''
-                    for idx, doc_item in enumerate(item.retrieval_result):
-                        content = doc_item['contents']
-                        title = content.split("\n")[0]
-                        text = "\n".join(content.split("\n")[1:])
-                        format_reference += f"{idx+1}(Title: {title}) {text}\n"
-
-                prompt = prompt_templete.format(question = item.question, reference = format_reference)
+                    format_reference = self.format_reference(retrieval_result)
+                
+                prompt = prompt_templete.format(question = question, reference = format_reference)
             else:
-                prompt = prompt_templete.format(question = item.question)
+                prompt = prompt_templete.format(question = question)
             prompt_list.append(prompt)
 
         return prompt_list
@@ -90,7 +96,7 @@ class SequentialPipeline(BasicPipeline):
     
     def standard_run(self, dataset):
         # direct generation without RAG
-        input_prompts = self.build_prompt(dataset, use_reference=False)
+        input_prompts = self.build_prompt(dataset.question, dataset.retrieval_results, use_reference=False)
         dataset.update_output('prompt', input_prompts)
 
         pred_answer_list = self.generator.generate(input_prompts)
@@ -110,7 +116,7 @@ class SequentialPipeline(BasicPipeline):
         if self.refiner:
             if 'llmlingua' in self.refiner.name:
                 # input prompt
-                input_prompts = self.build_prompt(dataset)
+                input_prompts = self.build_prompt(dataset.question, dataset.retrieval_results)
                 dataset.update_output('prompt', input_prompts)
                 input_prompts = self.refiner.batch_run(dataset)
                 dataset.update_output('prompt', input_prompts)
@@ -118,9 +124,9 @@ class SequentialPipeline(BasicPipeline):
                 # input retrieval docs
                 refine_results = self.refiner.batch_run(dataset)
                 dataset.update_output('refine_result', refine_results)
-                input_prompts = self.build_prompt(dataset, reference=refine_results)
+                input_prompts = self.build_prompt(dataset.question, dataset.retrieval_results, reference=refine_results)
         else:
-            input_prompts = self.build_prompt(dataset)
+            input_prompts = self.build_prompt(dataset.question, dataset.retrieval_results)
             dataset.update_output('prompt', input_prompts)
     
         pred_answer_list = self.generator.generate(input_prompts)
