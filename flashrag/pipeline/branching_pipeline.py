@@ -57,7 +57,7 @@ class REPLUGPipeline(BasicPipeline):
 
 
 class SuRePipeline(BasicPipeline):
-    # Provided prompt templete for SuRe method, candiadat num is set to 2
+    # Provided prompt templete for SuRe method, candidate num is set to 2
 
     # prompt for candidates generation 
     P_CAN = '''
