@@ -53,12 +53,14 @@ retrieval_use_fp16: True
 retrieval_query_max_length: 128
 
 # ----Generator Settings----
+use_vllm: False
 generator_model: "llama2-7B-chat" # name or path of the generator model
 generator_max_input_len: 1024
 generator_batch_size: 2
 generation_params:
-  max_new_tokens: 64
-  do_sample: False
+  #max_new_tokens: 64
+  max_tokens: 64
+  #do_sample: False
   temperature: 1.0
   top_p: 1.0
 

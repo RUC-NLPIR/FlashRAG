@@ -36,10 +36,16 @@ def get_generator(config, **params):
             "EncoderDecoderGenerator"
         )(config, **params)
     else:
-        return getattr(
+        if config['use_vllm']:
+            return getattr(
                 importlib.import_module("flashrag.generator"), 
-                "CausalLMGenerator"
+                "VLLMGenerator"
             )(config, **params)
+        else:
+            return getattr(
+                    importlib.import_module("flashrag.generator"), 
+                    "CausalLMGenerator"
+                )(config, **params)
 
 def get_retriever(config):
     r"""Automatically select retriever class based on config's retrieval method

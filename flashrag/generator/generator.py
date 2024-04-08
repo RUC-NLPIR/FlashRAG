@@ -10,7 +10,7 @@ import torch
 from copy import deepcopy
 from torch import Tensor
 from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM, T5ForConditionalGeneration, BartForConditionalGeneration
-from fastchat.model import load_model
+
 
 
 class BaseGenerator:
@@ -89,16 +89,62 @@ class EncoderDecoderGenerator(BaseGenerator):
         return responses
 
 
+class VLLMGenerator(BaseGenerator):
+    r"""Class for decoder-only generator, based on vllm. 
+    """
+    def __init__(self, config):
+        super().__init__(config)
+        
+        from vllm import LLM
+        self.model = LLM(self.model_path, tensor_parallel_size=self.gpu_num)
+
+        self.lora_path = None if 'generator_lora_path' not in config else config['generator_lora_path']
+        self.use_lora = False
+        if self.lora_path is not None:
+            self.use_lora = True
+
+            
+    @torch.no_grad()
+    def generate(self, input_list, output_original=False, **params):
+        from vllm import SamplingParams
+        if isinstance(input_list, str):
+            input_list = [input_list]
+        if batch_size is None:
+            batch_size = self.batch_size
+
+        generation_params = deepcopy(self.generation_params)
+        generation_params.update(params)
+        sampling_params = SamplingParams(**generation_params)
+
+        if self.use_lora:
+            from vllm.lora.request import LoRARequest
+            outputs = self.model.generate(
+                input_list,
+                sampling_params,
+                lora_request=LoRARequest('lora_module', 1, self.lora_path)
+            )
+        else:
+            outputs = self.model.generate(
+                input_list,
+                sampling_params
+            )
+        if output_original:
+            return outputs
+        else:
+            generated_texts = [output.outputs[0].text for output in outputs]
+            return generated_texts
+
 
 class CausalLMGenerator(BaseGenerator):
-    r"""Class for decoder-only generator. 
-    
+    r"""Class for decoder-only generator, based on hf. 
     """
     def __init__(self, config, model=None):
         super().__init__(config)
         lora_path = None if 'generator_lora_path' not in config else config['generator_lora_path']
         self.model, self.tokenizer = self._load_model(model=model)
+        self.use_lora = False
         if lora_path is not None:
+            self.use_lora = True
             import peft
             self.model.load_adapter(lora_path)
     
@@ -106,17 +152,18 @@ class CausalLMGenerator(BaseGenerator):
         r"""Load model and tokenizer for generator.
         
         """
-        # TODO: try vllm
-        # model = AutoModelForCausalLM.from_pretrained(self.model_path)
-        # model = model.to(self.device)
-        # tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         if model is None:
+            from fastchat.model import load_model
             model, tokenizer = load_model(self.model_path,
                                             device = 'cuda', 
                                             num_gpus = self.gpu_num,
                                             load_8bit = False,
                                             cpu_offloading = False,
                                             debug = False,)
+            #model = AutoModelForCausalLM.from_pretrained(self.model_path)
+            #tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+            model = model.to(self.device)
+            
         else:
             model.cuda()
             tokenizer = AutoTokenizer.from_pretrained(self.model_path)
