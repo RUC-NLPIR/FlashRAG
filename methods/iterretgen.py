@@ -3,11 +3,14 @@ Reference:
     Zhihong Shao et al. "Enhancing Retrieval-Augmented Large Language Models with Iterative
                          Retrieval-Generation Synergy"
     in EMNLP Findings 2023.
+
+    Zhangyin Feng et al. "Retrieval-Generation Synergy Augmented Large Language Models"
+    in EMNLP Findings 2023. 
 """
 
 from flashrag.config import Config
 from flashrag.utils import get_dataset
-from flashrag.pipeline import ITERRETGENPipeline
+from flashrag.pipeline import IterativePipeline
 
 iter_num = 3
 # preparation

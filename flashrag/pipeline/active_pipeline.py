@@ -5,7 +5,7 @@ from flashrag.utils import get_retriever, get_generator
 from flashrag.pipeline import BasicPipeline
 
 
-class ITERRETGENPipeline(BasicPipeline):
+class IterativePipeline(BasicPipeline):
     def __init__(self, config, iter_num = 3):
         super().__init__(config)
         self.iter_num = iter_num
