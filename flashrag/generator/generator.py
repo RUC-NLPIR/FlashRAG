@@ -105,7 +105,7 @@ class VLLMGenerator(BaseGenerator):
 
             
     @torch.no_grad()
-    def generate(self, input_list, output_original=False, **params):
+    def generate(self, input_list, return_raw_output=False, **params):
         from vllm import SamplingParams
         if isinstance(input_list, str):
             input_list = [input_list]
@@ -128,7 +128,7 @@ class VLLMGenerator(BaseGenerator):
                 input_list,
                 sampling_params
             )
-        if output_original:
+        if return_raw_output:
             return outputs
         else:
             generated_texts = [output.outputs[0].text for output in outputs]
