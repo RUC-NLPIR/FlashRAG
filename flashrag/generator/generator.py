@@ -126,8 +126,6 @@ class VLLMGenerator(BaseGenerator):
         from vllm import SamplingParams
         if isinstance(input_list, str):
             input_list = [input_list]
-        if batch_size is None:
-            batch_size = self.batch_size
 
         generation_params = deepcopy(self.generation_params)
         generation_params.update(params)
