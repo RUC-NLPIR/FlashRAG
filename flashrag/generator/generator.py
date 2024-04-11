@@ -113,7 +113,14 @@ class VLLMGenerator(BaseGenerator):
         super().__init__(config)
         
         from vllm import LLM
-        self.model = LLM(self.model_path, tensor_parallel_size=self.gpu_num)
+        if 'vllm_gpu_memory_utilization' not in config:
+            gpu_memory_utilization = 0.9
+        else:
+            gpu_memory_utilization = config['vllm_gpu_memory_utilization']
+        self.model = LLM(self.model_path, 
+                         tensor_parallel_size = self.gpu_num if self.gpu_num%2==0 else self.gpu_num-1,
+                         gpu_memory_utilization = gpu_memory_utilization
+                        )
 
         self.lora_path = None if 'generator_lora_path' not in config else config['generator_lora_path']
         self.use_lora = False

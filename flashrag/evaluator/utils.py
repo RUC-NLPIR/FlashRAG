@@ -16,10 +16,3 @@ def normalize_answer(s):
         return text.lower()
 
     return white_space_fix(remove_articles(remove_punc(lower(s))))
-
-def is_regex(pattern):
-    regex_chars = ["*", "+", "?", ".", "^", "$", "[", "]", "{", "}", "(", ")", "|"]
-    for char in regex_chars:
-        if char in pattern:
-            return True
-    return False

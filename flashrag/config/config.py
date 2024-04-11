@@ -161,9 +161,10 @@ class Config:
         self.final_config['generator_model_path'] = generator_model2path.get(generator_model, generator_model)
 
     def _prepare_dir(self):
+        save_note = self.final_config['save_note']
         current_time = datetime.datetime.now()
         self.final_config['save_dir'] = os.path.join(self.final_config['save_dir'], 
-                                     f"{self.final_config['dataset_name']}_{current_time.strftime('%Y_%m_%d_%H_%M')}")
+                                     f"{self.final_config['dataset_name']}_{current_time.strftime('%Y_%m_%d_%H_%M')}_{save_note}")
         os.makedirs(self.final_config['save_dir'], exist_ok=True)
         # save config parameters
         config_save_path = os.path.join(self.final_config['save_dir'],'config.yaml')
