@@ -33,6 +33,7 @@ def calculate_em(prediction: str, golden_answers: list) -> float:
     score = 0.0
     for golden_answer in golden_answers:
         if is_regex(golden_answer):
+            print("Consider answer as regex!")
             golden_answer = re.compile(golden_answer, re.IGNORECASE)
             match = re.fullmatch(golden_answer, normalized_prediction)
             if match is not None:
@@ -52,6 +53,7 @@ def calculate_sub_em(prediction: str, golden_answers: list) -> float:
     score = 0.0
     for golden_answer in golden_answers:
         if is_regex(golden_answer):
+            print("Consider answer as regex!")
             golden_answer = re.compile(golden_answer, re.IGNORECASE)
             match = re.search(golden_answer, normalized_prediction)
             if match is not None:
@@ -162,4 +164,4 @@ class Sub_ExactMatch(BaseMetric):
         metric_score_list = [calculate_sub_em(pred, golden_answers) for pred, golden_answers in zip(pred_list, golden_answers_list)]
         sub_em_score = sum(metric_score_list) / len(metric_score_list)
         
-        return {"sub": sub_em_score}, metric_score_list
+        return {"sub_em": sub_em_score}, metric_score_list

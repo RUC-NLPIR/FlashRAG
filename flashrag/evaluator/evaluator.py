@@ -75,7 +75,7 @@ class Evaluator:
         
         """
 
-        file_name = "intermediate_data.jsonl"
+        file_name = "intermediate_data.json"
         save_path = os.path.join(self.save_dir, file_name)
 
         data.save(save_path)

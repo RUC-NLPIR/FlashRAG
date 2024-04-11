@@ -171,9 +171,10 @@ class Dataset:
         """
         save_data = [item.to_dict() for item in self.data]
         with open(save_path,"w") as f:
-            for item in save_data:
-                json.dump(item, f)
-                f.write("\n")
+            json.dump(save_data, f, indent=4)
+            # for item in save_data:
+            #     json.dump(item, f)
+            #     f.write("\n")
 
         
 

@@ -50,8 +50,10 @@ class BasicPipeline:
                      use_reference = True, 
                      reference = None,
                      previous_gen = ""):
-        base_templete_rag = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n{reference}\nQuestion:{question}\nAnswer:{previous_gen}'
-        base_templete_standard = 'Write a high-quality answer for the given question.\nQuestion:{question}\nAnswer:{previous_gen}'
+        base_templete_rag = "Answer the question based on the given information. Only give me the answer and do not output any other words.\n\nThe following are given information.\n{reference}\n\nAnswer the question based on the given information. Only give me the answer and do not output any other words.\n\nQuestion: {question}\nAnswer:{previous_gen}"
+        base_templete_standard = "Answer the question based on your own knowledge. Only give me the answer and do not output any other words.\n\nQuestion: {question}\nAnswer:{previous_gen}"
+        #base_templete_rag = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n{reference}\nQuestion:{question}\nAnswer:{previous_gen}'
+        #base_templete_standard = 'Write a high-quality answer for the given question.\nQuestion:{question}\nAnswer:{previous_gen}'
         
         if prompt_templete is None:
             if use_reference:
@@ -101,14 +103,15 @@ class SequentialPipeline(BasicPipeline):
         else:
             self.refiner = None
     
-    def standard_run(self, dataset):
+    def standard_run(self, dataset, do_eval=True, pred_process_fun=None):
         # direct generation without RAG
         input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result, use_reference=False)
         dataset.update_output('prompt', input_prompts)
 
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred",pred_answer_list)
-
+        
+        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
         return dataset
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):

@@ -23,3 +23,10 @@ def is_regex(pattern):
         return True
     except re.error:
         return False
+
+def is_regex(pattern):
+    regex_chars = ["*", "+", "?", ".", "^", "$", "[", "]", "{", "}", "(", ")", "|"]
+    for char in regex_chars:
+        if char in pattern:
+            return True
+    return False
