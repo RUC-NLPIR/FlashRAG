@@ -31,12 +31,22 @@ class Evaluator:
         f"""Collect all classes based on ```BaseMetric```.
         
         """
-        avaliable_metrics = {}
+        def find_descendants(base_class, subclasses=None):
+            if subclasses is None:
+                subclasses = set()
 
-        for cls in BaseMetric.__subclasses__():
+            direct_subclasses = base_class.__subclasses__()
+            for subclass in direct_subclasses:
+                if subclass not in subclasses:
+                    subclasses.add(subclass)
+                    find_descendants(subclass, subclasses)
+            return subclasses
+        
+        avaliable_metrics = {}
+        for cls in find_descendants(BaseMetric):
             metric_name = cls.metric_name
             avaliable_metrics[metric_name] = cls
-
+        print(avaliable_metrics)
         return avaliable_metrics
 
     def evaluate(self, data):
