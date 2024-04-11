@@ -46,7 +46,6 @@ class Evaluator:
         for cls in find_descendants(BaseMetric):
             metric_name = cls.metric_name
             avaliable_metrics[metric_name] = cls
-        print(avaliable_metrics)
         return avaliable_metrics
 
     def evaluate(self, data):
