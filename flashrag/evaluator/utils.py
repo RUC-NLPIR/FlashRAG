@@ -18,13 +18,6 @@ def normalize_answer(s):
     return white_space_fix(remove_articles(remove_punc(lower(s))))
 
 def is_regex(pattern):
-    try:
-        re.compile(pattern)
-        return True
-    except re.error:
-        return False
-
-def is_regex(pattern):
     regex_chars = ["*", "+", "?", ".", "^", "$", "[", "]", "{", "}", "(", ")", "|"]
     for char in regex_chars:
         if char in pattern:
