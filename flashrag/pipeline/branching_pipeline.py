@@ -28,7 +28,7 @@ class REPLUGPipeline(BasicPipeline):
         return [prompt_templete.format(reference = doc, question = question) for doc in doc_list]
 
 
-    def run(self, dataset, do_eval=False, pred_process_fun=None):
+    def run(self, dataset, do_eval=True, pred_process_fun=None):
         input_query = dataset.question
 
         retrieval_results, doc_scores = self.retriever.batch_search(input_query, return_score=True)
@@ -152,7 +152,7 @@ class SuRePipeline(BasicPipeline):
             score = 0.5
         return score
 
-    def run(self, dataset, do_eval=False, pred_process_fun=None):
+    def run(self, dataset, do_eval=True, pred_process_fun=None):
         input_query = dataset.question
 
         retrieval_results, doc_scores = self.retriever.batch_search(input_query, return_score=True)

@@ -67,6 +67,7 @@ generation_params:
 # ----Evaluation Settings----
 metrics: ['em']
 save_metric_score: True
+save_intermediate_data: False
 
 # ----Refiner Settings----
 refiner_name: ~

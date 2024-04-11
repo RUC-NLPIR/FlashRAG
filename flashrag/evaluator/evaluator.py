@@ -11,7 +11,10 @@ class Evaluator:
 
     def __init__(self, config):
         self.config = config
-        self.save_metric = config['save_metric_score']
+        self.save_dir = config['save_dir']
+                                     
+        self.save_metric_flag = config['save_metric_score']
+        self.save_data_flag = config['save_intermediate_data']
         self.metrics = [metric.lower() for metric in self.config['metrics']]
 
         self.avaliable_metrics = self._collect_metrics()
@@ -23,8 +26,6 @@ class Evaluator:
             else:
                 print(f"{metric} has not been implemented!")
                 raise NotImplementedError
-        
-        self.save_metric_score = config['save_metric_score']
     
     def _collect_metrics(self):
         f"""Collect all classes based on ```BaseMetric```.
@@ -51,21 +52,30 @@ class Evaluator:
             for metric_score, item in zip(metric_scores, data):
                 item.update_evaluation_score(metric, metric_score)
             
-            if self.save_metric_score:
-                self.save(data)
+        if self.save_metric_flag:
+            self.save_metric_score(result_dict)
+
+        if self.save_data_flag:
+            self.save_data(data)
 
         
         return result_dict
     
-    def save(self, data):
+    def save_metric_score(self, result_dict):
+        file_name = "metric_score.txt"
+        save_path = os.path.join(self.save_dir, file_name)
+        with open(save_path,"w") as f:
+            for k,v in result_dict.items():
+                f.write(f"{k}: {v}\n")
+
+
+    def save_data(self, data):
         r"""Save the evaluated data, including the raw data and the score of each data 
         sample on each metric.
         
         """
-        
-        save_dir = self.config['save_dir']
-        os.makedirs(save_dir, exist_ok=True)
-        file_name = f"{data.dataset_name}_evaluated.jsonl"
-        save_path = os.path.join(save_dir, file_name)
+
+        file_name = "intermediate_data.jsonl"
+        save_path = os.path.join(self.save_dir, file_name)
 
         data.save(save_path)

@@ -15,7 +15,7 @@ class IterativePipeline(BasicPipeline):
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
     
-    def run(self, dataset, do_eval=False, pred_process_fun=None):
+    def run(self, dataset, do_eval=True, pred_process_fun=None):
         questions = dataset.question
 
         # run in batch
@@ -474,7 +474,7 @@ class SelfRAGPipeline(BasicPipeline):
         return final_output
 
 
-    def long_form_run(self, dataset, do_eval=False, pred_process_fun=None):
+    def long_form_run(self, dataset, do_eval=True, pred_process_fun=None):
         questions = dataset.question
         retrieval_results = self.retriever.batch_search(questions)
         dataset.update_output('retrieval_result', retrieval_results)
@@ -509,7 +509,7 @@ class SelfRAGPipeline(BasicPipeline):
 
 
 
-    def run(self, dataset, do_eval=False, pred_process_fun=None):
+    def run(self, dataset, do_eval=True, pred_process_fun=None):
         questions = dataset.question
         retrieval_results = self.retriever.batch_search(questions)
         dataset.update_output('retrieval_result', retrieval_results)
@@ -660,7 +660,7 @@ class FLAREPipeline(BasicPipeline):
         item.update_output('pred', final_gen_result)
                      
 
-    def run(self, dataset, do_eval=False, pred_process_fun=None):
+    def run(self, dataset, do_eval=True, pred_process_fun=None):
         for item in tqdm(dataset, desc="Inference: "):
             self.run_item(item)
 

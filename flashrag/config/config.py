@@ -6,6 +6,7 @@ import random
 import copy
 import importlib
 import sys
+import datetime
 
 class Config:
     def __init__(
@@ -28,6 +29,7 @@ class Config:
 
         self._init_device()
         self._set_seed()
+        self._prepare_dir()
 
 
     def _build_yaml_loader(self):
@@ -115,6 +117,7 @@ class Config:
         else:
             import torch
             self.final_config['device'] = torch.device('cpu')
+        
 
     def _set_additional_key(self):
         # set dataset
@@ -131,7 +134,6 @@ class Config:
         generator_model = self.final_config['generator_model']
         generator_model2path = self.final_config['generator_model2path']
 
-
         if self.final_config['index_path'] is None:
             try:
                 self.final_config['index_path'] = method2index[retrieval_method]
@@ -139,7 +141,7 @@ class Config:
                 print("Index is empty!!")
                 assert False
             
-
+    
         
         # if self.final_config['corpus_database_save_path'] is None:
         #     self.final_config['corpus_database_save_path'] = os.path.join(self.final_config['index_save_dir'], 'corpus.db')
@@ -155,11 +157,19 @@ class Config:
 
         if self.final_config['retrieval_pooling_method'] is None:
             self.final_config['retrieval_pooling_method'] = set_pooling_method(retrieval_method, model2pooling)
-        
-
 
         self.final_config['generator_model_path'] = generator_model2path.get(generator_model, generator_model)
-        
+
+    def _prepare_dir(self):
+        current_time = datetime.datetime.now()
+        self.final_config['save_dir'] = os.path.join(self.final_config['save_dir'], 
+                                     f"{self.final_config['dataset_name']}_{current_time.strftime('%Y_%m_%d_%H_%M')}")
+        os.makedirs(self.final_config['save_dir'], exist_ok=True)
+        # save config parameters
+        config_save_path = os.path.join(self.final_config['save_dir'],'config.yaml')
+        with open(config_save_path, 'w') as f:
+            yaml.dump(self.final_config, f)
+
     def _set_seed(self):
         import torch
         import numpy as np

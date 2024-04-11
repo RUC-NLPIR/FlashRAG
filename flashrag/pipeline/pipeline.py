@@ -19,7 +19,7 @@ class BasicPipeline:
         """
         pass
 
-    def evaluate(self, dataset, do_eval=False, pred_process_fun=None):
+    def evaluate(self, dataset, do_eval=True, pred_process_fun=None):
         r"""The evaluation process after finishing overall generation"""
         if pred_process_fun is not None:
             raw_pred = dataset.pred
@@ -31,6 +31,7 @@ class BasicPipeline:
             # evaluate & save result
             eval_result = self.evaluator.evaluate(dataset)
             print(eval_result)
+
         return dataset
         
     def format_reference(self, retrieval_result):
@@ -110,7 +111,7 @@ class SequentialPipeline(BasicPipeline):
 
         return dataset
 
-    def run(self, dataset, do_eval=False, pred_process_fun=None):
+    def run(self, dataset, do_eval=True, pred_process_fun=None):
         input_query = dataset.question
         if self.rewriter:
             input_query = self.rewriter.batch_run(input_query)
@@ -153,7 +154,7 @@ class ConditionalPipeline(BasicPipeline):
 
         self.sequential_pipeline = SequentialPipeline(config)
     
-    def run(self, dataset, do_eval=False, pred_process_fun=None):
+    def run(self, dataset, do_eval=True, pred_process_fun=None):
         # judge_result: list of bool element, representing whether to use retrieval
         judge_result = self.judger.judge(dataset)
 
