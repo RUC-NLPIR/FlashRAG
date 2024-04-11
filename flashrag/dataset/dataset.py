@@ -46,6 +46,15 @@ class Item:
         else:
             self.output[key] = value
 
+    def __getattr__(self, attr_name):
+        if attr_name in ['id','question','golden_answers','metadata','output']:
+            return self.__getattr__(attr_name)
+        else:
+            try:
+                return self.output[attr_name]
+            except:
+                assert False
+
     def to_dict(self):
         r"""Convert all information within the data sample into a dict. Information generated
         during the inference will be saved into output field.
@@ -138,9 +147,10 @@ class Dataset:
     
     def __getattr__(self, attr_name):
         try:
-            return [item[attr_name] for item in self.data]
+            return [item.__getattr__(attr_name) for item in self.data]
         except:
-            super().__getattr__(attr_name)
+            assert False
+            #super().__getattr__(attr_name)
 
     def get_attr_data(self, attr_name):
         r"""For the attributes constructed later (not implemented using property), 

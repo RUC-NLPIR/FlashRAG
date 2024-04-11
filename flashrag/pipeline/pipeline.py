@@ -102,7 +102,7 @@ class SequentialPipeline(BasicPipeline):
     
     def standard_run(self, dataset):
         # direct generation without RAG
-        input_prompts = self.build_prompt(dataset.question, dataset.retrieval_results, use_reference=False)
+        input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result, use_reference=False)
         dataset.update_output('prompt', input_prompts)
 
         pred_answer_list = self.generator.generate(input_prompts)
@@ -122,7 +122,7 @@ class SequentialPipeline(BasicPipeline):
         if self.refiner:
             if 'llmlingua' in self.refiner.name:
                 # input prompt
-                input_prompts = self.build_prompt(dataset.question, dataset.retrieval_results)
+                input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result)
                 dataset.update_output('prompt', input_prompts)
                 input_prompts = self.refiner.batch_run(dataset)
                 dataset.update_output('prompt', input_prompts)
@@ -130,9 +130,9 @@ class SequentialPipeline(BasicPipeline):
                 # input retrieval docs
                 refine_results = self.refiner.batch_run(dataset)
                 dataset.update_output('refine_result', refine_results)
-                input_prompts = self.build_prompt(dataset.question, dataset.retrieval_results, reference=refine_results)
+                input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result, reference=refine_results)
         else:
-            input_prompts = self.build_prompt(dataset.question, dataset.retrieval_results)
+            input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result)
             dataset.update_output('prompt', input_prompts)
     
         pred_answer_list = self.generator.generate(input_prompts)
