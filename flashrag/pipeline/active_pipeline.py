@@ -2,6 +2,7 @@ import transformers
 from transformers import AutoTokenizer
 import torch
 import numpy as np
+from tqdm import tqdm
 from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
 from flashrag.pipeline import BasicPipeline
@@ -266,7 +267,7 @@ class SelfRAGPipeline(BasicPipeline):
                     ret_token_score_dict[order][tok] = np.exp(prob)
                 if ret_token_score_dict[order]["[Retrieval]"] + ret_token_score_dict[order]["[No Retrieval]"] != 0.0:
                     do_retrieve = (ret_token_score_dict[order]["[Retrieval]"] + ret_token_score_dict[order]["[Continue to Use Evidence]"]) / (
-                        ret_token_score_dict[order]["[Retrieval]"] + ret_token_score_dict[order]["[No Retrieval]"]) > threshold
+                        ret_token_score_dict[order]["[Retrieval]"] + ret_token_score_dict[order]["[No Retrieval]"]) > self.threshold
                 else:
                     do_retrieve = 0.0
                 if do_retrieve > self.threshold:
@@ -568,8 +569,104 @@ class SelfRAGPipeline(BasicPipeline):
         
         
         
+class FLAREPipeline(BasicPipeline):
+    def __init__(self, config, threshold=0.2, look_ahead_steps=64, max_generation_length=256, max_iter_num=5):
+        super().__init__(config)
+        # from nltk.tokenize.punkt import PunktSentenceTokenizer
+        # self.sentence_spliter = PunktSentenceTokenizer()
 
+        self.retriever = get_retriever(config)
+        self.generator = get_generator(config)
+        self.threshold = threshold
+        self.max_generation_length = max_generation_length
+        self.max_iter_num = max_iter_num
+        self.look_ahead_steps = look_ahead_steps
+        self.stop_sym = '!@#$%^&*()\n\n)(*&^%$#@!'
+
+    # def get_next_sentence(self, output):
+    #     from collections import namedtuple
+    #     Sentence = namedtuple('Sentence', 'text start_char end_char')
+    #     sents = [Sentence(output[s:e], s, e) for s, e in self.sentence_spliter.span_tokenize(output)]
+
+    #     for sent in sents:
+    #         num_trail_sapces = len(sent.text) - len(sent.text.rstrip())
+    #         if sent.end_char - num_trail_sapces >= 4:
+    #             break_at = sent.end_char - num_trail_sapces
+    #             break
+    #     first_sent = output[:break_at]
         
+    #     return first_sent
+
+    def get_next_sentence(self, output, scores):
+        import re
+        tokenizer = self.generator.tokenizer
+        text_sentences = re.split(r'(?<=[^A-Z].[.?]) +', output)
+        token_id_sentences = [tokenizer.encode(s, add_special_tokens=False) for s in text_sentences]
+        output_ids = tokenizer.encode(output, add_special_tokens=False)
+        assert sum([len(s) for s in token_id_sentences]) == len(
+            output_ids), f"token id sentences length {sum([len(s) for s in token_id_sentences])} not equal to output ids length {len(target_ids)}\n{token_id_sentences}\n{text_sentences}\n{answer}"
+        
+        first_sent_ids = token_id_sentences[0]
+        first_sent_score = scores[:len(first_sent_ids)]
+        return text_sentences[0], first_sent_score
+
+    def judge_sent_confidence(self, sent, sent_score):
+        judge_result = all([score > self.threshold for score in sent_score])
+        new_query = None
+        if not judge_result:
+            tokenizer = self.generator.tokenizer
+            sent_ids = tokenizer.encode(sent, add_special_tokens=False)
+            assert len(sent_ids) == len(sent_score)
+            new_query_ids = [i for i,score in zip(sent_ids,sent_score) if score > self.threshold]
+            new_query = tokenizer.decode(new_query_ids)
+        return judge_result, new_query
+        
+    def run_item(self, item):
+        question = item.question
+        gen_length = 0
+        iter_round = 0
+        final_gen_result = ""
+        while gen_length < self.max_generation_length and iter_round < self.iter_round:
+            input_prompt = self.build_prompt(
+                question_list=[question], use_reference=False, previous_gen=final_gen_result)[0]
+            # scores: token logits of the whole generation seq
+            round_gen_output, scores = self.generator.generate(
+                input_prompt, return_scores=True, stop=self.stop_sym, max_new_tokens=self.look_ahead_steps)
+            round_gen_output, scores = round_gen_output[0], scores[0]
+            # next_sent_scores: token logits of the first sent in generation seq
+            next_sent, next_sent_score = self.get_next_sentence(round_gen_output, scores)
+            # judge next sentence
+            judge_result, query = self.judge_sent_confidence(next_sent, next_sent_score)
+            
+            if not judge_result:
+                # do retrieval-augmented generation
+                retrieval_result = self.retriever.search(query)
+                item.update_output('retrieval_result', retrieval_result)
+                
+                input_prompt = self.build_prompt(
+                    question_list = [question], 
+                    retrieval_results = retrieval_result, 
+                    previous_gen = final_gen_result)[0]
+                output, scores = self.generator.generate(
+                    input_prompt, return_scores=True, stop=self.stop_sym, max_new_tokens=self.look_ahead_steps)
+                output, scores = output[0], scores[0]
+                next_sent, _ = self.get_next_sentence(output, scores)
+
+            final_gen_result += next_sent
+            gen_length += len(next_sent_score)   
+            iter_round += 1
+
+        # TODO: save intermediate result
+        item.update_output('pred', final_gen_result)
+                     
+
+    def run(self, dataset, do_eval=False, pred_process_fun=None):
+        for item in tqdm(dataset, desc="Inference: "):
+            self.run_item(item)
+
+        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
+        return dataset
+            
 
 
 

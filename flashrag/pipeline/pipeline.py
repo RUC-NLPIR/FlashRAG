@@ -43,9 +43,14 @@ class BasicPipeline:
 
         return format_reference
 
-    def build_prompt(self, question_list, retrieval_results, prompt_templete=None, use_reference = True, reference = None):
-        base_templete_rag = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n{reference}\nQuestion:{question}\nAnswer:'
-        base_templete_standard = 'Write a high-quality answer for the given question.\nQuestion:{question}\nAnswer:'
+    def build_prompt(self, question_list, 
+                     retrieval_results=None,
+                     prompt_templete=None, 
+                     use_reference = True, 
+                     reference = None,
+                     previous_gen = ""):
+        base_templete_rag = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n{reference}\nQuestion:{question}\nAnswer:{previous_gen}'
+        base_templete_standard = 'Write a high-quality answer for the given question.\nQuestion:{question}\nAnswer:{previous_gen}'
         
         if prompt_templete is None:
             if use_reference:
@@ -67,9 +72,10 @@ class BasicPipeline:
                 else:
                     format_reference = self.format_reference(retrieval_result)
                 
-                prompt = prompt_templete.format(question = question, reference = format_reference)
+                prompt = prompt_templete.format(
+                    question = question, reference = format_reference, previous_gen = previous_gen)
             else:
-                prompt = prompt_templete.format(question = question)
+                prompt = prompt_templete.format(question = question, previous_gen = previous_gen)
             prompt_list.append(prompt)
 
         return prompt_list
