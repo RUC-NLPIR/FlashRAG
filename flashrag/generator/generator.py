@@ -117,8 +117,12 @@ class VLLMGenerator(BaseGenerator):
             gpu_memory_utilization = 0.9
         else:
             gpu_memory_utilization = config['vllm_gpu_memory_utilization']
+        if self.gpu_num != 1 and self.gpu_num%2 == 0:
+            tensor_parallel_size = self.gpu_num - 1
+        else:
+            tensor_parallel_size = self.gpu_num
         self.model = LLM(self.model_path, 
-                         tensor_parallel_size = self.gpu_num if self.gpu_num%2==0 else self.gpu_num-1,
+                         tensor_parallel_size = tensor_parallel_size,
                          gpu_memory_utilization = gpu_memory_utilization
                         )
 
