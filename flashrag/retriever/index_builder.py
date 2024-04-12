@@ -28,6 +28,7 @@ class Index_Builder:
             batch_size,
             use_fp16,
             pooling_method,
+            save_corpus,
             content_function: callable = base_content_function
         ):
         
@@ -39,6 +40,7 @@ class Index_Builder:
         self.batch_size = batch_size
         self.use_fp16 = use_fp16
         self.pooling_method = pooling_method
+        self.save_corpus = save_corpus
 
         self.gpu_num = torch.cuda.device_count()
         # prepare save dir
@@ -193,15 +195,17 @@ class Index_Builder:
         faiss.write_index(faiss_index, self.index_save_path)
         
 
-        if os.path.exists(self.database_save_path):
-           print("The database already exists and will not be written.") 
-        else:
-            # build corpus databse
-            db = Database(self.database_save_path)
-            docs = db['docs']
-            docs.insert_all(self.corpus, batch_size=1000000, truncate=True)
-            db.execute("CREATE INDEX idx_id ON docs (id)")
-            db.conn.close()
+        if self.save_corpus:
+            if os.path.exists(self.database_save_path):
+                print("The database already exists and will not be written.") 
+            else:
+                print("Begin creating database...")
+                # build corpus databse
+                db = Database(self.database_save_path)
+                docs = db['docs']
+                docs.insert_all(self.corpus, batch_size=1000000, truncate=True)
+                db.execute("CREATE INDEX idx_id ON docs (id)")
+                db.conn.close()
 
         print("Finish!")
 
@@ -227,6 +231,7 @@ def main():
     parser.add_argument('--batch_size', type=int, default=512)
     parser.add_argument('--use_fp16', default=False, action='store_true')
     parser.add_argument('--pooling_method', type=str, default=None)
+    parser.add_argument('--save_corpus', action='store_true',default=False)
     
     args = parser.parse_args()
 
@@ -252,6 +257,7 @@ def main():
                         batch_size = args.batch_size,
                         use_fp16 = args.use_fp16,
                         pooling_method = pooling_method,
+                        save_corpus = args.save_corpus
                     )
     index_builder.build_index()
 
