@@ -46,13 +46,37 @@ class EncoderDecoderGenerator(BaseGenerator):
     r"""Class for encoder-decoder model"""
     def __init__(self, config):
         super().__init__(config)
+        self.fid = config['use_fid']
         if "t5" in self.model_name: 
-            self.model = T5ForConditionalGeneration.from_pretrained(self.model_path)
+            if self.fid:
+                from fid import FiDT5
+                self.model = FiDT5.from_pretrained(self.model_path)
+            else:
+                self.model = T5ForConditionalGeneration.from_pretrained(self.model_path)
         else:
+            if self.fid:
+                assert False, "FiD only support T5"
             self.model = BartForConditionalGeneration.from_pretrained(self.model_path)
         self.model.cuda()
         self.model.eval()
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+
+    def encode_passages(self, batch_text_passages):
+        passage_ids, passage_masks = [], []
+        for k, text_passages in enumerate(batch_text_passages):
+            p = self.tokenizer.batch_encode_plus(
+                text_passages,
+                max_length=self.max_input_length,
+                pad_to_max_length=True,
+                return_tensors='pt',
+                truncation=True
+            )
+            passage_ids.append(p['input_ids'][None])
+            passage_masks.append(p['attention_mask'][None])
+
+        passage_ids = torch.cat(passage_ids, dim=0)
+        passage_masks = torch.cat(passage_masks, dim=0)
+        return passage_ids, passage_masks.bool()
 
 
     @torch.no_grad()
@@ -84,12 +108,18 @@ class EncoderDecoderGenerator(BaseGenerator):
         responses = []
         for idx in tqdm(range(0, len(input_list), batch_size), desc='Generation process: '):
             batched_prompts = input_list[idx:idx+batch_size]
-            inputs = self.tokenizer(batched_prompts, 
-                                    return_tensors="pt", 
-                                    padding=True,
-                                    truncation=True,
-                                    max_length=self.max_input_len
-                                ).to(self.device)
+            if self.fid:
+                # assume each input in input_list is a list, contains K string
+                input_ids, attention_mask = self.encode_passages(batched_prompts) 
+                inputs = {'input_ids': input_ids.to(self.device), 
+                          'attention_mask': attention_mask.to(self.device)}
+            else:
+                inputs = self.tokenizer(batched_prompts, 
+                                        return_tensors="pt", 
+                                        padding=True,
+                                        truncation=True,
+                                        max_length=self.max_input_len
+                                    ).to(self.device)
             
             # TODO: multi-gpu inference
             outputs = self.model.generate(

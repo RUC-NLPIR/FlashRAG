@@ -63,6 +63,7 @@ generation_params:
   #do_sample: False
   temperature: 1.0
   top_p: 1.0
+use_fid: False
 
 # ----Evaluation Settings----
 metrics: ['em']
