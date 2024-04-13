@@ -67,12 +67,12 @@ class BasicPipeline:
 
         for idx in range(len(question_list)):
             question = question_list[idx]
-            retrieval_result = retrieval_results[idx]
             if use_reference:
                 if reference is not None:
                     # use provided reference
                     format_reference = reference[idx]
                 else:
+                    retrieval_result = retrieval_results[idx]
                     format_reference = self.format_reference(retrieval_result)
                 
                 prompt = prompt_templete.format(
@@ -105,9 +105,9 @@ class SequentialPipeline(BasicPipeline):
         else:
             self.refiner = None
     
-    def standard_run(self, dataset, do_eval=True, pred_process_fun=None):
+    def naive_run(self, dataset, do_eval=True, pred_process_fun=None):
         # direct generation without RAG
-        input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result, use_reference=False)
+        input_prompts = self.build_prompt(dataset.question, use_reference=False)
         dataset.update_output('prompt', input_prompts)
         if self.use_fid:
             print('Use FiD generation')
