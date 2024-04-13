@@ -22,10 +22,11 @@ class Item:
         r"""Update the output dict and keep a key in self.output can be used as an attribute.
         
         """
-        self.output[key] = value
-        if key not in ['id','question','golden_answers','output']:
-            setattr(self, key, value)
-    
+        if key in ['id','question','golden_answers','output']:
+            raise AttributeError(f'{key} should not be changed')
+        else:
+            self.output[key] = value
+
     def update_evaluation_score(self, metric_name, metric_score):
         r"""Update the evaluation score of this sample for a metric.
         
@@ -34,26 +35,27 @@ class Item:
             self.output['metric_score'] = {}
         self.output['metric_score'][metric_name] = metric_score
     
-    def __getitem__(self, key):
-        if key in ['id','question','golden_answers','metadata']:
-            return getattr(self, key)
-        else:
-            return self.output[key]
+    # def __getitem__(self, key):
+    #     if key in ['id','question','golden_answers','metadata']:
+    #         return getattr(self, key)
+    #     else:
+    #         return self.output[key]
     
-    def __setitem__(self, key, value):
-        if key in ['id','question','golden_answers','metadata']:
-            setattr(self, key)
-        else:
-            self.output[key] = value
+    # def __setitem__(self, key, value):
+    #     if key in ['id','question','golden_answers','metadata']:
+    #         setattr(self, key)
+    #     else:
+    #         self.output[key] = value
 
     def __getattr__(self, attr_name):
         if attr_name in ['id','question','golden_answers','metadata','output']:
-            return self.__getattr__(attr_name)
+            return super().__getattribute__(attr_name)
         else:
-            try:
-                return self.output[attr_name]
-            except:
-                assert False
+            output = super().__getattribute__('output')
+            if attr_name in output:
+                return output[attr_name]
+            else:
+                raise AttributeError(f"Attribute `{attr_name}` not found")
 
     def to_dict(self):
         r"""Convert all information within the data sample into a dict. Information generated
@@ -146,11 +148,8 @@ class Dataset:
             yield [item[attr_name] for item in batch_items]
     
     def __getattr__(self, attr_name):
-        try:
-            return [item.__getattr__(attr_name) for item in self.data]
-        except:
-            assert False
-            #super().__getattr__(attr_name)
+        return [item.__getattr__(attr_name) for item in self.data]
+
 
     def get_attr_data(self, attr_name):
         r"""For the attributes constructed later (not implemented using property), 

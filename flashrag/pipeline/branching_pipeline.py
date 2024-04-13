@@ -3,6 +3,7 @@ from transformers import LogitsProcessorList
 import torch
 import itertools
 import re
+from tqdm import tqdm
 import numpy as np
 from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
@@ -159,10 +160,13 @@ class SuRePipeline(BasicPipeline):
         dataset.update_output('retrieval_result', retrieval_results)
 
         pred_answer_list = []
-        for item in dataset:
+        for item in tqdm(dataset, desc='Pipeline runing: '):
             retrieval_result = item.retrieval_result
             doc_num = len(retrieval_result)
             # format all docs 
+            for doc_item in retrieval_result:
+                if 'title' not in doc_item:
+                    doc_item['title'] = doc_item['contents'].split("\n")[0]
             formatted_ref = self.format_ref(titles = [i['title'] for i in retrieval_result], 
                                         contents = [i['contents'] for i in retrieval_result]
                                         )
