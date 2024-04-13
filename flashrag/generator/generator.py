@@ -151,16 +151,18 @@ class VLLMGenerator(BaseGenerator):
             tensor_parallel_size = self.gpu_num - 1
         else:
             tensor_parallel_size = self.gpu_num
-        self.model = LLM(self.model_path, 
-                         tensor_parallel_size = tensor_parallel_size,
-                         gpu_memory_utilization = gpu_memory_utilization
-                        )
-
+        
         self.lora_path = None if 'generator_lora_path' not in config else config['generator_lora_path']
         self.use_lora = False
         if self.lora_path is not None:
             self.use_lora = True
 
+        self.model = LLM(self.model_path, 
+                         tensor_parallel_size = tensor_parallel_size,
+                         gpu_memory_utilization = gpu_memory_utilization,
+                         enable_lora = self.use_lora,
+                         max_lora_rank=64
+                        )
             
     @torch.no_grad()
     def generate(self, input_list, return_raw_output=False, return_scores=False, **params):

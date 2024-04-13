@@ -2,6 +2,7 @@ import transformers
 from transformers import AutoTokenizer
 import torch
 import numpy as np
+import re
 from tqdm import tqdm
 from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
@@ -583,20 +584,6 @@ class FLAREPipeline(BasicPipeline):
         self.look_ahead_steps = look_ahead_steps
         self.stop_sym = '!@#$%^&*()\n\n)(*&^%$#@!'
 
-    # def get_next_sentence(self, output):
-    #     from collections import namedtuple
-    #     Sentence = namedtuple('Sentence', 'text start_char end_char')
-    #     sents = [Sentence(output[s:e], s, e) for s, e in self.sentence_spliter.span_tokenize(output)]
-
-    #     for sent in sents:
-    #         num_trail_sapces = len(sent.text) - len(sent.text.rstrip())
-    #         if sent.end_char - num_trail_sapces >= 4:
-    #             break_at = sent.end_char - num_trail_sapces
-    #             break
-    #     first_sent = output[:break_at]
-        
-    #     return first_sent
-
     def get_next_sentence(self, output, scores):
         import re
         tokenizer = self.generator.tokenizer
@@ -668,7 +655,115 @@ class FLAREPipeline(BasicPipeline):
         return dataset
             
 
+class SelfAskPipeline(BasicPipeline):
+    from flashrag.utils import SELF_ASK_PROMPT
+    P_INS = SELF_ASK_PROMPT
+    FOLLOW_UP_PATTERN = r"Follow up:.*\n"
 
+    def __init__(self, config, max_iter=5, single_hop=True):
+        super().__init__(config)
+        self.retriever = get_retriever(config)
+        self.generator = get_generator(config)
 
+        self.single_hop = single_hop
+        self.max_iter = max_iter
+    
+    def format_reference(self, retrieval_result):
+        format_reference = ''
+        for idx, doc_item in enumerate(retrieval_result):
+            content = doc_item['contents']
+            title = content.split("\n")[0]
+            text = "\n".join(content.split("\n")[1:])
+            format_reference += f"Context{idx+1}: {text}\n"
 
+        return format_reference
+
+    def _remove_duplicate_doc(self, docs):
+        assert all(['id' in doc for doc in docs])
+        new_doc_list = []
+        exist_ids = []
+        for doc in docs:
+            doc_id = doc['id']
+            if doc_id not in exist_ids:
+                exist_ids.append(doc_id)
+                new_doc_list.append(doc)
+        return new_doc_list
+
+    def run_item(self, item):
+        question = item.question
+        retrieval_result = self.retriever.search(question)
+
+        stop_condition = "Intermediate answer:"
+        follow_ups = "No." if self.single_hop else "Yes."
+        res = ""
+        early_exit = False
+        for idx in range(self.max_iter):
+            input_prompt = (
+                self.P_INS
+                + "\n"
+                + self.format_reference(retrieval_result)
+                + f"\nQuesiton: {question}"
+                + "\nAre follow up questions needed here: "
+                + follow_ups 
+                + res
+            )
+            gen_out = self.generator.generate(input_prompt, stop=["Context:", "#"])
+            item.update_output(f'intermediate_output_iter{idx}', gen_out)
+            
+            if stop_condition == "Intermediate answer:":
+                res += gen_out.split("Intermediate answer:")[0]
+                stop_condition = "Follow up:"
+
+            elif stop_condition == "Follow up:":
+                followup_split = re.split(self.FOLLOW_UP_PATTERN, gen_out)
+                res += followup_split[0]
+
+                if len(followup_split) > 1:
+                    res += re.findall(self.FOLLOW_UP_PATTERN, gen_out)[0]
+
+            # make sure the result does not end in a new line
+            if len(res) == 0:
+                early_exit = True
+                break
+            if res[-1] == "\n":
+                res = res[:-1]
+
+            if "Follow up: " in gen_out:
+                # get the first follow up
+                new_query = [l for l in gen_out.split("\n") if "Follow up: " in l][
+                    0
+                ].split("Follow up: ")[-1]
+                new_retrieval_result = self.retriever.search(new_query)
+                retrieval_result.append(new_retrieval_result)
+                retrieval_result = self._remove_duplicate_doc(retrieval_result)
+
+            elif "So the final answer is: " in gen_out:
+                res = (
+                    self.format_reference(retrieval_result)
+                    + f"\nQuesiton: {question}"
+                    + "\nAre follow up questions needed here: "
+                    + follow_ups 
+                    + res
+                )
+                early_exit = True
+                break 
+        
+        if not early_exit:
+            res = (
+                self.format_reference(retrieval_result)
+                + f"\nQuesiton: {question}"
+                + "\nAre follow up questions needed here: "
+                + follow_ups 
+                + res
+                )
+            
+        item.update_output('retrieval_result', retrieval_result)
+        item.update_output('pred', res)
+
+    def run(self, dataset, do_eval=True, pred_process_fun=None):
+        for item in tqdm(dataset, desc='Inference: '):
+            self.run_item(item)
+        
+        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
+        return dataset
 
