@@ -61,55 +61,42 @@ class SuRePipeline(BasicPipeline):
     # Provided prompt templete for SuRe method, candidate num is set to 2
 
     # prompt for candidates generation 
-    P_CAN = '''
-            Below are {N} passages related to the question at the end. After reading
-            the passages, provide two correct candidates for the answer to the
-            question at the end. Each answer should be in the form: (a) xx, (b)
-            yy, and should not exceed 3 words for each candidate.
-
-            {reference}
-            Question: {question}
-            Answer:
-            '''
-    
+    P_CAN = "Below are {N} passages related to the question at the end. After reading" \
+            "the passages, provide two correct candidates for the answer to the" \
+            "question at the end. Each answer should be in the form: (a) xx, (b)" \
+            "yy, and should not exceed 3 words for each candidate." \
+            "{reference}\n" \
+            "Question: {question}\n" \
+            "Answer:"
+            
     # prompt for candidate-conditioned summarization
-    P_SUM = '''
-            {reference}
-            Your job is to act as a professional writer. You will write a
-            good-quality passage that can support the given prediction about the
-            question only based on the information in the provided supporting
-            passages.
-
-            Now, let's start. After you write, please write [DONE] to indicate you 
-            are done. Do not write a prefix (e.g., "Response:") while writing a
-            passage.
-
-            Question: {question}
-            Prediction: {pred}
-            Passage:
-            '''
-
+    P_SUM =  "{reference}\n" \
+             "Your job is to act as a professional writer. You will write a" \
+             "good-quality passage that can support the given prediction about the" \
+             "question only based on the information in the provided supporting passages.\n" \
+             "Now, let's start. After you write, please write [DONE] to indicate you" \
+             "are done. Do not write a prefix (e.g., 'Response:') while writing a passage.\n\n" \
+             "Question: {question}\n" \
+             "Prediction: {pred}\n" \
+             "Passage:"
+     
     # prompt for instance-wise validation
-    P_VAL = '''
-            Question: {question}
-            Prediction: {pred}
-            Passage: {summary}
-            Does the passage correctly support the prediction? Choices: [True,False]. 
-            Answer:
-            '''
-
+    P_VAL = "Question: {question}\n" \
+            "Prediction: {pred}\n" \
+            "Passage: {summary}\n" \
+            "Does the passage correctly support the prediction? Choices: [True,False].\n" \
+            "Answer:" 
+    
     # prompt for pair-wise ranking
-    P_RANK = '''
-            Question: Given the following passages, determine which one provides a
-            more informative answer to the subsequent question.
-            Passage 1: {summary1}
-            Passage 2: {summary2}
-            Target Question: {question}
-            Your Task:
-            Identify which passage (Passage 1 or Passage 2) is more relevant and
-            informative to answer the question at hand. Choices: [Passage 1,Passage 2].
-            Answer:
-            '''
+    P_RANK = "Question: Given the following passages, determine which one provides a" \
+            "more informative answer to the subsequent question.\n" \
+            "Passage 1: {summary1}\n" \
+            "Passage 2: {summary2}\n" \
+            "Target Question: {question}\n" \
+            "Your Task:\n" \
+            "Identify which passage (Passage 1 or Passage 2) is more relevant and" \
+            "informative to answer the question at hand. Choices: [Passage 1,Passage 2].\n" \
+            "Answer:"
 
     def __init__(self, config):
         super().__init__(config)
@@ -117,18 +104,20 @@ class SuRePipeline(BasicPipeline):
         self.generator = get_generator(config)
     
     @staticmethod
-    def format_ref(titles, contents):
+    def format_ref(titles, texts):
         formatted_ref = ""
         idx = 1
-        for title, content in zip(titles, contents):
+        for title, text in zip(titles, texts):
             formatted_ref += f'Passage #{idx} Title: {title}\n'
-            formatted_ref += f'Passage #{idx} Text: {content}\n'
+            formatted_ref += f'Passage #{idx} Text: {text}\n'
             formatted_ref += '\n'
+            idx += 1
         return formatted_ref
     
     @staticmethod
     def parse_candidates(model_response):
         """Parse candidates from model response"""
+        model_response = model_response.strip("\n").strip()
         candidates = re.findall(r'\([a-z]\) ([^,]+)', model_response)
         return candidates
 
@@ -165,10 +154,11 @@ class SuRePipeline(BasicPipeline):
             doc_num = len(retrieval_result)
             # format all docs 
             for doc_item in retrieval_result:
-                if 'title' not in doc_item:
+                if 'title' not in doc_item or 'text' not in doc_item:
                     doc_item['title'] = doc_item['contents'].split("\n")[0]
+                    doc_item['text'] = "\n".join(doc_item['contents'].split("\n")[1:])
             formatted_ref = self.format_ref(titles = [i['title'] for i in retrieval_result], 
-                                        contents = [i['contents'] for i in retrieval_result]
+                                        texts = [i['text'] for i in retrieval_result]
                                         )
             # get candidates
             input_prompt = self.P_CAN.format(
@@ -178,12 +168,15 @@ class SuRePipeline(BasicPipeline):
                                     )
             output = self.generator.generate([input_prompt])[0]
             candidates = self.parse_candidates(output)
+            item.update_output('candidates', candidates)
 
             # get summarization for each candidate
             input_prompts = [self.P_SUM.format(question = item.question,
                                                pred = cand,
                                                reference = formatted_ref) for cand in candidates]
+
             all_summary = self.generator.generate(input_prompts)
+            item.update_output('all_summary', all_summary)
 
             # instance-wise validation
             input_prompts = [self.P_VAL.format(question = item.question,
@@ -191,6 +184,7 @@ class SuRePipeline(BasicPipeline):
                                                summary = summary) for cand,summary in zip(candidates, all_summary)]
             val_results = self.generator.generate(input_prompts)
             val_scores = [self.parse_validation(res) for res in val_results]
+            item.update_output('val_scores', val_scores)
 
             # pair-wise ranking
             summary_num = len(all_summary)
@@ -204,6 +198,7 @@ class SuRePipeline(BasicPipeline):
             for idx_tuple,score in zip(iter_idxs, ranking_scores):
                 score_matrix[idx_tuple[0], idx_tuple[1]] = score
             ranking_scores = score_matrix.sum(axis=1).squeeze().tolist()  # ranking score for each summary
+            item.update_output('ranking_scores', ranking_scores)
         
             # combine two scores as the final score for each summary
             if not isinstance(ranking_scores, list):
@@ -211,9 +206,13 @@ class SuRePipeline(BasicPipeline):
             if not isinstance(val_scores, list):
                 val_scores = [val_scores]
             total_scores = [x+y for x,y in zip(val_scores,ranking_scores)]
-            best_idx = np.argmax(total_scores)
+            if len(total_scores) == 0:
+                print("No valid predictions!")
+                pred = ""
+            else:    
+                best_idx = np.argmax(total_scores)
+                pred = candidates[best_idx]
 
-            pred = candidates[best_idx]
             pred_answer_list.append(pred)
         
         dataset.update_output("pred",pred_answer_list)
