@@ -206,6 +206,10 @@ class SuRePipeline(BasicPipeline):
             ranking_scores = score_matrix.sum(axis=1).squeeze().tolist()  # ranking score for each summary
         
             # combine two scores as the final score for each summary
+            if not isinstance(ranking_scores, list):
+                ranking_scores = [ranking_scores]
+            if not isinstance(val_scores, list):
+                val_scores = [val_scores]
             total_scores = [x+y for x,y in zip(val_scores,ranking_scores)]
             best_idx = np.argmax(total_scores)
 
