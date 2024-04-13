@@ -64,14 +64,14 @@ class SuRePipeline(BasicPipeline):
     P_CAN = "Below are {N} passages related to the question at the end. After reading" \
             "the passages, provide two correct candidates for the answer to the" \
             "question at the end. Each answer should be in the form: (a) xx, (b)" \
-            "yy, and should not exceed 3 words for each candidate." \
+            "yy, and should not exceed 3 words for each candidate.\n" \
             "{reference}\n" \
             "Question: {question}\n" \
             "Answer:"
             
     # prompt for candidate-conditioned summarization
-    P_SUM =  "{reference}\n" \
-             "Your job is to act as a professional writer. You will write a" \
+    P_SUM =  "Reference:\n{reference}\n" \
+             "Your job is to act as a professional writer. You need to write a" \
              "good-quality passage that can support the given prediction about the" \
              "question only based on the information in the provided supporting passages.\n" \
              "Now, let's start. After you write, please write [DONE] to indicate you" \
@@ -118,7 +118,11 @@ class SuRePipeline(BasicPipeline):
     def parse_candidates(model_response):
         """Parse candidates from model response"""
         model_response = model_response.strip("\n").strip()
-        candidates = re.findall(r'\([a-z]\) ([^,]+)', model_response)
+        # r'\([a-z]\) ([^,]+)' 
+        candidates = re.findall('\((\w+)\)\s*([^()]+)', model_response)
+        candidates = [cand[1].split("\n")[0].strip() for cand in candidates]
+        # post-process
+        candidates = [cand.replace(",","").strip() for cand in candidates]
         return candidates
 
     @staticmethod
@@ -170,6 +174,12 @@ class SuRePipeline(BasicPipeline):
             candidates = self.parse_candidates(output)
             item.update_output('candidates', candidates)
 
+            if len(candidates) == 0:
+                print("No valid predictions!")
+                pred = ""
+                pred_answer_list.append(pred)
+                continue
+
             # get summarization for each candidate
             input_prompts = [self.P_SUM.format(question = item.question,
                                                pred = cand,
@@ -206,13 +216,9 @@ class SuRePipeline(BasicPipeline):
             if not isinstance(val_scores, list):
                 val_scores = [val_scores]
             total_scores = [x+y for x,y in zip(val_scores,ranking_scores)]
-            if len(total_scores) == 0:
-                print("No valid predictions!")
-                pred = ""
-            else:    
-                best_idx = np.argmax(total_scores)
-                pred = candidates[best_idx]
 
+            best_idx = np.argmax(total_scores)
+            pred = candidates[best_idx]
             pred_answer_list.append(pred)
         
         dataset.update_output("pred",pred_answer_list)
