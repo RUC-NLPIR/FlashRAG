@@ -12,7 +12,6 @@ from transformers import (
     LogitsProcessor,
     LogitsProcessorList,
     StoppingCriteriaList,
-    pipeline,
 )
 import torch.nn as nn
 import torch.distributed as dist

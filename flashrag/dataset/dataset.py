@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import numpy as np
 
 class Item:
     r"""A container class used to store and manipulate a sample within a dataset. 
@@ -62,6 +63,9 @@ class Item:
         during the inference will be saved into output field.
         
         """
+        for k,v in self.output.items():
+            if isinstance(k, np.ndarray):
+                self.output[k] = v.tolist()
         output =  {
             "id": self.id,
             "question": self.question,

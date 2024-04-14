@@ -172,9 +172,10 @@ class DenseRetriever(BaseRetriever):
             query_batch = query_list[start_idx:start_idx + batch_size]
             batch_emb = self._encode(query_batch)
             batch_scores, batch_idxs = self.index.search(batch_emb, k=num)
-            batch_scores.tolist()
-            batch_idxs = batch_idxs.tolist()
 
+            batch_scores = batch_scores.tolist()
+            batch_idxs = batch_idxs.tolist()
+            
             flat_idxs = sum(batch_idxs, [])
             batch_results = load_docs(self.corpus, flat_idxs, content_function=base_content_function)
             
@@ -182,7 +183,6 @@ class DenseRetriever(BaseRetriever):
             
             scores.extend(batch_scores)
             results.extend(batch_results)
-        
         
         if return_score:
             return results, scores
