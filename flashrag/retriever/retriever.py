@@ -144,7 +144,7 @@ class DenseRetriever(BaseRetriever):
         return query_emb
 
     
-    def search(self, query, num: int = None):
+    def search(self, query, num: int = None, return_score = False):
         if num is None:
             num = self.topk
         query_emb = self._encode(query)
@@ -153,8 +153,7 @@ class DenseRetriever(BaseRetriever):
         scores = scores[0]
 
         results = load_docs(self.corpus, idxs, content_function=base_content_function)
-
-        if self.return_score:
+        if return_score:
             return results, scores
         else:
             return results
@@ -165,8 +164,6 @@ class DenseRetriever(BaseRetriever):
             num = self.topk
         if batch_size is None:
             batch_size = self.batch_size
-        if return_score is None:
-            return_score = self.return_score
 
         results = []
         scores = []

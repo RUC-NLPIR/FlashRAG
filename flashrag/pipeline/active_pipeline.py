@@ -705,9 +705,10 @@ class SelfAskPipeline(BasicPipeline):
                 + f"\nQuesiton: {question}"
                 + "\nAre follow up questions needed here: "
                 + follow_ups 
+                + "\n"
                 + res
             )
-            gen_out = self.generator.generate(input_prompt, stop=["Context:", "#"])
+            gen_out = self.generator.generate(input_prompt, stop=["Context:", "#"])[0]
             item.update_output(f'intermediate_output_iter{idx}', gen_out)
             
             if stop_condition == "Intermediate answer:":
@@ -743,6 +744,7 @@ class SelfAskPipeline(BasicPipeline):
                     + f"\nQuesiton: {question}"
                     + "\nAre follow up questions needed here: "
                     + follow_ups 
+                    + "\n"
                     + res
                 )
                 early_exit = True
@@ -754,6 +756,7 @@ class SelfAskPipeline(BasicPipeline):
                 + f"\nQuesiton: {question}"
                 + "\nAre follow up questions needed here: "
                 + follow_ups 
+                + "\n"
                 + res
                 )
             

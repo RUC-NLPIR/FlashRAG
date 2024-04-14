@@ -90,13 +90,11 @@ class EncoderDecoderGenerator(BaseGenerator):
         generation_params.update(params)
 
         # deal stop params
+        stop_sym = None
         if 'stop' in generation_params:
-            from transformers.generation.stopping_criteria import StoppingCriteriaList,StopAtSpecificTokenCriteria
+            from flashrag.generator.stop_word_criteria import StopWordCriteria
             stop_sym = generation_params.pop('stop')
-            stopping_criteria = StoppingCriteriaList()
-            for sym in stop_sym:
-                token_id = self.tokenizer.encode(sym)[0]
-                stopping_criteria.append(StopAtSpecificTokenCriteria(token_id_list=[token_id]))
+            stopping_criteria = [StopWordCriteria(tokenizer=self.tokenizer, prompts=input_list, stop_words=stop_sym)]
             generation_params['stopping_criteria'] = stopping_criteria
 
         if 'max_tokens' in generation_params:
@@ -264,13 +262,11 @@ class CausalLMGenerator(BaseGenerator):
         generation_params.update(params)
 
         # deal stop params
+        stop_sym = None
         if 'stop' in generation_params:
-            from transformers.generation.stopping_criteria import StoppingCriteriaList,StopAtSpecificTokenCriteria
+            from flashrag.generator.stop_word_criteria import StopWordCriteria
             stop_sym = generation_params.pop('stop')
-            stopping_criteria = StoppingCriteriaList()
-            for sym in stop_sym:
-                token_id = self.tokenizer.encode(sym)[0]
-                stopping_criteria.append(StopAtSpecificTokenCriteria(token_id_list=[token_id]))
+            stopping_criteria = [StopWordCriteria(tokenizer=self.tokenizer, prompts=input_list, stop_words=stop_sym)]
             generation_params['stopping_criteria'] = stopping_criteria
 
         if 'max_tokens' in generation_params:
@@ -321,6 +317,22 @@ class CausalLMGenerator(BaseGenerator):
                         )
                     )
                 new_text = text[prompt_length:]
+
+                if stop_sym is not None:
+                    strip_stopword = True
+                    # Find the first occurrence of any stop word
+                    lower_stop_index = len(new_text)  # Default to end of text
+                    for sym in stop_sym:
+                        stop_index = new_text.find(sym)
+                        if stop_index != -1:
+                            # Adjust stop index based on whether we're stripping the stop word
+                            stop_index += 0 if strip_stopword else len(sym)
+                            lower_stop_index = min(stop_index, lower_stop_index)
+                    
+                    # Cut the text at the first stop word found (if any)
+                    new_text = new_text[:lower_stop_index]
+
+
                 responses.append(new_text.strip())
         if return_scores:
             return responses, scores
