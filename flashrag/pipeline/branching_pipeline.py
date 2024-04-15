@@ -22,13 +22,18 @@ class REPLUGPipeline(BasicPipeline):
 
 
     def build_single_doc_prompt(self, question, doc_list, prompt_templete=None):
-        base_templete_rag = "[INST] <<SYS>> Answer the question based on the given document. Only give me the answer and do not output any other words.\n\nThe following are given document.\n{reference}\nAnswer the question based on the given information. Only give me the answer and do not output any other words.<</SYS>>\nQuestion: {question}\nAnswer:[/INST]"
+        base_templete_rag = "[INST] <<SYS>> Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given document.\n{reference}\n<</SYS>>\nQuestion: {question}\nAnswer:[/INST]"
         #base_templete_rag = "Answer the question based on the given document. Only give me the answer and do not output any other words.\n\nThe following are given document.\n{reference}\n\nAnswer the question based on the given information. Only give me the answer and do not output any other words.\n\nQuestion: {question}\nAnswer:"
         if prompt_templete is None:
             prompt_templete = base_templete_rag
 
         return [prompt_templete.format(reference = doc, question = question) for doc in doc_list]
 
+    def format_reference(self, doc_item):
+        content = doc_item['contents']
+        title = content.split("\n")[0]
+        text = "\n".join(content.split("\n")[1:])
+        return f'Document(Title: {title}): {text}'
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         input_query = dataset.question
@@ -40,7 +45,7 @@ class REPLUGPipeline(BasicPipeline):
         pred_answer_list = []
         # each doc has a prompt
         for item in tqdm(dataset, desc='Inference: '):
-            docs = [self.format_reference([doc_item]) for doc_item in item.retrieval_result]
+            docs = [self.format_reference(doc_item) for doc_item in item.retrieval_result]
             prompts = self.build_single_doc_prompt(question=item.question, doc_list=docs)
 
             scores = torch.tensor(item.doc_scores, dtype=torch.float32).to(self.device)
@@ -63,42 +68,42 @@ class SuRePipeline(BasicPipeline):
     # Provided prompt templete for SuRe method, candidate num is set to 2
 
     # prompt for candidates generation 
-    P_CAN = "[INST] <<SYS>> Below are {N} passages related to the question at the end. After reading" \
+    P_CAN = "Below are {N} passages related to the question at the end. After reading" \
             "the passages, provide two correct candidates for the answer to the" \
             "question at the end. Each answer should be in the form: (a) xx, (b)" \
             "yy, and should not exceed 3 words for each candidate.\n" \
-            "{reference}\n<</SYS>>" \
+            "{reference}\n" \
             "Question: {question}\n" \
-            "Answer:[/INST]"
+            "Answer:"
             
     # prompt for candidate-conditioned summarization
-    P_SUM =  "[INST] <<SYS>> Reference:\n{reference}\n" \
+    P_SUM =  "Reference:\n{reference}\n" \
              "Your job is to act as a professional writer. You need to write a" \
              "good-quality passage that can support the given prediction about the" \
              "question only based on the information in the provided supporting passages.\n" \
              "Now, let's start. After you write, please write [DONE] to indicate you" \
-             "are done. Do not write a prefix (e.g., 'Response:') while writing a passage.<</SYS>>\n" \
+             "are done. Do not write a prefix (e.g., 'Response:') while writing a passage.\n" \
              "Question: {question}\n" \
              "Prediction: {pred}\n" \
-             "Passage:[/INST]"
+             "Passage:"
      
     # prompt for instance-wise validation
-    P_VAL = "[INST] <<SYS>> Question: {question}\n" \
+    P_VAL = "Question: {question}\n" \
             "Prediction: {pred}\n" \
             "Passage: {summary}\n" \
-            "Does the passage correctly support the prediction? Choices: [True,False].<</SYS>>\n" \
-            "Answer:[/INST]" 
+            "Does the passage correctly support the prediction? Choices: [True,False].\n" \
+            "Answer:" 
     
     # prompt for pair-wise ranking
-    P_RANK = "[INST] <<SYS>> Question: Given the following passages, determine which one provides a" \
+    P_RANK = "Question: Given the following passages, determine which one provides a" \
             "more informative answer to the subsequent question.\n" \
             "Passage 1: {summary1}\n" \
             "Passage 2: {summary2}\n" \
             "Target Question: {question}\n" \
             "Your Task:\n" \
             "Identify which passage (Passage 1 or Passage 2) is more relevant and" \
-            "informative to answer the question at hand. Choices: [Passage 1,Passage 2].<</SYS>>\n" \
-            "Answer:[/INST]"
+            "informative to answer the question at hand. Choices: [Passage 1,Passage 2].\n" \
+            "Answer:"
 
     def __init__(self, config):
         super().__init__(config)

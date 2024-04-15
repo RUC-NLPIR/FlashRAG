@@ -85,7 +85,7 @@ class Dataset:
     
     """
     
-    def __init__(self, config=None, dataset_path=None, sample_num = None, random_sample = False):
+    def __init__(self, config=None, dataset_path=None, data=None, sample_num = None, random_sample = False):
         self.config = config
         self.dataset_name = config['dataset_name']
         self.dataset_path = dataset_path
@@ -93,8 +93,10 @@ class Dataset:
         self.sample_num = sample_num
         self.random_sample = random_sample
 
-        self.data = self._load_data(self.dataset_name, self.dataset_path)
-    
+        if data is None:
+            self.data = self._load_data(self.dataset_name, self.dataset_path)
+        else:
+            self.data = data
 
     def _load_data(self, dataset_name, dataset_path):
         r"""Load data from the provided dataset_path or directly download the file(TODO). 

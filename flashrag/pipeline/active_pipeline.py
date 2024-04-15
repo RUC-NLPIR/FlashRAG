@@ -7,6 +7,7 @@ from tqdm import tqdm
 from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
 from flashrag.pipeline import BasicPipeline
+from flashrag.dataset import get_batch_dataset, merge_batch_dataset
 
 
 class IterativePipeline(BasicPipeline):
@@ -77,7 +78,7 @@ class SelfRAGPipeline(BasicPipeline):
 
         assert mode in ['adaptive_retrieval', 'always_retrieve', 'no_retrieval']
 
-        self.task = self.load_task(config['dataset_name'])
+        self.task = config['dataset_name']
         self.threshold = threhsold
         self.max_depth = max_depth
         self.beam_width = beam_width
@@ -93,7 +94,7 @@ class SelfRAGPipeline(BasicPipeline):
             tokenizer, use_grounding = use_grounding, use_utility = use_utility)
         
     
-    def load_special_token(self, tokenizer, use_grounding, use_utility):
+    def load_special_tokens(self, tokenizer, use_grounding, use_utility):
         ret_tokens = {token: tokenizer.convert_tokens_to_ids(
             token) for token in self.retrieval_tokens_names}
         rel_tokens = {}
@@ -153,10 +154,10 @@ class SelfRAGPipeline(BasicPipeline):
             for idx, single_pred in enumerate(preds):
                 if self.threshold is not None:
                     score_dict = {}
-                    for tok, id in self.ret_tokens.items():
-                        if id not in all_pred_log_probs[idx][0][id]:
+                    for tok, tok_id in self.ret_tokens.items():
+                        if tok_id not in all_pred_log_probs[idx][0]:
                             score_dict[tok] = -100
-                        prob = all_pred_log_probs[idx][0][id]
+                        prob = all_pred_log_probs[idx][0][tok_id]
                         score_dict[tok] = float(prob)
                     do_retrieve = score_dict["[Retrieval]"] / (
                         score_dict["[Retrieval]"] + score_dict["[No Retrieval]"]) > self.threshold
@@ -232,7 +233,7 @@ class SelfRAGPipeline(BasicPipeline):
 
             if self.use_seqscore is True:
                 final_score = np.exp(seq_score) + self.w_rel * relevance_score + \
-                    self.w_sup * ground_score + self.self.w_use * utility_score
+                    self.w_sup * ground_score + self.w_use * utility_score
             else:
                 final_score = self.w_rel * relevance_score + \
                     self.w_sup * ground_score + self.w_use * utility_score
@@ -508,9 +509,18 @@ class SelfRAGPipeline(BasicPipeline):
         return dataset
             
 
+    def run(self, dataset, do_eval=True, pred_process_fun=None, batch_size=256):
+        all_dataset_list = []
+        # to avoid oom 
+        for batch_dataset in tqdm(get_batch_dataset(dataset, batch_size=batch_size), desc='Batch dataset: '):
+            batch_dataset = self.run_batch_pred(batch_dataset)
+            all_dataset_list.append(batch_dataset)
+        dataset = merge_batch_dataset(all_dataset_list)
 
+        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
+        return dataset
 
-    def run(self, dataset, do_eval=True, pred_process_fun=None):
+    def run_batch_pred(self, dataset):
         questions = dataset.question
         retrieval_results = self.retriever.batch_search(questions)
         dataset.update_output('retrieval_result', retrieval_results)
@@ -522,7 +532,7 @@ class SelfRAGPipeline(BasicPipeline):
         dataset.update_output('retrieval_flag', retrieval_flags)
 
         # process input item based on whether to retrieve
-        batch_input_list = []
+        all_input_list = []
         for idx, (prompt,item) in enumerate(zip(input_prompts,dataset)):
             retrieval_flag = retrieval_flags[idx]
 
@@ -536,9 +546,9 @@ class SelfRAGPipeline(BasicPipeline):
                 prompt_list = [prompt]
 
             item.update_output('prompt', prompt_list)
-            batch_input_list += prompt_list
+            all_input_list += prompt_list
         
-        batch_pred = self.generator.generate(batch_input_list, return_raw_output=True, logprobs=5000)
+        batch_pred = self.generator.generate(all_input_list, return_raw_output=True, logprobs=32000)
 
         # parse output based on retrieval flag
         pred_idx = 0
@@ -563,8 +573,6 @@ class SelfRAGPipeline(BasicPipeline):
             pred_answer_list.append(pred)
         
         dataset.update_output("pred",pred_answer_list)
-
-        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
 
         return dataset
         

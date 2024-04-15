@@ -51,7 +51,7 @@ class BasicPipeline:
                      reference = None,
                      previous_gen = ""):
         
-        base_templete_rag = "[INST] <<SYS>> Answer the question based on the given document. Only give me the answer and do not output any other words.\n\nThe following are given document.\n{reference}\nAnswer the question based on the given information. Only give me the answer and do not output any other words.<</SYS>>\nQuestion: {question}\nAnswer:[/INST]{previous_gen}"
+        base_templete_rag = "[INST] <<SYS>> Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n{reference}\n<</SYS>>\nQuestion: {question}\nAnswer:[/INST]{previous_gen}"
         base_templete_standard = "[INST] <<SYS>> Answer the question based on your own knowledge. Only give me the answer and do not output any other words.<</SYS>>\nQuestion: {question}\nAnswer:[/INST]{previous_gen}"
 
         #base_templete_rag = "Answer the question based on the given information. Only give me the answer and do not output any other words.\n\nThe following are given information.\n{reference}\n\nAnswer the question based on the given information. Only give me the answer and do not output any other words.\n\nQuestion: {question}\nAnswer:{previous_gen}"

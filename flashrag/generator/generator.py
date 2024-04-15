@@ -142,10 +142,10 @@ class VLLMGenerator(BaseGenerator):
         
         from vllm import LLM
         if 'vllm_gpu_memory_utilization' not in config:
-            gpu_memory_utilization = 0.9
+            gpu_memory_utilization = 0.85
         else:
             gpu_memory_utilization = config['vllm_gpu_memory_utilization']
-        if self.gpu_num != 1 and self.gpu_num%2 == 0:
+        if self.gpu_num != 1 and self.gpu_num%2 != 0:
             tensor_parallel_size = self.gpu_num - 1
         else:
             tensor_parallel_size = self.gpu_num
@@ -155,12 +155,19 @@ class VLLMGenerator(BaseGenerator):
         if self.lora_path is not None:
             self.use_lora = True
 
-        self.model = LLM(self.model_path, 
+        if self.use_lora:
+            self.model = LLM(self.model_path, 
                          tensor_parallel_size = tensor_parallel_size,
                          gpu_memory_utilization = gpu_memory_utilization,
-                         enable_lora = self.use_lora,
+                         enable_lora = True,
                          max_lora_rank=64
                         )
+        else:
+            self.model = LLM(self.model_path, 
+                            tensor_parallel_size = tensor_parallel_size,
+                            gpu_memory_utilization = gpu_memory_utilization,
+                            )
+            # max_logprobs=32016
             
     @torch.no_grad()
     def generate(self, input_list, return_raw_output=False, return_scores=False, **params):
@@ -170,6 +177,8 @@ class VLLMGenerator(BaseGenerator):
 
         generation_params = deepcopy(self.generation_params)
         generation_params.update(params)
+        if 'do_sample' in generation_params:
+            generation_params.pop('do_sample')
         if 'max_new_tokens' in generation_params:
             if 'max_new_tokens' in params:
                 generation_params['max_tokens'] = params.pop('max_new_tokens')
