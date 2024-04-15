@@ -476,7 +476,7 @@ class SelfRAGPipeline(BasicPipeline):
         return final_output
 
 
-    def long_form_run(self, dataset, do_eval=True, pred_process_fun=None):
+    def run_batch_pred_long_form(self, dataset):
         questions = dataset.question
         retrieval_results = self.retriever.batch_search(questions)
         dataset.update_output('retrieval_result', retrieval_results)
@@ -504,16 +504,15 @@ class SelfRAGPipeline(BasicPipeline):
 
             item.update_output('pred', pred)
 
-        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
-
         return dataset
             
 
-    def run(self, dataset, do_eval=True, pred_process_fun=None, batch_size=256):
+    def run(self, dataset, do_eval=True, pred_process_fun=None, batch_size=256, long_form=False):
         all_dataset_list = []
+        run_func = self.run_batch_pred_long_form if long_form else self.run_batch_pred
         # to avoid oom 
         for batch_dataset in tqdm(get_batch_dataset(dataset, batch_size=batch_size), desc='Batch dataset: '):
-            batch_dataset = self.run_batch_pred(batch_dataset)
+            batch_dataset = run_func(batch_dataset)
             all_dataset_list.append(batch_dataset)
         dataset = merge_batch_dataset(all_dataset_list)
 

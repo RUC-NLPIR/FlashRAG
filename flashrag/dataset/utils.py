@@ -40,6 +40,8 @@ def get_batch_dataset(dataset, batch_size=16):
 
 def merge_batch_dataset(dataset_list):
     dataset = dataset_list[0]
-    data = [batch_dataset.data for batch_dataset in dataset_list]
-    dataset = Dataset(config=dataset.config, data=data)
+    total_data = []
+    for batch_dataset in dataset_list:
+        total_data.extend(batch_dataset.data)
+    dataset = Dataset(config=dataset.config, data=total_data)
     return dataset
