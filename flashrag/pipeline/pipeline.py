@@ -139,7 +139,8 @@ class SequentialPipeline(BasicPipeline):
         dataset.update_output('retrieval_result', retrieval_results)
 
         if self.refiner:
-            if 'llmlingua' in self.refiner.name:
+            input_prompt_flag = self.refiner.input_prompt_flag
+            if 'llmlingua' in self.refiner.name and input_prompt_flag:
                 # input prompt
                 input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result)
                 dataset.update_output('prompt', input_prompts)

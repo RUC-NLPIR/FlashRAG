@@ -14,6 +14,7 @@ class BaseRefiner:
         self.name = config['refiner_name']
         self.model_path = config['refiner_model_path']
         self.device = config['device']
+        self.input_prompt_flag = config['refiner_input_prompt_flag'] if 'refiner_input_prompt_flag' in config else False
     
     def run(self, item) -> str:
         r"""Get refining result.
@@ -45,27 +46,47 @@ class LLMLinguaRefiner(BaseRefiner):
         }
 
         self.compress_config = config['llmlingua_config'] if 'llmlingua_config' in config else default_config
-        
         # load model
         from flashrag.refiner.llmlingua_compressor import PromptCompressor
         self.refiner = PromptCompressor(model_name = self.model_path)
     
+    def format_reference(self, retrieval_result):
+        format_reference = ''
+        for idx, doc_item in enumerate(retrieval_result):
+            content = doc_item['contents']
+            title = content.split("\n")[0]
+            text = "\n".join(content.split("\n")[1:])
+            format_reference += f"Doc {idx+1}(Title: {title}) {text}\n"
+
+        return format_reference
+
     def batch_run(self, dataset):
         output = []
         for item in tqdm(dataset, desc='Refining process: '):
-            input_prompt = item.prompt
             question = item.question
-
-            prompt_split = input_prompt.split("\n\n")
-            # need fixed format prompt: instr + demon(retrieval results) + question
-            instruction, question = prompt_split[0], prompt_split[-1]
-            demonstration = "\n".join(prompt_split[1:-1])
-            item_output = self.refiner.compress_prompt(
-                demonstration.split("\n"),
-                instruction=instruction,
-                question=question,
-                **self.compress_config
-            )
+            retrieval_result = item.retrieval_result
+            # TODO: suit more cases
+            if self.input_prompt_flag:
+                input_prompt = item.prompt
+                prompt_split = input_prompt.split("\n\n")
+                # need fixed format prompt: instr + demon(retrieval results) + question
+                instruction, question = prompt_split[0], prompt_split[-1]
+                demonstration = "\n".join(prompt_split[1:-1])
+                item_output = self.refiner.compress_prompt(
+                    [i for i in demonstration.split("\n") if i != ''],
+                    instruction=instruction,
+                    question=question,
+                    **self.compress_config
+                )
+            else:
+                docs = self.format_reference(retrieval_result).split("\n")
+                docs = [i for i in docs if i != '']
+                item_output = self.refiner.compress_prompt(
+                    docs,
+                    instruction="",
+                    question=question,
+                    **self.compress_config
+                )
             output.append(item_output['compressed_prompt'])
         return output
 
