@@ -35,7 +35,7 @@ class LLMLinguaRefiner(BaseRefiner):
     def __init__(self, config):
         super().__init__(config)
         default_config = {
-            'ratio': 0.55,
+            'rate': 0.55,
             'condition_in_question': 'after_condition',
             'reorder_context': 'sort',
             'dynamic_context_compression_ratio': 0.3,
@@ -47,17 +47,17 @@ class LLMLinguaRefiner(BaseRefiner):
         self.compress_config = config['llmlingua_config'] if 'llmlingua_config' in config else default_config
         
         # load model
-        from llmlingua_compressor import PromptCompressor
+        from flashrag.refiner.llmlingua_compressor import PromptCompressor
         self.refiner = PromptCompressor(model_name = self.model_path)
     
     def batch_run(self, dataset):
         output = []
-        for item in dataset:
+        for item in tqdm(dataset, desc='Refining process: '):
             input_prompt = item.prompt
             question = item.question
 
             prompt_split = input_prompt.split("\n\n")
-            # only supports fixed format prompt: instr + demon(retrieval results) + question
+            # need fixed format prompt: instr + demon(retrieval results) + question
             instruction, question = prompt_split[0], prompt_split[-1]
             demonstration = "\n".join(prompt_split[1:-1])
             item_output = self.refiner.compress_prompt(
@@ -88,7 +88,7 @@ class SelectiveContextRefiner(BaseRefiner):
         retrieval_results = [["\n".join(doc_item['contents'].split("\n")[1:]) for doc_item in item_result]for item_result in retrieval_results]
 
         output =[]
-        for text in retrieval_results:
+        for text in tqdm(retrieval_results, desc='Refining process: '):
             compress_text,_ = self.refiner(text,**self.compress_config)
             output.append(compress_text)
         return output
