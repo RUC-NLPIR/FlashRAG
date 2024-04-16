@@ -117,7 +117,7 @@ class SKRJudger(BaseJudger):
                         judgement = False
 
                 all_judgements.append(judgement)
-
+        
         return all_judgements
             
 

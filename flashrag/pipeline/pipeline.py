@@ -184,13 +184,11 @@ class ConditionalPipeline(BasicPipeline):
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         # judge_result: list of bool element, representing whether to use retrieval
         judge_result = self.judger.judge(dataset)
+        dataset.update_output('judge_result', judge_result)
 
         # split dataset based on judge_result
         pos_dataset, neg_dataset = split_dataset(dataset, judge_result)
 
-        pos_dataset.update_output('judge_result',[True]*len(pos_dataset))
-        neg_dataset.update_output('judge_result',[False]*len(pos_dataset))
-        
         pos_dataset = self.sequential_pipeline.run(pos_dataset, do_eval=False)
         neg_dataset = self.sequential_pipeline.naive_run(neg_dataset, do_eval=False)
 
