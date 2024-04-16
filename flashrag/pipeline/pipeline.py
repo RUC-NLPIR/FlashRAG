@@ -188,8 +188,11 @@ class ConditionalPipeline(BasicPipeline):
         # split dataset based on judge_result
         pos_dataset, neg_dataset = split_dataset(dataset, judge_result)
 
-        pos_dataset = self.sequential_pipeline.run(pos_dataset)
-        neg_dataset = self.sequential_pipeline.standard_run(neg_dataset)
+        pos_dataset.update_output('judge_result',[True]*len(pos_dataset))
+        neg_dataset.update_output('judge_result',[False]*len(pos_dataset))
+        
+        pos_dataset = self.sequential_pipeline.run(pos_dataset, do_eval=False)
+        neg_dataset = self.sequential_pipeline.naive_run(neg_dataset, do_eval=False)
 
         # merge datasets into original format
         dataset = merge_dataset(pos_dataset, neg_dataset, judge_result)
