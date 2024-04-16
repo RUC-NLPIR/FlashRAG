@@ -68,7 +68,7 @@ use_fid: False
 metrics: ['em']
 save_metric_score: True
 save_intermediate_data: False
-save_note: ~
+save_note: 'experiment'
 
 # ----Refiner Settings----
 refiner_name: ~
