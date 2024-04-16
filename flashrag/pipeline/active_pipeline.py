@@ -64,7 +64,8 @@ class SelfRAGPipeline(BasicPipeline):
              "arc_easy": "Given four answer candidates, A, B, C and D, choose the best answer choice.",
              "arc_c": "Given four answer candidates, A, B, C and D, choose the best answer choice.",
              "trex": "Given the input format 'Subject Entity [SEP] Relationship Type,' predict the target entity.",
-             "asqa": "Answer the following question. The question may be ambiguous and have multiple correct answers, and in that case, you have to provide a long-form answer including all correct answers."}
+             "asqa": "Answer the following question. The question may be ambiguous and have multiple correct answers, and in that case, you have to provide a long-form answer including all correct answers.",
+             'normal_qa': "Answer the following question, give me a short answer."}
 
 
     def __init__(self, config, threhsold=0.2, max_depth=2, beam_width=2,  
@@ -118,7 +119,7 @@ class SelfRAGPipeline(BasicPipeline):
     def build_prompt(self, questions):
         # TODO: add support for more task
         # TODO: add support for more type of prompts
-        task_instruction = self.task_inst.get(self.task, None)
+        task_instruction = self.task_inst.get(self.task, self.task_inst['normal_qa'])
         question_insts = [f"{task_instruction}\n\n## Input:\n\n{question}" if task_instruction is not None \
                     else question for question in questions]
         input_prompts = [f"### Instruction:\n{q_inst}\n\n### Response:\n" for q_inst in question_insts]
@@ -257,8 +258,6 @@ class SelfRAGPipeline(BasicPipeline):
             for tok_idx, tok in enumerate(pred_token_ids):
                 if tok == self.ret_tokens["[No Retrieval]"]:
                     ret_token_appear_indices.append(tok_idx)
-                    substrings
-                    print("retrieval_tokens")
 
             ret_token_score_dict = {}
             retrieval_remap = {}
@@ -547,7 +546,7 @@ class SelfRAGPipeline(BasicPipeline):
             item.update_output('prompt', prompt_list)
             all_input_list += prompt_list
         
-        batch_pred = self.generator.generate(all_input_list, return_raw_output=True, logprobs=32000)
+        batch_pred = self.generator.generate(all_input_list, return_raw_output=True, logprobs=32016)
 
         # parse output based on retrieval flag
         pred_idx = 0
