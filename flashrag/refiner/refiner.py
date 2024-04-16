@@ -94,8 +94,7 @@ class SelectiveContextRefiner(BaseRefiner):
     """Implementation for Selective Context"""
     def __init__(self, config):
         super().__init__(config)
-
-        from selective_context_compressor import SelectiveContext
+        from flashrag.refiner.selective_context_compressor import SelectiveContext
         default_config = {
             'reduce_ratio': 0.5
         }
@@ -103,13 +102,25 @@ class SelectiveContextRefiner(BaseRefiner):
         self.refiner = SelectiveContext(model_type="gpt2", model_path=self.model_path, lang="en")
         self.compress_config = config['sc_config'] if 'sc_config' in config else default_config
     
+    def format_reference(self, retrieval_result):
+        format_reference = ''
+        for idx, doc_item in enumerate(retrieval_result):
+            content = doc_item['contents']
+            title = content.split("\n")[0]
+            text = "\n".join(content.split("\n")[1:])
+            format_reference += f"Doc {idx+1}(Title: {title}) {text}\n"
+
+        return format_reference
+
     def batch_run(self, dataset):
         # only use text
-        retrieval_results = dataset.retrieval_result
-        retrieval_results = [["\n".join(doc_item['contents'].split("\n")[1:]) for doc_item in item_result]for item_result in retrieval_results]
-
+        all_inputs = []
+        for item in dataset:
+            retrieval_result = item.retrieval_result
+            all_inputs.append(self.format_reference(retrieval_result))
+             
         output =[]
-        for text in tqdm(retrieval_results, desc='Refining process: '):
+        for text in tqdm(all_inputs, desc='Refining process: '):
             compress_text,_ = self.refiner(text,**self.compress_config)
             output.append(compress_text)
         return output
