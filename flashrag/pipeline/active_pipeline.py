@@ -645,6 +645,7 @@ class FLAREPipeline(BasicPipeline):
                 output, scores = output[0], scores[0]
                 next_sent, _ = self.get_next_sentence(output, scores)
                 item.update_output(f'gen_iter_{iter_round}', next_sent)
+                item.update_output('retrieval_result', retrieval_result)
 
             final_gen_result += next_sent
             gen_length += len(next_sent_score)   
