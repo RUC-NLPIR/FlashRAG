@@ -619,7 +619,7 @@ class FLAREPipeline(BasicPipeline):
         gen_length = 0
         iter_round = 0
         final_gen_result = ""
-        while gen_length < self.max_generation_length and iter_round < self.iter_round:
+        while gen_length < self.max_generation_length and iter_round < self.max_iter_num:
             input_prompt = self.build_prompt(
                 question_list=[question], use_reference=False, previous_gen=final_gen_result)[0]
             # scores: token logits of the whole generation seq
@@ -630,26 +630,26 @@ class FLAREPipeline(BasicPipeline):
             next_sent, next_sent_score = self.get_next_sentence(round_gen_output, scores)
             # judge next sentence
             judge_result, query = self.judge_sent_confidence(next_sent, next_sent_score)
-            
+            item.update_output(f'judge_result_iter{iter_round}', judge_result)
+
             if not judge_result:
                 # do retrieval-augmented generation
                 retrieval_result = self.retriever.search(query)
                 item.update_output('retrieval_result', retrieval_result)
-                
                 input_prompt = self.build_prompt(
                     question_list = [question], 
-                    retrieval_results = retrieval_result, 
+                    retrieval_results = [retrieval_result], 
                     previous_gen = final_gen_result)[0]
                 output, scores = self.generator.generate(
                     input_prompt, return_scores=True, stop=self.stop_sym, max_new_tokens=self.look_ahead_steps)
                 output, scores = output[0], scores[0]
                 next_sent, _ = self.get_next_sentence(output, scores)
+                item.update_output(f'gen_iter_{iter_round}', next_sent)
 
             final_gen_result += next_sent
             gen_length += len(next_sent_score)   
             iter_round += 1
 
-        # TODO: save intermediate result
         item.update_output('pred', final_gen_result)
                      
 

@@ -78,7 +78,7 @@ class BasicPipeline:
                 else:
                     retrieval_result = retrieval_results[idx]
                     format_reference = self.format_reference(retrieval_result)
-                
+
                 prompt = prompt_templete.format(
                     question = question, reference = format_reference, previous_gen = previous_gen)
             else:
