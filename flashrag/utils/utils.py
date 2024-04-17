@@ -18,7 +18,7 @@ def get_dataset(config):
         if not os.path.exists(split_path):
             print(f"{split} file not exists!")
             continue
-        if split == "test":
+        if split == "test" or split == 'dev':
             split_dict[split] = Dataset(config, 
                                         split_path, 
                                         sample_num = config['test_sample_num'], 

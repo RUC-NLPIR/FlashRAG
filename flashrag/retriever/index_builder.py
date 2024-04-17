@@ -29,6 +29,7 @@ class Index_Builder:
             use_fp16,
             pooling_method,
             save_corpus,
+            faiss_type=None,
             content_function: callable = base_content_function
         ):
         
@@ -40,6 +41,7 @@ class Index_Builder:
         self.batch_size = batch_size
         self.use_fp16 = use_fp16
         self.pooling_method = pooling_method
+        self.faiss_type = faiss_type if faiss_type else 'Flat'
         self.save_corpus = save_corpus
 
         self.gpu_num = torch.cuda.device_count()
@@ -134,7 +136,7 @@ class Index_Builder:
         self.encoder.to('cuda')
         if self.gpu_num > 1:
             self.encoder = torch.nn.DataParallel(self.encoder)
-            self.batch_size = self.batch_size * self.gpu_num
+            #self.batch_size = self.batch_size * self.gpu_num
 
         # get embeddings
         doc_content = [item['contents'] for item in self.corpus]
@@ -188,9 +190,9 @@ class Index_Builder:
 
         # build index
         dim = all_embeddings.shape[-1]
-        faiss_index = faiss.index_factory(dim, 'IVF100,PQ16', faiss.METRIC_L2)
-        #faiss_index = faiss.index_factory(dim, 'Flat', faiss.METRIC_L2)
-        faiss_index.train(all_embeddings)
+        faiss_index = faiss.index_factory(dim, self.faiss_type, faiss.METRIC_L2)
+        if not faiss_index.is_trained:
+            faiss_index.train(all_embeddings)
         faiss_index.add(all_embeddings)
         faiss.write_index(faiss_index, self.index_save_path)
         
@@ -227,10 +229,11 @@ def main():
     parser.add_argument('--save_dir', default= 'indexes/',type=str)
 
     # Parameters for building dense index
-    parser.add_argument('--max_length', type=int, default=256)
+    parser.add_argument('--max_length', type=int, default=180)
     parser.add_argument('--batch_size', type=int, default=512)
     parser.add_argument('--use_fp16', default=False, action='store_true')
     parser.add_argument('--pooling_method', type=str, default=None)
+    parser.add_argument('--faiss_type',default=None,type=str)
     parser.add_argument('--save_corpus', action='store_true',default=False)
     
     args = parser.parse_args()
@@ -257,7 +260,8 @@ def main():
                         batch_size = args.batch_size,
                         use_fp16 = args.use_fp16,
                         pooling_method = pooling_method,
-                        save_corpus = args.save_corpus
+                        save_corpus = args.save_corpus,
+                        faiss_type = args.faiss_type
                     )
     index_builder.build_index()
 

@@ -22,7 +22,6 @@ class BaseRetriever(ABC):
         self.config = config
         self.retrieval_method = config['retrieval_method']
         self.topk = config['retrieval_topk']
-        self.return_score = config['retrieval_return_score']
         
         self.index_path = config['index_path']
         self.corpus_database_path = config['corpus_database_path']
@@ -58,7 +57,7 @@ class BM25Retriever(BaseRetriever):
         """
         return self.searcher.doc(0).raw() is not None
 
-    def search(self, query: str, num: int = None) -> List[Dict[str, str]]:
+    def search(self, query: str, num: int = None, return_score = False) -> List[Dict[str, str]]:
         if num is None:
             num = self.topk
         hits = self.searcher.search(query, num)
@@ -78,11 +77,24 @@ class BM25Retriever(BaseRetriever):
         else:
             results = load_docs(self.corpus, [hits[i].docid for i in range(num)])
 
-        if self.return_score:
+        if return_score:
             return results, scores
         else:
             return results
 
+    def batch_search(self, query_list, num: int = None, batch_size = None, return_score = False):
+        # TODO: modify batch method
+        results = []
+        scores = []
+        for query in query_list:
+            item_result, item_score = self.search(query, num=num,return_score=True)
+            results.append(item_result)
+            scores.append(item_score)
+
+        if return_score:
+            return results, scores
+        else:
+            return results
 
 class DenseRetriever(BaseRetriever):
     r"""Dense retriever based on pre-built faiss index."""
