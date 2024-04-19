@@ -73,22 +73,15 @@ def load_corpus(
     ):
     raw_corpus_sample = next(read_jsonl(corpus_path))
     have_contents = 'contents' in raw_corpus_sample
-    corpus = read_jsonl(corpus_path, content_function)
 
     import subprocess
     out = subprocess.getoutput("wc -l %s" % corpus_path)
     corpus_size = int(out.split()[0])
-    # corpus = []
-    # with open(corpus_path, "r") as f:
-    #     if ".jsonl" in corpus_path:
-    #         for line in f:
-    #             corpus.append(json.loads(line))
-    #     else:
-    #         corpus = json.load(f)
-    
-    # if 'contents' not in corpus[0]:
-    #     for item in corpus:
-    #         item['contents'] = content_function(item)
+    if not have_contents:
+        corpus = read_jsonl(corpus_path, content_function)
+    else:
+        # use original 'contents' key
+        corpus = read_jsonl(corpus_path)
 
     return corpus, have_contents, corpus_size
 

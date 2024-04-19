@@ -57,7 +57,7 @@ class Index_Builder:
 
         self.index_save_path = os.path.join(self.save_dir, f"{self.retrieval_method}_{self.faiss_type}.index")
         self.database_save_path = os.path.join(self.save_dir, "corpus.db")
-        self.embedding_save_path = os.path.join(self.save_path, "emb.")
+        self.embedding_save_path = os.path.join(self.save_dir, "emb.memmap")
 
         self.corpus, self.have_contents, self.corpus_size = load_corpus(self.corpus_path, content_function)
         self.content_function = content_function
