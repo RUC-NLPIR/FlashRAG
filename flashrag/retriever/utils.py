@@ -55,24 +55,42 @@ def load_database(database_path: str):
     return corpus
     
 
+def read_jsonl(file_path, content_function=None):
+    with open(file_path, "r") as f:
+        while True:
+            new_line = f.readline()
+            if not new_line:
+                return
+            new_item = json.loads(new_line)
+            if content_function:
+                new_item['contents'] = content_function(new_item)
+            
+            yield new_item
+
 def load_corpus(
         corpus_path: str,
         content_function: callable = lambda item: "\"{}\"\n{}".format(item['title'], item['text'])
     ):
-    
-    corpus = []
-    with open(corpus_path, "r") as f:
-        if ".jsonl" in corpus_path:
-            for line in f:
-                corpus.append(json.loads(line))
-        else:
-            corpus = json.load(f)
-    
-    if 'contents' not in corpus[0]:
-        for item in corpus:
-            item['contents'] = content_function(item)
+    raw_corpus_sample = next(read_jsonl(corpus_path))
+    have_contents = 'contents' in raw_corpus_sample
+    corpus = read_jsonl(corpus_path, content_function)
 
-    return corpus
+    import subprocess
+    out = subprocess.getoutput("wc -l %s" % corpus_path)
+    corpus_size = int(out.split()[0])
+    # corpus = []
+    # with open(corpus_path, "r") as f:
+    #     if ".jsonl" in corpus_path:
+    #         for line in f:
+    #             corpus.append(json.loads(line))
+    #     else:
+    #         corpus = json.load(f)
+    
+    # if 'contents' not in corpus[0]:
+    #     for item in corpus:
+    #         item['contents'] = content_function(item)
+
+    return corpus, have_contents, corpus_size
 
 def load_docs(corpus, doc_idxs, content_function=base_content_function):
     doc_ids =  [str(idx) for idx in doc_idxs]

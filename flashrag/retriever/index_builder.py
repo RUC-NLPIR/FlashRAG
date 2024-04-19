@@ -59,11 +59,9 @@ class Index_Builder:
         self.database_save_path = os.path.join(self.save_dir, "corpus.db")
         self.embedding_save_path = os.path.join(self.save_path, "emb.")
 
-        self.corpus = load_corpus(self.corpus_path)
+        self.corpus, self.have_contents, self.corpus_size = load_corpus(self.corpus_path, content_function)
         self.content_function = content_function
 
-        self.have_contents = 'contents' in self.corpus[0]       
-        
         # TODO: 在config模块完成后自动将路径存入yaml中
 
     @staticmethod
@@ -106,8 +104,6 @@ class Index_Builder:
         else:
             with open(temp_file_path, "w") as f:
                 for item in self.corpus:
-                    item = json.loads(item)
-                    item['contents'] = self.content_function(item)
                     f.write(json.dumps(item) + "\n")
         
         print("Start building bm25 index...")
@@ -123,7 +119,7 @@ class Index_Builder:
         
         print("Finish!")
 
-    def save_embedding(self, all_embeddings):
+    def _save_embedding(self, all_embeddings):
         memmap = np.memmap(
             self.embedding_save_path,
             shape=all_embeddings.shape,
@@ -159,18 +155,16 @@ class Index_Builder:
             self.encoder = torch.nn.DataParallel(self.encoder)
             self.batch_size = self.batch_size * self.gpu_num
 
-        # get embeddings
-        doc_content = [item['contents'] for item in self.corpus]
-
-        if self.retrieval_method == "e5":
-            doc_content = [f"passage: {doc}" for doc in doc_content]
 
         all_embeddings = []
 
-        for start_index in tqdm(range(0, len(doc_content), self.batch_size), 
-                                desc="Inference Embeddings",
-                                disable=len(doc_content) < self.batch_size):
-            sentences_batch = doc_content[start_index:start_index + self.batch_size]
+        for start_index in tqdm(range(0, self.corpus_size, self.batch_size), 
+                                desc="Inference Embeddings"):
+            sentences_batch = [next(self.corpus)['contents'] for i in range(self.batch_size)]
+            if self.retrieval_method == "e5":
+                sentences_batch = [f"passage: {doc}" for doc in sentences_batch]
+
+            #sentences_batch = doc_content[start_index:start_index + self.batch_size]
             inputs = self.tokenizer(
                         sentences_batch,
                         padding=True,
@@ -209,7 +203,7 @@ class Index_Builder:
         all_embeddings = np.concatenate(all_embeddings, axis=0)
         all_embeddings = all_embeddings.astype(np.float32)
         if self.save_embedding:
-            self.save_embedding(all_embeddings)
+            self._save_embedding(all_embeddings)
 
         # build index
         print("Creating index")
