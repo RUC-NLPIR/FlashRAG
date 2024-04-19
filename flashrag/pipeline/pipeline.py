@@ -82,7 +82,7 @@ class BasicPipeline:
             prompt = [{"role":"system", "content":sys_prompt},
                     {"role":"user", "content":f"Question: {question}\nAnswer:{previous_gen}"}]
         
-            prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=False)
+            prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
             prompt_list.append(prompt)
 
         return prompt_list
