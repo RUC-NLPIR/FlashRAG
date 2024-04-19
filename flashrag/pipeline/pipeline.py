@@ -1,3 +1,4 @@
+from transformers import AutoTokenizer
 from flashrag.evaluator import Evaluator
 from flashrag.dataset.utils import split_dataset, merge_dataset
 from flashrag.utils import get_retriever, get_generator, get_refiner, get_judger
@@ -12,6 +13,8 @@ class BasicPipeline:
         self.config = config
         self.device = config['device']
         self.evaluator = Evaluator(config)
+        # use for building prompt
+        self.tokenizer = AutoTokenizer.from_pretrained(config['generator_model_path'])
 
     def run(self, dataset):
         r"""The overall inference process of a RAG framework.
@@ -51,24 +54,17 @@ class BasicPipeline:
                      reference = None,
                      previous_gen = ""):
         
-        base_templete_rag = "[INST] <<SYS>> Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}\n\n<</SYS>>\nQuestion: {question}\nAnswer:[/INST]{previous_gen}"
-        base_templete_standard = "[INST] <<SYS>> Answer the question based on your own knowledge. Only give me the answer and do not output any other words.<</SYS>>\nQuestion: {question}\nAnswer:[/INST]{previous_gen}"
-
-        #base_templete_rag = "Answer the question based on the given information. Only give me the answer and do not output any other words.\n\nThe following are given information.\n{reference}\n\nAnswer the question based on the given information. Only give me the answer and do not output any other words.\n\nQuestion: {question}\nAnswer:{previous_gen}"
-        #base_templete_standard = "Answer the question based on your own knowledge. Only give me the answer and do not output any other words.\n\nQuestion: {question}\nAnswer:{previous_gen}"
-        #base_templete_rag = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n{reference}\nQuestion:{question}\nAnswer:{previous_gen}'
-        #base_templete_standard = 'Write a high-quality answer for the given question.\nQuestion:{question}\nAnswer:{previous_gen}'
-        
+        rag_instruct = "Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}"
+        standard_instruct = "Answer the question based on your own knowledge. Only give me the answer and do not output any other words."
         if prompt_templete is None:
             if use_reference:
-                prompt_templete = base_templete_rag
+                prompt_templete = rag_instruct
             else:
-                prompt_templete = base_templete_standard
-        prompt_list = []    
-
+                prompt_templete = standard_instruct
         if reference is not None:
-            assert len(reference) == len(question_list)
+            assert len(reference) == len(question_list)    
 
+        prompt_list = []
         for idx in range(len(question_list)):
             question = question_list[idx]
             if use_reference:
@@ -79,13 +75,54 @@ class BasicPipeline:
                     retrieval_result = retrieval_results[idx]
                     format_reference = self.format_reference(retrieval_result)
 
-                prompt = prompt_templete.format(
-                    question = question, reference = format_reference, previous_gen = previous_gen)
+                sys_prompt = prompt_templete.format(reference = format_reference)
             else:
-                prompt = prompt_templete.format(question = question, previous_gen = previous_gen)
+                sys_prompt = prompt_templete
+
+            prompt = [{"role":"system", "content":sys_prompt},
+                    {"role":"user", "content":f"Question: {question}\nAnswer:{previous_gen}"}]
+        
+            prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=False)
             prompt_list.append(prompt)
 
         return prompt_list
+
+
+        base_templete_rag = "[INST] <<SYS>> Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}\n\n<</SYS>>\nQuestion: {question}\nAnswer:[/INST]{previous_gen}"
+        base_templete_standard = "[INST] <<SYS>> Answer the question based on your own knowledge. Only give me the answer and do not output any other words.<</SYS>>\nQuestion: {question}\nAnswer:[/INST]{previous_gen}"
+
+        #base_templete_rag = "Answer the question based on the given information. Only give me the answer and do not output any other words.\n\nThe following are given information.\n{reference}\n\nAnswer the question based on the given information. Only give me the answer and do not output any other words.\n\nQuestion: {question}\nAnswer:{previous_gen}"
+        #base_templete_standard = "Answer the question based on your own knowledge. Only give me the answer and do not output any other words.\n\nQuestion: {question}\nAnswer:{previous_gen}"
+        #base_templete_rag = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n{reference}\nQuestion:{question}\nAnswer:{previous_gen}'
+        #base_templete_standard = 'Write a high-quality answer for the given question.\nQuestion:{question}\nAnswer:{previous_gen}'
+        
+        # if prompt_templete is None:
+        #     if use_reference:
+        #         prompt_templete = base_templete_rag
+        #     else:
+        #         prompt_templete = base_templete_standard
+        # prompt_list = []    
+
+        # if reference is not None:
+        #     assert len(reference) == len(question_list)
+
+        # for idx in range(len(question_list)):
+        #     question = question_list[idx]
+        #     if use_reference:
+        #         if reference is not None:
+        #             # use provided reference
+        #             format_reference = reference[idx]
+        #         else:
+        #             retrieval_result = retrieval_results[idx]
+        #             format_reference = self.format_reference(retrieval_result)
+
+        #         prompt = prompt_templete.format(
+        #             question = question, reference = format_reference, previous_gen = previous_gen)
+        #     else:
+        #         prompt = prompt_templete.format(question = question, previous_gen = previous_gen)
+        #     prompt_list.append(prompt)
+
+        # return prompt_list
 
     
 class SequentialPipeline(BasicPipeline):

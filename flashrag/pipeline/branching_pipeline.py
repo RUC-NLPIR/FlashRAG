@@ -22,12 +22,19 @@ class REPLUGPipeline(BasicPipeline):
 
 
     def build_single_doc_prompt(self, question, doc_list, prompt_templete=None):
-        base_templete_rag = "[INST] <<SYS>> Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given document.\n{reference}\n<</SYS>>\nQuestion: {question}\nAnswer:[/INST]"
-        #base_templete_rag = "Answer the question based on the given document. Only give me the answer and do not output any other words.\n\nThe following are given document.\n{reference}\n\nAnswer the question based on the given information. Only give me the answer and do not output any other words.\n\nQuestion: {question}\nAnswer:"
+        rag_instruct = "Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}"
+    
         if prompt_templete is None:
-            prompt_templete = base_templete_rag
+            prompt_templete = rag_instruct
+        prompt_list = []
+        for doc in doc_list:
+            prompt = [{"role":"system", "content": prompt_templete.format(reference = doc)},
+                        {"role":"user", "content":f"Question: {question}\nAnswer:"}]
+            
+            prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=False)
+            prompt_list.append(prompt)
 
-        return [prompt_templete.format(reference = doc, question = question) for doc in doc_list]
+        return prompt_list
 
     def format_reference(self, doc_item):
         content = doc_item['contents']
