@@ -77,6 +77,7 @@ def load_corpus(
     import subprocess
     out = subprocess.getoutput("wc -l %s" % corpus_path)
     corpus_size = int(out.split()[0])
+    
     if not have_contents:
         corpus = read_jsonl(corpus_path, content_function)
     else:

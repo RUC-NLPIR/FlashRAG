@@ -160,8 +160,16 @@ class Index_Builder:
 
         for start_index in tqdm(range(0, self.corpus_size, self.batch_size), 
                                 desc="Inference Embeddings"):
-            sentences = [next(self.corpus)['contents'] for i in range(min(self.corpus_size - start_index, self.batch_size))]
-            sentences_batch = [next(self.corpus)['contents'] for i in range(self.batch_size)]
+            sentences_batch = []
+            for _ in range(self.batch_size):
+                try:
+                    sentence = next(self.corpus)['contents']
+                    sentences_batch.append(sentence)
+                except StopIteration:
+                    break
+            if not sentences_batch:
+                print(f"stop at: {start_index}")
+                break
             if self.retrieval_method == "e5":
                 sentences_batch = [f"passage: {doc}" for doc in sentences_batch]
             inputs = self.tokenizer(
