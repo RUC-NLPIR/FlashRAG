@@ -221,11 +221,11 @@ class Index_Builder:
 
         co = faiss.GpuMultipleClonerOptions()
         co.useFloat16 = True
-        gpu_faiss_index = faiss.index_cpu_to_all_gpus(faiss_index, co)
-        gpu_faiss_index.train(all_embeddings)
-        gpu_faiss_index.add(all_embeddings)
-        faiss_index = faiss.index_gpu_to_cpu(gpu_faiss_index)
-        
+        faiss_index = faiss.index_cpu_to_all_gpus(faiss_index, co)
+        faiss_index.train(all_embeddings)
+        faiss_index.add(all_embeddings)
+        faiss_index = faiss.index_gpu_to_cpu(faiss_index)
+
         faiss.write_index(faiss_index, self.index_save_path)
         
 
