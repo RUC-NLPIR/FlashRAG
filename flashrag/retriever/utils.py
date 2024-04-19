@@ -22,7 +22,7 @@ def load_model(
     model.cuda()
     if use_fp16: 
         model = model.half()
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
+    tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
 
     return model, tokenizer
 

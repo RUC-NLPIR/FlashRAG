@@ -102,6 +102,7 @@ class DenseRetriever(BaseRetriever):
     def __init__(self, config: dict):
         super().__init__(config)
         self.index = faiss.read_index(self.index_path)
+        self.index = faiss.index_cpu_to_all_gpus(self.index)
         self.corpus = load_database(self.corpus_database_path)
         self.encoder, self.tokenizer = load_model(model_path = config['retrieval_model_path'], 
                                                   use_fp16 = config['retrieval_use_fp16'])

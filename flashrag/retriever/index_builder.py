@@ -30,6 +30,7 @@ class Index_Builder:
             pooling_method,
             save_corpus,
             faiss_type=None,
+            save_embedding=False,
             content_function: callable = base_content_function
         ):
         
@@ -42,6 +43,7 @@ class Index_Builder:
         self.use_fp16 = use_fp16
         self.pooling_method = pooling_method
         self.faiss_type = faiss_type if faiss_type else 'Flat'
+        self.save_embedding = save_embedding
         self.save_corpus = save_corpus
 
         self.gpu_num = torch.cuda.device_count()
@@ -53,8 +55,9 @@ class Index_Builder:
             if not self._check_dir(self.save_dir):
                 warnings.warn(f"Some files already exists in {self.save_dir} and may be overwritten.", UserWarning)
 
-        self.index_save_path = os.path.join(self.save_dir, f"{self.retrieval_method}.index")
+        self.index_save_path = os.path.join(self.save_dir, f"{self.retrieval_method}_{self.faiss_type}.index")
         self.database_save_path = os.path.join(self.save_dir, "corpus.db")
+        self.embedding_save_path = os.path.join(self.save_path, "emb.")
 
         self.corpus = load_corpus(self.corpus_path)
         self.content_function = content_function
@@ -120,6 +123,24 @@ class Index_Builder:
         
         print("Finish!")
 
+    def save_embedding(self, all_embeddings):
+        memmap = np.memmap(
+            self.embedding_save_path,
+            shape=all_embeddings.shape,
+            mode="w+",
+            dtype=all_embeddings.dtype
+        )
+        length = all_embeddings.shape[0]
+        # add in batch
+        save_batch_size = 10000
+        if length > save_batch_size:
+            for i in tqdm(range(0, length, save_batch_size), leave=False, desc="Saving Embeddings"):
+                j = min(i + save_batch_size, length)
+                memmap[i: j] = all_embeddings[i: j]
+        else:
+            memmap[:] = all_embeddings
+
+    @torch.no_grad()
     def build_dense_index(self):
         r"""Obtain the representation of documents based on the embedding model(BERT-based) and 
         construct a faiss index.
@@ -133,10 +154,10 @@ class Index_Builder:
 
         self.encoder, self.tokenizer = load_model(model_path = self.model_path, 
                                                   use_fp16 = self.use_fp16)
-        self.encoder.to('cuda')
         if self.gpu_num > 1:
+            print("Use multi gpu!")
             self.encoder = torch.nn.DataParallel(self.encoder)
-            #self.batch_size = self.batch_size * self.gpu_num
+            self.batch_size = self.batch_size * self.gpu_num
 
         # get embeddings
         doc_content = [item['contents'] for item in self.corpus]
@@ -187,13 +208,24 @@ class Index_Builder:
 
         all_embeddings = np.concatenate(all_embeddings, axis=0)
         all_embeddings = all_embeddings.astype(np.float32)
+        if self.save_embedding:
+            self.save_embedding(all_embeddings)
 
         # build index
+        print("Creating index")
         dim = all_embeddings.shape[-1]
         faiss_index = faiss.index_factory(dim, self.faiss_type, faiss.METRIC_L2)
-        if not faiss_index.is_trained:
-            faiss_index.train(all_embeddings)
-        faiss_index.add(all_embeddings)
+        
+        # faiss_index.train(all_embeddings)
+        # faiss_index.add(all_embeddings)
+
+        co = faiss.GpuMultipleClonerOptions()
+        co.useFloat16 = True
+        gpu_faiss_index = faiss.index_cpu_to_all_gpus(faiss_index, co)
+        gpu_faiss_index.train(all_embeddings)
+        gpu_faiss_index.add(all_embeddings)
+        faiss_index = faiss.index_gpu_to_cpu(gpu_faiss_index)
+        
         faiss.write_index(faiss_index, self.index_save_path)
         
 
@@ -235,6 +267,7 @@ def main():
     parser.add_argument('--pooling_method', type=str, default=None)
     parser.add_argument('--faiss_type',default=None,type=str)
     parser.add_argument('--save_corpus', action='store_true',default=False)
+    parser.add_argument('--save_embedding', action='store_true', default=False)
     
     args = parser.parse_args()
 
@@ -261,7 +294,8 @@ def main():
                         use_fp16 = args.use_fp16,
                         pooling_method = pooling_method,
                         save_corpus = args.save_corpus,
-                        faiss_type = args.faiss_type
+                        faiss_type = args.faiss_type,
+                        save_embedding = args.save_embedding
                     )
     index_builder.build_index()
 
