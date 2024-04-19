@@ -84,34 +84,19 @@ class BM25Retriever(BaseRetriever):
         else:
             return results
 
-    def batch_search_helper(self, args):
-        return self.search(*args)
-
     def batch_search(self, query_list, num: int = None, batch_size = None, return_score = False):
-        with Pool(self.max_process_num) as p:
-            args = [(query, num, return_score) for query in query_list]
-            results_and_scores = p.map(self.batch_search_helper, args)
-            
-        results, scores = zip(*results_and_scores)
-        
+        # TODO: modify batch method
+        results = []
+        scores = []
+        for query in query_list:
+            item_result, item_score = self.search(query, num=num,return_score=True)
+            results.append(item_result)
+            scores.append(item_score)
+
         if return_score:
-            return list(results), list(scores)
+            return results, scores
         else:
-            return list(results)
-
-    # def batch_search(self, query_list, num: int = None, batch_size = None, return_score = False):
-    #     # TODO: modify batch method
-    #     results = []
-    #     scores = []
-    #     for query in query_list:
-    #         item_result, item_score = self.search(query, num=num,return_score=True)
-    #         results.append(item_result)
-    #         scores.append(item_score)
-
-    #     if return_score:
-    #         return results, scores
-    #     else:
-    #         return results
+            return results
 
 class DenseRetriever(BaseRetriever):
     r"""Dense retriever based on pre-built faiss index."""
