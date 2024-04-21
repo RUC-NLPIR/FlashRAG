@@ -146,7 +146,6 @@ class SequentialPipeline(BasicPipeline):
                 input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result)
                 dataset.update_output('prompt', input_prompts)
                 input_prompts = self.refiner.batch_run(dataset)
-                dataset.update_output('prompt', input_prompts)
             else:
                 # input retrieval docs
                 refine_results = self.refiner.batch_run(dataset)
@@ -154,7 +153,7 @@ class SequentialPipeline(BasicPipeline):
                 input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result, reference=refine_results)
         else:
             input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result)
-            dataset.update_output('prompt', input_prompts)
+        dataset.update_output('prompt', input_prompts)
 
         if self.use_fid:
             print('Use FiD generation')
