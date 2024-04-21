@@ -168,6 +168,7 @@ class VLLMGenerator(BaseGenerator):
                             gpu_memory_utilization = gpu_memory_utilization,
                             )
             # max_logprobs=32016
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
             
     @torch.no_grad()
     def generate(self, input_list, return_raw_output=False, return_scores=False, **params):
@@ -187,6 +188,17 @@ class VLLMGenerator(BaseGenerator):
         if return_scores:
             if 'logprobs' not in generation_params:
                 generation_params['logprobs'] = 100
+        # fix for llama3
+        # extra_eos_tokens = [self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")]
+        # if 'stop_token_ids' in generation_params:
+        #     generation_params['stop_token_ids'].extend(extra_eos_tokens)
+        # else:
+        #     generation_params['stop_token_ids'] = extra_eos_tokens
+        if 'stop' in generation_params:
+            generation_params['stop'].append("<|eot_id|>")
+        else:
+            generation_params['stop'] = ["<|eot_id|>"]
+
         sampling_params = SamplingParams(**generation_params)
     
         if self.use_lora:
@@ -231,7 +243,6 @@ class CausalLMGenerator(BaseGenerator):
             self.use_lora = True
             import peft
             self.model.load_adapter(lora_path)
-    
     def _load_model(self, model=None):
         r"""Load model and tokenizer for generator.
         
@@ -283,6 +294,12 @@ class CausalLMGenerator(BaseGenerator):
                 generation_params['max_new_tokens'] = params.pop('max_tokens')
             else:
                 generation_params['max_new_tokens'] = generation_params.pop('max_tokens')
+
+        extra_eos_tokens = [self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")]
+        if 'eos_token_id' in generation_params:
+            generation_params['eos_token_id'].extend(extra_eos_tokens)
+        else:
+            generation_params['eos_token_id'] = extra_eos_tokens
 
         responses = []
         scores = []

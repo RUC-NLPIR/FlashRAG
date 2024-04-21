@@ -52,7 +52,7 @@ class BasicPipeline:
                      prompt_templete=None, 
                      use_reference = True, 
                      reference = None,
-                     previous_gen = ""):
+                     previous_gen = None):
         
         rag_instruct = "Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}"
         standard_instruct = "Answer the question based on your own knowledge. Only give me the answer and do not output any other words."
@@ -80,50 +80,14 @@ class BasicPipeline:
                 sys_prompt = prompt_templete
 
             prompt = [{"role":"system", "content":sys_prompt},
-                    {"role":"user", "content":f"Question: {question}\nAnswer:{previous_gen}"}]
+                    {"role":"user", "content":f"Question: {question}"}]
         
             prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
+            if previous_gen is not None:
+                prompt += previous_gen
             prompt_list.append(prompt)
 
         return prompt_list
-
-
-        base_templete_rag = "[INST] <<SYS>> Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}\n\n<</SYS>>\nQuestion: {question}\nAnswer:[/INST]{previous_gen}"
-        base_templete_standard = "[INST] <<SYS>> Answer the question based on your own knowledge. Only give me the answer and do not output any other words.<</SYS>>\nQuestion: {question}\nAnswer:[/INST]{previous_gen}"
-
-        #base_templete_rag = "Answer the question based on the given information. Only give me the answer and do not output any other words.\n\nThe following are given information.\n{reference}\n\nAnswer the question based on the given information. Only give me the answer and do not output any other words.\n\nQuestion: {question}\nAnswer:{previous_gen}"
-        #base_templete_standard = "Answer the question based on your own knowledge. Only give me the answer and do not output any other words.\n\nQuestion: {question}\nAnswer:{previous_gen}"
-        #base_templete_rag = 'Write a high-quality answer for the given question using the provided information (some of which might be irrelevant).\n{reference}\nQuestion:{question}\nAnswer:{previous_gen}'
-        #base_templete_standard = 'Write a high-quality answer for the given question.\nQuestion:{question}\nAnswer:{previous_gen}'
-        
-        # if prompt_templete is None:
-        #     if use_reference:
-        #         prompt_templete = base_templete_rag
-        #     else:
-        #         prompt_templete = base_templete_standard
-        # prompt_list = []    
-
-        # if reference is not None:
-        #     assert len(reference) == len(question_list)
-
-        # for idx in range(len(question_list)):
-        #     question = question_list[idx]
-        #     if use_reference:
-        #         if reference is not None:
-        #             # use provided reference
-        #             format_reference = reference[idx]
-        #         else:
-        #             retrieval_result = retrieval_results[idx]
-        #             format_reference = self.format_reference(retrieval_result)
-
-        #         prompt = prompt_templete.format(
-        #             question = question, reference = format_reference, previous_gen = previous_gen)
-        #     else:
-        #         prompt = prompt_templete.format(question = question, previous_gen = previous_gen)
-        #     prompt_list.append(prompt)
-
-        # return prompt_list
-
     
 class SequentialPipeline(BasicPipeline):
     def __init__(self, config):
