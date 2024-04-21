@@ -87,7 +87,7 @@ class SuRePipeline(BasicPipeline):
                 "Question: {question}\n" \
                 "Answer:"
         
-        prompt = [{"role":"user", "content": P_CAN_INSTRUCT.format(N, reference, question)}]   
+        prompt = [{"role":"user", "content": P_CAN_INSTRUCT.format(N=N, reference=reference, question=question)}]   
         prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
         return prompt
     
@@ -103,7 +103,7 @@ class SuRePipeline(BasicPipeline):
                 "Prediction: {pred}\n" \
                 "Passage:"
         
-        prompt = [{"role":"user", "content": P_SUM_INSTRUCT.format(reference, question, pred)}]   
+        prompt = [{"role":"user", "content": P_SUM_INSTRUCT.format(reference=reference, question=question, pred=pred)}]   
         prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
         return prompt
     
@@ -115,7 +115,7 @@ class SuRePipeline(BasicPipeline):
                 "Does the passage correctly support the prediction? Choices: [True,False].\n" \
                 "Answer:" 
         
-        prompt = [{"role":"user", "content": P_VAL_INSTRUCT.format(question, pred, summary)}]   
+        prompt = [{"role":"user", "content": P_VAL_INSTRUCT.format(question=question, pred=pred, summary=summary)}]   
         prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
         return prompt
     
@@ -131,7 +131,7 @@ class SuRePipeline(BasicPipeline):
                 "informative to answer the question at hand. Choices: [Passage 1,Passage 2].\n" \
                 "Answer:"
         
-        prompt = [{"role":"user", "content": P_RANK_INSTRUCT.format(summary1, summary2, question)}]   
+        prompt = [{"role":"user", "content": P_RANK_INSTRUCT.format(summary1=summary1, summary2=summary2, question=question)}]   
         prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
         return prompt
 
