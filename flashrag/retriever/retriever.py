@@ -104,7 +104,7 @@ class DenseRetriever(BaseRetriever):
     def __init__(self, config: dict):
         super().__init__(config)
         self.index = faiss.read_index(self.index_path)
-        self.index = faiss.index_cpu_to_all_gpus(self.index)
+        #self.index = faiss.index_cpu_to_all_gpus(self.index)
         self.corpus = load_database(self.corpus_database_path)
         self.encoder, self.tokenizer = load_model(model_path = config['retrieval_model_path'], 
                                                   use_fp16 = config['retrieval_use_fp16'])
@@ -155,7 +155,7 @@ class DenseRetriever(BaseRetriever):
                 query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
 
         query_emb = query_emb.detach().cpu().numpy()
-        query_emb = query_emb.astype(np.float32)
+        query_emb = query_emb.astype(np.float32, order="C")
         return query_emb
 
     
@@ -187,13 +187,11 @@ class DenseRetriever(BaseRetriever):
             query_batch = query_list[start_idx:start_idx + batch_size]
             batch_emb = self._encode(query_batch)
             batch_scores, batch_idxs = self.index.search(batch_emb, k=num)
-
             batch_scores = batch_scores.tolist()
             batch_idxs = batch_idxs.tolist()
             
             flat_idxs = sum(batch_idxs, [])
             batch_results = load_docs(self.corpus, flat_idxs, content_function=base_content_function)
-            
             batch_results = [batch_results[i*num : (i+1)*num] for i in range(len(batch_idxs))]
             
             scores.extend(batch_scores)

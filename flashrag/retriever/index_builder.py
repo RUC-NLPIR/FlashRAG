@@ -215,17 +215,19 @@ class Index_Builder:
         # build index
         print("Creating index")
         dim = all_embeddings.shape[-1]
-        faiss_index = faiss.index_factory(dim, self.faiss_type, faiss.METRIC_L2)
+        faiss_index = faiss.index_factory(dim, self.faiss_type, faiss.METRIC_INNER_PRODUCT)
         
         # faiss_index.train(all_embeddings)
-        # faiss_index.add(all_embeddings)
-
-        co = faiss.GpuMultipleClonerOptions()
-        co.useFloat16 = True
-        faiss_index = faiss.index_cpu_to_all_gpus(faiss_index, co)
-        faiss_index.train(all_embeddings)
+        if not faiss_index.is_trained:
+            faiss_index.train(all_embeddings)
         faiss_index.add(all_embeddings)
-        faiss_index = faiss.index_gpu_to_cpu(faiss_index)
+
+        # co = faiss.GpuMultipleClonerOptions()
+        # co.useFloat16 = True
+        # faiss_index = faiss.index_cpu_to_all_gpus(faiss_index, co)
+        # faiss_index.train(all_embeddings)
+        # faiss_index.add(all_embeddings)
+        # faiss_index = faiss.index_gpu_to_cpu(faiss_index)
 
         faiss.write_index(faiss_index, self.index_save_path)
         
