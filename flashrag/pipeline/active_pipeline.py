@@ -597,7 +597,7 @@ class FLAREPipeline(BasicPipeline):
         token_id_sentences = [tokenizer.encode(s, add_special_tokens=False) for s in text_sentences]
         output_ids = tokenizer.encode(output, add_special_tokens=False)
         assert sum([len(s) for s in token_id_sentences]) == len(
-            output_ids), f"token id sentences length {sum([len(s) for s in token_id_sentences])} not equal to output ids length {len(target_ids)}\n{token_id_sentences}\n{text_sentences}\n{answer}"
+            output_ids), "token id sentences length not equal to output ids length"
         
         first_sent_ids = token_id_sentences[0]
         first_sent_score = scores[:len(first_sent_ids)]
