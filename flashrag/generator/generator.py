@@ -185,6 +185,7 @@ class VLLMGenerator(BaseGenerator):
                 generation_params['max_tokens'] = params.pop('max_new_tokens')
             else:
                 generation_params['max_tokens'] = generation_params.pop('max_new_tokens')
+            generation_params.pop('max_new_tokens')
         if return_scores:
             if 'logprobs' not in generation_params:
                 generation_params['logprobs'] = 100
@@ -294,6 +295,7 @@ class CausalLMGenerator(BaseGenerator):
                 generation_params['max_new_tokens'] = params.pop('max_tokens')
             else:
                 generation_params['max_new_tokens'] = generation_params.pop('max_tokens')
+            generation_params.pop('max_tokens')
 
         extra_eos_tokens = [self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")]
         if 'eos_token_id' in generation_params:
