@@ -588,7 +588,7 @@ class FLAREPipeline(BasicPipeline):
         self.max_generation_length = max_generation_length
         self.max_iter_num = max_iter_num
         self.look_ahead_steps = look_ahead_steps
-        self.stop_sym = '!@#$%^&*()\n\n)(*&^%$#@!'
+        self.stop_sym = list('!@#$%^&*()\n\n)(*&^%$#@!')
 
     def get_next_sentence(self, output, scores):
         import re

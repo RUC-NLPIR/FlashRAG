@@ -10,3 +10,4 @@ sqlite_utils==3.36
 torch==2.1.2
 tqdm==4.66.1
 transformers==4.38.2
+vllm==0.2.6
