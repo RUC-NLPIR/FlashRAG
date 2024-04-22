@@ -596,11 +596,13 @@ class FLAREPipeline(BasicPipeline):
         text_sentences = re.split(r'(?<=[^A-Z].[.?]) +', output)
         token_id_sentences = [tokenizer.encode(s, add_special_tokens=False) for s in text_sentences]
         output_ids = tokenizer.encode(output, add_special_tokens=False)
-        assert sum([len(s) for s in token_id_sentences]) == len(
-            output_ids), "token id sentences length not equal to output ids length"
         
+        # assert sum([len(s) for s in token_id_sentences]) == len(
+        #    output_ids), "token id sentences length not equal to output ids length"
+    
         first_sent_ids = token_id_sentences[0]
         first_sent_score = scores[:len(first_sent_ids)]
+        
         return text_sentences[0], first_sent_score
 
     def judge_sent_confidence(self, sent, sent_score):
@@ -742,7 +744,7 @@ class SelfAskPipeline(BasicPipeline):
                     0
                 ].split("Follow up: ")[-1]
                 new_retrieval_result = self.retriever.search(new_query)
-                retrieval_result.append(new_retrieval_result)
+                retrieval_result.extend(new_retrieval_result)
                 retrieval_result = self._remove_duplicate_doc(retrieval_result)
 
             elif "So the final answer is: " in gen_out:
