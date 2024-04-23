@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 from typing import cast, List, Union, Tuple
 import warnings
 import numpy as np
+import datasets
+from torch.utils.data import DataLoader
 import shutil
 import subprocess
 import argparse
@@ -28,9 +30,9 @@ class Index_Builder:
             batch_size,
             use_fp16,
             pooling_method,
-            save_corpus,
             faiss_type=None,
             save_embedding=False,
+            faiss_gpu=False,
             content_function: callable = base_content_function
         ):
         
@@ -44,7 +46,7 @@ class Index_Builder:
         self.pooling_method = pooling_method
         self.faiss_type = faiss_type if faiss_type else 'Flat'
         self.save_embedding = save_embedding
-        self.save_corpus = save_corpus
+        self.faiss_gpu = faiss_gpu
 
         self.gpu_num = torch.cuda.device_count()
         # prepare save dir
@@ -56,13 +58,16 @@ class Index_Builder:
                 warnings.warn(f"Some files already exists in {self.save_dir} and may be overwritten.", UserWarning)
 
         self.index_save_path = os.path.join(self.save_dir, f"{self.retrieval_method}_{self.faiss_type}.index")
-        self.database_save_path = os.path.join(self.save_dir, "corpus.db")
         self.embedding_save_path = os.path.join(self.save_dir, "emb.memmap")
 
-        self.corpus, self.have_contents, self.corpus_size = load_corpus(self.corpus_path, content_function)
+        self.corpus = load_corpus(self.corpus_path)
         self.content_function = content_function
-
-        # TODO: 在config模块完成后自动将路径存入yaml中
+        self.have_contents = 'contents' in self.corpus[0]
+        if not self.have_contents:
+            def add_contents(item):
+                item['contents'] = self.content_function(item)
+                return item
+            self.corpus = self.corpus.map(add_contents,num_proc=8, batched=True, batch_size=10000)
 
     @staticmethod
     def _check_dir(dir_path):
@@ -143,8 +148,7 @@ class Index_Builder:
         
         """
         # TODO: disassembly overall process, use non open-source emebdding/ processed embedding
-        # TODO: save embedding
-        # prepare model
+
         if os.path.exists(self.index_save_path):
             print("The index file already exists and will be overwritten.")
 
@@ -155,25 +159,16 @@ class Index_Builder:
             self.encoder = torch.nn.DataParallel(self.encoder)
             self.batch_size = self.batch_size * self.gpu_num
 
-
         all_embeddings = []
 
-        for start_index in tqdm(range(0, self.corpus_size, self.batch_size), 
-                                desc="Inference Embeddings"):
-            sentences_batch = []
-            for _ in range(self.batch_size):
-                try:
-                    sentence = next(self.corpus)['contents']
-                    sentences_batch.append(sentence)
-                except StopIteration:
-                    break
-            if not sentences_batch:
-                print(f"stop at: {start_index}")
-                break
+        for start_idx in tqdm(range(0, len(self.corpus), self.batch_size), desc='Inference Embeddings:'):
+            batch_data = self.corpus[start_idx:start_idx+self.batch_size]['contents']
+
             if self.retrieval_method == "e5":
-                sentences_batch = [f"passage: {doc}" for doc in sentences_batch]
+                batch_data = [f"passage: {doc}" for doc in batch_data]
+
             inputs = self.tokenizer(
-                        sentences_batch,
+                        batch_data,
                         padding=True,
                         truncation=True,
                         return_tensors='pt',
@@ -217,33 +212,20 @@ class Index_Builder:
         dim = all_embeddings.shape[-1]
         faiss_index = faiss.index_factory(dim, self.faiss_type, faiss.METRIC_INNER_PRODUCT)
         
-        # faiss_index.train(all_embeddings)
-        if not faiss_index.is_trained:
-            faiss_index.train(all_embeddings)
-        faiss_index.add(all_embeddings)
-
-        # co = faiss.GpuMultipleClonerOptions()
-        # co.useFloat16 = True
-        # faiss_index = faiss.index_cpu_to_all_gpus(faiss_index, co)
-        # faiss_index.train(all_embeddings)
-        # faiss_index.add(all_embeddings)
-        # faiss_index = faiss.index_gpu_to_cpu(faiss_index)
+        if self.faiss_gpu:
+            co = faiss.GpuMultipleClonerOptions()
+            co.useFloat16 = True
+            faiss_index = faiss.index_cpu_to_all_gpus(faiss_index, co)
+            if not faiss_index.is_trained:
+                faiss_index.train(all_embeddings)
+            faiss_index.add(all_embeddings)
+            faiss_index = faiss.index_gpu_to_cpu(faiss_index)
+        else:
+            if not faiss_index.is_trained:
+                faiss_index.train(all_embeddings)
+            faiss_index.add(all_embeddings)
 
         faiss.write_index(faiss_index, self.index_save_path)
-        
-
-        if self.save_corpus:
-            if os.path.exists(self.database_save_path):
-                print("The database already exists and will not be written.") 
-            else:
-                print("Begin creating database...")
-                # build corpus databse
-                db = Database(self.database_save_path)
-                docs = db['docs']
-                docs.insert_all(self.corpus, batch_size=1000000, truncate=True)
-                db.execute("CREATE INDEX idx_id ON docs (id)")
-                db.conn.close()
-
         print("Finish!")
 
 
@@ -269,8 +251,8 @@ def main():
     parser.add_argument('--use_fp16', default=False, action='store_true')
     parser.add_argument('--pooling_method', type=str, default=None)
     parser.add_argument('--faiss_type',default=None,type=str)
-    parser.add_argument('--save_corpus', action='store_true',default=False)
     parser.add_argument('--save_embedding', action='store_true', default=False)
+    parser.add_argument('--faiss_gpu', default=False, action='store_true')
     
     args = parser.parse_args()
 
@@ -296,9 +278,9 @@ def main():
                         batch_size = args.batch_size,
                         use_fp16 = args.use_fp16,
                         pooling_method = pooling_method,
-                        save_corpus = args.save_corpus,
                         faiss_type = args.faiss_type,
-                        save_embedding = args.save_embedding
+                        save_embedding = args.save_embedding,
+                        faiss_gpu = args.faiss_gpu
                     )
     index_builder.build_index()
 

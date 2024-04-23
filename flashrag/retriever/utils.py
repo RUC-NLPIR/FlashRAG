@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import List, Dict
 import numpy as np
 from sqlite_utils import Database
+import datasets
 import torch.nn.functional as F
 
 from transformers import AutoTokenizer, AutoModel, AutoConfig, T5EncoderModel
@@ -49,9 +50,12 @@ def base_content_function(item):
     else:
         return item['text']
 
-def load_database(database_path: str):
-    db = Database(database_path)
-    corpus = db['docs']
+def load_corpus(corpus_path: str):
+    corpus = datasets.load_dataset(
+                                'json', 
+                                data_files=corpus_path,
+                                split="train",
+                               num_proc=8)
     return corpus
     
 
@@ -67,34 +71,27 @@ def read_jsonl(file_path, content_function=None):
             
             yield new_item
 
-def load_corpus(
-        corpus_path: str,
-        content_function: callable = lambda item: "\"{}\"\n{}".format(item['title'], item['text'])
-    ):
-    raw_corpus_sample = next(read_jsonl(corpus_path))
-    have_contents = 'contents' in raw_corpus_sample
+# def load_corpus(
+#         corpus_path: str,
+#         content_function: callable = lambda item: "\"{}\"\n{}".format(item['title'], item['text'])
+#     ):
+#     raw_corpus_sample = next(read_jsonl(corpus_path))
+#     have_contents = 'contents' in raw_corpus_sample
 
-    import subprocess
-    out = subprocess.getoutput("wc -l %s" % corpus_path)
-    corpus_size = int(out.split()[0])
+#     import subprocess
+#     out = subprocess.getoutput("wc -l %s" % corpus_path)
+#     corpus_size = int(out.split()[0])
     
-    if not have_contents:
-        corpus = read_jsonl(corpus_path, content_function)
-    else:
-        # use original 'contents' key
-        corpus = read_jsonl(corpus_path)
+#     if not have_contents:
+#         corpus = read_jsonl(corpus_path, content_function)
+#     else:
+#         # use original 'contents' key
+#         corpus = read_jsonl(corpus_path)
 
-    return corpus, have_contents, corpus_size
+#     return corpus, have_contents, corpus_size
 
 def load_docs(corpus, doc_idxs, content_function=base_content_function):
-    doc_ids =  [str(idx) for idx in doc_idxs]
-    query = 'id IN ({})'.format(','.join('?' * len(doc_ids)))
-    results = corpus.rows_where(query, doc_ids)
-    results = list(results)
-
-    # match the corresponding idx
-    id2item = {item['id']:item for item in results}
-    results = [id2item[id] for id in doc_ids]
+    results = [corpus[idx] for idx in doc_idxs]
 
     # add content field
     for item in results:

@@ -13,7 +13,7 @@ from torch import Tensor
 import torch.nn.functional as F
 
 from transformers import AutoTokenizer, AutoModel
-from flashrag.retriever.utils import load_model, pooling, base_content_function, load_database, load_docs
+from flashrag.retriever.utils import load_model, pooling, base_content_function, load_corpus, load_docs
 
         
 class BaseRetriever(ABC):
@@ -25,7 +25,7 @@ class BaseRetriever(ABC):
         self.topk = config['retrieval_topk']
         
         self.index_path = config['index_path']
-        self.corpus_database_path = config['corpus_database_path']
+        self.corpus_path = config['corpus_path']
 
 
     @abstractmethod
@@ -51,7 +51,7 @@ class BM25Retriever(BaseRetriever):
         self.searcher = LuceneSearcher(self.index_path)
         self.contain_doc = self._check_contain_doc()
         if not self.contain_doc:
-            self.corpus = load_database(self.corpus_database_path)
+            self.corpus = load_corpus(self.corpus_path)
         self.max_process_num = 8
         
     def _check_contain_doc(self):
@@ -105,7 +105,7 @@ class DenseRetriever(BaseRetriever):
         super().__init__(config)
         self.index = faiss.read_index(self.index_path)
         #self.index = faiss.index_cpu_to_all_gpus(self.index)
-        self.corpus = load_database(self.corpus_database_path)
+        self.corpus = load_corpus(self.corpus_path)
         self.encoder, self.tokenizer = load_model(model_path = config['retrieval_model_path'], 
                                                   use_fp16 = config['retrieval_use_fp16'])
         self.topk = config['retrieval_topk']
