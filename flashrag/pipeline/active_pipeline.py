@@ -718,7 +718,6 @@ class SelfAskPipeline(BasicPipeline):
                 + res
             )
             gen_out = self.generator.generate(input_prompt, stop=["Context:", "#", stop_condition])[0]
-            print(gen_out)
             item.update_output(f'intermediate_output_iter{idx}', gen_out)
             
             if stop_condition == "Intermediate answer:":
@@ -759,7 +758,7 @@ class SelfAskPipeline(BasicPipeline):
                     + res
                 )
                 early_exit = True
-                print("Success: early exit!")
+                # print("Success: early exit!")
                 break 
         
         if not early_exit:
