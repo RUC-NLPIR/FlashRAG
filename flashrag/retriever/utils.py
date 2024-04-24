@@ -52,10 +52,10 @@ def base_content_function(item):
 
 def load_corpus(corpus_path: str):
     corpus = datasets.load_dataset(
-                                'json', 
-                                data_files=corpus_path,
-                                split="train",
-                               num_proc=8)
+            'json', 
+            data_files=corpus_path,
+            split="train",
+            num_proc=8)
     return corpus
     
 
@@ -91,7 +91,7 @@ def read_jsonl(file_path, content_function=None):
 #     return corpus, have_contents, corpus_size
 
 def load_docs(corpus, doc_idxs, content_function=base_content_function):
-    results = [corpus[idx] for idx in doc_idxs]
+    results = [corpus[int(idx)] for idx in doc_idxs]
 
     # add content field
     for item in results:

@@ -665,17 +665,17 @@ class FLAREPipeline(BasicPipeline):
             
 
 class SelfAskPipeline(BasicPipeline):
-    from flashrag.utils import SELF_ASK_PROMPT
-    P_INS = SELF_ASK_PROMPT
     FOLLOW_UP_PATTERN = r"Follow up:.*\n"
 
     def __init__(self, config, max_iter=5, single_hop=True):
         super().__init__(config)
+        from flashrag.utils import SELF_ASK_PROMPT_SINGLE_HOP, SELF_ASK_PROMPT_MULTI_HOP
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
 
         self.single_hop = single_hop
         self.max_iter = max_iter
+        self.P_INS = SELF_ASK_PROMPT_SINGLE_HOP if self.single_hop else SELF_ASK_PROMPT_MULTI_HOP
     
     def format_reference(self, retrieval_result):
         format_reference = ''
@@ -717,7 +717,8 @@ class SelfAskPipeline(BasicPipeline):
                 + "\n"
                 + res
             )
-            gen_out = self.generator.generate(input_prompt, stop=["Context:", "#"])[0]
+            gen_out = self.generator.generate(input_prompt, stop=["Context:", "#", stop_condition])[0]
+            print(gen_out)
             item.update_output(f'intermediate_output_iter{idx}', gen_out)
             
             if stop_condition == "Intermediate answer:":
@@ -730,6 +731,7 @@ class SelfAskPipeline(BasicPipeline):
 
                 if len(followup_split) > 1:
                     res += re.findall(self.FOLLOW_UP_PATTERN, gen_out)[0]
+                stop_condition = 'Intermediate answer:'
 
             # make sure the result does not end in a new line
             if len(res) == 0:
@@ -747,7 +749,7 @@ class SelfAskPipeline(BasicPipeline):
                 retrieval_result.extend(new_retrieval_result)
                 retrieval_result = self._remove_duplicate_doc(retrieval_result)
 
-            elif "So the final answer is: " in gen_out:
+            if "So the final answer is: " in gen_out:
                 res = (
                     self.format_reference(retrieval_result)
                     + f"\nQuesiton: {question}"
@@ -757,6 +759,7 @@ class SelfAskPipeline(BasicPipeline):
                     + res
                 )
                 early_exit = True
+                print("Success: early exit!")
                 break 
         
         if not early_exit:

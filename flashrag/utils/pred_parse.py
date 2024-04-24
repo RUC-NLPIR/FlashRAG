@@ -1,13 +1,12 @@
-def retrobust_pred_parse(pred):
-    """Parsing the prediction results of RETROBUST.
-    Output of RETROBUST is in self-ask format.
+def selfask_pred_parse(pred):
+    """Parsing the prediction results of self-ask format.
     """
     FINAL_ANSWER_PREFIX = "So the final answer is: "
 
     lines = pred.split("\n")
     answer = ""
     for line in lines:
-        if line.startswith(FINAL_ANSWER_PREFIX):
+        if FINAL_ANSWER_PREFIX in line:
             answer = line.split(FINAL_ANSWER_PREFIX)[1].strip()
             break
     
