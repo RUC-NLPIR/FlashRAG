@@ -717,6 +717,7 @@ class SelfAskPipeline(BasicPipeline):
                 + "\n"
                 + res
             )
+            #gen_out = self.generator.generate(input_prompt, stop=[stop_condition])[0]
             gen_out = self.generator.generate(input_prompt, stop=["Context:", "#", stop_condition])[0]
             item.update_output(f'intermediate_output_iter{idx}', gen_out)
             
@@ -744,9 +745,9 @@ class SelfAskPipeline(BasicPipeline):
                 new_query = [l for l in gen_out.split("\n") if "Follow up: " in l][
                     0
                 ].split("Follow up: ")[-1]
-                new_retrieval_result = self.retriever.search(new_query)
-                retrieval_result.extend(new_retrieval_result)
-                retrieval_result = self._remove_duplicate_doc(retrieval_result)
+                retrieval_result = self.retriever.search(new_query)
+                #retrieval_result.extend(new_retrieval_result)
+                #retrieval_result = self._remove_duplicate_doc(retrieval_result)
 
             if "So the final answer is: " in gen_out:
                 res = (
