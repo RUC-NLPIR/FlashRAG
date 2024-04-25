@@ -13,6 +13,7 @@ class BasicPipeline:
         self.config = config
         self.device = config['device']
         self.evaluator = Evaluator(config)
+        self.save_retrieval_cache = config['save_retrieval_cache']
         # use for building prompt
         self.tokenizer = AutoTokenizer.from_pretrained(config['generator_model_path'])
 
@@ -24,6 +25,7 @@ class BasicPipeline:
 
     def evaluate(self, dataset, do_eval=True, pred_process_fun=None):
         r"""The evaluation process after finishing overall generation"""
+        
         if pred_process_fun is not None:
             raw_pred = dataset.pred
             processed_pred = [pred_process_fun(pred) for pred in raw_pred]
@@ -34,6 +36,10 @@ class BasicPipeline:
             # evaluate & save result
             eval_result = self.evaluator.evaluate(dataset)
             print(eval_result)
+
+        # save retrieval cache
+        if self.save_retrieval_cache:
+            self.retriever._save_cache()
 
         return dataset
         

@@ -50,6 +50,9 @@ retrieval_batch_size: 256
 retrieval_topk: 5
 retrieval_use_fp16: True
 retrieval_query_max_length: 128
+save_retrieval_cache: True
+use_retrieval_cache: False
+retrieval_cache_path: ~
 
 use_reranker: False
 rerank_model_path: ~

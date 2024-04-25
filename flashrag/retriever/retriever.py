@@ -1,8 +1,11 @@
 import faiss
 import json
+import os
+import warnings
 from abc import ABC, abstractmethod
 from typing import List, Dict
 import numpy as np
+import functools
 import torch
 from tqdm import tqdm
 from multiprocessing import Pool
@@ -15,7 +18,69 @@ import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
 from flashrag.retriever.utils import load_model, pooling, base_content_function, load_corpus, load_docs
 
-        
+
+
+def cache_manager(func):
+    @functools.wraps(func)
+    def wrapper(self, query_list, num, return_score):    
+        if self.use_cache:
+            if isinstance(query_list, str):
+                new_query_list = [query_list]
+            else:
+                new_query_list = query_list
+
+            no_cache_query = []
+            cache_results = []
+            for query in new_query_list:
+                if query in self.cache:
+                    cache_res = self.cache[query]
+                    if len(cache_res) < num:
+                        warnings.warn(f"The number of cached retrieval results is less than topk ({num})")
+                    cache_res = cache_res[:num]
+                    # separate the doc score
+                    doc_scores = [item.pop('score') for item in cache_res]
+                    cache_results.append((cache_res, doc_scores))
+                else:
+                    cache_results.append(None)
+                    no_cache_query.append(query)
+            
+            if no_cache_query != []:
+                no_cache_results, no_cache_scores = self.batch_search(no_cache_query, num ,True)
+                no_cache_idx = 0
+                for idx,res in enumerate(cache_results):
+                    if res is None:
+                        assert new_query_list[idx] == no_cache_query[no_cache_idx]
+                        cache_results = (no_cache_results[no_cache_idx], no_cache_scores[no_cache_scores])
+                        no_cache_idx += 1
+    
+            results, scores = ([t[0] for t in cache_results], [t[1] for t in cache_results])
+       
+        else:
+            results, scores = func(self, query_list, num, True)
+
+        if self.save_cache:
+            if not self.use_cache:
+                results, scores = func(self, query_list, num, True)
+            # merge result and score
+            if isinstance(query_list):
+                query_list = [query_list]
+                if 'batch' not in func.__name__:
+                    results = [results]
+                    scores = [scores]
+            for query, doc_items, doc_scores in zip(query_list, results, scores):
+                for item, score in zip(doc_items, doc_scores):
+                    item['score'] = score
+                self.cache[query] = doc_items
+
+        if return_score:
+            return results, scores
+        else:
+            return results
+
+    return wrapper
+
+
+
 class BaseRetriever(ABC):
     r"""Base object for all retrievers."""
 
@@ -27,9 +92,24 @@ class BaseRetriever(ABC):
         self.index_path = config['index_path']
         self.corpus_path = config['corpus_path']
 
+        self.save_cache = config['save_retrieval_cache']
+        self.use_cache = config['use_retrieval_cache']
+        self.cache_path = config['retrieval_cache_path']
+
+        if self.save_cache:
+            self.cache_save_path = os.path.join(config['save_dir'], 'retrieval_cache.json')
+            self.cache = {}
+        if self.use_cache:
+            assert self.cache_path is not None
+            with open(self.cache_path,"r") as f:
+                self.cache = json.load(f)
+    
+    def _save_cache(self):
+        with open(self.cache_save_path, "w") as f:
+            json.dump(self.cache, f, indent=4)
 
     @abstractmethod
-    def search(self, query: str, num: int) -> List[Dict[str, str]]:
+    def search(self, query: str, num: int, return_score:bool) -> List[Dict[str, str]]:
         r"""Retrieve topk relevant documents in corpus.
         
         Return:
@@ -59,6 +139,7 @@ class BM25Retriever(BaseRetriever):
         """
         return self.searcher.doc(0).raw() is not None
 
+    @cache_manager
     def search(self, query: str, num: int = None, return_score = False) -> List[Dict[str, str]]:
         if num is None:
             num = self.topk
@@ -83,8 +164,9 @@ class BM25Retriever(BaseRetriever):
             return results, scores
         else:
             return results
-
-    def batch_search(self, query_list, num: int = None, batch_size = None, return_score = False):
+        
+    @cache_manager
+    def batch_search(self, query_list, num: int = None, return_score = False):
         # TODO: modify batch method
         results = []
         scores = []
@@ -158,7 +240,7 @@ class DenseRetriever(BaseRetriever):
         query_emb = query_emb.astype(np.float32, order="C")
         return query_emb
 
-    
+    @cache_manager
     def search(self, query, num: int = None, return_score = False):
         if num is None:
             num = self.topk
@@ -173,12 +255,14 @@ class DenseRetriever(BaseRetriever):
         else:
             return results
 
-
-    def batch_search(self, query_list, num: int = None, batch_size = None, return_score = False):
+    @cache_manager
+    def batch_search(self, query_list, num: int = None, return_score = False):
+        if isinstance(query_list, str):
+            query_list = [query_list]
         if num is None:
             num = self.topk
-        if batch_size is None:
-            batch_size = self.batch_size
+        
+        batch_size = self.batch_size
 
         results = []
         scores = []
