@@ -1,5 +1,6 @@
 from flashrag.evaluator.utils import normalize_answer
 import re
+import warnings 
 from collections import Counter
 
 class BaseMetric:
@@ -169,3 +170,95 @@ class Sub_ExactMatch(BaseMetric):
         sub_em_score = sum(metric_score_list) / len(metric_score_list)
         
         return {"sub_em": sub_em_score}, metric_score_list
+
+class Retrieval_Recall(BaseMetric):
+    r"""The recall of the top-k retreived passages, we measure if any of the passage contain the answer string. """
+    metric_name = "retrieval_recall"
+    def __init__(self, config):
+        super().__init__(config)
+        self.topk = config['metric_setting']['retrieval_recall_topk']
+        
+    def calculate_metric(self, data):
+        golden_answers_list = data.golden_answers
+        retrieve_docs = data.retrieval_result
+        recall_score_list = []
+        for doc_list, golden_answers in zip(retrieve_docs, golden_answers_list):
+            if len(doc_list) < self.topk:
+                warnings.warn(f"Length of retrieved docs is smaller than topk ({self.topk})")
+            doc_list = [doc['contents'] for doc in doc_list[:self.topk]]
+            score = 0.0
+            for golden_answer in golden_answers:
+                if golden_answer in doc_list:
+                    score = 1.0
+                    break
+            recall_score_list.append(score)
+        recall_score = sum(recall_score_list) / len(recall_score_list)
+
+        return {f"retrieval_recall_top{self.topk}": recall_score}, recall_score_list
+
+class Rouge_Score(BaseMetric):
+    metric_name = "rouge_score"
+    def __init__(self, config):
+        super().__init__(config)
+        from rouge import Rouge
+        self.scorer = Rouge()
+    
+    def calculate_rouge(self, pred, golden_answers):
+        output = {}
+        for answer in golden_answers:
+            scores = self.scorer.get_scores(pred, answer)
+            for key in ['rouge-1', 'rouge-2', 'rouge-l']:
+                if key not in output:
+                    output[key] = []
+                output[key].append(scores[0][key]['f'])
+        for k,v in output.items():
+            output[k] = max(v)
+
+        return output
+
+
+class Rouge_1(Rouge_Score):
+    metric_name = "rouge-1"
+    def __init__(self, config):
+        super().__init__(config)
+
+    def calculate_metric(self, data):
+        golden_answers_list = data.golden_answers
+        pred_list = data.pred
+
+        metric_score_list = [self.calculate_rouge(pred, golden_answers)['rouge-1'] for pred, golden_answers in zip(pred_list, golden_answers_list)]
+        score = sum(metric_score_list) / len(metric_score_list)
+        
+        return {"rouge-1": score}, metric_score_list
+
+
+class Rouge_2(Rouge_Score):
+    metric_name = "rouge-2"
+    def __init__(self, config):
+        super().__init__(config)
+
+    def calculate_metric(self, data):
+        golden_answers_list = data.golden_answers
+        pred_list = data.pred
+
+        metric_score_list = [self.calculate_rouge(pred, golden_answers)['rouge-2'] for pred, golden_answers in zip(pred_list, golden_answers_list)]
+        score = sum(metric_score_list) / len(metric_score_list)
+        
+        return {"rouge-2": score}, metric_score_list
+
+class Rouge_L(Rouge_Score):
+    metric_name = "rouge-l"
+    def __init__(self, config):
+        super().__init__(config)
+
+    def calculate_metric(self, data):
+        golden_answers_list = data.golden_answers
+        pred_list = data.pred
+
+        metric_score_list = [self.calculate_rouge(pred, golden_answers)['rouge-l'] for pred, golden_answers in zip(pred_list, golden_answers_list)]
+        score = sum(metric_score_list) / len(metric_score_list)
+        
+        return {"rouge-l": score}, metric_score_list
+
+        
+        

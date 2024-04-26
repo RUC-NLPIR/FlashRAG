@@ -74,9 +74,12 @@ use_fid: False
 
 # ----Evaluation Settings----
 metrics: ['em']
+metric_setting:
+  retrieval_recall_topk: 5
 save_metric_score: True
 save_intermediate_data: False
 save_note: 'experiment'
+
 
 # ----Refiner Settings----
 refiner_name: ~

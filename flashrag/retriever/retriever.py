@@ -22,7 +22,9 @@ from flashrag.retriever.utils import load_model, pooling, base_content_function,
 
 def cache_manager(func):
     @functools.wraps(func)
-    def wrapper(self, query_list, num, return_score):    
+    def wrapper(self, query_list, num = None, return_score = False):    
+        if num is None:
+            num = self.topk
         if self.use_cache:
             if isinstance(query_list, str):
                 new_query_list = [query_list]
@@ -62,7 +64,7 @@ def cache_manager(func):
             if not self.use_cache:
                 results, scores = func(self, query_list, num, True)
             # merge result and score
-            if isinstance(query_list):
+            if isinstance(query_list, str):
                 query_list = [query_list]
                 if 'batch' not in func.__name__:
                     results = [results]
