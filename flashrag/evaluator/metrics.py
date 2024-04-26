@@ -260,5 +260,44 @@ class Rouge_L(Rouge_Score):
         
         return {"rouge-l": score}, metric_score_list
 
+
+
+
+class BLEU(BaseMetric):
+    metric_name = "bleu"
+    def __init__(self, config):
+        super().__init__(config)
+        from ._bleu import Tokenizer13a
+        self.tokenizer = Tokenizer13a()
+        self.max_order = config['metric_setting'].get('bleu_max_order', 4)
+        self.smooth = config['metric_setting'].get('bleu_smooth', False)
+
+    def calculate_metric(self, data):
+        from ._bleu import compute_bleu
+        golden_answers_list = data.golden_answers
+        pred_list = data.pred
         
-        
+        pred_list = [self.tokenizer(pred) for pred in pred_list]
+        golden_answers_list = [[self.tokenizer(ans) for ans in golden_answers] for golden_answers in golden_answers_list]
+        score = compute_bleu(
+            reference_corpus=golden_answers_list, 
+            translation_corpus=pred_list, 
+            max_order=self.max_order, 
+            smooth=self.smooth
+        )
+        (total_bleu, precisions, bp, ratio, translation_length, reference_length) = score
+
+        score_list = []
+        for pred, golden_answers in zip(pred_list, golden_answers_list):
+            pred = [pred]
+            golden_answers = [golden_answers]
+            score = compute_bleu(
+                reference_corpus=golden_answers_list, 
+                translation_corpus=pred_list, 
+                max_order=self.max_order, 
+                smooth=self.smooth
+            )
+            (bleu, precisions, bp, ratio, translation_length, reference_length) = score
+            score_list.append(bleu)
+
+        return {"bleu": total_bleu}, score_list
