@@ -55,7 +55,10 @@ use_retrieval_cache: False
 retrieval_cache_path: ~
 
 use_reranker: False
+rerank_model_name: ~
 rerank_model_path: ~
+rerank_pooling_method: ~
+rerank_use_fp16: True
 rerank_topk: 5
 rerank_max_length: 512
 rerank_batch_size: 256

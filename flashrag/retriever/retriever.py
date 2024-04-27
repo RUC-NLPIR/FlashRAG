@@ -16,6 +16,7 @@ from torch import Tensor
 import torch.nn.functional as F
 
 from transformers import AutoTokenizer, AutoModel
+from flashrag.utils import get_reranker
 from flashrag.retriever.utils import load_model, pooling, base_content_function, load_corpus, load_docs
 from flashrag.retriever.encoder import Encoder
 
@@ -47,7 +48,8 @@ def cache_manager(func):
                     no_cache_query.append(query)
             
             if no_cache_query != []:
-                no_cache_results, no_cache_scores = self.batch_search(no_cache_query, num ,True)
+                # use batch search without decorator
+                no_cache_results, no_cache_scores = self._batch_search_with_rerank(no_cache_query, num ,True)
                 no_cache_idx = 0
                 for idx,res in enumerate(cache_results):
                     if res is None:
@@ -81,6 +83,20 @@ def cache_manager(func):
 
     return wrapper
 
+def rerank_manager(func):
+    @functools.wraps(func)
+    def wrapper(self, query_list, num = None, return_score = False):
+        results, scores = func(self, query_list, num, True)
+        if self.use_reranker:
+            results, scores = self.reranker.rerank(query_list, results)
+            if 'batch' not in func.__name__:
+                results = results[0]
+                scores = scores[0]
+        if return_score:
+            return results, scores
+        else:
+            return results 
+    return wrapper
 
 
 class BaseRetriever(ABC):
@@ -98,6 +114,10 @@ class BaseRetriever(ABC):
         self.use_cache = config['use_retrieval_cache']
         self.cache_path = config['retrieval_cache_path']
 
+        self.use_reranker = config['use_reranker']
+        if self.use_reranker:
+            self.reranker = get_reranker(config)
+
         if self.save_cache:
             self.cache_save_path = os.path.join(config['save_dir'], 'retrieval_cache.json')
             self.cache = {}
@@ -110,8 +130,7 @@ class BaseRetriever(ABC):
         with open(self.cache_save_path, "w") as f:
             json.dump(self.cache, f, indent=4)
 
-    @abstractmethod
-    def search(self, query: str, num: int, return_score:bool) -> List[Dict[str, str]]:
+    def _search(self, query: str, num: int, return_score:bool) -> List[Dict[str, str]]:
         r"""Retrieve topk relevant documents in corpus.
         
         Return:
@@ -124,7 +143,27 @@ class BaseRetriever(ABC):
 
         pass
 
+    def _batch_search(self, query_list, num, return_score):
+        pass
+
+    @cache_manager
+    @rerank_manager
+    def search(self, *args, **kwargs):
+        return self._search(*args, **kwargs)
     
+    @cache_manager
+    @rerank_manager
+    def batch_search(self, *args, **kwargs):
+        return self._batch_search(*args, **kwargs)
+    
+    @rerank_manager
+    def _batch_search_with_rerank(self, *args, **kwargs):
+        return self._batch_search(*args, **kwargs)
+    
+    @rerank_manager
+    def _search_with_rerank(self, *args, **kwargs):
+        return self._search(*args, **kwargs)
+
 class BM25Retriever(BaseRetriever):
     r"""BM25 retriever based on pre-built pyserini index."""
 
@@ -141,8 +180,7 @@ class BM25Retriever(BaseRetriever):
         """
         return self.searcher.doc(0).raw() is not None
 
-    @cache_manager
-    def search(self, query: str, num: int = None, return_score = False) -> List[Dict[str, str]]:
+    def _search(self, query: str, num: int = None, return_score = False) -> List[Dict[str, str]]:
         if num is None:
             num = self.topk
         hits = self.searcher.search(query, num)
@@ -166,14 +204,14 @@ class BM25Retriever(BaseRetriever):
             return results, scores
         else:
             return results
-        
-    @cache_manager
-    def batch_search(self, query_list, num: int = None, return_score = False):
+
+
+    def _batch_search(self, query_list, num: int = None, return_score = False):
         # TODO: modify batch method
         results = []
         scores = []
         for query in query_list:
-            item_result, item_score = self.search(query, num=num,return_score=True)
+            item_result, item_score = self._search(query, num,True)
             results.append(item_result)
             scores.append(item_score)
 
@@ -200,9 +238,7 @@ class DenseRetriever(BaseRetriever):
         self.topk = config['retrieval_topk']
         self.batch_size = self.config['retrieval_batch_size']
 
-
-    @cache_manager
-    def search(self, query, num: int = None, return_score = False):
+    def _search(self, query, num: int = None, return_score = False):
         if num is None:
             num = self.topk
         query_emb = self.encoder.encode(query)
@@ -216,8 +252,7 @@ class DenseRetriever(BaseRetriever):
         else:
             return results
 
-    @cache_manager
-    def batch_search(self, query_list, num: int = None, return_score = False):
+    def _batch_search(self, query_list, num: int = None, return_score = False):
         if isinstance(query_list, str):
             query_list = [query_list]
         if num is None:

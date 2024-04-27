@@ -157,6 +157,20 @@ class Config:
 
         if self.final_config['retrieval_pooling_method'] is None:
             self.final_config['retrieval_pooling_method'] = set_pooling_method(retrieval_method, model2pooling)
+        
+
+        rerank_model_name = self.final_config['rerank_model_name']
+        rerank_model_path = self.final_config['rerank_model_path']
+        if self.final_config['rerank_pooling_method'] is None:
+            if rerank_model_name is not None:
+                self.final_config['rerank_pooling_method'] = set_pooling_method(
+                    rerank_model_name,
+                    model2pooling
+                )
+        
+        if rerank_model_path is None and \
+            rerank_model_name is not None:
+            self.final_config['rerank_model_path'] = retriever_model2path.get(rerank_model_name, rerank_model_name)
 
         self.final_config['generator_model_path'] = generator_model2path.get(generator_model, generator_model)
 

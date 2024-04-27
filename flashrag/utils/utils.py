@@ -67,6 +67,23 @@ def get_retriever(config):
             "DenseRetriever"
         )(config)
 
+def get_reranker(config):
+    model_path = config['rerank_model_path']
+    # get model config
+    model_config = AutoConfig.from_pretrained(model_path)
+    arch = model_config.architectures[0]
+    if 'forsequenceclassification' in arch.lower():
+        return getattr(
+            importlib.import_module("flashrag.retriever"), 
+            "CrossReranker"
+        )(config)
+    else:
+        return getattr(
+            importlib.import_module("flashrag.retriever"), 
+            "BiReranker"
+        )(config)
+
+
 def get_judger(config):
     judger_name = config['judger_name']
     if 'skr' in judger_name.lower():
