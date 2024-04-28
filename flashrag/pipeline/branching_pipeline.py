@@ -9,11 +9,12 @@ from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
 from flashrag.pipeline import BasicPipeline
 from flashrag.pipeline.replug_utils import REPLUGLogitsProcessor, load_replug_model
+from flashrag.prompt import PromptTemplate
 
 
 class REPLUGPipeline(BasicPipeline):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, config, prompt_template=None):
+        super().__init__(config, prompt_template)
         self.retriever = get_retriever(config)
         # load specify model for REPLUG
         model = load_replug_model(config['generator_model_path'])
@@ -21,20 +22,28 @@ class REPLUGPipeline(BasicPipeline):
     
 
 
-    def build_single_doc_prompt(self, question, doc_list, prompt_templete=None):
-        rag_instruct = "Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}"
+    def build_single_doc_prompt(self, question, doc_list):
+        return [
+            self.prompt_template.get_string(
+                question = question,
+                formatted_reference = doc
+            )
+            for doc in doc_list
+        ]
+        
+        # rag_instruct = "Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}"
     
-        if prompt_templete is None:
-            prompt_templete = rag_instruct
-        prompt_list = []
-        for doc in doc_list:
-            prompt = [{"role":"system", "content": prompt_templete.format(reference = doc)},
-                        {"role":"user", "content":f"Question: {question}"}]
+        # if prompt_template is None:
+        #     prompt_template = rag_instruct
+        # prompt_list = []
+        # for doc in doc_list:
+        #     prompt = [{"role":"system", "content": prompt_template.format(reference = doc)},
+        #                 {"role":"user", "content":f"Question: {question}"}]
             
-            prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
-            prompt_list.append(prompt)
+        #     prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
+        #     prompt_list.append(prompt)
 
-        return prompt_list
+        # return prompt_list
 
     def format_reference(self, doc_item):
         content = doc_item['contents']
@@ -72,12 +81,14 @@ class REPLUGPipeline(BasicPipeline):
 
 
 class SuRePipeline(BasicPipeline):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, config, prompt_template=None):
+        super().__init__(config, prompt_template)
+        self.config = config
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
+        self.load_prompts()
     
-    def P_CAN(self, N, reference, question):
+    def load_prompts(self):
         # prompt for candidates generation 
         P_CAN_INSTRUCT = "Below are {N} passages related to the question at the end. After reading" \
                 "the passages, provide two correct candidates for the answer to the" \
@@ -86,12 +97,7 @@ class SuRePipeline(BasicPipeline):
                 "{reference}" \
                 "Question: {question}\n" \
                 "Answer:"
-        
-        prompt = [{"role":"user", "content": P_CAN_INSTRUCT.format(N=N, reference=reference, question=question)}]   
-        prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
-        return prompt
-    
-    def P_SUM(self, reference, question, pred):
+
         # prompt for candidate-conditioned summarization
         P_SUM_INSTRUCT =  "Reference:\n{reference}\n" \
                 "Your job is to act as a professional writer. You need to write a" \
@@ -102,24 +108,14 @@ class SuRePipeline(BasicPipeline):
                 "Question: {question}\n" \
                 "Prediction: {pred}\n" \
                 "Passage:"
-        
-        prompt = [{"role":"user", "content": P_SUM_INSTRUCT.format(reference=reference, question=question, pred=pred)}]   
-        prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
-        return prompt
-    
-    def P_VAL(self, question, pred, summary):
+
         # prompt for instance-wise validation
         P_VAL_INSTRUCT = "Question: {question}\n" \
                 "Prediction: {pred}\n" \
                 "Passage: {summary}\n" \
                 "Does the passage correctly support the prediction? Choices: [True,False].\n" \
-                "Answer:" 
+                "Answer:"
         
-        prompt = [{"role":"user", "content": P_VAL_INSTRUCT.format(question=question, pred=pred, summary=summary)}]   
-        prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
-        return prompt
-    
-    def P_RANK(self, summary1, summary2, question):
         # prompt for pair-wise ranking
         P_RANK_INSTRUCT = "Question: Given the following passages, determine which one provides a" \
                 "more informative answer to the subsequent question.\n" \
@@ -130,10 +126,69 @@ class SuRePipeline(BasicPipeline):
                 "Identify which passage (Passage 1 or Passage 2) is more relevant and" \
                 "informative to answer the question at hand. Choices: [Passage 1,Passage 2].\n" \
                 "Answer:"
+
+        self.P_CAN_TEMPLATE = PromptTemplate(self.config, "", P_CAN_INSTRUCT)
+        self.P_SUM_TEMPLATE = PromptTemplate(self.config, "", P_SUM_INSTRUCT)
+        self.P_VAL_TEMPLATE = PromptTemplate(self.config, "", P_VAL_INSTRUCT)
+        self.P_RANK_TEMPLATE = PromptTemplate(self.config, "", P_RANK_INSTRUCT)
+
+    # def P_CAN(self, N, reference, question):
+    #     # prompt for candidates generation 
+    #     P_CAN_INSTRUCT = "Below are {N} passages related to the question at the end. After reading" \
+    #             "the passages, provide two correct candidates for the answer to the" \
+    #             "question at the end. Each answer should be in the form: (a) xx, (b)" \
+    #             "yy, and should not exceed 3 words for each candidate.\n\n" \
+    #             "{reference}" \
+    #             "Question: {question}\n" \
+    #             "Answer:"
         
-        prompt = [{"role":"user", "content": P_RANK_INSTRUCT.format(summary1=summary1, summary2=summary2, question=question)}]   
-        prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
-        return prompt
+    #     prompt = [{"role":"user", "content": P_CAN_INSTRUCT.format(N=N, reference=reference, question=question)}]   
+    #     prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
+    #     return prompt
+    
+    # def P_SUM(self, reference, question, pred):
+    #     # prompt for candidate-conditioned summarization
+    #     P_SUM_INSTRUCT =  "Reference:\n{reference}\n" \
+    #             "Your job is to act as a professional writer. You need to write a" \
+    #             "good-quality passage that can support the given prediction about the" \
+    #             "question only based on the information in the provided supporting passages.\n" \
+    #             "Now, let's start. After you write, please write [DONE] to indicate you" \
+    #             "are done. Do not write a prefix (e.g., 'Response:') while writing a passage.\n" \
+    #             "Question: {question}\n" \
+    #             "Prediction: {pred}\n" \
+    #             "Passage:"
+        
+    #     prompt = [{"role":"user", "content": P_SUM_INSTRUCT.format(reference=reference, question=question, pred=pred)}]   
+    #     prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
+    #     return prompt
+    
+    # def P_VAL(self, question, pred, summary):
+    #     # prompt for instance-wise validation
+    #     P_VAL_INSTRUCT = "Question: {question}\n" \
+    #             "Prediction: {pred}\n" \
+    #             "Passage: {summary}\n" \
+    #             "Does the passage correctly support the prediction? Choices: [True,False].\n" \
+    #             "Answer:" 
+        
+    #     prompt = [{"role":"user", "content": P_VAL_INSTRUCT.format(question=question, pred=pred, summary=summary)}]   
+    #     prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
+    #     return prompt
+    
+    # def P_RANK(self, summary1, summary2, question):
+    #     # prompt for pair-wise ranking
+    #     P_RANK_INSTRUCT = "Question: Given the following passages, determine which one provides a" \
+    #             "more informative answer to the subsequent question.\n" \
+    #             "Passage 1: {summary1}\n" \
+    #             "Passage 2: {summary2}\n" \
+    #             "Target Question: {question}\n" \
+    #             "Your Task:\n" \
+    #             "Identify which passage (Passage 1 or Passage 2) is more relevant and" \
+    #             "informative to answer the question at hand. Choices: [Passage 1,Passage 2].\n" \
+    #             "Answer:"
+        
+    #     prompt = [{"role":"user", "content": P_RANK_INSTRUCT.format(summary1=summary1, summary2=summary2, question=question)}]   
+    #     prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
+    #     return prompt
 
 
     @staticmethod
@@ -198,9 +253,10 @@ class SuRePipeline(BasicPipeline):
                                         texts = [i['text'] for i in retrieval_result]
                                         )
             # get candidates
-            input_prompt = self.P_CAN(
+
+            input_prompt = self.P_CAN_TEMPLATE.get_string(
                                             N = doc_num, 
-                                            reference = formatted_ref,
+                                            formatted_reference = formatted_ref,
                                             question = item.question
                                     )
             output = self.generator.generate([input_prompt])[0]
@@ -214,15 +270,15 @@ class SuRePipeline(BasicPipeline):
                 continue
 
             # get summarization for each candidate
-            input_prompts = [self.P_SUM(question = item.question,
-                                               pred = cand,
-                                               reference = formatted_ref) for cand in candidates]
+            input_prompts = [self.P_SUM_TEMPLATE.get_string(question = item.question,
+                                pred = cand,
+                                formatted_reference = formatted_ref) for cand in candidates]
 
             all_summary = self.generator.generate(input_prompts)
             item.update_output('all_summary', all_summary)
 
             # instance-wise validation
-            input_prompts = [self.P_VAL(question = item.question,
+            input_prompts = [self.P_VAL_TEMPLATE.get_string(question = item.question,
                                                pred = cand,
                                                summary = summary) for cand,summary in zip(candidates, all_summary)]
             val_results = self.generator.generate(input_prompts)
@@ -233,7 +289,7 @@ class SuRePipeline(BasicPipeline):
             summary_num = len(all_summary)
             score_matrix = np.zeros((summary_num, summary_num))
             iter_idxs = list(itertools.permutations(range(summary_num), 2))
-            input_prompts = [self.P_RANK(question = item.question,
+            input_prompts = [self.P_RANK_TEMPLATE.get_string(question = item.question,
                                                 summary1 = all_summary[idx_tuple[0]],
                                                 summary2 = all_summary[idx_tuple[1]]) for idx_tuple in iter_idxs]
             ranking_output = self.generator.generate(input_prompts)

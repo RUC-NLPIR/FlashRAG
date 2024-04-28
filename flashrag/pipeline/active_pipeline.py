@@ -8,11 +8,11 @@ from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
 from flashrag.pipeline import BasicPipeline
 from flashrag.dataset import get_batch_dataset, merge_batch_dataset
-
+from flashrag.prompt import PromptTemplate
 
 class IterativePipeline(BasicPipeline):
-    def __init__(self, config, iter_num = 3):
-        super().__init__(config)
+    def __init__(self, config, prompt_template=None,iter_num = 3):
+        super().__init__(config, prompt_template)
         self.iter_num = iter_num
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
@@ -34,11 +34,17 @@ class IterativePipeline(BasicPipeline):
             dataset.update_output(f'retrieval_result_iter_{iter_idx}', retrieval_results)
             
             # retrieval-augmented generation
-            input_prompts = self.build_prompt(questions, retrieval_results)
+            # input_prompts = self.build_prompt(questions, retrieval_results)
+            input_prompts = [self.prompt_template.get_string(
+                question=q, retrieval_result=r) for q,r in zip(questions, retrieval_results)] 
+
             dataset.update_output(f'prompt_iter_{iter_idx}', input_prompts)
             past_generation_result = self.generator.generate(input_prompts)
             dataset.update_output(f'pred_iter_{iter_idx}', past_generation_result)
         
+        # use last retrieval result for evaluation
+        dataset.update_output("retrieval_result", retrieval_results)
+
         dataset.update_output("pred", past_generation_result)
         dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
 
@@ -71,15 +77,27 @@ class SelfRAGPipeline(BasicPipeline):
     def __init__(self, config, threhsold=0.2, max_depth=2, beam_width=2,  
                  w_rel=1.0, w_sup=1.0, w_use=1.0,
                  use_grounding=True, use_utility=True, use_seqscore=True, ignore_cont=True,
-                 mode='adaptive_retrieval'):
+                 mode='adaptive_retrieval', prompt_template = None):
         
-        super().__init__(config)
+        super().__init__(config, prompt_template)
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
 
         assert mode in ['adaptive_retrieval', 'always_retrieve', 'no_retrieval']
 
         self.task = config['dataset_name']
+        self.task_instruction = self.task_inst.get(self.task, self.task_inst['normal_qa'])
+        if self.task_instruction is not None:
+            question_inst = self.task_instruction + "\n\n## Input:\n\n{question}"
+        else:
+            question_inst = '{question}'
+        if prompt_template is None:
+            self.prompt_template = PromptTemplate(
+                config,
+                user_prompt="### Instruction:\n" + question_inst + "\n\n### Response:\n",
+                enable_chat=False
+            )
+        
         self.threshold = threhsold
         self.max_depth = max_depth
         self.beam_width = beam_width
@@ -116,15 +134,14 @@ class SelfRAGPipeline(BasicPipeline):
 
         return ret_tokens, rel_tokens, grd_tokens, ut_tokens
     
-    def build_prompt(self, questions):
-        # TODO: add support for more task
-        # TODO: add support for more type of prompts
-        task_instruction = self.task_inst.get(self.task, self.task_inst['normal_qa'])
-        question_insts = [f"{task_instruction}\n\n## Input:\n\n{question}" if task_instruction is not None \
-                    else question for question in questions]
-        input_prompts = [f"### Instruction:\n{q_inst}\n\n### Response:\n" for q_inst in question_insts]
+    # def build_prompt(self, questions):
+    #     # TODO: add support for more task
+    #     # TODO: add support for more type of prompts
+    #     question_insts = [f"{self.task_instruction}\n\n## Input:\n\n{question}" if self.task_instruction is not None \
+    #                 else question for question in questions]
+    #     input_prompts = [f"### Instruction:\n{q_inst}\n\n### Response:\n" for q_inst in question_insts]
         
-        return input_prompts
+    #     return input_prompts
 
     def judge_retrieve(self, input_prompts):
         """Calculate whether a retrieve is required based on the output probability of 
@@ -480,7 +497,8 @@ class SelfRAGPipeline(BasicPipeline):
         retrieval_results = self.retriever.batch_search(questions)
         dataset.update_output('retrieval_result', retrieval_results)
 
-        input_prompts = self.build_prompt(questions)
+        #input_prompts = self.build_prompt(questions)
+        input_prompts = [self.prompt_template.get_string(question=q) for q in questions] 
 
         # determine whether to retrieve
         retrieval_flags = self.judge_retrieve(input_prompts)
@@ -523,7 +541,9 @@ class SelfRAGPipeline(BasicPipeline):
         retrieval_results = self.retriever.batch_search(questions)
         dataset.update_output('retrieval_result', retrieval_results)
 
-        input_prompts = self.build_prompt(questions)
+        #input_prompts = self.build_prompt(questions)
+        input_prompts = [self.prompt_template.get_string(question=q) for q in questions] 
+
 
         # determine whether to retrieve
         retrieval_flags = self.judge_retrieve(input_prompts)
@@ -577,8 +597,8 @@ class SelfRAGPipeline(BasicPipeline):
         
         
 class FLAREPipeline(BasicPipeline):
-    def __init__(self, config, threshold=0.2, look_ahead_steps=64, max_generation_length=256, max_iter_num=5):
-        super().__init__(config)
+    def __init__(self, config, threshold=0.2, look_ahead_steps=64, max_generation_length=256, max_iter_num=5, prompt_template=None):
+        super().__init__(config, prompt_template)
         # from nltk.tokenize.punkt import PunktSentenceTokenizer
         # self.sentence_spliter = PunktSentenceTokenizer()
 
@@ -622,8 +642,11 @@ class FLAREPipeline(BasicPipeline):
         iter_round = 0
         final_gen_result = ""
         while gen_length < self.max_generation_length and iter_round < self.max_iter_num:
-            input_prompt = self.build_prompt(
-                question_list=[question], use_reference=False, previous_gen=final_gen_result)[0]
+            input_prompt = self.prompt_template.get_string(
+                question=question, previous_gen=final_gen_result)
+
+            # input_prompt = self.build_prompt(
+            #     question_list=[question], use_reference=False, previous_gen=final_gen_result)[0]
             # scores: token logits of the whole generation seq
             round_gen_output, scores = self.generator.generate(
                 input_prompt, return_scores=True, stop=self.stop_sym, max_new_tokens=self.look_ahead_steps)
@@ -638,10 +661,13 @@ class FLAREPipeline(BasicPipeline):
                 # do retrieval-augmented generation
                 retrieval_result = self.retriever.search(query)
                 item.update_output('retrieval_result', retrieval_result)
-                input_prompt = self.build_prompt(
-                    question_list = [question], 
-                    retrieval_results = [retrieval_result], 
-                    previous_gen = final_gen_result)[0]
+                input_prompt = self.prompt_template.get_string(
+                    question=question, retrieval_result=retrieval_result, previous_gen=final_gen_result)
+
+                # input_prompt = self.build_prompt(
+                #     question_list = [question], 
+                #     retrieval_results = [retrieval_result], 
+                #     previous_gen = final_gen_result)[0]
                 output, scores = self.generator.generate(
                     input_prompt, return_scores=True, stop=self.stop_sym, max_new_tokens=self.look_ahead_steps)
                 output, scores = output[0], scores[0]
@@ -667,8 +693,8 @@ class FLAREPipeline(BasicPipeline):
 class SelfAskPipeline(BasicPipeline):
     FOLLOW_UP_PATTERN = r"Follow up:.*\n"
 
-    def __init__(self, config, max_iter=5, single_hop=True):
-        super().__init__(config)
+    def __init__(self, config, prompt_template=None, max_iter=5, single_hop=True):
+        super().__init__(config, prompt_template)
         from flashrag.utils import SELF_ASK_PROMPT_SINGLE_HOP, SELF_ASK_PROMPT_MULTI_HOP
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)

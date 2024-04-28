@@ -2,20 +2,21 @@ from transformers import AutoTokenizer
 from flashrag.evaluator import Evaluator
 from flashrag.dataset.utils import split_dataset, merge_dataset
 from flashrag.utils import get_retriever, get_generator, get_refiner, get_judger
-
+from flashrag.prompt import PromptTemplate
 
 class BasicPipeline:
     r"""Base object of all pipelines. A pipeline includes the overall process of RAG.
     If you want to implement a pipeline, you should inherit this class.
     
     """
-    def __init__(self, config):
+    def __init__(self, config, prompt_template = None):
         self.config = config
         self.device = config['device']
         self.evaluator = Evaluator(config)
         self.save_retrieval_cache = config['save_retrieval_cache']
-        # use for building prompt
-        self.tokenizer = AutoTokenizer.from_pretrained(config['generator_model_path'])
+        if prompt_template is None:
+            prompt_template = PromptTemplate(config)
+        self.prompt_template = prompt_template
 
     def run(self, dataset):
         r"""The overall inference process of a RAG framework.
@@ -43,65 +44,65 @@ class BasicPipeline:
 
         return dataset
         
-    def format_reference(self, retrieval_result):
-        format_reference = ''
-        for idx, doc_item in enumerate(retrieval_result):
-            content = doc_item['contents']
-            title = content.split("\n")[0]
-            text = "\n".join(content.split("\n")[1:])
-            format_reference += f"Doc {idx+1}(Title: {title}) {text}\n"
+    # def format_reference(self, retrieval_result):
+    #     format_reference = ''
+    #     for idx, doc_item in enumerate(retrieval_result):
+    #         content = doc_item['contents']
+    #         title = content.split("\n")[0]
+    #         text = "\n".join(content.split("\n")[1:])
+    #         format_reference += f"Doc {idx+1}(Title: {title}) {text}\n"
 
-        return format_reference
+    #     return format_reference
 
-    def build_prompt(self, question_list, 
-                     retrieval_results=None,
-                     prompt_templete=None, 
-                     use_reference = True, 
-                     reference = None,
-                     previous_gen = None):
+    # def build_prompt(self, question_list, 
+    #                  retrieval_results=None,
+    #                  prompt_template=None, 
+    #                  use_reference = True, 
+    #                  reference = None,
+    #                  previous_gen = None):
         
-        rag_instruct = "Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}"
-        standard_instruct = "Answer the question based on your own knowledge. Only give me the answer and do not output any other words."
-        if prompt_templete is None:
-            if use_reference:
-                prompt_templete = rag_instruct
-            else:
-                prompt_templete = standard_instruct
-        if reference is not None:
-            assert len(reference) == len(question_list)    
+    #     rag_instruct = "Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}"
+    #     standard_instruct = "Answer the question based on your own knowledge. Only give me the answer and do not output any other words."
+    #     if prompt_template is None:
+    #         if use_reference:
+    #             prompt_template = rag_instruct
+    #         else:
+    #             prompt_template = standard_instruct
+    #     if reference is not None:
+    #         assert len(reference) == len(question_list)    
 
-        prompt_list = []
-        for idx in range(len(question_list)):
-            question = question_list[idx]
-            if use_reference:
-                if reference is not None:
-                    # use provided reference
-                    format_reference = reference[idx]
-                else:
-                    retrieval_result = retrieval_results[idx]
-                    format_reference = self.format_reference(retrieval_result)
+    #     prompt_list = []
+    #     for idx in range(len(question_list)):
+    #         question = question_list[idx]
+    #         if use_reference:
+    #             if reference is not None:
+    #                 # use provided reference
+    #                 format_reference = reference[idx]
+    #             else:
+    #                 retrieval_result = retrieval_results[idx]
+    #                 format_reference = self.format_reference(retrieval_result)
 
-                sys_prompt = prompt_templete.format(reference = format_reference)
-            else:
-                sys_prompt = prompt_templete
+    #             sys_prompt = prompt_template.format(reference = format_reference)
+    #         else:
+    #             sys_prompt = prompt_template
 
-            prompt = [{"role":"system", "content":sys_prompt},
-                    {"role":"user", "content":f"Question: {question}"}]
+    #         prompt = [{"role":"system", "content":sys_prompt},
+    #                 {"role":"user", "content":f"Question: {question}"}]
         
-            prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
-            if previous_gen is not None:
-                prompt += previous_gen
-            prompt_list.append(prompt)
+    #         prompt = self.tokenizer.apply_chat_template(prompt,tokenize=False,add_generation_prompt=True)
+    #         if previous_gen is not None:
+    #             prompt += previous_gen
+    #         prompt_list.append(prompt)
 
-        return prompt_list
+    #     return prompt_list
     
 class SequentialPipeline(BasicPipeline):
-    def __init__(self, config):
+    def __init__(self, config, prompt_template = None):
         """
         inference stage:
             query -> pre-retrieval -> retriever -> post-retrieval -> generator
         """
-        super().__init__(config)
+        super().__init__(config, prompt_template)
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
         if config['rewriter_path'] is not None:
@@ -118,7 +119,8 @@ class SequentialPipeline(BasicPipeline):
     
     def naive_run(self, dataset, do_eval=True, pred_process_fun=None):
         # direct generation without RAG
-        input_prompts = self.build_prompt(dataset.question, use_reference=False)
+        #input_prompts = self.build_prompt(dataset.question, use_reference=False)
+        input_prompts = [self.prompt_template.get_string(question=q) for q in dataset.question] 
         dataset.update_output('prompt', input_prompts)
         if self.use_fid:
             print('Use FiD generation')
@@ -149,16 +151,28 @@ class SequentialPipeline(BasicPipeline):
             input_prompt_flag = self.refiner.input_prompt_flag
             if 'llmlingua' in self.refiner.name and input_prompt_flag:
                 # input prompt
-                input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result)
+                input_prompts = [
+                    self.prompt_template.get_string(question=q, retrieval_result=r)
+                    for q, r in zip(dataset.question, dataset.retrieval_result)
+                ] 
+                #input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result)
                 dataset.update_output('prompt', input_prompts)
                 input_prompts = self.refiner.batch_run(dataset)
             else:
                 # input retrieval docs
                 refine_results = self.refiner.batch_run(dataset)
                 dataset.update_output('refine_result', refine_results)
-                input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result, reference=refine_results)
+                input_prompts = [
+                    self.prompt_template.get_string(question=q, formatted_reference=r)
+                    for q, r in zip(dataset.question, refine_results)
+                ] 
+            
+                #input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result, reference=refine_results)
         else:
-            input_prompts = self.build_prompt(dataset.question, dataset.retrieval_result)
+            input_prompts = [
+                    self.prompt_template.get_string(question=q, retrieval_result=r)
+                    for q, r in zip(dataset.question, dataset.retrieval_result)
+            ] 
         dataset.update_output('prompt', input_prompts)
 
         if self.use_fid:
@@ -178,15 +192,15 @@ class SequentialPipeline(BasicPipeline):
         return dataset
 
 class ConditionalPipeline(BasicPipeline):
-    def __init__(self, config):
+    def __init__(self, config, prompt_template = None):
         """
         inference stage:
             query -> judger -> sequential pipeline or naive generate
         """
-        super().__init__(config)
+        super().__init__(config, prompt_template)
         self.judger = get_judger(config)
 
-        self.sequential_pipeline = SequentialPipeline(config)
+        self.sequential_pipeline = SequentialPipeline(config, prompt_template)
     
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         # judge_result: list of bool element, representing whether to use retrieval

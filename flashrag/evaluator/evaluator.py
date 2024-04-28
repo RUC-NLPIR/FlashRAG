@@ -55,11 +55,16 @@ class Evaluator:
 
         result_dict = {}
         for metric in self.metrics:
-            metric_result, metric_scores = self.metric_class[metric].calculate_metric(data)
-            result_dict.update(metric_result)
-            
-            for metric_score, item in zip(metric_scores, data):
-                item.update_evaluation_score(metric, metric_score)
+            try:
+                metric_result, metric_scores = self.metric_class[metric].calculate_metric(data)
+                result_dict.update(metric_result)
+                
+                for metric_score, item in zip(metric_scores, data):
+                    item.update_evaluation_score(metric, metric_score)
+            except Exception as e:
+                print(f'Error in {metric}!')
+                print(e)
+                continue
             
         if self.save_metric_flag:
             self.save_metric_score(result_dict)
