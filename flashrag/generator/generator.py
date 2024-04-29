@@ -145,7 +145,7 @@ class VLLMGenerator(BaseGenerator):
             gpu_memory_utilization = 0.85
         else:
             gpu_memory_utilization = config['vllm_gpu_memory_utilization']
-        if self.gpu_num != 1 and self.gpu_num%2 != 0:
+        if self.gpu_num != 1 and self.gpu_num %2 != 0:
             tensor_parallel_size = self.gpu_num - 1
         else:
             tensor_parallel_size = self.gpu_num
@@ -155,19 +155,14 @@ class VLLMGenerator(BaseGenerator):
         if self.lora_path is not None:
             self.use_lora = True
 
-        if self.use_lora:
-            self.model = LLM(self.model_path, 
-                         tensor_parallel_size = tensor_parallel_size,
-                         gpu_memory_utilization = gpu_memory_utilization,
-                         enable_lora = True,
-                         max_lora_rank=64
-                        )
-        else:
-            self.model = LLM(self.model_path, 
-                            tensor_parallel_size = tensor_parallel_size,
-                            gpu_memory_utilization = gpu_memory_utilization,
-                            )
-            # max_logprobs=32016
+        self.model = LLM(self.model_path, 
+                        tensor_parallel_size = tensor_parallel_size,
+                        gpu_memory_utilization = gpu_memory_utilization,
+                        enable_lora = True,
+                        max_lora_rank=64,
+                        max_logprobs=32016
+                    )
+    
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
             
     @torch.no_grad()
@@ -190,12 +185,7 @@ class VLLMGenerator(BaseGenerator):
         if return_scores:
             if 'logprobs' not in generation_params:
                 generation_params['logprobs'] = 100
-        # fix for llama3
-        # extra_eos_tokens = [self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")]
-        # if 'stop_token_ids' in generation_params:
-        #     generation_params['stop_token_ids'].extend(extra_eos_tokens)
-        # else:
-        #     generation_params['stop_token_ids'] = extra_eos_tokens
+
         if 'stop' in generation_params:
             generation_params['stop'].append("<|eot_id|>")
         else:

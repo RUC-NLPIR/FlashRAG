@@ -1,13 +1,7 @@
-import faiss
 import json
-from abc import ABC, abstractmethod
 from typing import List, Dict
-import numpy as np
-from sqlite_utils import Database
 import datasets
-import torch.nn.functional as F
-
-from transformers import AutoTokenizer, AutoModel, AutoConfig, T5EncoderModel
+from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 
 def load_model(

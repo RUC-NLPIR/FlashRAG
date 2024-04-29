@@ -1,18 +1,13 @@
 import os
 import faiss
 import json
-from abc import ABC, abstractmethod
-from typing import cast, List, Union, Tuple
 import warnings
 import numpy as np
-import datasets
-from torch.utils.data import DataLoader
 import shutil
 import subprocess
 import argparse
 import torch
 from tqdm import tqdm
-from sqlite_utils import Database
 from flashrag.retriever.utils import load_model, load_corpus, pooling, base_content_function
 
 class Index_Builder:

@@ -1,6 +1,4 @@
-import transformers
 from transformers import AutoTokenizer
-import torch
 import numpy as np
 import re
 from tqdm import tqdm
@@ -133,15 +131,6 @@ class SelfRAGPipeline(BasicPipeline):
                 ut_tokens[token] = tokenizer.convert_tokens_to_ids(token)
 
         return ret_tokens, rel_tokens, grd_tokens, ut_tokens
-    
-    # def build_prompt(self, questions):
-    #     # TODO: add support for more task
-    #     # TODO: add support for more type of prompts
-    #     question_insts = [f"{self.task_instruction}\n\n## Input:\n\n{question}" if self.task_instruction is not None \
-    #                 else question for question in questions]
-    #     input_prompts = [f"### Instruction:\n{q_inst}\n\n### Response:\n" for q_inst in question_insts]
-        
-    #     return input_prompts
 
     def judge_retrieve(self, input_prompts):
         """Calculate whether a retrieve is required based on the output probability of 
@@ -175,7 +164,7 @@ class SelfRAGPipeline(BasicPipeline):
                     for tok, tok_id in self.ret_tokens.items():
                         if tok_id not in all_pred_log_probs[idx][0]:
                             score_dict[tok] = -100
-                        prob = all_pred_log_probs[idx][0][tok_id]
+                        prob = all_pred_log_probs[idx][0][tok_id].logprob
                         score_dict[tok] = float(prob)
                     do_retrieve = score_dict["[Retrieval]"] / (
                         score_dict["[Retrieval]"] + score_dict["[No Retrieval]"]) > self.threshold
@@ -200,13 +189,12 @@ class SelfRAGPipeline(BasicPipeline):
             pred_log_probs = pred.outputs[0].logprobs
             seq_score = pred.outputs[0].cumulative_logprob / \
                 max(len(pred.outputs[0].token_ids), 1)
-
             relevance_score_dict.setdefault(p_idx, {})
             grd_score_dict.setdefault(p_idx, {})
             ut_score_dict.setdefault(p_idx, {})
             # Compute reward scores
             for tok, id in self.rel_tokens.items():
-                prob = pred_log_probs[0][id] if id in pred_log_probs[0] else -100
+                prob = pred_log_probs[0][id].logprob if id in pred_log_probs[0] else -100
                 relevance_score_dict[p_idx][tok] = np.exp(float(prob))
 
             if self.grd_tokens is not None:
@@ -218,7 +206,7 @@ class SelfRAGPipeline(BasicPipeline):
                 if len(groundness_token_appear_indices) > 0:
                     idx = groundness_token_appear_indices[0]
                     for token, token_id in self.grd_tokens.items():
-                        prob = pred_log_probs[idx][token_id] if token_id in pred_log_probs[idx] else -100
+                        prob = pred_log_probs[idx][token_id].logprob if token_id in pred_log_probs[idx] else -100
                         grd_score_dict[p_idx][token] = np.exp(float(prob))
             utility_token_appear_indices = []
             if self.ut_tokens is not None:
@@ -228,7 +216,7 @@ class SelfRAGPipeline(BasicPipeline):
                 if len(utility_token_appear_indices) > 0:
                     idx = utility_token_appear_indices[0]
                     for token, token_id in self.ut_tokens.items():
-                        prob = pred_log_probs[idx][token_id] if token_id in pred_log_probs[idx] else -100
+                        prob = pred_log_probs[idx][token_id].logprob if token_id in pred_log_probs[idx] else -100
                         ut_score_dict[p_idx][token] = np.exp(float(prob))
 
             relevance_score = relevance_score_dict[p_idx]["[Relevant]"] / (
@@ -281,7 +269,7 @@ class SelfRAGPipeline(BasicPipeline):
             for order, idx in enumerate(ret_token_appear_indices):
                 ret_token_score_dict.setdefault(order, {})
                 for tok, tok_id in self.ret_tokens.items():
-                    prob = pred_log_probs[idx][tok_id] if tok_id in pred_log_probs[idx] else -100
+                    prob = pred_log_probs[idx][tok_id].logprob if tok_id in pred_log_probs[idx] else -100
                     ret_token_score_dict[order][tok] = np.exp(prob)
                 if ret_token_score_dict[order]["[Retrieval]"] + ret_token_score_dict[order]["[No Retrieval]"] != 0.0:
                     do_retrieve = (ret_token_score_dict[order]["[Retrieval]"] + ret_token_score_dict[order]["[Continue to Use Evidence]"]) / (

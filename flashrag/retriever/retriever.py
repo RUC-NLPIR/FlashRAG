@@ -4,20 +4,13 @@ import os
 import warnings
 from abc import ABC, abstractmethod
 from typing import List, Dict
-import numpy as np
 import functools
-import torch
 from tqdm import tqdm
 from multiprocessing import Pool
 from pyserini.search.lucene import LuceneSearcher
-from pyserini.index.lucene import IndexReader
 
-from torch import Tensor
-import torch.nn.functional as F
-
-from transformers import AutoTokenizer, AutoModel
 from flashrag.utils import get_reranker
-from flashrag.retriever.utils import load_model, pooling, base_content_function, load_corpus, load_docs
+from flashrag.retriever.utils import base_content_function, load_corpus, load_docs
 from flashrag.retriever.encoder import Encoder
 
 
