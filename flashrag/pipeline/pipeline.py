@@ -88,9 +88,9 @@ class SequentialPipeline(BasicPipeline):
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         input_query = dataset.question
-        if self.rewriter:
-            input_query = self.rewriter.batch_run(input_query)
-            dataset.update_output('rewrite_query', input_query)
+        # if self.rewriter:
+        #     input_query = self.rewriter.batch_run(input_query)
+        #     dataset.update_output('rewrite_query', input_query)
   
         retrieval_results = self.retriever.batch_search(input_query)
         dataset.update_output('retrieval_result', retrieval_results)
