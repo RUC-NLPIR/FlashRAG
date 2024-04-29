@@ -1,6 +1,5 @@
 cohere==5.3.3
 datasets==2.14.6
-faiss==1.7.4
 faiss_cpu==1.8.0
 fschat==0.2.32
 nltk==3.8.1
@@ -13,7 +12,6 @@ rank_bm25==0.2.2
 rouge==1.0.1
 setuptools==68.0.0
 spacy==3.7.4
-sqlite_utils==3.36
 tiktoken==0.6.0
 torch==2.2.1
 tqdm==4.66.1
