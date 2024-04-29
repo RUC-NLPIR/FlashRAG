@@ -3,6 +3,7 @@ import faiss
 import json
 import warnings
 import numpy as np
+from typing import cast
 import shutil
 import subprocess
 import argparse

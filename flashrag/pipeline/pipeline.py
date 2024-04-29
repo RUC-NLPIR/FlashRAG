@@ -53,10 +53,11 @@ class SequentialPipeline(BasicPipeline):
         super().__init__(config, prompt_template)
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
-        if config['rewriter_path'] is not None:
-            self.rewriter = get_rewriter(config)
-        else:
-            self.rewriter = None
+        # TODO: add rewriter module
+        # if config['rewriter_path'] is not None:
+        #     self.rewriter = get_rewriter(config)
+        # else:
+        #     self.rewriter = None
         
         self.use_fid = config['use_fid']
 
