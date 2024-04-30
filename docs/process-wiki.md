@@ -1,8 +1,8 @@
-# Building Wiki Corpus
+## Building Wiki Corpus
 
 You can create your own wiki corpus by following these steps.
 
-## Step0: Install necessary tools
+### Step1: Install necessary tools
 
 First, install the required tools:
 ```bash
@@ -17,7 +17,7 @@ pip install en_core_web_lg-3.7.1-py3-none-any.whl
 ```
 
 
-## Step1: Download Wiki dump
+### Step2: Download Wiki dump
 
 Download the Wikipedia dump you require in XML format. For instance: 
 
@@ -25,10 +25,10 @@ Download the Wikipedia dump you require in XML format. For instance:
 wget https://archive.org/download/enwiki-20181220/enwiki-20181220-pages-articles.xml.bz2
 ```
 
-You can access other dumps from this website[](https://archive.org/search?query=Wikimedia+database+dump&sort=-downloads).
+You can access other dumps from this [website](https://archive.org/search?query=Wikimedia+database+dump&sort=-downloads).
 
 
-## Step2: Run process script
+### Step3: Run process script
 
 Execute the provided script to process the wiki dump into JSONL format. Adjust the corpus partitioning parameters as needed:
 
