@@ -1,7 +1,7 @@
 cohere==5.3.3
 datasets==2.14.6
 faiss_cpu==1.8.0
-fschat==0.2.32
+fschat
 nltk==3.8.1
 numpy==1.24.3
 openai==0.28.1
