@@ -70,15 +70,6 @@ class SequentialPipeline(BasicPipeline):
         # direct generation without RAG
         input_prompts = [self.prompt_template.get_string(question=q) for q in dataset.question] 
         dataset.update_output('prompt', input_prompts)
-        if self.use_fid:
-            print('Use FiD generation')
-            input_prompts = []
-            for item in dataset:
-                q = item.question
-                docs = item.retrieval_result
-                input_prompts.append(
-                    [q + " " + doc for doc in docs]
-                )
 
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred",pred_answer_list)
