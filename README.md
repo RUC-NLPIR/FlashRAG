@@ -12,14 +12,16 @@
 </div>
 
 <h4 align="center">
-    <p>
-    | <a  href="#installation">Installation</a> |
-    <a href="#features">Features</a> |
-    <a href="#quick-start">Quick-Start</a> |
-    <a href="#⚙️-components"> Components</a> |
-    <a href="#🤖-supporting-methods"> Supporting Methods</a> |
-    <a href="#🗄️-supporting-datasets"> Supporting Datasets</a> |
-    </p>
+
+<p>
+<a href="#wrench-installation">Installation</a> |
+<a href="#sparkles-features">Features</a> |
+<a href="#running-quick-start">Quick-Start</a> |
+<a href="#gear-components"> Components</a> |
+<a href="#robot-supporting-methods"> Supporting Methods</a> |
+<a href="#notebook-supporting-datasets"> Supporting Datasets</a> |
+</p>
+
 
 </h4>
 
@@ -33,7 +35,7 @@ With FlashRAG and provided resources, you can effortless reproduce existing SOTA
 
 
 
-# ✨ Features
+## :sparkles: Features
 
 - **🛠 Extensive and Customizable Framework**: Includes essential components for RAG scenarios such as retrievers, rerankers, generators, and compressors, allowing for flexible assembly of complex pipelines.
 
@@ -45,7 +47,7 @@ With FlashRAG and provided resources, you can effortless reproduce existing SOTA
 
 - **🚀 Optimized Execution**: The library's efficiency is enhanced with tools like vLLM, FastChat for LLM inference acceleration, and Faiss for vector index management.
 
-# 🔧 Installation 
+## :wrench: Installation 
 
 To get started with FlashRAG, simply clone it from Github and install (requires Python 3.9+): 
 
@@ -55,7 +57,7 @@ cd FlashRAG
 pip install -e . 
 ```
 
-# 🏃 Quick Start
+## :running: Quick Start
 
 Run the following code to implement a naive RAG pipeline using provided toy datasets. 
 The default retriever is ```e5``` and default generator is ```llama2-7B-chat```. You need to fill in the corresponding model path in the following command. If you wish to use other models, please refer to the detailed instructions below.
@@ -73,7 +75,7 @@ After the code is completed, you can view the intermediate results of the run an
 
 If you would like to learn more about our toolkit, please refer to our documents.
 
-## ⚙️ Components
+## :gear: Components
 
 In FlashRAG, we have built a series of common RAG components, including retrievers, generators, refiners, and more. Based on these components, we have assembled several pipelines to implement the RAG workflow, while also providing the flexibility to combine these components in custom arrangements to create your own pipeline.
 
@@ -206,7 +208,7 @@ In each category, we have implemented corresponding common pipelines. Some pipel
 </table>
 
 
-## 🤖 Supporting Methods
+## :robot: Supporting Methods
 
 We have implemented 12 works with a consistent setting of:
 - **Generator:** LLAMA3-8B-instruct with input length of 4096
@@ -239,7 +241,7 @@ It’s important to note that, to ensure consistency, we have utilized a uniform
 
 
 
-## 🗄️ Supporting Datasets
+## :notebook: Supporting Datasets
 
 We have collected and processed 35 datasets widely used in RAG research, pre-processing them to ensure a consistent format for ease of use. For certain datasets (such as Wiki-asp), we have adapted them to fit the requirements of RAG tasks according to the methods commonly used within the community. Below is the list of datasets along with the corresponding sample sizes:
 
