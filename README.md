@@ -73,7 +73,7 @@ After the code is completed, you can view the intermediate results of the run an
 
 **Note:** This toy example is just to help test whether the entire process can run normally. Our toy retrieval document only contains 1000 pieces of data, so it may not yield good results.
 
-If you would like to learn more about our toolkit, please refer to our documents.
+If you would like to learn more about our toolkit, please refer to our [documents](./docs/basic_usage.md).
 
 ## :gear: Components
 
