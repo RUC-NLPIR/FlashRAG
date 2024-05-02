@@ -8,17 +8,14 @@ def get_dataset(config):
     dataset_path = config['dataset_path']
     all_split = config['split']
 
-    split_dict = {
-                'train': None,
-                'dev': None,
-                'test': None
-            }
+    split_dict = {split: None for split in all_split}
+
     for split in all_split:
         split_path = os.path.join(dataset_path, f'{split}.jsonl')
         if not os.path.exists(split_path):
             print(f"{split} file not exists!")
             continue
-        if split == "test" or split == 'dev':
+        if split == "test" or split == 'dev' or split == 'val':
             split_dict[split] = Dataset(config, 
                                         split_path, 
                                         sample_num = config['test_sample_num'], 
