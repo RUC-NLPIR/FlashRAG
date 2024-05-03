@@ -20,6 +20,7 @@
 <a href="#gear-components"> Components</a> |
 <a href="#robot-supporting-methods"> Supporting Methods</a> |
 <a href="#notebook-supporting-datasets"> Supporting Datasets</a> |
+<a href="#raised_hands-additional-faqs"> FAQs</a>
 </p>
 
 
@@ -59,6 +60,9 @@ pip install -e .
 
 ## :running: Quick Start
 
+
+#### Toy Example
+
 Run the following code to implement a naive RAG pipeline using provided toy datasets. 
 The default retriever is ```e5``` and default generator is ```llama2-7B-chat```. You need to fill in the corresponding model path in the following command. If you wish to use other models, please refer to the detailed instructions below.
 
@@ -73,7 +77,83 @@ After the code is completed, you can view the intermediate results of the run an
 
 **Note:** This toy example is just to help test whether the entire process can run normally. Our toy retrieval document only contains 1000 pieces of data, so it may not yield good results.
 
-If you would like to learn more about our toolkit, please refer to our [documents](./docs/basic_usage.md).
+#### Using the ready-made pipeline
+
+You can use the pipeline class we have already built (as shown in [pipelines](#pipelines)) to implement the RAG process inside. In this case, you just need to configure the config and load the corresponding pipeline.
+
+Firstly, load the entire process's config, which records various hyperparameters required in the RAG process. You can input yaml files as parameters or directly as variables. The priority of variables as input is higher than that of files.
+
+```python
+from flashrag.config import Config
+
+config_dict = {'data_dir': 'dataset/'}
+my_config = Config(config_file_path = 'my_config.yaml',
+                config_dict = config_dict)
+```
+You can refer to the [basic yaml file](./flashrag/config/basic_config.yaml) we provide to set your own parameters. For specific parameter names and meanings, please refer to the [config parameter description](./docs/config_des.md).
+
+Next, load the corresponding dataset and initialize the pipeline. The components in the pipeline will be automatically loaded. 
+
+```python
+from flashrag.utils import get_dataset
+from flashrag.pipeline import SequentialPipeline
+from flashrag.prompt import PromptTemplate
+from flashrag.config import Config
+
+config_dict = {'data_dir': 'dataset/'}
+my_config = Config(config_file_path = 'my_config.yaml',
+                config_dict = config_dict)
+all_split = get_dataset(my_config)
+test_data = all_split['test']
+
+pipeline = SequentialPipeline(my_config)
+```
+
+You can specify your own input prompt using `PromptTemplete`:
+```python
+prompt_templete = PromptTemplate(
+    config, 
+    system_prompt = "Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}",
+    user_prompt = "Question: {question}\nAnswer:"
+)
+pipeline = SequentialPipeline(my_config, prompt_template=prompt_templete)
+```
+
+Finally, execute `pipeline.run` to obtain the final result.
+
+```python
+output_dataset = pipeline.run(test_data, do_eval=True)
+```
+The `output_dataset` contains the intermediate results and metric scores for each item in the input dataset.
+Meanwhile, the dataset with intermediate results and the overall evaluation score will also be saved as a file (if `save_intermediate_data` and `save_metric_score` are specified).
+
+#### Build your own pipeline
+
+Sometimes you may need to implement more complex RAG process, and you can build your own pipeline to implement it.
+Please first understand the input and output forms of the components you need to use from our [documentation](./docs/basic_usage.md).
+
+You just need to inherit `BasicPipeline`, initialize the components you need, and complete the `run` function.
+
+```python
+from flashrag.pipeline import BasicPipeline
+from flashrag.utils import get_retriever, get_generator
+
+class ToyPipeline(BasicPipeline):
+  def __init__(self, config, prompt_templete=None):
+    # Load your own components
+    pass
+
+  def run(self, dataset, do_eval=True):
+    # Complete your own process logic
+
+    # get attribute in dataset using `.`
+    input_query = dataset.question
+    ...
+    # use `update_output` to save intermeidate data
+    dataset.update_output("pred",pred_answer_list)
+    dataset = self.evaluate(dataset, do_eval=do_eval)
+    return dataset
+```
 
 ## :gear: Components
 
@@ -284,7 +364,10 @@ We have collected and processed 35 datasets widely used in RAG research, pre-pro
 | FermiSynth       | QA              | 8000            | 1000          | 1000          |
 | WNED-Wiki        | Entity Linking           | /               | 5599          | /             |
 
+## :raised_hands: Additional FAQs
 
+- [How to build my own corpus, such as a specific segmented Wikipedia?](./docs/process-wiki.md) 
+- [How to index my own corpus?](./docs/building-index.md)
 
 ## License
 

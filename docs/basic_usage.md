@@ -1,16 +1,5 @@
 # Usage 
 
-## Build index
-
-```python
-from flashrag.config import Config
-from flashrag.retriever import Index_Builder
-
-config = Config('my_config.yaml')
-index_builder = Index_Builder(config)
-index_builder.build_index()
-```
-
 ## Run naive RAG pipeline
 
 ```python
