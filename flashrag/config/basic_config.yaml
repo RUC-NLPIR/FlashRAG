@@ -68,19 +68,17 @@ generator_model: "llama2-7B-chat" # name or path of the generator model
 generator_max_input_len: 1024
 generator_batch_size: 2
 generation_params:
-  #max_new_tokens: 64
   max_tokens: 64
-  #do_sample: False
   temperature: 1.0
   top_p: 1.0
 use_fid: False
 
 # ----Evaluation Settings----
-metrics: ['em']
+metrics: ['em','f1','sub_em','precision','recall']
 metric_setting:
   retrieval_recall_topk: 5
 save_metric_score: True
-save_intermediate_data: False
+save_intermediate_data: True
 save_note: 'experiment'
 
 
@@ -96,9 +94,3 @@ refiner_encode_max_length: 256
 refiner_max_input_length: 1024
 refiner_max_output_length: 512
 
-# ----Index build settings(only use when building index)----
-index_doc_max_length: 256
-index_batch_size: 4096
-index_use_fp16: True
-index_save_dir: "indexes/"
-index_corpus_path: ~  # path to jsonl file, only used in building index
