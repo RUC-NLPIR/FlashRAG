@@ -1,0 +1,90 @@
+# ----Global Paths----
+# Paths to retrieval models
+retriever_model2path:
+  e5: model/e5-base-v2
+  contriever: "model/contriever-msmarco"
+  
+# Paths to generation models
+generator_model2path:
+  llama2-13B: model/llama-2-13b-hf
+  llama2-13B-chat: model/llama2-13b-chat
+  llama2-7B: model/llama-2-7b-hf
+  llama2-7B-chat: model/llama-2-7b-chat-hf
+  llama3-8B-instruct: model/LLaMA-3-8b-Instruct/
+
+# Pooling methods for each embedding model
+model2pooling:
+  default: "pooler"
+  e5: "mean"
+  bge: "cls"
+  contriever: "mean"
+
+# Indexes path for retrieval models
+method2index:
+  e5: "index/e5_flat_inner.index"
+  bm25: "index/bm25"
+  contriever: "index/contriever.index"
+
+# ----Environment Settings----
+gpu_id: "0,1"
+dataset_name: "nq"
+split: ["dev",'test']
+
+# Sampling configurations for testing
+test_sample_num: 5
+random_sample: False
+save_intermediate_data: True
+# Seed for reproducibility
+seed: 2024
+
+# Directory paths for data and outputs
+data_dir: "datasets/"
+#save_dir: "/data00/jiajie_jin/test_project/output"
+save_dir: "output/"
+
+# ----Retrieval Settings----
+retrieval_method: "e5" # name or path of the retrieval model
+index_path: ~ # Set automatically if not provided
+corpus_path: "index/wiki_dump.jsonl"
+retrieval_pooling_method: ~
+
+retrieval_topk: 5
+retrieval_batch_size: 256
+retrieval_use_fp16: True
+retrieval_query_max_length: 128
+save_retrieval_cache: False
+use_retrieval_cache: False
+retrieval_cache_path: ~
+
+use_reranker: False
+rerank_model_name: e5
+rerank_model_path: ~
+rerank_pooling_method: ~
+rerank_use_fp16: True
+rerank_topk: 5
+rerank_max_length: 512
+rerank_batch_size: 256
+
+# ----Generator Settings----
+use_vllm: False
+generator_model: "llama3-8B-instruct"  # name or path of the generator
+generator_max_input_len: 4096
+generator_batch_size: 4
+generation_params:
+  do_sample: False
+  max_tokens: 32
+  temperature: 0.1
+  top_p: 1.0
+vllm_gpu_memory_utilization: 0.8
+
+# ----Evaluation Settings----
+#metrics: ['em','f1','sub_em','precision','recall','retrieval_recall','rouge-1','rouge-l', 'bleu']
+metrics: ['em','f1','sub_em','precision','recall']
+save_metric_score: True
+
+# ---index building
+index_doc_max_length: 256
+index_batch_size: 4096
+index_use_fp16: True
+index_save_dir: "indexes/"
+index_corpus_path: ~  # path to jsonl file, only used in building index

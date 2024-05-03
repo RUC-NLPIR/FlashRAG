@@ -302,7 +302,7 @@ We have implemented 12 works with a consistent setting of:
 
 For open-source methods, we implemented their processes using our framework. For methods where the author did not provide source code, we will try our best to follow the methods in the original paper for implementation.
 
-For necessary settings and hyperparameters specific to some methods, we have documented them in the **specific settings** column. For more details, please consult our code.
+For necessary settings and hyperparameters specific to some methods, we have documented them in the **specific settings** column. For more details, please consult our [code](./examples/methods/run_exp.py).
 
 It’s important to note that, to ensure consistency, we have utilized a uniform setting. However, this setting may differ from the original setting of the method, leading to variations in results compared to the original outcomes.
 

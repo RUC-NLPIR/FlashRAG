@@ -1,0 +1,5945 @@
+[
+    {
+        "question": "who is the first husband of julia roberts?",
+        "judgement": "same",
+        "golden_answers": [
+            "Lyle Lovett"
+        ]
+    },
+    {
+        "question": "who was peter parker's first girlfriend?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mary Jane Watson"
+        ]
+    },
+    {
+        "question": "who is the president of the european union 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Jerzy Buzek"
+        ]
+    },
+    {
+        "question": "what soviet leader came to power in the 1920s?",
+        "judgement": "same",
+        "golden_answers": [
+            "Joseph Stalin"
+        ]
+    },
+    {
+        "question": "what buildings were destroyed in september 11th?",
+        "judgement": "same",
+        "golden_answers": [
+            ""
+        ]
+    },
+    {
+        "question": "when does school start in los angeles california 2011?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "August"
+        ]
+    },
+    {
+        "question": "when is the new series of the only way is essex starting?",
+        "judgement": "same",
+        "golden_answers": [
+            "2010-10-10"
+        ]
+    },
+    {
+        "question": "when did charlie sheen enter the thousand oaks rehab facility?",
+        "judgement": "same",
+        "golden_answers": [
+            "1998-05-20"
+        ]
+    },
+    {
+        "question": "what year did the vietnam war happen?",
+        "judgement": "same",
+        "golden_answers": [
+            "1959-03"
+        ]
+    },
+    {
+        "question": "what year was the cubs last world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "1908 World Series"
+        ]
+    },
+    {
+        "question": "who was among the first pioneers to cross the appalachian mountains into kentucky?",
+        "judgement": "same",
+        "golden_answers": [
+            "Daniel Boone"
+        ]
+    },
+    {
+        "question": "which movie did john rubinstein star in in 1996?",
+        "judgement": "same",
+        "golden_answers": [
+            "Norma Jean & Marilyn"
+        ]
+    },
+    {
+        "question": "when was tom brady first superbowl win?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XXXVI"
+        ]
+    },
+    {
+        "question": "which album did neko case release in march 2006?",
+        "judgement": "same",
+        "golden_answers": [
+            "Fox Confessor Brings The Flood"
+        ]
+    },
+    {
+        "question": "who is the long snapper currently for the steelers?",
+        "judgement": "same",
+        "golden_answers": [
+            "Greg Warren"
+        ]
+    },
+    {
+        "question": "when was the galileo spacecraft launched?",
+        "judgement": "same",
+        "golden_answers": [
+            "1989-10-18"
+        ]
+    },
+    {
+        "question": "what team does hank baskett play for 2009 season?",
+        "judgement": "same",
+        "golden_answers": [
+            "Indianapolis Colts"
+        ]
+    },
+    {
+        "question": "who does ronaldinho play for now 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Clube de Regatas do Flamengo"
+        ]
+    },
+    {
+        "question": "when did the renaissance begin?",
+        "judgement": "same",
+        "golden_answers": [
+            "1300"
+        ]
+    },
+    {
+        "question": "what year did dwayne wade came to the nba?",
+        "judgement": "same",
+        "golden_answers": [
+            "2003 NBA Draft"
+        ]
+    },
+    {
+        "question": "who played dumbledore in the first movie?",
+        "judgement": "same",
+        "golden_answers": [
+            "Richard Harris"
+        ]
+    },
+    {
+        "question": "where did huguenots settle in 1678?",
+        "judgement": "same",
+        "golden_answers": [
+            "New Paltz"
+        ]
+    },
+    {
+        "question": "who won the fa cup in 2008?",
+        "judgement": "same",
+        "golden_answers": [
+            "Portsmouth F.C."
+        ]
+    },
+    {
+        "question": "what to do in dubuque this weekend?",
+        "judgement": "same",
+        "golden_answers": [
+            "Dubuque Arboretum and Botanical Gardens"
+        ]
+    },
+    {
+        "question": "who did america gain independence from in 1776?",
+        "judgement": "same",
+        "golden_answers": [
+            "Britain"
+        ]
+    },
+    {
+        "question": "when did romney first run for president?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mitt Romney presidential campaign, 2008"
+        ]
+    },
+    {
+        "question": "who was the first coach of the bucaneers?",
+        "judgement": "same",
+        "golden_answers": [
+            "John McKay"
+        ]
+    },
+    {
+        "question": "what is the name of the first harry potter novel?",
+        "judgement": "same",
+        "golden_answers": [
+            "Harry Potter and the Philosopher's Stone"
+        ]
+    },
+    {
+        "question": "where is byron nelson 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Roanoke"
+        ]
+    },
+    {
+        "question": "which english team won the champions league first?",
+        "judgement": "same",
+        "golden_answers": [
+            "the Federation of Free States"
+        ]
+    },
+    {
+        "question": "what year did allen iverson get married?",
+        "judgement": "same",
+        "golden_answers": [
+            "2001-08-03"
+        ]
+    },
+    {
+        "question": "when is the diwali festival?",
+        "judgement": "same",
+        "golden_answers": [
+            "October"
+        ]
+    },
+    {
+        "question": "what is the currency in the dominican republic 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Dominican peso"
+        ]
+    },
+    {
+        "question": "what year did arizona cardinals go to superbowl?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Super Bowl XLIII"
+        ]
+    },
+    {
+        "question": "which year was lily mo sheen born in?",
+        "judgement": "same",
+        "golden_answers": [
+            "1999"
+        ]
+    },
+    {
+        "question": "who was the leader of the soviet union in 1945?",
+        "judgement": "same",
+        "golden_answers": [
+            "Joseph Stalin"
+        ]
+    },
+    {
+        "question": "which film starring sam anderson was released in 1982?",
+        "judgement": "same",
+        "golden_answers": [
+            "Airplane II: The Sequel"
+        ]
+    },
+    {
+        "question": "who is the governor of kentucky 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Steve Beshear"
+        ]
+    },
+    {
+        "question": "when richard nixon was president?",
+        "judgement": "same",
+        "golden_answers": [
+            "1960"
+        ]
+    },
+    {
+        "question": "who does david beckham play for in 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "LA Galaxy"
+        ]
+    },
+    {
+        "question": "what team does terrell owens play for last year?",
+        "judgement": "same",
+        "golden_answers": [
+            "Texas Revolution"
+        ]
+    },
+    {
+        "question": "when did easy aces stop being produced?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "1945"
+        ]
+    },
+    {
+        "question": "who is the current leader of france 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Nicolas Sarkozy"
+        ]
+    },
+    {
+        "question": "what is the first book of the old testament?",
+        "judgement": "same",
+        "golden_answers": [
+            "Genesis"
+        ]
+    },
+    {
+        "question": "who is the starting running back for the 2009 minnisota vikings?",
+        "judgement": "same",
+        "golden_answers": [
+            "Adrian Peterson"
+        ]
+    },
+    {
+        "question": "who owns chrysler corporation 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Chrysler Group LLC"
+        ]
+    },
+    {
+        "question": "what team does diego forlan currently play for?",
+        "judgement": "same",
+        "golden_answers": [
+            "Sport Club Internacional"
+        ]
+    },
+    {
+        "question": "when did francesco sabatini start working on the puerta de san vicente?",
+        "judgement": "same",
+        "golden_answers": [
+            "1775"
+        ]
+    },
+    {
+        "question": "what is the oregon ducks 2012 football schedule?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "University of Oregon"
+        ]
+    },
+    {
+        "question": "when did george w bush take office?",
+        "judgement": "same",
+        "golden_answers": [
+            "George W. Bush 2001 presidential inauguration"
+        ]
+    },
+    {
+        "question": "what type of government does vietnam have today?",
+        "judgement": "same",
+        "golden_answers": [
+            "Socialist state"
+        ]
+    },
+    {
+        "question": "what year did florida marlins win the world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "2003 World Series"
+        ]
+    },
+    {
+        "question": "when was panasonic corporation founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1918-03"
+        ]
+    },
+    {
+        "question": "who was the first president to grow tomatoes?",
+        "judgement": "same",
+        "golden_answers": [
+            "Thomas Jefferson"
+        ]
+    },
+    {
+        "question": "who is the first communist chairman in prc?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mao Zedong"
+        ]
+    },
+    {
+        "question": "which album did x japan release in july 1994?",
+        "judgement": "same",
+        "golden_answers": [
+            "Rusty Nail"
+        ]
+    },
+    {
+        "question": "which movie did ventura pons direct in 1990?",
+        "judgement": "same",
+        "golden_answers": [
+            "What's It All About"
+        ]
+    },
+    {
+        "question": "what is the second percy jackson book called?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Sea of Monsters"
+        ]
+    },
+    {
+        "question": "who did mexico win its independence from in 1821?",
+        "judgement": "same",
+        "golden_answers": [
+            "Spain"
+        ]
+    },
+    {
+        "question": "who played darth vader in the first movie?",
+        "judgement": "same",
+        "golden_answers": [
+            "David Prowse"
+        ]
+    },
+    {
+        "question": "what caused the cuban rebellion in 1868?",
+        "judgement": "same",
+        "golden_answers": [
+            "Ten Years' War"
+        ]
+    },
+    {
+        "question": "who is the quarterback for the new york giants as of december 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Eli Manning"
+        ]
+    },
+    {
+        "question": "when was letter from america last broadcast?",
+        "judgement": "same",
+        "golden_answers": [
+            "2004-02-20"
+        ]
+    },
+    {
+        "question": "where was the earthquake in chile 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Spanish"
+        ]
+    },
+    {
+        "question": "who was the colts coach in 2011?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Jim Caldwell"
+        ]
+    },
+    {
+        "question": "when does the world cup occur?",
+        "judgement": "same",
+        "golden_answers": [
+            "Every 4 Years"
+        ]
+    },
+    {
+        "question": "when was the last time the red sox won 100 games?",
+        "judgement": "same",
+        "golden_answers": [
+            "1912 Major League Baseball Season"
+        ]
+    },
+    {
+        "question": "how many people were at the 2006 fifa world cup final?",
+        "judgement": "same",
+        "golden_answers": [
+            "1"
+        ]
+    },
+    {
+        "question": "when was reagan inaugurated?",
+        "judgement": "same",
+        "golden_answers": [
+            "1981-01-20"
+        ]
+    },
+    {
+        "question": "who was the newscaster in 1948 on cbs evening news?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Douglas Edwards"
+        ]
+    },
+    {
+        "question": "which 1990 sport athlete was known by the nickname prime time?",
+        "judgement": "same",
+        "golden_answers": [
+            "deion sanders"
+        ]
+    },
+    {
+        "question": "when did the battle of thermopylae occur?",
+        "judgement": "same",
+        "golden_answers": [
+            "-0479"
+        ]
+    },
+    {
+        "question": "who is the richest person 2015?",
+        "judgement": "same",
+        "golden_answers": [
+            "Bill Gates"
+        ]
+    },
+    {
+        "question": "which movie did barney martin star in in 1981?",
+        "judgement": "same",
+        "golden_answers": [
+            "Arthur"
+        ]
+    },
+    {
+        "question": "where does allen iverson live now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Philadelphia"
+        ]
+    },
+    {
+        "question": "what team did kobe bryant play for first?",
+        "judgement": "same",
+        "golden_answers": [
+            "Los Angeles Lakers"
+        ]
+    },
+    {
+        "question": "who was invaded by iraq in 1990?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Kuwait"
+        ]
+    },
+    {
+        "question": "what team is reggie bush on 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Miami Dolphins"
+        ]
+    },
+    {
+        "question": "who was first to set up the buisness of ford?",
+        "judgement": "same",
+        "golden_answers": [
+            "Henry Ford"
+        ]
+    },
+    {
+        "question": "when did kerry run for president?",
+        "judgement": "same",
+        "golden_answers": [
+            "John Kerry presidential campaign, 2004"
+        ]
+    },
+    {
+        "question": "what team does allen iverson play for now?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Philadelphia 76ers"
+        ]
+    },
+    {
+        "question": "which book did william golding write in 1995?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Double Tongue"
+        ]
+    },
+    {
+        "question": "when was samuel pepys born?",
+        "judgement": "same",
+        "golden_answers": [
+            "1633-02-23 "
+        ]
+    },
+    {
+        "question": "who won fedex cup in 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Brandt Snedeker"
+        ]
+    },
+    {
+        "question": "what did charles babbage create in the 1800s?",
+        "judgement": "same",
+        "golden_answers": [
+            "Analytical Engine"
+        ]
+    },
+    {
+        "question": "who does ronaldinho play for now in 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Clube de Regatas do Flamengo"
+        ]
+    },
+    {
+        "question": "when was barghash bin said of zanzibar born?",
+        "judgement": "same",
+        "golden_answers": [
+            "1837"
+        ]
+    },
+    {
+        "question": "when did the aurora colorado shooting take place?",
+        "judgement": "same",
+        "golden_answers": [
+            "2012 Aurora shooting"
+        ]
+    },
+    {
+        "question": "when is the next geneva motor show?",
+        "judgement": "same",
+        "golden_answers": [
+            "March"
+        ]
+    },
+    {
+        "question": "when did greece win its independence from the ottoman empire?",
+        "judgement": "same",
+        "golden_answers": [
+            "Greek War of Independence"
+        ]
+    },
+    {
+        "question": "what date was abraham lincoln inaugurated?",
+        "judgement": "same",
+        "golden_answers": [
+            "Abraham Lincoln 1861 presidential inauguration"
+        ]
+    },
+    {
+        "question": "who is the current governor of the us in 2011?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Barack obama"
+        ]
+    },
+    {
+        "question": "which album did boredoms release in september 1992?",
+        "judgement": "same",
+        "golden_answers": [
+            "Pop Tatari"
+        ]
+    },
+    {
+        "question": "who won london mayoral elections 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Stephen Foster"
+        ]
+    },
+    {
+        "question": "what book did charles darwin wrote in 1859?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Origin of Species"
+        ]
+    },
+    {
+        "question": "when did airbags become mandatory in american?",
+        "judgement": "same",
+        "golden_answers": [
+            "1998"
+        ]
+    },
+    {
+        "question": "which film starring gao yuanyuan was released in 2001?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Beijing Bicycle"
+        ]
+    },
+    {
+        "question": "when did bill clinton graduated from georgetown university?",
+        "judgement": "same",
+        "golden_answers": [
+            "1968"
+        ]
+    },
+    {
+        "question": "what is the official language of china 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Standard Mandarin"
+        ]
+    },
+    {
+        "question": "which movie did billy wilder direct in 1981?",
+        "judgement": "same",
+        "golden_answers": [
+            "Buddy Buddy"
+        ]
+    },
+    {
+        "question": "when was porgy and bess first performed?",
+        "judgement": "same",
+        "golden_answers": [
+            "1935-09-30"
+        ]
+    },
+    {
+        "question": "which movie did alana austin star in in 1996?",
+        "judgement": "same",
+        "golden_answers": [
+            "A Mother's Instinct"
+        ]
+    },
+    {
+        "question": "who did plaxico burress sign with 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Pittsburgh Steelers"
+        ]
+    },
+    {
+        "question": "what currency is used in england 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "UK \u00a3"
+        ]
+    },
+    {
+        "question": "what time zone is london in right now?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Greenwich Mean Time"
+        ]
+    },
+    {
+        "question": "who is leann rimes with now?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Eddie Cibrian"
+        ]
+    },
+    {
+        "question": "what year did arizona diamondbacks win the world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "2001 World Series"
+        ]
+    },
+    {
+        "question": "which legend of zelda game is the first?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Legend of Zelda"
+        ]
+    },
+    {
+        "question": "what is the first book sherlock holmes appeared in?",
+        "judgement": "same",
+        "golden_answers": [
+            "A Study in Scarlet"
+        ]
+    },
+    {
+        "question": "who won the super bowl xliv 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "New Orleans Saints"
+        ]
+    },
+    {
+        "question": "when did mykel hawke and ruth england get married?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "2005"
+        ]
+    },
+    {
+        "question": "what is money used in korea before 1892?",
+        "judgement": "same",
+        "golden_answers": [
+            "the Korean mun"
+        ]
+    },
+    {
+        "question": "when was nutty professor released?",
+        "judgement": "same",
+        "golden_answers": [
+            "1996-06-27"
+        ]
+    },
+    {
+        "question": "what is the currency in egypt 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Egyptian pound"
+        ]
+    },
+    {
+        "question": "who plays captain kirk in 2009?",
+        "judgement": "same",
+        "golden_answers": [
+            "Chris Pine"
+        ]
+    },
+    {
+        "question": "what was the first name of the washington redskins?",
+        "judgement": "same",
+        "golden_answers": [
+            "Boston Redskins"
+        ]
+    },
+    {
+        "question": "when is the us open tennis mens final 2011?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "2011 US Open"
+        ]
+    },
+    {
+        "question": "when was the order of saint michael founded?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1469"
+        ]
+    },
+    {
+        "question": "who won the grammy for best new artist in 2014?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Sam Smith"
+        ]
+    },
+    {
+        "question": "which album did aretha franklin release in may 1976?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Sparkle"
+        ]
+    },
+    {
+        "question": "who was the prime minister of australia in 1958?",
+        "judgement": "same",
+        "golden_answers": [
+            "Robert Menzies"
+        ]
+    },
+    {
+        "question": "who seized power in italy in 1922?",
+        "judgement": "same",
+        "golden_answers": [
+            "Benito Mussolini"
+        ]
+    },
+    {
+        "question": "which album did steve hackett release in 1999?",
+        "judgement": "same",
+        "golden_answers": [
+            "Dark Town"
+        ]
+    },
+    {
+        "question": "who is the president of ecuador in 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Rafael Correa"
+        ]
+    },
+    {
+        "question": "when was the construction of new steubenville bridge finished?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1990"
+        ]
+    },
+    {
+        "question": "when was the musical annie written?",
+        "judgement": "same",
+        "golden_answers": [
+            "Annie (1977 original Broadway cast)"
+        ]
+    },
+    {
+        "question": "when was the release date for titanic?",
+        "judgement": "same",
+        "golden_answers": [
+            "1997-11-01"
+        ]
+    },
+    {
+        "question": "which album did venus hum release in july 2006?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Colors in the Wheel"
+        ]
+    },
+    {
+        "question": "when did everything is illuminated win the guardian first book award?",
+        "judgement": "same",
+        "golden_answers": [
+            "2002"
+        ]
+    },
+    {
+        "question": "what year was the album decade released?",
+        "judgement": "same",
+        "golden_answers": [
+            "1977-10-28"
+        ]
+    },
+    {
+        "question": "who is julia roberts married to 2012?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Daniel Moder"
+        ]
+    },
+    {
+        "question": "which album did billy currington release in october 2008?",
+        "judgement": "same",
+        "golden_answers": [
+            "Little Bit of Everything"
+        ]
+    },
+    {
+        "question": "what is the capital of italy today?",
+        "judgement": "same",
+        "golden_answers": [
+            "Rome"
+        ]
+    },
+    {
+        "question": "who was the first dictator of the soviet union?",
+        "judgement": "same",
+        "golden_answers": [
+            "Vladimir Lenin"
+        ]
+    },
+    {
+        "question": "when did the princetown railway close?",
+        "judgement": "same",
+        "golden_answers": [
+            "1956-03-03"
+        ]
+    },
+    {
+        "question": "where will tebow go in 2013?",
+        "judgement": "same",
+        "golden_answers": [
+            "New England Patriots"
+        ]
+    },
+    {
+        "question": "when did the wright brothers created their first plane?",
+        "judgement": "same",
+        "golden_answers": [
+            "1900 Wright Glider"
+        ]
+    },
+    {
+        "question": "when michael jordan got drafted?",
+        "judgement": "same",
+        "golden_answers": [
+            "1984 NBA Draft"
+        ]
+    },
+    {
+        "question": "which album did john scofield release in 1997?",
+        "judgement": "same",
+        "golden_answers": [
+            "A Go Go"
+        ]
+    },
+    {
+        "question": "who is jennifer lawrence boyfriend 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Nicholas Hoult"
+        ]
+    },
+    {
+        "question": "what money do they use in spain before 2002?",
+        "judgement": "same",
+        "golden_answers": [
+            "Peseta"
+        ]
+    },
+    {
+        "question": "when was the last time the oakland raiders were in the super bowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "2003 NFL season"
+        ]
+    },
+    {
+        "question": "who is the current president of the dominican republic in 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Leonel Fern\u00e1ndez"
+        ]
+    },
+    {
+        "question": "who was the winner of the 2009 nobel peace prize?",
+        "judgement": "same",
+        "golden_answers": [
+            "Barack Obama"
+        ]
+    },
+    {
+        "question": "which film starring katherine shindle was released in 2005?",
+        "judgement": "same",
+        "golden_answers": [
+            "Capote"
+        ]
+    },
+    {
+        "question": "what currency does the czech republic use now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Czech koruna"
+        ]
+    },
+    {
+        "question": "who does cristiano ronaldo play for 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Real Madrid C.F."
+        ]
+    },
+    {
+        "question": "when did braves win the world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "1995 World Series"
+        ]
+    },
+    {
+        "question": "during what time period did uluru form?",
+        "judgement": "same",
+        "golden_answers": [
+            "Paleozoic"
+        ]
+    },
+    {
+        "question": "which album did shalamar release in august 1990?",
+        "judgement": "same",
+        "golden_answers": [
+            "Wake Up"
+        ]
+    },
+    {
+        "question": "which album did billy paul release in 2000?",
+        "judgement": "same",
+        "golden_answers": [
+            "Live World Tour 1999"
+        ]
+    },
+    {
+        "question": "who owns audi 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Volkswagen Group"
+        ]
+    },
+    {
+        "question": "when were the texas rangers started?",
+        "judgement": "same",
+        "golden_answers": [
+            "1972"
+        ]
+    },
+    {
+        "question": "who is the leader of north korea today?",
+        "judgement": "same",
+        "golden_answers": [
+            "Kim Jong-un"
+        ]
+    },
+    {
+        "question": "when were women allowed to go to the olympics?",
+        "judgement": "same",
+        "golden_answers": [
+            "1900"
+        ]
+    },
+    {
+        "question": "when was the united nations founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1945-10-24"
+        ]
+    },
+    {
+        "question": "who owns chrysler corporation 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Walter Chrysler"
+        ]
+    },
+    {
+        "question": "what was the strongest storm in the 1992 atlantic hurricane season?",
+        "judgement": "same",
+        "golden_answers": [
+            "Hurricane Andrew"
+        ]
+    },
+    {
+        "question": "which film starring zoe caldwell was released in 2004?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Birth"
+        ]
+    },
+    {
+        "question": "when did argentina gain independence from spain?",
+        "judgement": "same",
+        "golden_answers": [
+            "1816-07-09"
+        ]
+    },
+    {
+        "question": "who did taft defeated in 1908?",
+        "judgement": "same",
+        "golden_answers": [
+            "William Jennings Bryan"
+        ]
+    },
+    {
+        "question": "when did democritus discovered the atom?",
+        "judgement": "same",
+        "golden_answers": [
+            "-442"
+        ]
+    },
+    {
+        "question": "when was the latest release of microsoft word?",
+        "judgement": "same",
+        "golden_answers": [
+            "2010-07-15"
+        ]
+    },
+    {
+        "question": "what year did tim duncan enter the nba?",
+        "judgement": "same",
+        "golden_answers": [
+            "1997-98 NBA season"
+        ]
+    },
+    {
+        "question": "which book did alan weisman write in 2007?",
+        "judgement": "same",
+        "golden_answers": [
+            "The World Without Us"
+        ]
+    },
+    {
+        "question": "who will alex smith play for in 2011?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "San Francisco 49ers"
+        ]
+    },
+    {
+        "question": "who is the governor of indiana 2009?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mitch Daniels"
+        ]
+    },
+    {
+        "question": "who played in the ncaa football championship in 2013?",
+        "judgement": "same",
+        "golden_answers": [
+            "Kansas"
+        ]
+    },
+    {
+        "question": "when did babe ruth start playing baseball in the mlb?",
+        "judgement": "same",
+        "golden_answers": [
+            "1914 Major League Baseball Season"
+        ]
+    },
+    {
+        "question": "who is the leader of the dominican republic 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Leonel Fern\u00e1ndez"
+        ]
+    },
+    {
+        "question": "when did kennedy get elected?",
+        "judgement": "same",
+        "golden_answers": [
+            "1960"
+        ]
+    },
+    {
+        "question": "who did the chargers draft in 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Frank Summers"
+        ]
+    },
+    {
+        "question": "what medal did graeme brown receive at the 2004 summer olympics?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Gold medal"
+        ]
+    },
+    {
+        "question": "who is the senator of the united states 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Jefferson Sessions"
+        ]
+    },
+    {
+        "question": "when does harry potter come out on dvd deathly hallows 2?",
+        "judgement": "same",
+        "golden_answers": [
+            "2011-11-11"
+        ]
+    },
+    {
+        "question": "who is the 2011 heisman trophy winner?",
+        "judgement": "same",
+        "golden_answers": [
+            "Robert Griffin III"
+        ]
+    },
+    {
+        "question": "when did the ny knicks last win a championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "1973 NBA Finals"
+        ]
+    },
+    {
+        "question": "who was the leader of the nation of islam in 1996?",
+        "judgement": "same",
+        "golden_answers": [
+            "Louis Farrakhan"
+        ]
+    },
+    {
+        "question": "what year did george washington become the president?",
+        "judgement": "same",
+        "golden_answers": [
+            "George Washington 1789 presidential inauguration"
+        ]
+    },
+    {
+        "question": "what year did france surrender to germany?",
+        "judgement": "same",
+        "golden_answers": [
+            "1940"
+        ]
+    },
+    {
+        "question": "how much money in damages did the 1904 toronto fire cost?",
+        "judgement": "same",
+        "golden_answers": [
+            "10350000"
+        ]
+    },
+    {
+        "question": "when was the last superbowl win for the steelers?",
+        "judgement": "same",
+        "golden_answers": [
+            "2006 NFL season"
+        ]
+    },
+    {
+        "question": "when did the new york mets start playing baseball?",
+        "judgement": "same",
+        "golden_answers": [
+            "1962"
+        ]
+    },
+    {
+        "question": "when was the first pope of the catholic church?",
+        "judgement": "same",
+        "golden_answers": [
+            "0001"
+        ]
+    },
+    {
+        "question": "what battle had the first tent hospital in the civil war?",
+        "judgement": "same",
+        "golden_answers": [
+            "Battle of Shiloh"
+        ]
+    },
+    {
+        "question": "what superman actors birthday is on 31st july?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "dean Cain"
+        ]
+    },
+    {
+        "question": "who is the governor of indiana 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mitch Daniels"
+        ]
+    },
+    {
+        "question": "who won the 2012 snooker masters?",
+        "judgement": "same",
+        "golden_answers": [
+            "Neil Robertson"
+        ]
+    },
+    {
+        "question": "when was the last time the toronto maple leafs made the playoffs?",
+        "judgement": "same",
+        "golden_answers": [
+            "2004-05-04"
+        ]
+    },
+    {
+        "question": "when did john f kennedy die?",
+        "judgement": "same",
+        "golden_answers": [
+            "1963-11-22"
+        ]
+    },
+    {
+        "question": "which movie did paul greengrass direct in 2006?",
+        "judgement": "same",
+        "golden_answers": [
+            "United 93"
+        ]
+    },
+    {
+        "question": "who is the governor of virginia 2011?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Bob McDonnell"
+        ]
+    },
+    {
+        "question": "which book did edgar allan poe write in 1827?",
+        "judgement": "same",
+        "golden_answers": [
+            "Tamerlane and Other Poems"
+        ]
+    },
+    {
+        "question": "when will oscar pistorius compete?",
+        "judgement": "same",
+        "golden_answers": [
+            "2012 Summer Olympics"
+        ]
+    },
+    {
+        "question": "which book did alasdair gray write in 1990?",
+        "judgement": "same",
+        "golden_answers": [
+            "Something Leather"
+        ]
+    },
+    {
+        "question": "who did president obama run against in 2008?",
+        "judgement": "same",
+        "golden_answers": [
+            "John McCain"
+        ]
+    },
+    {
+        "question": "what type of government does japan currently have?",
+        "judgement": "same",
+        "golden_answers": [
+            "Constitutional monarchy"
+        ]
+    },
+    {
+        "question": "who will the cavaliers draft 2012?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Dion Waiters"
+        ]
+    },
+    {
+        "question": "what year did john adams get elected president?",
+        "judgement": "same",
+        "golden_answers": [
+            "United States presidential election, 1796"
+        ]
+    },
+    {
+        "question": "when did cars first appeared in england?",
+        "judgement": "same",
+        "golden_answers": [
+            "1784"
+        ]
+    },
+    {
+        "question": "when was the last time the san francisco giants won a world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "2012 World Series"
+        ]
+    },
+    {
+        "question": "when is the last time the raiders won a championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XVIII"
+        ]
+    },
+    {
+        "question": "when did shawn johnson won the gold medal?",
+        "judgement": "same",
+        "golden_answers": [
+            "2008 Summer Olympics"
+        ]
+    },
+    {
+        "question": "who is the speaker of the house of representatives currently?",
+        "judgement": "same",
+        "golden_answers": [
+            "John Boehner"
+        ]
+    },
+    {
+        "question": "when was amnesty international aotearoa new zealand founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1965"
+        ]
+    },
+    {
+        "question": "what year did lakers win their first championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "1948 NBL Finals"
+        ]
+    },
+    {
+        "question": "how many first generation particles are there?",
+        "judgement": "same",
+        "golden_answers": [
+            "7"
+        ]
+    },
+    {
+        "question": "who won fedex cup 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Brandt Snedeker"
+        ]
+    },
+    {
+        "question": "who was the first jedi master?",
+        "judgement": "same",
+        "golden_answers": [
+            "Yoda"
+        ]
+    },
+    {
+        "question": "who became the wife of martin luther in 1525?",
+        "judgement": "same",
+        "golden_answers": [
+            "Katharina von Bora"
+        ]
+    },
+    {
+        "question": "which country did eric of sweden conquered in 1157?",
+        "judgement": "same",
+        "golden_answers": [
+            "Finland"
+        ]
+    },
+    {
+        "question": "when was the last time the ny giants played in the superbowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XLVI"
+        ]
+    },
+    {
+        "question": "what year did seattle seahawks go to the super bowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "2005 NFL season"
+        ]
+    },
+    {
+        "question": "what club does cristiano ronaldo play for in 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Real Madrid C.F."
+        ]
+    },
+    {
+        "question": "where does leland chapman live now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Kailua"
+        ]
+    },
+    {
+        "question": "when did the band massive attack form?",
+        "judgement": "same",
+        "golden_answers": [
+            "1987"
+        ]
+    },
+    {
+        "question": "what is the currency in england 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "UK \u00a3"
+        ]
+    },
+    {
+        "question": "when did anita brookner win the booker prize?",
+        "judgement": "same",
+        "golden_answers": [
+            "1984"
+        ]
+    },
+    {
+        "question": "what country gained its independence from britain on july 10 1973?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Bahamas"
+        ]
+    },
+    {
+        "question": "what year did president obama graduate from columbia university?",
+        "judgement": "same",
+        "golden_answers": [
+            "1983"
+        ]
+    },
+    {
+        "question": "when did the christchurch quake happened?",
+        "judgement": "same",
+        "golden_answers": [
+            "2011 Christchurch earthquake"
+        ]
+    },
+    {
+        "question": "what years did the atlanta braves win the world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "1995 World Series"
+        ]
+    },
+    {
+        "question": "which country gained its independence from spain in 1968?",
+        "judgement": "same",
+        "golden_answers": [
+            "Equatorial Guinea"
+        ]
+    },
+    {
+        "question": "what year did steve nash play for the mavericks?",
+        "judgement": "same",
+        "golden_answers": [
+            "1998-99 NBA season"
+        ]
+    },
+    {
+        "question": "what happened to justin bieber 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Billboard Music Award for Top Social Artist"
+        ]
+    },
+    {
+        "question": "who did jackie robinson first play for?",
+        "judgement": "same",
+        "golden_answers": [
+            "UCLA Bruins football"
+        ]
+    },
+    {
+        "question": "when was the civil war in libya?",
+        "judgement": "same",
+        "golden_answers": [
+            "2011-02-15"
+        ]
+    },
+    {
+        "question": "who did cristiano ronaldo play for in 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Real Madrid C.F."
+        ]
+    },
+    {
+        "question": "what land did the us acquire from spain in 1819?",
+        "judgement": "same",
+        "golden_answers": [
+            "Florida"
+        ]
+    },
+    {
+        "question": "when the atlanta braves won the world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "1995 World Series"
+        ]
+    },
+    {
+        "question": "which year was dr alana lentin born in?",
+        "judgement": "same",
+        "golden_answers": [
+            "1973"
+        ]
+    },
+    {
+        "question": "when did lilliane and maurice barrard die?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "1986"
+        ]
+    },
+    {
+        "question": "what year did brandon roy get drafted?",
+        "judgement": "same",
+        "golden_answers": [
+            "2006 NBA Draft"
+        ]
+    },
+    {
+        "question": "who won last year's nfl super bowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "New York Giants"
+        ]
+    },
+    {
+        "question": "who is the leader now in the us?",
+        "judgement": "same",
+        "golden_answers": [
+            "Barack Obama"
+        ]
+    },
+    {
+        "question": "what day of the week was giuseppe mango born on?",
+        "judgement": "same",
+        "golden_answers": [
+            "Saturday"
+        ]
+    },
+    {
+        "question": "what year were the cincinnati reds founded?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1881"
+        ]
+    },
+    {
+        "question": "who is the leader of france 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Nicolas Sarkozy"
+        ]
+    },
+    {
+        "question": "when did robin williams stop abusing cocaine?",
+        "judgement": "same",
+        "golden_answers": [
+            "1983"
+        ]
+    },
+    {
+        "question": "what percentage of the grapes in a 1966 chateau latour grand vin are merlot?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "20"
+        ]
+    },
+    {
+        "question": "what currency is used in germany 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Euro"
+        ]
+    },
+    {
+        "question": "who does michael oher play for in 2009?",
+        "judgement": "same",
+        "golden_answers": [
+            "Baltimore Ravens"
+        ]
+    },
+    {
+        "question": "when did tamu admit women?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1965"
+        ]
+    },
+    {
+        "question": "what year did william mckinley became president?",
+        "judgement": "same",
+        "golden_answers": [
+            "1897"
+        ]
+    },
+    {
+        "question": "what team did shaq play for first?",
+        "judgement": "same",
+        "golden_answers": [
+            "Orlando Magic"
+        ]
+    },
+    {
+        "question": "who to vote for in san francisco 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Libertarian Party of San Francisco"
+        ]
+    },
+    {
+        "question": "where does frida kahlo live in 1950?",
+        "judgement": "same",
+        "golden_answers": [
+            "Coyoac\u00e1n"
+        ]
+    },
+    {
+        "question": "who is running for vice president with barack obama 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Joe Biden"
+        ]
+    },
+    {
+        "question": "when did allen iverson get drafted?",
+        "judgement": "same",
+        "golden_answers": [
+            "1996-97 NBA season"
+        ]
+    },
+    {
+        "question": "who did elton john marry first?",
+        "judgement": "same",
+        "golden_answers": [
+            "Renate Blauel"
+        ]
+    },
+    {
+        "question": "who won the league cup in 2002?",
+        "judgement": "same",
+        "golden_answers": [
+            "Liverpool F.C."
+        ]
+    },
+    {
+        "question": "when did the standard school broadcast start production?",
+        "judgement": "same",
+        "golden_answers": [
+            "1928"
+        ]
+    },
+    {
+        "question": "when was the printing press invented?",
+        "judgement": "same",
+        "golden_answers": [
+            "1440"
+        ]
+    },
+    {
+        "question": "what year were the new york yankees established?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1903"
+        ]
+    },
+    {
+        "question": "when did the vikings settled in normandy?",
+        "judgement": "same",
+        "golden_answers": [
+            "9th Century"
+        ]
+    },
+    {
+        "question": "how old is the current president of north korea?",
+        "judgement": "same",
+        "golden_answers": [
+            "1984-01-08"
+        ]
+    },
+    {
+        "question": "who is ruling tunisia now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Ali Laarayedh"
+        ]
+    },
+    {
+        "question": "who will coach carolina panthers in 2013?",
+        "judgement": "same",
+        "golden_answers": [
+            "Ron Rivera"
+        ]
+    },
+    {
+        "question": "who is the current leader of china and what is their title?",
+        "judgement": "same",
+        "golden_answers": [
+            "Xi Jinping"
+        ]
+    },
+    {
+        "question": "when was cathy landers certified as a fifth degree black belt in seishindo kenpo?",
+        "judgement": "same",
+        "golden_answers": [
+            "2008-08-16"
+        ]
+    },
+    {
+        "question": "when did japan end as a musical group?",
+        "judgement": "same",
+        "golden_answers": [
+            "1991"
+        ]
+    },
+    {
+        "question": "when was the nfl hall of fame opened?",
+        "judgement": "same",
+        "golden_answers": [
+            "1963"
+        ]
+    },
+    {
+        "question": "since when has the california gull been the state bird of utah?",
+        "judgement": "same",
+        "golden_answers": [
+            "1955"
+        ]
+    },
+    {
+        "question": "what award did jack albertson win in 1968?",
+        "judgement": "same",
+        "golden_answers": [
+            "Academy Award for Actor in a Supporting Role"
+        ]
+    },
+    {
+        "question": "when did aldi originate?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1913"
+        ]
+    },
+    {
+        "question": "which movie did atom egoyan direct in 1991?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Adjuster"
+        ]
+    },
+    {
+        "question": "who is the president of the european union 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Martin Schulz"
+        ]
+    },
+    {
+        "question": "what was the purpose of the 1964 gulf of tonkin resolution?",
+        "judgement": "same",
+        "golden_answers": [
+            "Yen Bai mutiny"
+        ]
+    },
+    {
+        "question": "who is the american author who lived in japan during the 1800's?",
+        "judgement": "same",
+        "golden_answers": [
+            "Lafcadio Hearn"
+        ]
+    },
+    {
+        "question": "what is martin cooper doing now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Inventor"
+        ]
+    },
+    {
+        "question": "who was the former male entertainment tonight host with mary hart?",
+        "judgement": "same",
+        "golden_answers": [
+            "John Tesh"
+        ]
+    },
+    {
+        "question": "when was the airspeed oxford first flown?",
+        "judgement": "same",
+        "golden_answers": [
+            "1937-06-19"
+        ]
+    },
+    {
+        "question": "what year did the houston rockets win their first championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "1994 NBA Finals"
+        ]
+    },
+    {
+        "question": "what movie did danny devito win an award for in 1981?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Taxi"
+        ]
+    },
+    {
+        "question": "who does jr smith play for 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "New York Knicks"
+        ]
+    },
+    {
+        "question": "who was in the national championship in 2013?",
+        "judgement": "same",
+        "golden_answers": [
+            "Alabama"
+        ]
+    },
+    {
+        "question": "what is the official language of brazil now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Portuguese Language"
+        ]
+    },
+    {
+        "question": "which album did merril bainbridge release in 1996?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "The Garden"
+        ]
+    },
+    {
+        "question": "who is the governor of virginia in 2011?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Bob McDonnell"
+        ]
+    },
+    {
+        "question": "which year was archduke felix of austria born in?",
+        "judgement": "same",
+        "golden_answers": [
+            "1916"
+        ]
+    },
+    {
+        "question": "who was kim kardashian's first husband?",
+        "judgement": "same",
+        "golden_answers": [
+            "Damon Thomas"
+        ]
+    },
+    {
+        "question": "what team does lamar odom play for 2013?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Los Angeles Clippers"
+        ]
+    },
+    {
+        "question": "when did sherlock holmes live?",
+        "judgement": "same",
+        "golden_answers": [
+            "221B Baker Street "
+        ]
+    },
+    {
+        "question": "which album did humble pie release in march 1972?",
+        "judgement": "same",
+        "golden_answers": [
+            "Smokin'"
+        ]
+    },
+    {
+        "question": "where did the massive allied invasion of northern france take place in june 1944?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Normandy"
+        ]
+    },
+    {
+        "question": "which dawkins book to read first?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Selfish Gene"
+        ]
+    },
+    {
+        "question": "which album did kreator release in july 1997?",
+        "judgement": "same",
+        "golden_answers": [
+            "Outcast"
+        ]
+    },
+    {
+        "question": "who won american idol 2006 season 5?",
+        "judgement": "same",
+        "golden_answers": [
+            "Taylor Hicks"
+        ]
+    },
+    {
+        "question": "what year doug williams won the super bowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "1987 NFL season"
+        ]
+    },
+    {
+        "question": "when was the last time knicks won the championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "1973 NBA Finals"
+        ]
+    },
+    {
+        "question": "when was bruce almighty released?",
+        "judgement": "same",
+        "golden_answers": [
+            "2003-05-23"
+        ]
+    },
+    {
+        "question": "what positon does ray lewis currently play for the baltimore ravens?",
+        "judgement": "same",
+        "golden_answers": [
+            "Linebacker"
+        ]
+    },
+    {
+        "question": "what year did the orioles win 100 games?",
+        "judgement": "same",
+        "golden_answers": [
+            "1970 World Series"
+        ]
+    },
+    {
+        "question": "where do most immigrants in the united states come from today?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mexico"
+        ]
+    },
+    {
+        "question": "when was the san diego zoo opened?",
+        "judgement": "same",
+        "golden_answers": [
+            "1915"
+        ]
+    },
+    {
+        "question": "which book did greg bear write in 1999?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Darwin's Radio"
+        ]
+    },
+    {
+        "question": "when was girl scouts of the usa founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1912"
+        ]
+    },
+    {
+        "question": "when did carolina hurricanes win the cup?",
+        "judgement": "same",
+        "golden_answers": [
+            "2006 Stanley Cup Finals"
+        ]
+    },
+    {
+        "question": "what is the currency in slovakia 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Euro"
+        ]
+    },
+    {
+        "question": "when does one direction play at the olympics?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "2012"
+        ]
+    },
+    {
+        "question": "what book was written by george orwell and published in 1945?",
+        "judgement": "same",
+        "golden_answers": [
+            "Animal Farm"
+        ]
+    },
+    {
+        "question": "which movie did kevin lima star in in 1995?",
+        "judgement": "same",
+        "golden_answers": [
+            "A Goofy Movie"
+        ]
+    },
+    {
+        "question": "who is the current president of colombia 2011?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Juan Manuel Santos"
+        ]
+    },
+    {
+        "question": "when was barbie launched?",
+        "judgement": "same",
+        "golden_answers": [
+            "1959"
+        ]
+    },
+    {
+        "question": "what is the currency of germany in 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Euro"
+        ]
+    },
+    {
+        "question": "when was joni mitchell inducted into the rock and roll hall of fame?",
+        "judgement": "same",
+        "golden_answers": [
+            "1997"
+        ]
+    },
+    {
+        "question": "when was starbucks founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1971"
+        ]
+    },
+    {
+        "question": "who is the coach of the pittsburgh steelers 2005?",
+        "judgement": "same",
+        "golden_answers": [
+            "Bill Cowher"
+        ]
+    },
+    {
+        "question": "where does robin williams live 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "San Francisco"
+        ]
+    },
+    {
+        "question": "what year did united states buy alaska from russia?",
+        "judgement": "same",
+        "golden_answers": [
+            "1867"
+        ]
+    },
+    {
+        "question": "who did mexico gain independence from in 1821?",
+        "judgement": "same",
+        "golden_answers": [
+            "Spain"
+        ]
+    },
+    {
+        "question": "what conservative walked out of the democratic convention in 1948?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Strom Thurmond"
+        ]
+    },
+    {
+        "question": "which book did tobias wolff write in 2003?",
+        "judgement": "same",
+        "golden_answers": [
+            "Old School"
+        ]
+    },
+    {
+        "question": "when was the iphone introduced?",
+        "judgement": "same",
+        "golden_answers": [
+            "2007-06-29"
+        ]
+    },
+    {
+        "question": "who is the minority leader of the house of representatives now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Nancy Pelosi"
+        ]
+    },
+    {
+        "question": "where does kirk cameron live now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Los Angeles"
+        ]
+    },
+    {
+        "question": "who runs china 2011?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Wen Jiabao"
+        ]
+    },
+    {
+        "question": "when is the gold cup cheltenham?",
+        "judgement": "same",
+        "golden_answers": [
+            "Yearly"
+        ]
+    },
+    {
+        "question": "where is the world series 2012 being played?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Gashouse Gang: How Dizzy Dean, Leo Durocher, Branch Rickey, Pepper Martin, and Their Colorful, Come-from-Behind Ball Club Won the World Series - and America's Heart - During the Great Depression"
+        ]
+    },
+    {
+        "question": "when do we change the clocks in 2011 in australia?",
+        "judgement": "same",
+        "golden_answers": [
+            "04-01"
+        ]
+    },
+    {
+        "question": "when did the detroit pistons last win the championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "2004 NBA Finals"
+        ]
+    },
+    {
+        "question": "when was macintosh introduced?",
+        "judgement": "same",
+        "golden_answers": [
+            "1984-01-24"
+        ]
+    },
+    {
+        "question": "who was governor of texas in 2003?",
+        "judgement": "same",
+        "golden_answers": [
+            "Rick Perry"
+        ]
+    },
+    {
+        "question": "what year was peyton manning's rookie year?",
+        "judgement": "same",
+        "golden_answers": [
+            "1998 NFL Draft"
+        ]
+    },
+    {
+        "question": "when did coronet peak open?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1947"
+        ]
+    },
+    {
+        "question": "which album did bennie green release in 1955?",
+        "judgement": "same",
+        "golden_answers": [
+            "Bennie Green Blows His Horn"
+        ]
+    },
+    {
+        "question": "what team will michael vick play for in 2011?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Philadelphia Eagles"
+        ]
+    },
+    {
+        "question": "who runs the cornelia marie now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Jake Harris"
+        ]
+    },
+    {
+        "question": "when were the phillies founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1883"
+        ]
+    },
+    {
+        "question": "which album did clem snide release in 2007?",
+        "judgement": "same",
+        "golden_answers": [
+            "Lose Big"
+        ]
+    },
+    {
+        "question": "who came to power in cuba in 1959?",
+        "judgement": "same",
+        "golden_answers": [
+            "Fidel Castro"
+        ]
+    },
+    {
+        "question": "when did secretariat die?",
+        "judgement": "same",
+        "golden_answers": [
+            "1989-10-04"
+        ]
+    },
+    {
+        "question": "which album did ziggy marley release in may 1991?",
+        "judgement": "same",
+        "golden_answers": [
+            "Jahmekya"
+        ]
+    },
+    {
+        "question": "who won fa cup 1976?",
+        "judgement": "same",
+        "golden_answers": [
+            "Southampton F.C."
+        ]
+    },
+    {
+        "question": "when was the last dallas cowboys super bowl win?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XXX"
+        ]
+    },
+    {
+        "question": "what is the currency in croatia 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Croatian kuna"
+        ]
+    },
+    {
+        "question": "which album did loudon wainwright iii release in 1973?",
+        "judgement": "same",
+        "golden_answers": [
+            "Attempted Mustache"
+        ]
+    },
+    {
+        "question": "what was van halen first album?",
+        "judgement": "same",
+        "golden_answers": [
+            "Van Halen"
+        ]
+    },
+    {
+        "question": "which album did eddie rabbitt release in march 1986?",
+        "judgement": "same",
+        "golden_answers": [
+            "Rabbitt Trax"
+        ]
+    },
+    {
+        "question": "when was the last time the orioles had a winning season?",
+        "judgement": "same",
+        "golden_answers": [
+            "2012 World Series"
+        ]
+    },
+    {
+        "question": "what did nintendo announce at e3 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "NINTENDO CO LTD Common Stock"
+        ]
+    },
+    {
+        "question": "when was the last time the dodgers won a championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "1988 World Series"
+        ]
+    },
+    {
+        "question": "what year was danny devito born?",
+        "judgement": "same",
+        "golden_answers": [
+            "1944-11-17"
+        ]
+    },
+    {
+        "question": "when was the last time the ny knicks won a playoff game?",
+        "judgement": "same",
+        "golden_answers": [
+            "1973 NBA Finals"
+        ]
+    },
+    {
+        "question": "when was the frida kahlo exhibit at the philadelphia art museum?",
+        "judgement": "same",
+        "golden_answers": [
+            "2008-02-20"
+        ]
+    },
+    {
+        "question": "when did jennifer lopez start on in living color?",
+        "judgement": "same",
+        "golden_answers": [
+            "In Living Color (Season 4)"
+        ]
+    },
+    {
+        "question": "who was bill clinton's vice president during 1995?",
+        "judgement": "same",
+        "golden_answers": [
+            "Al Gore"
+        ]
+    },
+    {
+        "question": "what year was tom brady drafted?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "2000 NFL Draft"
+        ]
+    },
+    {
+        "question": "which album did boom boom satellites release in may 2006?",
+        "judgement": "same",
+        "golden_answers": [
+            "On"
+        ]
+    },
+    {
+        "question": "what team did david beckham play for in 2011?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "LA Galaxy"
+        ]
+    },
+    {
+        "question": "what timezone is indianapolis in now?",
+        "judgement": "same",
+        "golden_answers": [
+            "North American Eastern Time Zone"
+        ]
+    },
+    {
+        "question": "where was the first microsoft headquarters located?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Redmond"
+        ]
+    },
+    {
+        "question": "what year was the band limp bizkit established?",
+        "judgement": "same",
+        "golden_answers": [
+            "1995"
+        ]
+    },
+    {
+        "question": "where is poe buried now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Westminster Hall and Burying Ground"
+        ]
+    },
+    {
+        "question": "where does ryan lochte live now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Gainesville"
+        ]
+    },
+    {
+        "question": "what was the first language spoken in spain?",
+        "judgement": "same",
+        "golden_answers": [
+            "Spanish Language"
+        ]
+    },
+    {
+        "question": "when did hurricane andrew form?",
+        "judgement": "same",
+        "golden_answers": [
+            "1992-08-16"
+        ]
+    },
+    {
+        "question": "which book did mark twain write in 1909?",
+        "judgement": "same",
+        "golden_answers": [
+            "Letters from the Earth"
+        ]
+    },
+    {
+        "question": "who will plaxico burress play for in 2011?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "New York Jets"
+        ]
+    },
+    {
+        "question": "when did america gain independence from england?",
+        "judgement": "same",
+        "golden_answers": [
+            "1776"
+        ]
+    },
+    {
+        "question": "who is the leader of syria now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Bashar al-Assad"
+        ]
+    },
+    {
+        "question": "what time do the polls open in indiana 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "UTC\u221206:00"
+        ]
+    },
+    {
+        "question": "who was the first wife of prophet muhammad?",
+        "judgement": "same",
+        "golden_answers": [
+            "Khadija bint Khuwaylid"
+        ]
+    },
+    {
+        "question": "what day of the week was dan andriano born on?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Tuesday"
+        ]
+    },
+    {
+        "question": "who played the title role of superman in 1950?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "George Reeves"
+        ]
+    },
+    {
+        "question": "where is devon sawa now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Vancouver"
+        ]
+    },
+    {
+        "question": "who is the governor of colorado 2009?",
+        "judgement": "same",
+        "golden_answers": [
+            "Bill Ritter"
+        ]
+    },
+    {
+        "question": "which movie did costa gavras direct in 2005?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Le Couperet"
+        ]
+    },
+    {
+        "question": "when was the boston herald first published?",
+        "judgement": "same",
+        "golden_answers": [
+            "1982"
+        ]
+    },
+    {
+        "question": "when are the australian open men's finals?",
+        "judgement": "same",
+        "golden_answers": [
+            "Yearly"
+        ]
+    },
+    {
+        "question": "who played nba finals 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Los Angeles Lakers"
+        ]
+    },
+    {
+        "question": "when did liverpool fc last win the champions league?",
+        "judgement": "same",
+        "golden_answers": [
+            "2004\u201305 UEFA Champions League"
+        ]
+    },
+    {
+        "question": "when was the abbey of st. gall listed as an unesco world heritage site?",
+        "judgement": "same",
+        "golden_answers": [
+            "1983"
+        ]
+    },
+    {
+        "question": "who discovered the first athletic research laboratory at the university of illinois in 1925?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Coleman Griffith"
+        ]
+    },
+    {
+        "question": "when last did real madrid win the champions league?",
+        "judgement": "same",
+        "golden_answers": [
+            "2002 UEFA Champions League Final"
+        ]
+    },
+    {
+        "question": "what year did tut became king?",
+        "judgement": "same",
+        "golden_answers": [
+            "Eighteenth Dynasty of Egypt"
+        ]
+    },
+    {
+        "question": "where does kate middleton live 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Reading"
+        ]
+    },
+    {
+        "question": "what year did the florida marlins win their 2nd world series title?",
+        "judgement": "same",
+        "golden_answers": [
+            "2003 World Series"
+        ]
+    },
+    {
+        "question": "when did hurricane irene hit ct?",
+        "judgement": "same",
+        "golden_answers": [
+            "2011 Atlantic hurricane season"
+        ]
+    },
+    {
+        "question": "who did brett gardner play for in 2008?",
+        "judgement": "same",
+        "golden_answers": [
+            "New York Yankees"
+        ]
+    },
+    {
+        "question": "when is the last time the chicago bulls won a championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "1998 NBA Finals"
+        ]
+    },
+    {
+        "question": "what is celebrated on january 6th in france?",
+        "judgement": "same",
+        "golden_answers": [
+            "Epiphany"
+        ]
+    },
+    {
+        "question": "what years did joe montana win super bowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XIX"
+        ]
+    },
+    {
+        "question": "who is amy grant's first husband?",
+        "judgement": "same",
+        "golden_answers": [
+            "Gary Chapman"
+        ]
+    },
+    {
+        "question": "who arrived in jamestown in 1620?",
+        "judgement": "same",
+        "golden_answers": [
+            "German"
+        ]
+    },
+    {
+        "question": "what date did the earthquake in christchurch happen?",
+        "judgement": "same",
+        "golden_answers": [
+            "2011 Christchurch earthquake"
+        ]
+    },
+    {
+        "question": "who does michael oher play for in 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Baltimore Ravens"
+        ]
+    },
+    {
+        "question": "which film starring mighty gabby was released in 2005?",
+        "judgement": "same",
+        "golden_answers": [
+            "500 Years Later"
+        ]
+    },
+    {
+        "question": "which film starring thom hoffman was released in 2006?",
+        "judgement": "same",
+        "golden_answers": [
+            "Black Book"
+        ]
+    },
+    {
+        "question": "when was 300 released?",
+        "judgement": "same",
+        "golden_answers": [
+            "2006-12-09"
+        ]
+    },
+    {
+        "question": "which album did bonnie pink release in april 2000?",
+        "judgement": "same",
+        "golden_answers": [
+            "Let Go"
+        ]
+    },
+    {
+        "question": "what type of government does italy have 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Parliamentary republic"
+        ]
+    },
+    {
+        "question": "when was the pencarrow head lighthouse first lit?",
+        "judgement": "same",
+        "golden_answers": [
+            "1859"
+        ]
+    },
+    {
+        "question": "when did the black death start in asia?",
+        "judgement": "same",
+        "golden_answers": [
+            "1338"
+        ]
+    },
+    {
+        "question": "when did the raiders win the superbowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XI, Super Bowl XV, Super Bowl XVIII"
+        ]
+    },
+    {
+        "question": "what is the currency of sweden in 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Swedish krona"
+        ]
+    },
+    {
+        "question": "which movie did rob minkoff direct in 2002?",
+        "judgement": "same",
+        "golden_answers": [
+            "Stuart Little 2"
+        ]
+    },
+    {
+        "question": "who was the cohost in 1993 on cbs evening news?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Connie Chung"
+        ]
+    },
+    {
+        "question": "what year did reggie bush get drafted?",
+        "judgement": "same",
+        "golden_answers": [
+            "2006 NFL Draft"
+        ]
+    },
+    {
+        "question": "who is the current head of the department of the treasury?",
+        "judgement": "same",
+        "golden_answers": [
+            "Timothy Geithner"
+        ]
+    },
+    {
+        "question": "who won the presidential election in egypt 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mohamed Morsi"
+        ]
+    },
+    {
+        "question": "what year did dwight howard won the slam dunk contest?",
+        "judgement": "same",
+        "golden_answers": [
+            "2007-08 NBA season"
+        ]
+    },
+    {
+        "question": "what year magic johnson retired?",
+        "judgement": "same",
+        "golden_answers": [
+            "1991"
+        ]
+    },
+    {
+        "question": "which book did adeline yen mah write in 2004?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Chinese Cinderella and the Secret Dragon Society"
+        ]
+    },
+    {
+        "question": "when did joe walsh leave the eagles?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "1980"
+        ]
+    },
+    {
+        "question": "when and where did the battle of antietam take place?",
+        "judgement": "same",
+        "golden_answers": [
+            "1862-09-17"
+        ]
+    },
+    {
+        "question": "what time is the grand prix starting?",
+        "judgement": "same",
+        "golden_answers": [
+            "1950 Monaco Grand Prix"
+        ]
+    },
+    {
+        "question": "what led to the split of the republican party in 1912?",
+        "judgement": "same",
+        "golden_answers": [
+            "William Howard Taft"
+        ]
+    },
+    {
+        "question": "which book did cory doctorow write in 2001?",
+        "judgement": "same",
+        "golden_answers": [
+            "Frequency Audio"
+        ]
+    },
+    {
+        "question": "when did toronto blue jays become a team?",
+        "judgement": "same",
+        "golden_answers": [
+            "1977 Major League Baseball Season"
+        ]
+    },
+    {
+        "question": "which movie did zoe cassavetes direct in 2007?",
+        "judgement": "same",
+        "golden_answers": [
+            "Broken English"
+        ]
+    },
+    {
+        "question": "when was the last time the oakland raiders won the super bowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XVIII"
+        ]
+    },
+    {
+        "question": "what year was the new york blackout?",
+        "judgement": "same",
+        "golden_answers": [
+            "New York City blackout of 1977"
+        ]
+    },
+    {
+        "question": "who are the members of the supreme court 2009?",
+        "judgement": "same",
+        "golden_answers": [
+            "John Roberts"
+        ]
+    },
+    {
+        "question": "when was the last time the toronto maple leafs were in the stanley cup finals?",
+        "judgement": "same",
+        "golden_answers": [
+            "1967 Stanley Cup Finals"
+        ]
+    },
+    {
+        "question": "where is the warmest weather in the united states in december?",
+        "judgement": "same",
+        "golden_answers": [
+            "Florida"
+        ]
+    },
+    {
+        "question": "who did terrell owens play for in 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Cincinnati Bengals"
+        ]
+    },
+    {
+        "question": "when was 13 going on 30 released?",
+        "judgement": "same",
+        "golden_answers": [
+            "2004-04-14"
+        ]
+    },
+    {
+        "question": "which movie did eddie hodges star in in 1959?",
+        "judgement": "same",
+        "golden_answers": [
+            "A Hole in the Head"
+        ]
+    },
+    {
+        "question": "what currency does greece use 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Euro"
+        ]
+    },
+    {
+        "question": "who did abyssinia belong to in 1935?",
+        "judgement": "same",
+        "golden_answers": [
+            "Italy"
+        ]
+    },
+    {
+        "question": "when did kings last win stanley cup?",
+        "judgement": "same",
+        "golden_answers": [
+            "2012 Stanley Cup Finals"
+        ]
+    },
+    {
+        "question": "when did invertigo open?",
+        "judgement": "same",
+        "golden_answers": [
+            "1999-04-17"
+        ]
+    },
+    {
+        "question": "when did manchester united first win a trophy?",
+        "judgement": "same",
+        "golden_answers": [
+            "1976-77 FA Cup"
+        ]
+    },
+    {
+        "question": "what victories did labor unions win in the 1930s?",
+        "judgement": "same",
+        "golden_answers": [
+            "strike"
+        ]
+    },
+    {
+        "question": "when did jack albertson die?",
+        "judgement": "same",
+        "golden_answers": [
+            "1981-11-25"
+        ]
+    },
+    {
+        "question": "which album did peter cetera release in 1986?",
+        "judgement": "same",
+        "golden_answers": [
+            "Solitude/Solitaire"
+        ]
+    },
+    {
+        "question": "what did charles lindbergh became famous for in the 1920s?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Pilot"
+        ]
+    },
+    {
+        "question": "which film starring aubrey morris was released in 1996?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Bordello of Blood"
+        ]
+    },
+    {
+        "question": "where does bradley cooper live now?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Los Angeles"
+        ]
+    },
+    {
+        "question": "who is kurt busch driving for now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Furniture Row Racing"
+        ]
+    },
+    {
+        "question": "who was elected the first governor of virgina in 1776?",
+        "judgement": "same",
+        "golden_answers": [
+            "Patrick Henry"
+        ]
+    },
+    {
+        "question": "who won the presidential election in egypt in 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mohamed Morsi"
+        ]
+    },
+    {
+        "question": "when did johannes guttenberg invent the printing press?",
+        "judgement": "same",
+        "golden_answers": [
+            "1440"
+        ]
+    },
+    {
+        "question": "when did herman cain run for president?",
+        "judgement": "same",
+        "golden_answers": [
+            "Herman Cain presidential campaign, 2012"
+        ]
+    },
+    {
+        "question": "who was the prime minister of canada in 1998?",
+        "judgement": "same",
+        "golden_answers": [
+            "Jean Chr\u00e9tien"
+        ]
+    },
+    {
+        "question": "what is the capital of spain in 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Madrid"
+        ]
+    },
+    {
+        "question": "what team does jeremy lin play for 2013?",
+        "judgement": "same",
+        "golden_answers": [
+            "Houston Rockets"
+        ]
+    },
+    {
+        "question": "what is happening in germany right now?",
+        "judgement": "same",
+        "golden_answers": [
+            "German federal election, 2013"
+        ]
+    },
+    {
+        "question": "where is jay cutler now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Chicago Bears"
+        ]
+    },
+    {
+        "question": "what was the date of the first sesame street episode aired?",
+        "judgement": "same",
+        "golden_answers": [
+            "1969-11-10"
+        ]
+    },
+    {
+        "question": "what were the causes of the russian revolution in 1917?",
+        "judgement": "same",
+        "golden_answers": [
+            "World War I"
+        ]
+    },
+    {
+        "question": "when was borders founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1971"
+        ]
+    },
+    {
+        "question": "when did mexico win its independence from spain?",
+        "judgement": "same",
+        "golden_answers": [
+            "1821"
+        ]
+    },
+    {
+        "question": "who did abraham lincoln run against for president in 1864?",
+        "judgement": "same",
+        "golden_answers": [
+            "George B. McClellan"
+        ]
+    },
+    {
+        "question": "what year did john cappelletti win the heisman trophy?",
+        "judgement": "same",
+        "golden_answers": [
+            "1973"
+        ]
+    },
+    {
+        "question": "what is the currency in germany in 2010?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Euro"
+        ]
+    },
+    {
+        "question": "who won 2011 heisman trophy?",
+        "judgement": "same",
+        "golden_answers": [
+            "Robert Griffin III"
+        ]
+    },
+    {
+        "question": "which album did ruff endz release in may 2002?",
+        "judgement": "same",
+        "golden_answers": [
+            "Someone to Love You"
+        ]
+    },
+    {
+        "question": "when was louisiana entered into the union?",
+        "judgement": "same",
+        "golden_answers": [
+            "1812-04-30"
+        ]
+    },
+    {
+        "question": "when did christopher higgins stop playing for the montreal canadiens?",
+        "judgement": "same",
+        "golden_answers": [
+            "2009"
+        ]
+    },
+    {
+        "question": "when did the italian fascists came to power?",
+        "judgement": "same",
+        "golden_answers": [
+            "World War II"
+        ]
+    },
+    {
+        "question": "when did yuvraj made his odi debut?",
+        "judgement": "same",
+        "golden_answers": [
+            "2000-10-03"
+        ]
+    },
+    {
+        "question": "which album did the chordettes release in 1952?",
+        "judgement": "same",
+        "golden_answers": [
+            "Harmony Encores"
+        ]
+    },
+    {
+        "question": "what year did houston rockets win their first championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "1994 NBA Finals"
+        ]
+    },
+    {
+        "question": "when did the arab israeli war start?",
+        "judgement": "same",
+        "golden_answers": [
+            "1948-05-15"
+        ]
+    },
+    {
+        "question": "what was pink floyd's first album?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Piper at the Gates of Dawn"
+        ]
+    },
+    {
+        "question": "when was pride and prejudice published?",
+        "judgement": "same",
+        "golden_answers": [
+            "1813-01-28"
+        ]
+    },
+    {
+        "question": "who did shaq first play for?",
+        "judgement": "same",
+        "golden_answers": [
+            "Orlando Magic"
+        ]
+    },
+    {
+        "question": "when did barry zito won the cy young?",
+        "judgement": "same",
+        "golden_answers": [
+            "2002 Major League Baseball Season"
+        ]
+    },
+    {
+        "question": "when was gardasil released to the public?",
+        "judgement": "same",
+        "golden_answers": [
+            "2006"
+        ]
+    },
+    {
+        "question": "who did president bush run against in 2004?",
+        "judgement": "same",
+        "golden_answers": [
+            "John Kerry"
+        ]
+    },
+    {
+        "question": "who did michael vick play for in 2008?",
+        "judgement": "same",
+        "golden_answers": [
+            "Atlanta Falcons"
+        ]
+    },
+    {
+        "question": "who is the current leader of cuba today?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Ra\u00fal Castro"
+        ]
+    },
+    {
+        "question": "what is currency of czechoslovakia before 1939?",
+        "judgement": "same",
+        "golden_answers": [
+            "Czechoslovak koruna"
+        ]
+    },
+    {
+        "question": "what year did spudd webb won the dunk contest?",
+        "judgement": "same",
+        "golden_answers": [
+            "1985-86 NBA season"
+        ]
+    },
+    {
+        "question": "which movie did alfred hitchcock direct in 1960?",
+        "judgement": "same",
+        "golden_answers": [
+            "Psycho"
+        ]
+    },
+    {
+        "question": "what year was france invaded in world war 2?",
+        "judgement": "same",
+        "golden_answers": [
+            "1940"
+        ]
+    },
+    {
+        "question": "when was oxygen discovered?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "1774"
+        ]
+    },
+    {
+        "question": "what year did john glenn walk on the moon?",
+        "judgement": "same",
+        "golden_answers": [
+            "1962"
+        ]
+    },
+    {
+        "question": "how many storms were in the 2005 atlantic hurricane season?",
+        "judgement": "same",
+        "golden_answers": [
+            "28"
+        ]
+    },
+    {
+        "question": "what was manchester united first name?",
+        "judgement": "same",
+        "golden_answers": [
+            "Newton Heath L&YR F.C."
+        ]
+    },
+    {
+        "question": "who is the current coach of the new york knicks?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mike Woodson"
+        ]
+    },
+    {
+        "question": "what state does the simpsons live in 2012?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Springfield"
+        ]
+    },
+    {
+        "question": "when was mark mckinney born?",
+        "judgement": "same",
+        "golden_answers": [
+            "1959-06-26"
+        ]
+    },
+    {
+        "question": "when did tutankhamun die?",
+        "judgement": "same",
+        "golden_answers": [
+            "-1322"
+        ]
+    },
+    {
+        "question": "which album did they might be giants release in september 1994?",
+        "judgement": "same",
+        "golden_answers": [
+            "John Henry"
+        ]
+    },
+    {
+        "question": "when is dussehra celebrated in delhi?",
+        "judgement": "same",
+        "golden_answers": [
+            "October"
+        ]
+    },
+    {
+        "question": "when is the last time the ravens won a superbowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XLVII"
+        ]
+    },
+    {
+        "question": "when did mt st helens first erupt?",
+        "judgement": "same",
+        "golden_answers": [
+            "1980 eruption of Mount St. Helens"
+        ]
+    },
+    {
+        "question": "what going on in afghanistan right now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Conflict in Afghanistan"
+        ]
+    },
+    {
+        "question": "when does turbo come out on dvd in australia?",
+        "judgement": "same",
+        "golden_answers": [
+            "2014-03-12"
+        ]
+    },
+    {
+        "question": "which album did jan akkerman release in 1993?",
+        "judgement": "same",
+        "golden_answers": [
+            "Puccini's Cafe"
+        ]
+    },
+    {
+        "question": "who will michael schumacher drive for in 2013?",
+        "judgement": "same",
+        "golden_answers": [
+            "Omega SA"
+        ]
+    },
+    {
+        "question": "what country was formed from eastern pakistan in 1971?",
+        "judgement": "same",
+        "golden_answers": [
+            "Bangladesh"
+        ]
+    },
+    {
+        "question": "who was president in 1988 in the united states?",
+        "judgement": "same",
+        "golden_answers": [
+            "Ronald Reagan"
+        ]
+    },
+    {
+        "question": "what college did martin luther king graduated from in 1948?",
+        "judgement": "same",
+        "golden_answers": [
+            "Morehouse College"
+        ]
+    },
+    {
+        "question": "who will win the 2011 nhl stanley cup?",
+        "judgement": "same",
+        "golden_answers": [
+            "Canada"
+        ]
+    },
+    {
+        "question": "who is the current leader of china today?",
+        "judgement": "same",
+        "golden_answers": [
+            "Xi Jinping"
+        ]
+    },
+    {
+        "question": "who are the senators of new jersey now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Bob Menendez"
+        ]
+    },
+    {
+        "question": "when did the colorado rockies go to the world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "2007 National League Championship Series"
+        ]
+    },
+    {
+        "question": "when did moscow burn?",
+        "judgement": "same",
+        "golden_answers": [
+            "1812 Fire of Moscow"
+        ]
+    },
+    {
+        "question": "when did tom brady join the patriots?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "2000 NFL Draft"
+        ]
+    },
+    {
+        "question": "which movie did eric sykes star in in 2005?",
+        "judgement": "same",
+        "golden_answers": [
+            "Harry Potter and the Goblet of Fire"
+        ]
+    },
+    {
+        "question": "which movie did alan rafkin direct in 1965?",
+        "judgement": "same",
+        "golden_answers": [
+            "Ski Party"
+        ]
+    },
+    {
+        "question": "who is the current president of china 2010?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Hu Jintao"
+        ]
+    },
+    {
+        "question": "what was the first book charles dickens wrote?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Pickwick Papers"
+        ]
+    },
+    {
+        "question": "when do they have the olympics?",
+        "judgement": "same",
+        "golden_answers": [
+            "Once every four years"
+        ]
+    },
+    {
+        "question": "what team does kris humphries play for in 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Brooklyn Nets"
+        ]
+    },
+    {
+        "question": "when was the last time the dallas cowboys won the superbowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XXX"
+        ]
+    },
+    {
+        "question": "who does cristiano ronaldo play for in 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Real Madrid C.F."
+        ]
+    },
+    {
+        "question": "when was the last time iran invaded another country?",
+        "judgement": "same",
+        "golden_answers": [
+            "Iran\u2013Iraq War"
+        ]
+    },
+    {
+        "question": "where was hockey world cup 2010 held?",
+        "judgement": "same",
+        "golden_answers": [
+            "Dhyan Chand National Stadium"
+        ]
+    },
+    {
+        "question": "when did michael jordan return to the nba?",
+        "judgement": "same",
+        "golden_answers": [
+            "2001-02 NBA season"
+        ]
+    },
+    {
+        "question": "which book did william faulkner write in 1942?",
+        "judgement": "same",
+        "golden_answers": [
+            "Go Down, Moses"
+        ]
+    },
+    {
+        "question": "what year did tim tebow win the heisman trophy?",
+        "judgement": "same",
+        "golden_answers": [
+            "2007"
+        ]
+    },
+    {
+        "question": "what year did yankees win their first world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "1923 World Series"
+        ]
+    },
+    {
+        "question": "what was wayne gretzky's first team?",
+        "judgement": "same",
+        "golden_answers": [
+            "Edmonton Oilers"
+        ]
+    },
+    {
+        "question": "what record label is rihanna signed to 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Def Jam Recordings"
+        ]
+    },
+    {
+        "question": "what is the current leader of japan?",
+        "judgement": "same",
+        "golden_answers": [
+            "Shinz\u014d Abe"
+        ]
+    },
+    {
+        "question": "what president resigned from office in 1974?",
+        "judgement": "same",
+        "golden_answers": [
+            "Richard Nixon"
+        ]
+    },
+    {
+        "question": "what year were the ny yankees founded?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1901"
+        ]
+    },
+    {
+        "question": "when did shaq come to the nba?",
+        "judgement": "same",
+        "golden_answers": [
+            "1992-93 NBA season"
+        ]
+    },
+    {
+        "question": "when president lincoln was elected?",
+        "judgement": "same",
+        "golden_answers": [
+            "Abraham Lincoln Presidential Campaign, 1860"
+        ]
+    },
+    {
+        "question": "when did mayans predict end of the world?",
+        "judgement": "same",
+        "golden_answers": [
+            "2012"
+        ]
+    },
+    {
+        "question": "when and where was william shakespeare buried?",
+        "judgement": "same",
+        "golden_answers": [
+            "1616-05-05"
+        ]
+    },
+    {
+        "question": "where did barack obama go to college in 1991?",
+        "judgement": "same",
+        "golden_answers": [
+            "Harvard Law School"
+        ]
+    },
+    {
+        "question": "when did the bali bombings occur?",
+        "judgement": "same",
+        "golden_answers": [
+            "2002 Bali bombings"
+        ]
+    },
+    {
+        "question": "what document was signed by the pilgrims in 1620?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mayflower Compact"
+        ]
+    },
+    {
+        "question": "who is the governor of hawaii now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Neil Abercrombie"
+        ]
+    },
+    {
+        "question": "when did a prairie home companion first air?",
+        "judgement": "same",
+        "golden_answers": [
+            "1974-07-06"
+        ]
+    },
+    {
+        "question": "what team does joe girardi currently manage?",
+        "judgement": "same",
+        "golden_answers": [
+            "New York Yankees"
+        ]
+    },
+    {
+        "question": "when did michael schumacher win his first title?",
+        "judgement": "same",
+        "golden_answers": [
+            "1995"
+        ]
+    },
+    {
+        "question": "who is the prime minister of ethiopia now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Hailemariam Desalegn"
+        ]
+    },
+    {
+        "question": "when was jcpenney founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1902"
+        ]
+    },
+    {
+        "question": "who is paul mccartney's current wife?",
+        "judgement": "same",
+        "golden_answers": [
+            "Nancy Shevell"
+        ]
+    },
+    {
+        "question": "which album did chris hillman release in 2005?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Other Side"
+        ]
+    },
+    {
+        "question": "which album did deep purple release in july 1993?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Battle Rages On..."
+        ]
+    },
+    {
+        "question": "what did nikola tesla invented that is of use today?",
+        "judgement": "same",
+        "golden_answers": [
+            "Tesla coil"
+        ]
+    },
+    {
+        "question": "when was christopher columbus first expedition?",
+        "judgement": "same",
+        "golden_answers": [
+            "1492 Conquest of Paradise"
+        ]
+    },
+    {
+        "question": "when does nasdaq start trading?",
+        "judgement": "same",
+        "golden_answers": [
+            "1971"
+        ]
+    },
+    {
+        "question": "who is the ravens quarterback 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Joe Flacco"
+        ]
+    },
+    {
+        "question": "when did michael jackson go solo?",
+        "judgement": "same",
+        "golden_answers": [
+            "1967"
+        ]
+    },
+    {
+        "question": "who was the first governor of colonial south carolina?",
+        "judgement": "same",
+        "golden_answers": [
+            "Thomas Pinckney"
+        ]
+    },
+    {
+        "question": "when was the last time the la kings won a playoff series?",
+        "judgement": "same",
+        "golden_answers": [
+            "2012 Stanley Cup Finals"
+        ]
+    },
+    {
+        "question": "who was the first president to use a hearing aid?",
+        "judgement": "same",
+        "golden_answers": [
+            "George Washington"
+        ]
+    },
+    {
+        "question": "what year did edgar allan poe go to college?",
+        "judgement": "same",
+        "golden_answers": [
+            "1826-02-14"
+        ]
+    },
+    {
+        "question": "what country did united states purchase alaska from in 1867 for $7.2 million dollars?",
+        "judgement": "same",
+        "golden_answers": [
+            "Russia"
+        ]
+    },
+    {
+        "question": "where does selena gomez live right now 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "New York City"
+        ]
+    },
+    {
+        "question": "who are the senators of hawaii 2012?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Brian Schatz"
+        ]
+    },
+    {
+        "question": "what year did scottie pippen come into the nba?",
+        "judgement": "same",
+        "golden_answers": [
+            "1987"
+        ]
+    },
+    {
+        "question": "when was the last time the ny giants were in the super bowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XLVI"
+        ]
+    },
+    {
+        "question": "what currency does russia use 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Russian ruble"
+        ]
+    },
+    {
+        "question": "how many countries participated in the 2006 winter olympics?",
+        "judgement": "same",
+        "golden_answers": [
+            "80"
+        ]
+    },
+    {
+        "question": "who was the president of pakistan in 1980?",
+        "judgement": "same",
+        "golden_answers": [
+            "Muhammad Zia-ul-Haq"
+        ]
+    },
+    {
+        "question": "which album did professor griff release in 2001?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "And the Word Became Flesh"
+        ]
+    },
+    {
+        "question": "what is the name of dawn french's first novel?",
+        "judgement": "same",
+        "golden_answers": [
+            "Big knits"
+        ]
+    },
+    {
+        "question": "when was amos alonzo stagg high school founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1964"
+        ]
+    },
+    {
+        "question": "what money do they have in greek before 2002?",
+        "judgement": "same",
+        "golden_answers": [
+            "Greek drachma"
+        ]
+    },
+    {
+        "question": "what is the price of a 2012 jeep wrangler sport?",
+        "judgement": "same",
+        "golden_answers": [
+            "22045"
+        ]
+    },
+    {
+        "question": "when did mcdonalds officially open?",
+        "judgement": "same",
+        "golden_answers": [
+            "1940-05-15"
+        ]
+    },
+    {
+        "question": "when did the industrial revolution in europe began?",
+        "judgement": "same",
+        "golden_answers": [
+            "1790"
+        ]
+    },
+    {
+        "question": "what year was kevin durant drafted?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "2007 NBA Draft"
+        ]
+    },
+    {
+        "question": "who won the american league east in 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "New York Yankees"
+        ]
+    },
+    {
+        "question": "who does billy beane work for now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Oakland Athletics"
+        ]
+    },
+    {
+        "question": "who coached the dallas cowboys in 1996?",
+        "judgement": "same",
+        "golden_answers": [
+            "Chan Gailey"
+        ]
+    },
+    {
+        "question": "when was hank aaron inducted into the hall of fame?",
+        "judgement": "same",
+        "golden_answers": [
+            "1982-08-01"
+        ]
+    },
+    {
+        "question": "who graduated from west point in 1829?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Robert E. Lee"
+        ]
+    },
+    {
+        "question": "when was yosemite national park designated as a protected place?",
+        "judgement": "same",
+        "golden_answers": [
+            "1890-10-01"
+        ]
+    },
+    {
+        "question": "what did france lose to the british in the treaty of paris in 1763?",
+        "judgement": "same",
+        "golden_answers": [
+            "North America"
+        ]
+    },
+    {
+        "question": "which book did ann martin write in 2003?",
+        "judgement": "same",
+        "golden_answers": [
+            "The Meanest Doll in the World"
+        ]
+    },
+    {
+        "question": "what team does david beckham play for in 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "LA Galaxy"
+        ]
+    },
+    {
+        "question": "what year did the golden state warriors win their first nba championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "1947 BAA Finals"
+        ]
+    },
+    {
+        "question": "who is the president of costa rica in 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Laura Chinchilla"
+        ]
+    },
+    {
+        "question": "who is the governor of oregon 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "John Kitzhaber"
+        ]
+    },
+    {
+        "question": "what year michael jordan came in the nba?",
+        "judgement": "same",
+        "golden_answers": [
+            "1984 NBA Draft"
+        ]
+    },
+    {
+        "question": "when did mcgee start on ncis?",
+        "judgement": "same",
+        "golden_answers": [
+            "NCIS - Season 1"
+        ]
+    },
+    {
+        "question": "who is the prime minister of new zealand now?",
+        "judgement": "same",
+        "golden_answers": [
+            "John Key"
+        ]
+    },
+    {
+        "question": "how many teams participated in the 1979 cricket world cup?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "8"
+        ]
+    },
+    {
+        "question": "who is the governor of california 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Arnold Schwarzenegger"
+        ]
+    },
+    {
+        "question": "who won 2001 fa cup?",
+        "judgement": "same",
+        "golden_answers": [
+            "Liverpool F.C."
+        ]
+    },
+    {
+        "question": "who was the first leader of the afl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Samuel Gompers"
+        ]
+    },
+    {
+        "question": "what does the mayan calendar say about 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "The End Of Time"
+        ]
+    },
+    {
+        "question": "who was andy williams second wife?",
+        "judgement": "same",
+        "golden_answers": [
+            "Debbie Meyer"
+        ]
+    },
+    {
+        "question": "who played joe palooka in the 1934 palooka?",
+        "judgement": "same",
+        "golden_answers": [
+            "Stuart Erwin"
+        ]
+    },
+    {
+        "question": "what year did the mets win their first world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "1969 World Series"
+        ]
+    },
+    {
+        "question": "which movie did deepak sareen direct in 1998?",
+        "judgement": "same",
+        "golden_answers": [
+            "Jab Pyaar Kisise Hota Hai"
+        ]
+    },
+    {
+        "question": "which year was mohammed vi of morocco born in?",
+        "judgement": "same",
+        "golden_answers": [
+            "1963"
+        ]
+    },
+    {
+        "question": "what country did italy conquer in 1939?",
+        "judgement": "same",
+        "golden_answers": [
+            "Albania"
+        ]
+    },
+    {
+        "question": "which year was hanne ruud reksten born in?",
+        "judgement": "same",
+        "golden_answers": [
+            "1985"
+        ]
+    },
+    {
+        "question": "when was the ss great britain established as a museum?",
+        "judgement": "same",
+        "golden_answers": [
+            "2005"
+        ]
+    },
+    {
+        "question": "who does brian dawkins play for 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Denver Broncos"
+        ]
+    },
+    {
+        "question": "what year did kobe bryant go to high school?",
+        "judgement": "same",
+        "golden_answers": [
+            "1996"
+        ]
+    },
+    {
+        "question": "when did the last episode of six feet under air?",
+        "judgement": "same",
+        "golden_answers": [
+            "2005-08-21"
+        ]
+    },
+    {
+        "question": "who was the first russian president?",
+        "judgement": "same",
+        "golden_answers": [
+            "Boris Yeltsin"
+        ]
+    },
+    {
+        "question": "when was starry night painted?",
+        "judgement": "same",
+        "golden_answers": [
+            "1889-06"
+        ]
+    },
+    {
+        "question": "what year did michael jordan started his career?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "1984 NBA Draft"
+        ]
+    },
+    {
+        "question": "when was saint nicholas died?",
+        "judgement": "same",
+        "golden_answers": [
+            "343-12-06"
+        ]
+    },
+    {
+        "question": "which album did the octopus project release in october 2005?",
+        "judgement": "same",
+        "golden_answers": [
+            "One Ten Hundred Thousand Million"
+        ]
+    },
+    {
+        "question": "who is in charge of libya now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Ali Zeidan"
+        ]
+    },
+    {
+        "question": "who was the coach for spain in the 2010 fifa world cup?",
+        "judgement": "same",
+        "golden_answers": [
+            "Vicente Del Bosque"
+        ]
+    },
+    {
+        "question": "who founded the american federation of labor afl in 1886?",
+        "judgement": "same",
+        "golden_answers": [
+            "Samuel Gompers"
+        ]
+    },
+    {
+        "question": "which album did zimmers hole release in 1999?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Bound By Fire"
+        ]
+    },
+    {
+        "question": "what year was michael jordan rookie year?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1984-85 NBA season"
+        ]
+    },
+    {
+        "question": "when did ian thorpe become famous?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "2000 Summer Olympics"
+        ]
+    },
+    {
+        "question": "when did the apple i stop being sold?",
+        "judgement": "same",
+        "golden_answers": [
+            "1977-10"
+        ]
+    },
+    {
+        "question": "who is ruling north korea now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Kim Jong-un"
+        ]
+    },
+    {
+        "question": "what year did ray allen join the nba?",
+        "judgement": "same",
+        "golden_answers": [
+            "1996"
+        ]
+    },
+    {
+        "question": "which album did limbeck release in april 2007?",
+        "judgement": "same",
+        "golden_answers": [
+            "Limbeck"
+        ]
+    },
+    {
+        "question": "which movie did anita yuen star in in 2004?",
+        "judgement": "same",
+        "golden_answers": [
+            "Love Trilogy"
+        ]
+    },
+    {
+        "question": "who was the prime minister of pakistan in 1999?",
+        "judgement": "same",
+        "golden_answers": [
+            "Nawaz Sharif"
+        ]
+    },
+    {
+        "question": "for what country did bernard lagat play in the 2000 summer olympics?",
+        "judgement": "same",
+        "golden_answers": [
+            "Kenya"
+        ]
+    },
+    {
+        "question": "who is president of pakistan 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Asif Ali Zardari"
+        ]
+    },
+    {
+        "question": "when olympic games 2012 opening ceremony?",
+        "judgement": "same",
+        "golden_answers": [
+            "2012-07-27"
+        ]
+    },
+    {
+        "question": "who does david beckham play for in 2013?",
+        "judgement": "same",
+        "golden_answers": [
+            "Paris Saint-Germain F.C."
+        ]
+    },
+    {
+        "question": "what year did ted kennedy run for president?",
+        "judgement": "same",
+        "golden_answers": [
+            "United States presidential election, 1980"
+        ]
+    },
+    {
+        "question": "when did herbert hoover become president?",
+        "judgement": "same",
+        "golden_answers": [
+            "1929-03-04"
+        ]
+    },
+    {
+        "question": "what was the first pope in history?",
+        "judgement": "same",
+        "golden_answers": [
+            "Pope Sixtus II"
+        ]
+    },
+    {
+        "question": "which album did dave vanian and the phantom chords release in 1995?",
+        "judgement": "same",
+        "golden_answers": [
+            "David Vanian and the Phantom Chords"
+        ]
+    },
+    {
+        "question": "what movie did tom hanks won his first oscar?",
+        "judgement": "same",
+        "golden_answers": [
+            "Big"
+        ]
+    },
+    {
+        "question": "when was the mark vii monorail introduced?",
+        "judgement": "same",
+        "golden_answers": [
+            "2008"
+        ]
+    },
+    {
+        "question": "what is the capital city of germany now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Berlin"
+        ]
+    },
+    {
+        "question": "which book did katherine hannigan write in 2004?",
+        "judgement": "same",
+        "golden_answers": [
+            "Ida B."
+        ]
+    },
+    {
+        "question": "where do the florida marlins play spring training?",
+        "judgement": "same",
+        "golden_answers": [
+            "University of Florida"
+        ]
+    },
+    {
+        "question": "what year did mcfly go to the future?",
+        "judgement": "same",
+        "golden_answers": [
+            "1985"
+        ]
+    },
+    {
+        "question": "what year did poland surrender to germany?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1939"
+        ]
+    },
+    {
+        "question": "when is the last time the denver broncos won the superbowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XXXIII"
+        ]
+    },
+    {
+        "question": "what year did volleyball first appeared in the olympics?",
+        "judgement": "same",
+        "golden_answers": [
+            "1964"
+        ]
+    },
+    {
+        "question": "who was killed first tupac or biggie?",
+        "judgement": "same",
+        "golden_answers": [
+            "Tupac"
+        ]
+    },
+    {
+        "question": "which team does ronaldinho play for 2013?",
+        "judgement": "same",
+        "golden_answers": [
+            "Clube Atl\u00e9tico Mineiro"
+        ]
+    },
+    {
+        "question": "when did the chicago bulls win their first championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "1991 NBA Finals"
+        ]
+    },
+    {
+        "question": "when was the sony nex-5 released?",
+        "judgement": "same",
+        "golden_answers": [
+            "2010-05-11"
+        ]
+    },
+    {
+        "question": "which film starring vyacheslav tikhonov was released in 1994?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Burnt by the Sun"
+        ]
+    },
+    {
+        "question": "what year did the new york mets start?",
+        "judgement": "same",
+        "golden_answers": [
+            "1962"
+        ]
+    },
+    {
+        "question": "who does david james play for 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Bristol City F.C."
+        ]
+    },
+    {
+        "question": "what contribution did hooke made to science in 1665?",
+        "judgement": "same",
+        "golden_answers": [
+            "Micrographia"
+        ]
+    },
+    {
+        "question": "what year was the first miss america pageant?",
+        "judgement": "same",
+        "golden_answers": [
+            "1921"
+        ]
+    },
+    {
+        "question": "when was the movie big daddy released?",
+        "judgement": "same",
+        "golden_answers": [
+            "1999-06-25"
+        ]
+    },
+    {
+        "question": "who is the president of israel 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Shimon Peres"
+        ]
+    },
+    {
+        "question": "which album did the crystal method release in september 1997?",
+        "judgement": "same",
+        "golden_answers": [
+            "Vegas"
+        ]
+    },
+    {
+        "question": "who is lamar odom playing for this year?",
+        "judgement": "same",
+        "golden_answers": [
+            "Los Angeles Clippers"
+        ]
+    },
+    {
+        "question": "when was barack obama elected president?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "2008"
+        ]
+    },
+    {
+        "question": "what year was the first miss america pageant held?",
+        "judgement": "same",
+        "golden_answers": [
+            "Miss America 1921"
+        ]
+    },
+    {
+        "question": "what is the very first harry potter book?",
+        "judgement": "same",
+        "golden_answers": [
+            "Harry Potter and the Philosopher's Stone"
+        ]
+    },
+    {
+        "question": "when does ziva start on ncis?",
+        "judgement": "same",
+        "golden_answers": [
+            "NCIS - Season 3"
+        ]
+    },
+    {
+        "question": "which album did dave seaman release in august 1999?",
+        "judgement": "same",
+        "golden_answers": [
+            "Global Underground 012"
+        ]
+    },
+    {
+        "question": "what is the transmission of a 2011 honda fit?",
+        "judgement": "same",
+        "golden_answers": [
+            "5 Speed Manual"
+        ]
+    },
+    {
+        "question": "who was the first actor to play edward quartermaine?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "David Lewis"
+        ]
+    },
+    {
+        "question": "when did sean murray first appear on ncis?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "2003"
+        ]
+    },
+    {
+        "question": "who rules denmark right now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Helle Thorning-Schmidt"
+        ]
+    },
+    {
+        "question": "when did juventus win the champions league?",
+        "judgement": "same",
+        "golden_answers": [
+            "1996 UEFA Champions League Final"
+        ]
+    },
+    {
+        "question": "where was the first ford motor company located?",
+        "judgement": "same",
+        "golden_answers": [
+            "Dearborn"
+        ]
+    },
+    {
+        "question": "when did joe mcelderry won x factor?",
+        "judgement": "same",
+        "golden_answers": [
+            "The X Factor (UK) - Season 6"
+        ]
+    },
+    {
+        "question": "what land did the us buy from france in 1803?",
+        "judgement": "same",
+        "golden_answers": [
+            "Louisiana"
+        ]
+    },
+    {
+        "question": "when did ted kulongoski become governor of oregon?",
+        "judgement": "same",
+        "golden_answers": [
+            "2003-01-13"
+        ]
+    },
+    {
+        "question": "who does kurt busch drive for now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Furniture Row Racing"
+        ]
+    },
+    {
+        "question": "when did the lions last win a thanksgiving game?",
+        "judgement": "same",
+        "golden_answers": [
+            "Yearly"
+        ]
+    },
+    {
+        "question": "which book did roald dahl write in 1990?",
+        "judgement": "same",
+        "golden_answers": [
+            "Esio Trot"
+        ]
+    },
+    {
+        "question": "who does cristiano ronaldo play for now 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Real Madrid C.F."
+        ]
+    },
+    {
+        "question": "when was the high court of australia founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1901"
+        ]
+    },
+    {
+        "question": "which album did jackie mclean release in 2005?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Consequence"
+        ]
+    },
+    {
+        "question": "when was the 2012 calgary stampede?",
+        "judgement": "same",
+        "golden_answers": [
+            "from 2012-07-06 to 2012-07-15"
+        ]
+    },
+    {
+        "question": "which kennedy died first?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "John F. Kennedy"
+        ]
+    },
+    {
+        "question": "who won the state of texas in 2008?",
+        "judgement": "same",
+        "golden_answers": [
+            "John McCain"
+        ]
+    },
+    {
+        "question": "which album did ramy ayach release in december 2006?",
+        "judgement": "same",
+        "golden_answers": [
+            "Habbaytak ana"
+        ]
+    },
+    {
+        "question": "which album did toad the wet sprocket release in 1995?",
+        "judgement": "same",
+        "golden_answers": [
+            "In Light Syrup"
+        ]
+    },
+    {
+        "question": "what team does reggie bush play for 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Miami Dolphins"
+        ]
+    },
+    {
+        "question": "who won the 2000 fa cup final?",
+        "judgement": "same",
+        "golden_answers": [
+            "Chelsea FC"
+        ]
+    },
+    {
+        "question": "what did taylor swift do at the vmas 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Grammy Award for Best Country Solo Performance"
+        ]
+    },
+    {
+        "question": "when was target founded?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "1902"
+        ]
+    },
+    {
+        "question": "what year did aaron rodgers get drafted?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "2005 NFL Draft"
+        ]
+    },
+    {
+        "question": "which movie did jaco van dormael direct in 2009?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mr. Nobody"
+        ]
+    },
+    {
+        "question": "which album did a band called pain release in 2005?",
+        "judgement": "same",
+        "golden_answers": [
+            "Broken Dreams"
+        ]
+    },
+    {
+        "question": "who was johnny cash's first wife?",
+        "judgement": "same",
+        "golden_answers": [
+            "Vivian Liberto"
+        ]
+    },
+    {
+        "question": "who was the first president to visit all of the first states in the us?",
+        "judgement": "same",
+        "golden_answers": [
+            "George Washington"
+        ]
+    },
+    {
+        "question": "when did william golding write lord of the flies?",
+        "judgement": "same",
+        "golden_answers": [
+            "1954"
+        ]
+    },
+    {
+        "question": "who does jeremy shockey play for in 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Carolina Panthers"
+        ]
+    },
+    {
+        "question": "which album did cosima de vito release in october 2004?",
+        "judgement": "same",
+        "golden_answers": [
+            "Cosima"
+        ]
+    },
+    {
+        "question": "what club does ronaldinho play for 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Clube de Regatas do Flamengo"
+        ]
+    },
+    {
+        "question": "who founded the pittsburgh steelers in 1933?",
+        "judgement": "same",
+        "golden_answers": [
+            "Rooney family"
+        ]
+    },
+    {
+        "question": "what year did us invaded iraq?",
+        "judgement": "same",
+        "golden_answers": [
+            "2003 invasion of Iraq"
+        ]
+    },
+    {
+        "question": "when was the last time the new england patriots won the superbowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XXXVIII"
+        ]
+    },
+    {
+        "question": "what is the best currency to take to egypt 2013?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Egyptian pound"
+        ]
+    },
+    {
+        "question": "who does hank baskett play for now nov 2010?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Philadelphia Eagles"
+        ]
+    },
+    {
+        "question": "what did dmitri mendeleev discover in 1869?",
+        "judgement": "same",
+        "golden_answers": [
+            "Periodic Table"
+        ]
+    },
+    {
+        "question": "which movie did matt leblanc star in in 2001?",
+        "judgement": "same",
+        "golden_answers": [
+            "All the Queen's Men"
+        ]
+    },
+    {
+        "question": "what sport did scott anderson play in the 1992 summer olympics?",
+        "judgement": "same",
+        "golden_answers": [
+            "Field hockey"
+        ]
+    },
+    {
+        "question": "who is the governor of pennsylvania state now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Tom Corbett"
+        ]
+    },
+    {
+        "question": "what year did reggie bush win the heisman trophy?",
+        "judgement": "same",
+        "golden_answers": [
+            "2005"
+        ]
+    },
+    {
+        "question": "when was the last time the orioles won the world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "1983 World Series"
+        ]
+    },
+    {
+        "question": "who is the current governor of arizona in 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Jan Brewer"
+        ]
+    },
+    {
+        "question": "who was the first host of the tonight show?",
+        "judgement": "same",
+        "golden_answers": [
+            "Steve Allen"
+        ]
+    },
+    {
+        "question": "who won governor in connecticut 2010?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Dan Malloy"
+        ]
+    },
+    {
+        "question": "when was blessed kateri born?",
+        "judgement": "same",
+        "golden_answers": [
+            "1656"
+        ]
+    },
+    {
+        "question": "which album did the colourfield release in march 1987?",
+        "judgement": "same",
+        "golden_answers": [
+            "Deception"
+        ]
+    },
+    {
+        "question": "when did michael jordan started playing basketball in the nba?",
+        "judgement": "same",
+        "golden_answers": [
+            "1984"
+        ]
+    },
+    {
+        "question": "where is the 2012 ncaa basketball tournament?",
+        "judgement": "same",
+        "golden_answers": [
+            "New Orleans"
+        ]
+    },
+    {
+        "question": "when is the restoration of the rijksmuseum supposed to finish?",
+        "judgement": "same",
+        "golden_answers": [
+            "2013"
+        ]
+    },
+    {
+        "question": "who is the king of cambodia now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Norodom Sihamoni"
+        ]
+    },
+    {
+        "question": "who managed liverpool f.c. from 2004 to june 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "G\u00e9rard Houllier"
+        ]
+    },
+    {
+        "question": "when did sanchez leave usc?",
+        "judgement": "same",
+        "golden_answers": [
+            "2009 NFL season"
+        ]
+    },
+    {
+        "question": "who is the current president of dominican republic 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Danilo Medina"
+        ]
+    },
+    {
+        "question": "who was michael jackson first girlfriend?",
+        "judgement": "same",
+        "golden_answers": [
+            "Lisa Marie Presley"
+        ]
+    },
+    {
+        "question": "when did florida marlins join mlb?",
+        "judgement": "same",
+        "golden_answers": [
+            "1993 Major League Baseball Season"
+        ]
+    },
+    {
+        "question": "who does albert pujols play for 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Los Angeles Angels of Anaheim"
+        ]
+    },
+    {
+        "question": "how many people played in the 2010 fifa world cup final?",
+        "judgement": "same",
+        "golden_answers": [
+            "46"
+        ]
+    },
+    {
+        "question": "who performed at the super bowl in 1993?",
+        "judgement": "same",
+        "golden_answers": [
+            "Michael Jackson"
+        ]
+    },
+    {
+        "question": "who play happy gilmore in the 1996 film?",
+        "judgement": "same",
+        "golden_answers": [
+            "Adam Sandler"
+        ]
+    },
+    {
+        "question": "who is the current governor of arizona 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Jan Brewer"
+        ]
+    },
+    {
+        "question": "what team does messi play for 2011?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "FC Barcelona"
+        ]
+    },
+    {
+        "question": "what year lebron james came to the nba?",
+        "judgement": "same",
+        "golden_answers": [
+            "2003-04 NBA season"
+        ]
+    },
+    {
+        "question": "who is the current queen of australia?",
+        "judgement": "same",
+        "golden_answers": [
+            "Elizabeth II"
+        ]
+    },
+    {
+        "question": "what currency is used in switzerland 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Swiss franc"
+        ]
+    },
+    {
+        "question": "who played will scarlett in the 1991 robin hood?",
+        "judgement": "same",
+        "golden_answers": [
+            "Christian Slater"
+        ]
+    },
+    {
+        "question": "when was the uss croaker launched?",
+        "judgement": "same",
+        "golden_answers": [
+            "1943-12-19"
+        ]
+    },
+    {
+        "question": "who played the lead in the 2001 film a beautiful mind?",
+        "judgement": "same",
+        "golden_answers": [
+            "Russell Crowe"
+        ]
+    },
+    {
+        "question": "what did hans oersted discovered in 1819?",
+        "judgement": "same",
+        "golden_answers": [
+            "Aluminium"
+        ]
+    },
+    {
+        "question": "who is ronaldo playing for now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Real Madrid"
+        ]
+    },
+    {
+        "question": "when was the first amendment ratified?",
+        "judgement": "same",
+        "golden_answers": [
+            "1791-12-15"
+        ]
+    },
+    {
+        "question": "where is augusta masters 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Augusta National Golf Course"
+        ]
+    },
+    {
+        "question": "who is the leader of japan right now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Shinz\u014d Abe"
+        ]
+    },
+    {
+        "question": "what year was ron glass an award nominee?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1982"
+        ]
+    },
+    {
+        "question": "when was the last time the toronto maple leafs make the playoffs?",
+        "judgement": "same",
+        "golden_answers": [
+            "1967 Stanley Cup Finals"
+        ]
+    },
+    {
+        "question": "who is ryan reynolds married to 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Blake Lively"
+        ]
+    },
+    {
+        "question": "when did maria sharapova start playing tennis?",
+        "judgement": "same",
+        "golden_answers": [
+            "2001-04-19"
+        ]
+    },
+    {
+        "question": "what currency does australia use 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Australian dollar"
+        ]
+    },
+    {
+        "question": "what is the currency in australia 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Australian dollar"
+        ]
+    },
+    {
+        "question": "who started the first persian gulf war?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Kuwait"
+        ]
+    },
+    {
+        "question": "when did germany defeat france in world war 2?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Battle of France"
+        ]
+    },
+    {
+        "question": "when was civilization first released?",
+        "judgement": "same",
+        "golden_answers": [
+            "1991"
+        ]
+    },
+    {
+        "question": "which film starring dhanush was released in 2008?",
+        "judgement": "same",
+        "golden_answers": [
+            "Yaaradi Nee Mohini"
+        ]
+    },
+    {
+        "question": "when was the first christmas celebrated in the us?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1539"
+        ]
+    },
+    {
+        "question": "when does the one direction movie come out on dvd in the us?",
+        "judgement": "same",
+        "golden_answers": [
+            "2013-12-17"
+        ]
+    },
+    {
+        "question": "when was the most recent earthquake in haiti?",
+        "judgement": "same",
+        "golden_answers": [
+            "2010 Haiti Earthquake"
+        ]
+    },
+    {
+        "question": "which album did hanin elias release in may 2004?",
+        "judgement": "same",
+        "golden_answers": [
+            "Future Noir"
+        ]
+    },
+    {
+        "question": "when did the colts last win the superbowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XLI"
+        ]
+    },
+    {
+        "question": "when is the last time the giants won the world series?",
+        "judgement": "same",
+        "golden_answers": [
+            "2012 World Series"
+        ]
+    },
+    {
+        "question": "what honor did agatha christie receive in 1971?",
+        "judgement": "same",
+        "golden_answers": [
+            "Dame Commander of the Order of the British Empire"
+        ]
+    },
+    {
+        "question": "what was the first newspaper called in australia?",
+        "judgement": "same",
+        "golden_answers": [
+            "Sydney Gazette"
+        ]
+    },
+    {
+        "question": "which album did deep forest release in 2000?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Pacifique"
+        ]
+    },
+    {
+        "question": "when did melbourne get its name?",
+        "judgement": "same",
+        "golden_answers": [
+            "1835"
+        ]
+    },
+    {
+        "question": "who will david beckham play for in 2013?",
+        "judgement": "same",
+        "golden_answers": [
+            "Paris Saint-Germain F.C."
+        ]
+    },
+    {
+        "question": "when was the last time the dallas cowboys went to the super bowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XXX"
+        ]
+    },
+    {
+        "question": "what was walt disney's first cartoon called?",
+        "judgement": "same",
+        "golden_answers": [
+            "Steamboat Willie"
+        ]
+    },
+    {
+        "question": "what year was the navy chief established?",
+        "judgement": "same",
+        "golden_answers": [
+            "1893-04-01"
+        ]
+    },
+    {
+        "question": "in which comic book issue did kitty pryde first appear?",
+        "judgement": "same",
+        "golden_answers": [
+            "Uncanny X-Men #129"
+        ]
+    },
+    {
+        "question": "what was omar epps first movie?",
+        "judgement": "same",
+        "golden_answers": [
+            "Juice"
+        ]
+    },
+    {
+        "question": "who is rob kardashian dating now 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Rita Ora"
+        ]
+    },
+    {
+        "question": "when did bradley cooper's dad die?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "2011"
+        ]
+    },
+    {
+        "question": "when did carolina panthers go to superbowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "2003 NFL season"
+        ]
+    },
+    {
+        "question": "who is hugh hefner dating now in 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Crystal Harris"
+        ]
+    },
+    {
+        "question": "when was the chinese flag designed?",
+        "judgement": "same",
+        "golden_answers": [
+            "1949"
+        ]
+    },
+    {
+        "question": "when is wimbledon tennis tournament?",
+        "judgement": "same",
+        "golden_answers": [
+            "Yearly"
+        ]
+    },
+    {
+        "question": "when did the charlotte bobcats first play in the nba?",
+        "judgement": "same",
+        "golden_answers": [
+            "2004 NBA Draft"
+        ]
+    },
+    {
+        "question": "who won the michigan ohio state game 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Ohio State Buckeyes football"
+        ]
+    },
+    {
+        "question": "which movie did hanna schygulla star in in 1980?",
+        "judgement": "same",
+        "golden_answers": [
+            "Berlin Alexanderplatz"
+        ]
+    },
+    {
+        "question": "what was the title of the first book dr. seuss wrote?",
+        "judgement": "same",
+        "golden_answers": [
+            "Fox in Socks"
+        ]
+    },
+    {
+        "question": "when did canada gain independence from england?",
+        "judgement": "same",
+        "golden_answers": [
+            "1867-07-01"
+        ]
+    },
+    {
+        "question": "which album did wayne wonder release in april 2006?",
+        "judgement": "same",
+        "golden_answers": [
+            "Original Bombshell (Remastered)"
+        ]
+    },
+    {
+        "question": "who was the first african american us surgeon general?",
+        "judgement": "same",
+        "golden_answers": [
+            "Joycelyn Elders"
+        ]
+    },
+    {
+        "question": "who was the first african american presidential candidate nominated?",
+        "judgement": "same",
+        "golden_answers": [
+            "Barack Obama"
+        ]
+    },
+    {
+        "question": "when was the green party founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "2001"
+        ]
+    },
+    {
+        "question": "when was techvibes started?",
+        "judgement": "same",
+        "golden_answers": [
+            "2002"
+        ]
+    },
+    {
+        "question": "when did mcgee join the ncis team?",
+        "judgement": "same",
+        "golden_answers": [
+            "2003"
+        ]
+    },
+    {
+        "question": "when was universal studios japan opened?",
+        "judgement": "same",
+        "golden_answers": [
+            "2001-03-31"
+        ]
+    },
+    {
+        "question": "who was the governor of missouri in 1996?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mel Carnahan"
+        ]
+    },
+    {
+        "question": "who currently owns the steelers?",
+        "judgement": "same",
+        "golden_answers": [
+            "Rooney family"
+        ]
+    },
+    {
+        "question": "which movie did steve hanft direct in 2004?",
+        "judgement": "same",
+        "golden_answers": [
+            "Kill the Moonlight"
+        ]
+    },
+    {
+        "question": "when was ancient egypt created?",
+        "judgement": "same",
+        "golden_answers": [
+            "-3100"
+        ]
+    },
+    {
+        "question": "when is next t20 world cup cricket?",
+        "judgement": "same",
+        "golden_answers": [
+            "Every 4 Years"
+        ]
+    },
+    {
+        "question": "what year did mitt romney first run for president?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mitt Romney presidential campaign, 2008"
+        ]
+    },
+    {
+        "question": "how many games did donovan mcnabb play in the 2008 season?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "16"
+        ]
+    },
+    {
+        "question": "when was mary poppins made?",
+        "judgement": "same",
+        "golden_answers": [
+            "1964"
+        ]
+    },
+    {
+        "question": "when did martin margiela start designing for herm?",
+        "judgement": "same",
+        "golden_answers": [
+            "1997"
+        ]
+    },
+    {
+        "question": "when did john j. raskob own the empire state building?",
+        "judgement": "same",
+        "golden_answers": [
+            "1950"
+        ]
+    },
+    {
+        "question": "when was the last time the toronto maple leafs win the stanley cup?",
+        "judgement": "same",
+        "golden_answers": [
+            "1967 Stanley Cup Finals"
+        ]
+    },
+    {
+        "question": "when was george w bush sworn in?",
+        "judgement": "same",
+        "golden_answers": [
+            "George W. Bush 2001 presidential inauguration"
+        ]
+    },
+    {
+        "question": "who is the current president of chile 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "Sebasti\u00e1n Pi\u00f1era"
+        ]
+    },
+    {
+        "question": "which book did alasdair gray write in 1981?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Lanark: A Life in Four Books"
+        ]
+    },
+    {
+        "question": "who ran against abraham lincoln for president in 1860?",
+        "judgement": "same",
+        "golden_answers": [
+            "John C. Breckinridge"
+        ]
+    },
+    {
+        "question": "what year did johnny cash die and how old was he?",
+        "judgement": "same",
+        "golden_answers": [
+            "2003-09-12"
+        ]
+    },
+    {
+        "question": "who is the present chief justice of the u.s. supreme court?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "John Roberts"
+        ]
+    },
+    {
+        "question": "where are they now jessica mcclure?",
+        "judgement": "same",
+        "golden_answers": [
+            "Midland"
+        ]
+    },
+    {
+        "question": "who played neurologist oliver sacks in the 1990 film awakenings?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Robin Williams"
+        ]
+    },
+    {
+        "question": "when is the last time chicago bulls won a championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "1998 NBA Finals"
+        ]
+    },
+    {
+        "question": "what team did ronaldo play for in 2003?",
+        "judgement": "same",
+        "golden_answers": [
+            "Real Madrid C.F."
+        ]
+    },
+    {
+        "question": "who played in the superbowl in 2006?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "the Steelers"
+        ]
+    },
+    {
+        "question": "when did mary shelley write frankenstein what were the circumstances?",
+        "judgement": "same",
+        "golden_answers": [
+            "1815"
+        ]
+    },
+    {
+        "question": "where does morrissey live 2010?",
+        "judgement": "same",
+        "golden_answers": [
+            "Manchester"
+        ]
+    },
+    {
+        "question": "when did they stop making ford rangers?",
+        "judgement": "same",
+        "golden_answers": [
+            "2011 Ford Ranger"
+        ]
+    },
+    {
+        "question": "what country did germany invade first in ww1?",
+        "judgement": "same",
+        "golden_answers": [
+            "Belgium"
+        ]
+    },
+    {
+        "question": "when did mount fuji last erupt?",
+        "judgement": "same",
+        "golden_answers": [
+            "1707-12-16"
+        ]
+    },
+    {
+        "question": "who took control of rome in 46 bc and became dictator?",
+        "judgement": "same",
+        "golden_answers": [
+            "Julius Caesar"
+        ]
+    },
+    {
+        "question": "where is mark sanchez now?",
+        "judgement": "same",
+        "golden_answers": [
+            "New York Jets"
+        ]
+    },
+    {
+        "question": "what year was the great san francisco fire?",
+        "judgement": "same",
+        "golden_answers": [
+            "1906 San Francisco earthquake"
+        ]
+    },
+    {
+        "question": "who directed the first jurassic park?",
+        "judgement": "same",
+        "golden_answers": [
+            "Steven Spielberg"
+        ]
+    },
+    {
+        "question": "what caused the russian financial crisis of 1998?",
+        "judgement": "same",
+        "golden_answers": [
+            "Allies of World War II"
+        ]
+    },
+    {
+        "question": "who is the president of cuba in 2009?",
+        "judgement": "same",
+        "golden_answers": [
+            "Ra\u00fal Castro"
+        ]
+    },
+    {
+        "question": "when was home depot founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1978"
+        ]
+    },
+    {
+        "question": "who is mexico's president right now 2011?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Felipe Calder\u00f3n"
+        ]
+    },
+    {
+        "question": "when was wells fargo founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1852-03-18"
+        ]
+    },
+    {
+        "question": "who does justin bieber go out with on facebook in 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "selena gomez"
+        ]
+    },
+    {
+        "question": "what city hosted the 1948 summer olympics?",
+        "judgement": "same",
+        "golden_answers": [
+            "London"
+        ]
+    },
+    {
+        "question": "when is the last time the pittsburgh steelers won a superbowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl XLIII"
+        ]
+    },
+    {
+        "question": "what is the average temperature in sydney in august?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "17"
+        ]
+    },
+    {
+        "question": "who won the 1992 national championship in college football?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Alabama"
+        ]
+    },
+    {
+        "question": "when was the last time the boston bruins went to the stanley cup?",
+        "judgement": "same",
+        "golden_answers": [
+            "2011 Stanley Cup Finals"
+        ]
+    },
+    {
+        "question": "when was the last time the kansas city chiefs won a superbowl?",
+        "judgement": "same",
+        "golden_answers": [
+            "Super Bowl IV"
+        ]
+    },
+    {
+        "question": "who is the current coach of the chicago bulls?",
+        "judgement": "same",
+        "golden_answers": [
+            "Tom Thibodeau"
+        ]
+    },
+    {
+        "question": "when did the 7th harry potter book come out?",
+        "judgement": "same",
+        "golden_answers": [
+            "2007-07-21"
+        ]
+    },
+    {
+        "question": "which film starring adelle lutz was released in 1995?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Beyond Rangoon"
+        ]
+    },
+    {
+        "question": "when does medicare part d start?",
+        "judgement": "same",
+        "golden_answers": [
+            "Centers for Medicare and Medicaid Services"
+        ]
+    },
+    {
+        "question": "which album did kathleen hanna release in 1997?",
+        "judgement": "same",
+        "golden_answers": [
+            "Julie Ruin"
+        ]
+    },
+    {
+        "question": "how many wins did the philadelphia eagles have in the 2008 nfl season?",
+        "judgement": "same",
+        "golden_answers": [
+            "1"
+        ]
+    },
+    {
+        "question": "who won governor of indiana 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Mitch Daniels"
+        ]
+    },
+    {
+        "question": "who did the chicago bears get in the 2013 draft?",
+        "judgement": "same",
+        "golden_answers": [
+            "Kyle Long"
+        ]
+    },
+    {
+        "question": "which film starring jamie waylett was released in 2005?",
+        "judgement": "same",
+        "golden_answers": [
+            "Harry Potter and the Goblet of Fire"
+        ]
+    },
+    {
+        "question": "when will muharram start 2011?",
+        "judgement": "same",
+        "golden_answers": [
+            "2011-11-26"
+        ]
+    },
+    {
+        "question": "who does sonny bill williams play for 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Chiefs"
+        ]
+    },
+    {
+        "question": "who was rhe first prime minister of australia?",
+        "judgement": "same",
+        "golden_answers": [
+            "Edmund Barton"
+        ]
+    },
+    {
+        "question": "what ship did christopher columbus sail on in 1492?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Santa Maria"
+        ]
+    },
+    {
+        "question": "who is the governor of wyoming currently?",
+        "judgement": "same",
+        "golden_answers": [
+            "Matt Mead"
+        ]
+    },
+    {
+        "question": "who was the leader of the ussr in 1948?",
+        "judgement": "same",
+        "golden_answers": [
+            "Joseph Stalin"
+        ]
+    },
+    {
+        "question": "which album did fleetwood mac release in april 2003?",
+        "judgement": "same",
+        "golden_answers": [
+            "Say You Will"
+        ]
+    },
+    {
+        "question": "which prize did elie wiesel win in 1986?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Nobel Peace Prize"
+        ]
+    },
+    {
+        "question": "what is the name of the first prophet of islam?",
+        "judgement": "same",
+        "golden_answers": [
+            "Muhammad"
+        ]
+    },
+    {
+        "question": "what teams did the patriots lose to in 2013?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Baltimore Ravens"
+        ]
+    },
+    {
+        "question": "when did carson palmer win the heisman trophy?",
+        "judgement": "same",
+        "golden_answers": [
+            "2002"
+        ]
+    },
+    {
+        "question": "when did the name jehovah first appear?",
+        "judgement": "same",
+        "golden_answers": [
+            "1530"
+        ]
+    },
+    {
+        "question": "what countries were occupied by the soviet union in 1988?",
+        "judgement": "same",
+        "golden_answers": [
+            "Afghanistan"
+        ]
+    },
+    {
+        "question": "who is greece's leader now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Karolos Papoulias"
+        ]
+    },
+    {
+        "question": "what year did the seahawks win the superbowl?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Super Bowl XLVIII"
+        ]
+    },
+    {
+        "question": "who defeated napoleon at the battle of trafalgar in 1805?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Nelson"
+        ]
+    },
+    {
+        "question": "when was interstate 579 formed?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "1962"
+        ]
+    },
+    {
+        "question": "what years did andrew jackson run for president?",
+        "judgement": "same",
+        "golden_answers": [
+            "1829-03-04"
+        ]
+    },
+    {
+        "question": "when was omarion born?",
+        "judgement": "same",
+        "golden_answers": [
+            "1984-11-12"
+        ]
+    },
+    {
+        "question": "who was the leader of the first communist party of china?",
+        "judgement": "same",
+        "golden_answers": [
+            "Chen Duxiu"
+        ]
+    },
+    {
+        "question": "when did the boston celtics win their first championship?",
+        "judgement": "same",
+        "golden_answers": [
+            "1957 NBA Finals"
+        ]
+    },
+    {
+        "question": "when does ramadan end 2012 indonesia?",
+        "judgement": "same",
+        "golden_answers": [
+            "2012-08-18"
+        ]
+    },
+    {
+        "question": "who won 2012 presidential election in france?",
+        "judgement": "same",
+        "golden_answers": [
+            "Fran\u00e7ois Hollande"
+        ]
+    },
+    {
+        "question": "who is the present president of china?",
+        "judgement": "same",
+        "golden_answers": [
+            "Xi Jinping"
+        ]
+    },
+    {
+        "question": "who was the president of the us in 1971?",
+        "judgement": "same",
+        "golden_answers": [
+            "Richard Nixon"
+        ]
+    },
+    {
+        "question": "since when has the arabic alphabet been used?",
+        "judgement": "same",
+        "golden_answers": [
+            "0400"
+        ]
+    },
+    {
+        "question": "which album did mark pickerel release in may 2006?",
+        "judgement": "ir_worse",
+        "golden_answers": [
+            "Snake in the Radio"
+        ]
+    },
+    {
+        "question": "who is the president of brazil now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Dilma Rousseff"
+        ]
+    },
+    {
+        "question": "who is the falcons quarterback 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Matt Ryan"
+        ]
+    },
+    {
+        "question": "who is the leader of cuba 2012?",
+        "judgement": "same",
+        "golden_answers": [
+            "Ra\u00fal Castro"
+        ]
+    },
+    {
+        "question": "when did abraham lincoln free the slaves?",
+        "judgement": "same",
+        "golden_answers": [
+            "1863"
+        ]
+    },
+    {
+        "question": "who is the first us president?",
+        "judgement": "same",
+        "golden_answers": [
+            "George Washington"
+        ]
+    },
+    {
+        "question": "when was george h.w. bush elected president?",
+        "judgement": "same",
+        "golden_answers": [
+            "1988"
+        ]
+    },
+    {
+        "question": "when was facebook launched?",
+        "judgement": "same",
+        "golden_answers": [
+            "2004-02-04"
+        ]
+    },
+    {
+        "question": "when are the summer olympics held?",
+        "judgement": "same",
+        "golden_answers": [
+            "Once every four years"
+        ]
+    },
+    {
+        "question": "when was walmart founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1962"
+        ]
+    },
+    {
+        "question": "where does avril lavigne live now?",
+        "judgement": "same",
+        "golden_answers": [
+            "Ontario"
+        ]
+    },
+    {
+        "question": "when was the catcher in the rye first published?",
+        "judgement": "same",
+        "golden_answers": [
+            "1951-07-16"
+        ]
+    },
+    {
+        "question": "what year did michael jordan get drafted?",
+        "judgement": "same",
+        "golden_answers": [
+            "1984 NBA Draft"
+        ]
+    },
+    {
+        "question": "when does ellen air?",
+        "judgement": "same",
+        "golden_answers": [
+            "Madeo Restaurant"
+        ]
+    },
+    {
+        "question": "which film starring paul dillon was released in 1994?",
+        "judgement": "ir_better",
+        "golden_answers": [
+            "Blink"
+        ]
+    },
+    {
+        "question": "when was savealot founded?",
+        "judgement": "same",
+        "golden_answers": [
+            "1977"
+        ]
+    }
+]
