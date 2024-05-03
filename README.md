@@ -130,8 +130,6 @@ Meanwhile, the dataset with intermediate results and the overall evaluation scor
 #### Build your own pipeline
 
 Sometimes you may need to implement more complex RAG process, and you can build your own pipeline to implement it.
-Please first understand the input and output forms of the components you need to use from our [documentation](./docs/basic_usage.md).
-
 You just need to inherit `BasicPipeline`, initialize the components you need, and complete the `run` function.
 
 ```python
@@ -154,6 +152,13 @@ class ToyPipeline(BasicPipeline):
     dataset = self.evaluate(dataset, do_eval=do_eval)
     return dataset
 ```
+
+Please first understand the input and output forms of the components you need to use from our [documentation](./docs/basic_usage.md).
+
+
+#### Just use components
+
+If you already have your own code and only want to use our components to embed the original code, you can refer to the [basic introduction of the components](./docs/basic_usage.md) to obtain the input and output formats of each component.
 
 ## :gear: Components
 
@@ -323,7 +328,20 @@ It’s important to note that, to ensure consistency, we have utilized a uniform
 
 ## :notebook: Supporting Datasets
 
-We have collected and processed 35 datasets widely used in RAG research, pre-processing them to ensure a consistent format for ease of use. For certain datasets (such as Wiki-asp), we have adapted them to fit the requirements of RAG tasks according to the methods commonly used within the community. Below is the list of datasets along with the corresponding sample sizes:
+We have collected and processed 35 datasets widely used in RAG research, pre-processing them to ensure a consistent format for ease of use. For certain datasets (such as Wiki-asp), we have adapted them to fit the requirements of RAG tasks according to the methods commonly used within the community. 
+
+For each dataset, we save each split as a `jsonl` file, and each line is a dict as follows:
+```python
+{
+  'id': str,
+  'question': str,
+  'golden_answers': List[str],
+  'metadata': dict
+}
+```
+
+
+Below is the list of datasets along with the corresponding sample sizes:
 
 | Dataset Name     | Task      | # Train | # Dev| # Test |
 |------------------|-----------------|-----------------|---------------|---------------|
