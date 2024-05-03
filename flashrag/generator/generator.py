@@ -49,7 +49,7 @@ class EncoderDecoderGenerator(BaseGenerator):
         self.fid = config['use_fid']
         if "t5" in self.model_name: 
             if self.fid:
-                from fid import FiDT5
+                from flashrag.generator.fid import FiDT5
                 self.model = FiDT5.from_pretrained(self.model_path)
             else:
                 self.model = T5ForConditionalGeneration.from_pretrained(self.model_path)
