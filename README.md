@@ -2,10 +2,8 @@
 
 
 <div align="center">
-<a href=""target="_blank">
-<img src=https://img.shields.io/badge/arXiv-b5212f.svg?logo=arxiv>
-</a>
-<a href="" target="_blank"><img src=https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face%20Space-276cb4.svg ></a>
+<a href=""target="_blank"><img src=https://img.shields.io/badge/arXiv-b5212f.svg?logo=arxiv></a>
+<a href="" target="_blank"><img src=https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face%20Space-276cb4.svg></a>
 <a href="https://github.com/ignorejjj/FlashRAG/blob/main/LICENSE">
 <img alt="License" src="https://img.shields.io/badge/LICENSE-MIT-green">
 </a>
