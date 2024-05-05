@@ -176,18 +176,18 @@ In FlashRAG, we have built a series of common RAG components, including retrieve
   </thead>
   <tbody>
     <tr>
-      <td rowspan="2">Judger</td>
+      <td rowspan="1">Judger</td>
       <td>SKR Judger</td>
       <td>Judging whether to retrieve using <a href="https://aclanthology.org/2023.findings-emnlp.691.pdf">SKR</a> method</td>
     </tr>
     <tr>
-      <td>BM25 Retriever</td>
-      <td>Sparse retrieval method based on Lucene</td>
-    </tr>
-    <tr>
-      <td rowspan="3">Retriever</td>
+      <td rowspan="4">Retriever</td>
       <td>Dense Retriever</td>
       <td>Bi-encoder models such as dpr, bge, e5, using faiss for search</td>
+    </tr>
+    <tr>
+      <td>BM25 Retriever</td>
+      <td>Sparse retrieval method based on Lucene</td>
     </tr>
     <tr>
       <td>Bi-Encoder Reranker</td>
