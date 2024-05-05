@@ -2,10 +2,8 @@
 
 
 <div align="center">
-<a href=""target="_blank">
-<img src=https://img.shields.io/badge/arXiv-b5212f.svg?logo=arxiv>
-</a>
-<a href="" target="_blank"><img src=https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face%20Space-276cb4.svg ></a>
+<a href=""target="_blank"><img src=https://img.shields.io/badge/arXiv-b5212f.svg?logo=arxiv></a>
+<a href="" target="_blank"><img src=https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face%20Space-276cb4.svg></a>
 <a href="https://github.com/ignorejjj/FlashRAG/blob/main/LICENSE">
 <img alt="License" src="https://img.shields.io/badge/LICENSE-MIT-green">
 </a>
@@ -345,42 +343,42 @@ Below is the list of datasets along with the corresponding sample sizes:
 
 | Dataset Name     | Task      | # Train | # Dev| # Test |
 |------------------|-----------------|-----------------|---------------|---------------|
-| NQ               | QA              | 79168           | 8757          | 3610          |
-| TriviaQA         | QA              | 78785           | 8837          | 11313         |
-| HotpotQA         | QA              | 90447           | 7405          | /             |
-| 2WikiMultiHopQA  | QA              | 15000           | 12576         | /             |
-| PopQA            | QA           | /               | /             | 14267         |
-| Musique          | QA              | 19938           | 2417          | /             |
-| SQuAD            | QA              | 87599           | 10570         | /             |
-| MS MARCO         | QA              | 808731          | 101093        | /             |
-| MMLU             | Language Understanding          | 99842           | 1531          | 14042         |
-| FEVER            | Fact Verification              | 104966          | 10444         | /             |
+| NQ               | QA              | 79,168           | 8,757          | 3,610          |
+| TriviaQA         | QA              | 78,785           | 8,837          | 11,313         |
+| HotpotQA         | QA              | 90,447           | 7,405          | /             |
+| 2WikiMultiHopQA  | QA              | 15,000           | 12,576         | /             |
+| PopQA            | QA           | /               | /             | 14,267         |
+| Musique          | QA              | 19,938           | 2,417          | /             |
+| SQuAD            | QA              | 87,599           | 10,570         | /             |
+| MS MARCO         | QA              | 808,731          | 101,093        | /             |
+| MMLU             | Language Understanding          | 99,842           | 1,531          | 14,042         |
+| FEVER            | Fact Verification              | 104,966          | 10,444         | /             |
 | TruthfulQA       | QA              | /               | 817           | /             |
 | Bamboogle        | QA           | /               | /             | 125           |
-| WikiASP          | Open-domain Summarization              | 300636          | 37046         | 37368         |
-| NarrativeQA      | QA              | 32747           | 3461          | 10557         |
-| WikiQA           | QA              | 20360           | 2733          | 6165          |
-| ASQA             | QA              | 4353            | 948           | /             |
-| HellaSWAG        | Commonsense Reasoning              | 39905           | 10042         | /             |
-| ELI5             | Long-form QA              | 272634          | 1507          | /             |
-| WebQuestions     | QA              | 3778            | /             | 2032          |
-| AmbigQA          | QA              | 10036           | 2002          | /             |
-| SIQA             | Commonsense Reasoning              | 33410           | 1954          | /             |
-| T-REx            | Slot Filling              | 2284168         | 5000          | /             |
-| ARC-Easy         | Commonsense Reasoning              | 2251            | 570           | 2376          |
-| ARC-Challenge    | Commonsense Reasoning              | 1119            | 299           | 1172          |
-| WOW              | Dialog Generation              | 63734           | 3054          | /             |
-| AIDA CoNll-yago(ay2)              | Entity Linking              | 18395           | 4784          | /             |
-| WNED-CWEB        | Entity Linking           | /               | 3396          | /             |
-| CommenseQA       | QA              | 9741            | 1221          | /             |
-| OpenBookQA       | Commonsense Reasoning             | 4957            | 500           | 500           |
-| BoolQ            | QA              | 9427            | 3270          | /             |
-| Zero-shot RE(zsre)          | Slot Filling              | 147909          | 3724          | /             |
+| WikiASP          | Open-domain Summarization              | 300,636          | 37,046         | 37,368         |
+| NarrativeQA      | QA              | 32,747           | 3,461          | 10,557         |
+| WikiQA           | QA              | 20,360           | 2,733          | 6,165          |
+| ASQA             | QA              | 4,353            | 948           | /             |
+| HellaSWAG        | Commonsense Reasoning              | 39,905           | 10,042         | /             |
+| ELI5             | Long-form QA              | 272,634          | 1,507          | /             |
+| WebQuestions     | QA              | 3,778            | /             | 2,032          |
+| AmbigQA          | QA              | 10,036           | 2,002          | /             |
+| SIQA             | Commonsense Reasoning              | 33,410           | 1,954          | /             |
+| T-REx            | Slot Filling              | 2,284,168         | 5,000          | /             |
+| ARC-Easy         | Commonsense Reasoning              | 2,251            | 570           | 2,376          |
+| ARC-Challenge    | Commonsense Reasoning              | 1,119            | 299           | 1,172          |
+| WOW              | Dialog Generation              | 63,734           | 3,054          | /             |
+| AIDA CoNll-yago(ay2)              | Entity Linking              | 18,395           | 4,784          | /             |
+| WNED-CWEB        | Entity Linking           | /               | 3,396          | /             |
+| CommenseQA       | QA              | 9,741            | 1,221          | /             |
+| OpenBookQA       | Commonsense Reasoning             | 4,957            | 500           | 500           |
+| BoolQ            | QA              | 9,427            | 3,270          | /             |
+| Zero-shot RE(zsre)          | Slot Filling              | 147,909          | 3,724          | /             |
 | CuratedTREC      | QA           | 430             | /             | 430           |
-| PIQA             | QA              | 16113           | 1838          | /             |
+| PIQA             | QA              | 16,113           | 1,838          | /             |
 | FermiReal        | QA              | 185             | 125           | 557           |
-| FermiSynth       | QA              | 8000            | 1000          | 1000          |
-| WNED-Wiki        | Entity Linking           | /               | 5599          | /             |
+| FermiSynth       | QA              | 8,000            | 1,000          | 1,000          |
+| WNED-Wiki        | Entity Linking           | /               | 5,599          | /             |
 
 ## :raised_hands: Additional FAQs
 
