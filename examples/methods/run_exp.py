@@ -14,9 +14,6 @@ def naive(args):
     all_split = get_dataset(config)
     test_data = all_split[args.split]
 
-    import torch
-    print(torch.cuda.device_count())
-    assert False
     pred_process_fun = lambda x: x.split("\n")[0]
     pipeline = SequentialPipeline(config)
     
@@ -34,8 +31,14 @@ def zero_shot(args):
     test_data = all_split[args.split]
 
     from flashrag.pipeline import SequentialPipeline
+    from flashrag.prompt import PromptTemplate
+    templete = PromptTemplate(
+        config = config, 
+        system_prompt =  "Answer the question based on your own knowledge. Only give me the answer and do not output any other words.",
+        user_prompt = "Question: {question}"
+    )
     pred_process_fun = lambda x: x.split("\n")[0]
-    pipeline = SequentialPipeline(config)
+    pipeline = SequentialPipeline(config, templete)
     result = pipeline.naive_run(test_data)
 
 def aar(args):
