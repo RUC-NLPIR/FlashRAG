@@ -298,7 +298,7 @@ def main():
                         use_fp16 = args.use_fp16,
                         pooling_method = pooling_method,
                         faiss_type = args.faiss_type,
-                        embedding_path = args.embedding_path
+                        embedding_path = args.embedding_path,
                         save_embedding = args.save_embedding,
                         faiss_gpu = args.faiss_gpu
                     )
