@@ -251,7 +251,8 @@ class Index_Builder:
 MODEL2POOLING = {
     "e5": "mean",
     "bge": "cls",
-    "contriever": "mean"
+    "contriever": "mean",
+    'jina': 'mean'
 }
 
 def main():
@@ -276,7 +277,7 @@ def main():
     args = parser.parse_args()
 
     if args.pooling_method is None:
-        pooling_method = 'pooler'
+        pooling_method = 'mean'
         for k,v in MODEL2POOLING.items():
             if k in args.retrieval_method.lower():
                 pooling_method = v

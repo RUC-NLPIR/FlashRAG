@@ -153,7 +153,7 @@ class Config:
             for key,value in model2pooling.items():
                 if key.lower() in method.lower():
                     return value
-            return 'pooler'
+            return 'mean'
 
         if self.final_config['retrieval_pooling_method'] is None:
             self.final_config['retrieval_pooling_method'] = set_pooling_method(retrieval_method, model2pooling)
