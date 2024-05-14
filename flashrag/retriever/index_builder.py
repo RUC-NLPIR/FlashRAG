@@ -27,6 +27,7 @@ class Index_Builder:
             use_fp16,
             pooling_method,
             faiss_type=None,
+            embedding_path=None,
             save_embedding=False,
             faiss_gpu=False,
             content_function: callable = base_content_function
@@ -41,6 +42,7 @@ class Index_Builder:
         self.use_fp16 = use_fp16
         self.pooling_method = pooling_method
         self.faiss_type = faiss_type if faiss_type else 'Flat'
+        self.embedding_path = embedding_path
         self.save_embedding = save_embedding
         self.faiss_gpu = faiss_gpu
 
@@ -54,7 +56,8 @@ class Index_Builder:
                 warnings.warn(f"Some files already exists in {self.save_dir} and may be overwritten.", UserWarning)
 
         self.index_save_path = os.path.join(self.save_dir, f"{self.retrieval_method}_{self.faiss_type}.index")
-        self.embedding_save_path = os.path.join(self.save_dir, "emb.memmap")
+
+        self.embedding_save_path = os.path.join(self.save_dir, f"emb_{self.retrieval_method}.memmap")
 
         self.corpus = load_corpus(self.corpus_path)
         self.content_function = content_function
@@ -120,6 +123,14 @@ class Index_Builder:
         
         print("Finish!")
 
+    def _load_embedding(self, embedding_path, corpus_size, hidden_size):
+        all_embeddings = np.memmap(
+                embedding_path,
+                mode="r",
+                dtype=np.float32
+            ).reshape(corpus_size, hidden_size)
+        return all_embeddings
+
     def _save_embedding(self, all_embeddings):
         memmap = np.memmap(
             self.embedding_save_path,
@@ -137,19 +148,7 @@ class Index_Builder:
         else:
             memmap[:] = all_embeddings
 
-    @torch.no_grad()
-    def build_dense_index(self):
-        r"""Obtain the representation of documents based on the embedding model(BERT-based) and 
-        construct a faiss index.
-        
-        """
-        # TODO: disassembly overall process, use non open-source emebdding/ processed embedding
-
-        if os.path.exists(self.index_save_path):
-            print("The index file already exists and will be overwritten.")
-
-        self.encoder, self.tokenizer = load_model(model_path = self.model_path, 
-                                                  use_fp16 = self.use_fp16)
+    def encode_all(self):
         if self.gpu_num > 1:
             print("Use multi gpu!")
             self.encoder = torch.nn.DataParallel(self.encoder)
@@ -200,6 +199,29 @@ class Index_Builder:
 
         all_embeddings = np.concatenate(all_embeddings, axis=0)
         all_embeddings = all_embeddings.astype(np.float32)
+
+        return all_embeddings
+
+    @torch.no_grad()
+    def build_dense_index(self):
+        r"""Obtain the representation of documents based on the embedding model(BERT-based) and 
+        construct a faiss index.
+        
+        """
+        # TODO: disassembly overall process, use non open-source emebdding/ processed embedding
+
+        if os.path.exists(self.index_save_path):
+            print("The index file already exists and will be overwritten.")
+        
+        self.encoder, self.tokenizer = load_model(model_path = self.model_path, 
+                                                  use_fp16 = self.use_fp16)
+        if self.embedding_path is not None:
+            hidden_size = self.encoder.config.hidden_size
+            corpus_size = len(self.corpus)
+            all_embeddings = self._load_embedding(self.embedding_path, corpus_size, hidden_size)
+        else:
+            all_embeddings = self.encode_all()
+        
         if self.save_embedding:
             self._save_embedding(all_embeddings)
 
@@ -247,6 +269,7 @@ def main():
     parser.add_argument('--use_fp16', default=False, action='store_true')
     parser.add_argument('--pooling_method', type=str, default=None)
     parser.add_argument('--faiss_type',default=None,type=str)
+    parser.add_argument('--embedding_path', default=None, type=str)
     parser.add_argument('--save_embedding', action='store_true', default=False)
     parser.add_argument('--faiss_gpu', default=False, action='store_true')
     
@@ -275,6 +298,7 @@ def main():
                         use_fp16 = args.use_fp16,
                         pooling_method = pooling_method,
                         faiss_type = args.faiss_type,
+                        embedding_path = args.embedding_path
                         save_embedding = args.save_embedding,
                         faiss_gpu = args.faiss_gpu
                     )
