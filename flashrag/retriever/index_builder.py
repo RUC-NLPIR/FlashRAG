@@ -41,7 +41,7 @@ class Index_Builder:
         self.batch_size = batch_size
         self.use_fp16 = use_fp16
         self.pooling_method = pooling_method
-        self.faiss_type = faiss_type if faiss_type else 'Flat'
+        self.faiss_type = faiss_type if faiss_type is not None else 'Flat'
         self.embedding_path = embedding_path
         self.save_embedding = save_embedding
         self.faiss_gpu = faiss_gpu
