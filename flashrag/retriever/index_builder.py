@@ -221,9 +221,9 @@ class Index_Builder:
             all_embeddings = self._load_embedding(self.embedding_path, corpus_size, hidden_size)
         else:
             all_embeddings = self.encode_all()
-        
-        if self.save_embedding:
-            self._save_embedding(all_embeddings)
+            if self.save_embedding:
+                self._save_embedding(all_embeddings)
+            del self.corpus
 
         # build index
         print("Creating index")
