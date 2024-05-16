@@ -53,7 +53,7 @@ class Index_Builder:
             os.makedirs(self.save_dir)
         else:
             if not self._check_dir(self.save_dir):
-                warnings.warn(f"Some files already exists in {self.save_dir} and may be overwritten.", UserWarning)
+                warnings.warn("Some files already exists in save dir and may be overwritten.", UserWarning)
 
         self.index_save_path = os.path.join(self.save_dir, f"{self.retrieval_method}_{self.faiss_type}.index")
 
