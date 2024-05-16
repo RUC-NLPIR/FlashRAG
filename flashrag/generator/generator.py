@@ -216,7 +216,7 @@ class VLLMGenerator(BaseGenerator):
             for output in outputs:
                 logprobs = output.outputs[0].logprobs
                 scores.append(
-                    [np.exp(list(score_dict.values())[0]) for score_dict in logprobs]
+                    [np.exp(list(score_dict.values())[0].logprob) for score_dict in logprobs]
                 )
             return base_output, scores
         else:
