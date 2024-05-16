@@ -8,7 +8,7 @@ def load_model(
         model_path: str, 
         use_fp16: bool = False
     ):
-    model_config = AutoConfig.from_pretrained(model_path)
+    model_config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
     model_class = AutoModel
     #model_class = T5EncoderModel if "t5" in model_config.architectures[0].lower() else AutoModel
 
@@ -17,7 +17,7 @@ def load_model(
     model.cuda()
     if use_fp16: 
         model = model.half()
-    tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True, trust_remote_code=True)
 
     return model, tokenizer
 

@@ -341,44 +341,41 @@ For each dataset, we save each split as a `jsonl` file, and each line is a dict 
 
 Below is the list of datasets along with the corresponding sample sizes:
 
-| Dataset Name     | Task      | # Train | # Dev| # Test |
-|------------------|-----------------|-----------------|---------------|---------------|
-| NQ               | QA              | 79,168           | 8,757          | 3,610          |
-| TriviaQA         | QA              | 78,785           | 8,837          | 11,313         |
-| HotpotQA         | QA              | 90,447           | 7,405          | /             |
-| 2WikiMultiHopQA  | QA              | 15,000           | 12,576         | /             |
-| PopQA            | QA           | /               | /             | 14,267         |
-| Musique          | QA              | 19,938           | 2,417          | /             |
-| SQuAD            | QA              | 87,599           | 10,570         | /             |
-| MS MARCO         | QA              | 808,731          | 101,093        | /             |
-| MMLU             | Language Understanding          | 99,842           | 1,531          | 14,042         |
-| FEVER            | Fact Verification              | 104,966          | 10,444         | /             |
-| TruthfulQA       | QA              | /               | 817           | /             |
-| Bamboogle        | QA           | /               | /             | 125           |
-| WikiASP          | Open-domain Summarization              | 300,636          | 37,046         | 37,368         |
-| NarrativeQA      | QA              | 32,747           | 3,461          | 10,557         |
-| WikiQA           | QA              | 20,360           | 2,733          | 6,165          |
-| ASQA             | QA              | 4,353            | 948           | /             |
-| HellaSWAG        | Commonsense Reasoning              | 39,905           | 10,042         | /             |
-| ELI5             | Long-form QA              | 272,634          | 1,507          | /             |
-| WebQuestions     | QA              | 3,778            | /             | 2,032          |
-| AmbigQA          | QA              | 10,036           | 2,002          | /             |
-| SIQA             | Commonsense Reasoning              | 33,410           | 1,954          | /             |
-| T-REx            | Slot Filling              | 2,284,168         | 5,000          | /             |
-| ARC-Easy         | Commonsense Reasoning              | 2,251            | 570           | 2,376          |
-| ARC-Challenge    | Commonsense Reasoning              | 1,119            | 299           | 1,172          |
-| WOW              | Dialog Generation              | 63,734           | 3,054          | /             |
-| AIDA CoNll-yago(ay2)              | Entity Linking              | 18,395           | 4,784          | /             |
-| WNED-CWEB        | Entity Linking           | /               | 3,396          | /             |
-| CommenseQA       | QA              | 9,741            | 1,221          | /             |
-| OpenBookQA       | Commonsense Reasoning             | 4,957            | 500           | 500           |
-| BoolQ            | QA              | 9,427            | 3,270          | /             |
-| Zero-shot RE(zsre)          | Slot Filling              | 147,909          | 3,724          | /             |
-| CuratedTREC      | QA           | 430             | /             | 430           |
-| PIQA             | QA              | 16,113           | 1,838          | /             |
-| FermiReal        | QA              | 185             | 125           | 557           |
-| FermiSynth       | QA              | 8,000            | 1,000          | 1,000          |
-| WNED-Wiki        | Entity Linking           | /               | 5,599          | /             |
+| Task                      | Dataset Name    | Knowledge Source | # Train   | # Dev   | # Test |
+|---------------------------|-----------------|------------------|-----------|---------|--------|
+| QA                        | NQ              | wiki             | 79,168    | 8,757   | 3,610  |
+| QA                        | TriviaQA        | wiki & web       | 78,785    | 8,837   | 11,313 |
+| QA                        | PopQA           | wiki             | /         | /       | 14,267 |
+| QA                        | SQuAD           | wiki             | 87,599    | 10,570  | /      |
+| QA                        | MSMARCO-QA      | web              | 808,731   | 101,093 | /      |
+| QA                        | NarrativeQA     | books and story  | 32,747    | 3,461   | 10,557 |
+| QA                        | WikiQA          | wiki             | 20,360    | 2,733   | 6,165  |
+| QA                        | WebQuestions    | Google Freebase  | 3,778     | /       | 2,032  |
+| QA                        | AmbigQA         | wiki             | 10,036    | 2,002   | /      |
+| QA                        | SIQA            | -                | 33,410    | 1,954   | /      |
+| QA                        | CommenseQA      | -                | 9,741     | 1,221   | /      |
+| QA                        | BoolQ           | wiki             | 9,427     | 3,270   | /      |
+| QA                        | PIQA            | -                | 16,113    | 1,838   | /      |
+| QA                        | Fermi           | wiki             | 8,000     | 1,000   | 1,000  |
+| multi-hop QA              | HotpotQA        | wiki             | 90,447    | 7,405   | /      |
+| multi-hop QA              | 2WikiMultiHopQA | wiki             | 15,000    | 12,576  | /      |
+| multi-hop QA              | Musique         | wiki             | 19,938    | 2,417   | /      |
+| multi-hop QA              | Bamboogle       | wiki             | /         | /       | 125    |
+| Long-form QA              | ASQA            | wiki             | 4,353     | 948     | /      |
+| Long-form QA              | ELI5            | Reddit           | 272,634   | 1,507   | /      |
+| Open-Domain Summarization | WikiASP         | wiki             | 300,636   | 37,046  | 37,368 |
+| multiple-choice           | MMLU            | -                | 99,842    | 1,531   | 14,042 |
+| multiple-choice           | TruthfulQA      | wiki             | /         | 817     | /      |
+| multiple-choice           | HellaSWAG       | ActivityNet      | 39,905    | 10,042  | /      |
+| multiple-choice           | ARC             | -                | 3,370     | 869     | 3,548  |
+| multiple-choice           | OpenBookQA      | -                | 4,957     | 500     | 500    |
+| Fact Verification         | FEVER           | wiki             | 104,966   | 10,444  | /      |
+| Dialog Generation         | WOW             | wiki             | 63,734    | 3,054   | /      |
+| Entity Linking            | AIDA CoNll-yago | Freebase & wiki  | 18,395    | 4,784   | /      |
+| Entity Linking            | WNED            | Wiki             | /         | 8,995   | /      |
+| Slot Filling              | T-REx           | DBPedia          | 2,284,168 | 5,000   | /      |
+| Slot Filling              | Zero-shot RE    | wiki             | 147,909   | 3,724   | /      |
+
 
 ## :raised_hands: Additional FAQs
 

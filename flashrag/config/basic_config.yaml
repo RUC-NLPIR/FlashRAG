@@ -17,6 +17,8 @@ model2pooling:
   e5: "mean"
   bge: "cls"
   contriever: "mean"
+  jina: 'mean'
+  dpr: cls
 
 # Indexes path for retrieval models
 method2index:
