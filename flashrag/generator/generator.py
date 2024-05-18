@@ -249,7 +249,6 @@ class CausalLMGenerator(BaseGenerator):
                                             debug = False,)
             #model = AutoModelForCausalLM.from_pretrained(self.model_path)
             #tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-            model = model.to(self.device)
             
         else:
             model.cuda()

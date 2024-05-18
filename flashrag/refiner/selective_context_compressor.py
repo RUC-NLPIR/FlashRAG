@@ -56,7 +56,7 @@ class SelectiveContext:
         # for Chinese, use `nlp = spacy.load('zh_core_web_sm')`` directly
         lang = self.lang
         if lang == "en":
-            self.nlp = spacy.load("en_core_web_sm", disable=["ner"])
+            self.nlp = spacy.load("en_core_web_lg", disable=["ner"])
             self.nlp.add_pipe('merge_noun_chunks')
         elif lang == "zh":
             self.nlp = spacy.load('zh_core_web_sm', disable=["ner"])
