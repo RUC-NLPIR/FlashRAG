@@ -39,11 +39,16 @@ class BaseReranker:
             query_list = [query_list]
         if not isinstance(doc_list[0], list):
             doc_list = [doc_list]
-        
+    
         assert len(query_list) == len(doc_list)
         assert topk < min([len(docs) for docs in doc_list]), "The number of doc returned by the retriever is less than the topk."
 
-        all_scores = self.get_rerank_scores(query_list, doc_list, batch_size)
+        # get doc contents
+        doc_contents = []
+        for docs in doc_list:
+            doc_contents.append([doc['contents'] for doc in docs])
+
+        all_scores = self.get_rerank_scores(query_list, doc_contents, batch_size)
         assert len(all_scores) == sum([len(docs) for docs in doc_list])
 
         # sort docs 
@@ -69,24 +74,24 @@ class CrossReranker(BaseReranker):
                                                                          num_labels=1)
         self.ranker.eval()
         self.ranker.to(self.device)
-    
+
+    @torch.no_grad()
     def get_rerank_scores(self, query_list, doc_list, batch_size):
         # flatten all pairs
         all_pairs = []
         for query, docs in zip(query_list, doc_list):
             all_pairs.extend([[query, doc] for doc in docs])
-        
         all_scores = []
         for start_idx in tqdm(range(0, len(all_pairs), batch_size), desc='Reranking process: '):
             pair_batch = all_pairs[start_idx:start_idx + batch_size]
-
+            
             inputs = self.tokenizer(
                 pair_batch, 
                 padding=True, 
                 truncation=True, 
                 return_tensors='pt', 
                 max_length=self.max_length
-            )
+            ).to(self.device)
             batch_scores = self.ranker(**inputs, return_dict=True).logits.view(-1, ).float().cpu()
             all_scores.extend(batch_scores)
 
