@@ -33,6 +33,7 @@ You can access other dumps from this [website](https://archive.org/search?query=
 Execute the provided script to process the wiki dump into JSONL format. Adjust the corpus partitioning parameters as needed:
 
 ```bash
+cd scripts
 python preprocess_wiki.py --dump_path ../enwikinews-20240420-pages-articles.xml.bz2  \
                         --save_path ../test_sample.jsonl \
 ```
