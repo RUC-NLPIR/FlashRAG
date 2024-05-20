@@ -178,7 +178,7 @@ class BM25Retriever(BaseRetriever):
             num = self.topk
         hits = self.searcher.search(query, num)
         if len(hits) < 1:
-            if self.return_score:
+            if return_score:
                 return [],[]
             else:
                 return []
