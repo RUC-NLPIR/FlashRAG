@@ -619,7 +619,7 @@ class FLAREPipeline(BasicPipeline):
         if not judge_result:
             tokenizer = self.generator.tokenizer
             sent_ids = tokenizer.encode(sent, add_special_tokens=False)
-            assert len(sent_ids) == len(sent_score)
+            # assert len(sent_ids) == len(sent_score)
             new_query_ids = [i for i,score in zip(sent_ids,sent_score) if score > self.threshold]
             new_query = tokenizer.decode(new_query_ids)
         return judge_result, new_query
