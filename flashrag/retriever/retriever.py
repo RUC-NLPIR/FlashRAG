@@ -184,14 +184,18 @@ class BM25Retriever(BaseRetriever):
                 return []
             
         scores = [hit.score for hit in hits]
+        if len(hits) < num:
+            warnings.warn('Not enough documents retrieved!')
+        else:
+            hits = hits[:num]
 
         if self.contain_doc:
-            all_contents = [json.loads(self.searcher.doc(hits[i].docid).raw())['contents'] for i in range(num)]
+            all_contents = [json.loads(self.searcher.doc(hit.docid).raw())['contents'] for hit in hits]
             results = [{'title': content.split("\n")[0].strip("\""), 
                         'text': "\n".join(content.split("\n")[1:]),
                         'contents': content} for content in all_contents]
         else:
-            results = load_docs(self.corpus, [hits[i].docid for i in range(num)])
+            results = load_docs(self.corpus, [hit.docid for hit in hits])
 
         if return_score:
             return results, scores
