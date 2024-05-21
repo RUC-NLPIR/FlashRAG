@@ -49,6 +49,7 @@ def create_segments(doc_text, max_length, stride):
         segments.append(segment)
         if i + max_length >= len(sentences):
             break
+
     return segments
 
 def basic_process(title, text):
@@ -148,11 +149,9 @@ def process_corpus(title, text):
         return 
     
     if args.chunk_by == 'sentence':
-        segments = create_segments(text, seg_size=args.seg_size, stride=args.stride)
+        segments = create_segments(text, max_length=args.seg_size, stride=args.stride)
         for segment in segments:
-            if segment.text is None:
-                continue
-            text = segment.text.replace("\n", " ").replace("\t", " ")
+            text = segment.replace("\n", " ").replace("\t", " ")
             clean_corpus.append({"title": title, "text": text})
 
     elif args.chunk_by == '100w':
@@ -198,7 +197,7 @@ if __name__ == '__main__':
     parser.add_argument('--save_path', type=str, default='clean_corpus.jsonl')
     args = parser.parse_args()
 
-    # extract wiki dump
+    #extract wiki dump
     temp_dir = os.path.join(Path(args.save_path).parent, 'temp')
     os.makedirs(temp_dir)
     subprocess.run(['python', '-m',
@@ -207,7 +206,7 @@ if __name__ == '__main__':
                     '-o', temp_dir,
                     '--process', '12',
                     args.dump_path])
-
+    
     corpus = load_corpus(temp_dir)
     nlp = spacy.load("en_core_web_lg")
 
@@ -221,7 +220,6 @@ if __name__ == '__main__':
             documents[title] += " " + text
         else:
             documents[title] = text 
-
     clean_corpus = []
     with ThreadPoolExecutor(max_workers=16) as executor:
         for title, text in tqdm(documents.items()):
