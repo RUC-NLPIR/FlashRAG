@@ -41,7 +41,7 @@ def load_corpus(dir_path):
 def create_segments(doc_text, max_length, stride):
     doc_text = doc_text.strip()
     doc = nlp(doc_text)
-    sentences = [sent.string.strip() for sent in doc.sents]
+    sentences = [sent.text.strip() for sent in doc.sents]
     segments = []
     
     for i in range(0, len(sentences), stride):
