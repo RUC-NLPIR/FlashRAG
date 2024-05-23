@@ -193,7 +193,7 @@ if __name__ == '__main__':
         else:
             documents[title] = text 
     
-    
+    print("Start pre-processing...")
     documents = list(documents.items())
     manager = Manager()
     result_list = manager.list()
@@ -203,11 +203,11 @@ if __name__ == '__main__':
     all_title = [item[0] for item in result_list]
     all_text = [item[1] for item in result_list]
 
-    print("Begin precessing...")
+    print("Start chunking...")
     idx = 0
     clean_corpus = []
     if args.chunk_by == 'sentence':
-        for doc in tqdm(nlp.pipe(all_text, n_process=args.num_workers, batch_size=2000,exclude=["tok2vec", "tagger","attribute_ruler", "lemmatizer","ner","textcat"]), total=len(all_text)):
+        for doc in tqdm(nlp.pipe(all_text, n_process=args.num_workers, batch_size=2000), total=len(all_text)):
             title = all_title[idx]
             idx += 1
             sentences = [sent.text.strip() for sent in doc.sents]
