@@ -24,7 +24,7 @@
 
 </h4>
 
-FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 35 pre-processed benchmark RAG datasets and 12 state-of-the-art RAG algorithms. 
+FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 32 pre-processed benchmark RAG datasets and 12 state-of-the-art RAG algorithms. 
 
 <p align="center">
 <img src="asset/framework.png">
