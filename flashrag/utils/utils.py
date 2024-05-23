@@ -27,22 +27,28 @@ def get_dataset(config):
 
 def get_generator(config, **params):
     r"""Automatically select generator class based on config."""
-    if "t5" in config['generator_model'] or "bart" in config['generator_model']:
+    if config['framework'] == 'vllm':
         return getattr(
-            importlib.import_module("flashrag.generator"), 
-            "EncoderDecoderGenerator"
-        )(config, **params)
-    else:
-        if config['use_vllm']:
-            return getattr(
                 importlib.import_module("flashrag.generator"), 
                 "VLLMGenerator"
+            )(config, **params)
+    elif config['framework'] == 'fschat':
+        return getattr(
+                importlib.import_module("flashrag.generator"), 
+                "FastChatGenerator"
+            )(config, **params)
+    else:
+        if "t5" in config['generator_model'] or "bart" in config['generator_model']:
+            return getattr(
+                importlib.import_module("flashrag.generator"), 
+                "EncoderDecoderGenerator"
             )(config, **params)
         else:
             return getattr(
                     importlib.import_module("flashrag.generator"), 
-                    "CausalLMGenerator"
+                    "HFCausalLMGenerator"
                 )(config, **params)
+
 
 def get_retriever(config):
     r"""Automatically select retriever class based on config's retrieval method

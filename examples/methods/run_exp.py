@@ -186,7 +186,6 @@ def retrobust(args):
                'generator_lora_path': lora_path,
                'generation_params':{"max_tokens":100},
                'gpu_id':args.gpu_id,
-               'use_vllm':False,
                'generator_max_input_len': 4096,
                'dataset_name':args.dataset_name}
     config = Config('my_config.yaml',config_dict)
@@ -258,7 +257,7 @@ def skr(args):
 def selfrag(args):
     config_dict = {'generator_model':'selfrag-llama2-7B',
                 'generator_model_path': 'model/selfrag_llama2_7b',
-               'use_vllm': True,
+               'framework': 'vllm',
                'save_note':'self-rag',
                'gpu_id':args.gpu_id,
                'generation_params':{'max_new_tokens':100,'temperature':0.0,'top_p':1.0,'skip_special_tokens':False},
@@ -277,7 +276,7 @@ def selfrag(args):
     result = pipeline.run(test_data, batch_size=256)
 
 def flare(args):
-    config_dict={'save_note':'flare', 'gpu_id':args.gpu_id, 'use_vllm':True,
+    config_dict={'save_note':'flare', 'gpu_id':args.gpu_id, 
                 'dataset_name':args.dataset_name}
     config = Config('my_config.yaml',config_dict)
     all_split = get_dataset(config)

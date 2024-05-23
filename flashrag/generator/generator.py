@@ -215,7 +215,7 @@ class VLLMGenerator(BaseGenerator):
             return base_output
 
 
-class CausalLMGenerator(BaseGenerator):
+class HFCausalLMGenerator(BaseGenerator):
     """Class for decoder-only generator, based on hf. """
 
     def __init__(self, config, model=None):
@@ -233,15 +233,12 @@ class CausalLMGenerator(BaseGenerator):
         
         """
         if model is None:
-            from fastchat.model import load_model
-            model, tokenizer = load_model(self.model_path,
-                                            device = 'cuda', 
-                                            num_gpus = self.gpu_num,
-                                            load_8bit = False,
-                                            cpu_offloading = False,
-                                            debug = False,)
-            #model = AutoModelForCausalLM.from_pretrained(self.model_path, torch_dtype="auto", device_map="auto")
-            #tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+            model = AutoModelForCausalLM.from_pretrained(
+                                                        self.model_path, 
+                                                         torch_dtype="auto", 
+                                                         device_map="auto"
+                                                        )
+            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
             
         else:
             model.cuda()
@@ -288,7 +285,7 @@ class CausalLMGenerator(BaseGenerator):
                                     padding=True,
                                     truncation=True,
                                     max_length=self.max_input_len
-                                ).to(self.model.device)
+                                ).to('cuda')
             outputs = self.model.generate(
                 **inputs,
                 output_scores=True,
@@ -357,3 +354,32 @@ class CausalLMGenerator(BaseGenerator):
             logits = logits[range(len(target_ids)), target_ids]
         
         return target_ids, logits
+
+
+class FastChatGenerator(HFCausalLMGenerator):
+    def __init__(self, config, model=None):
+        super().__init__(config)
+
+    def _load_model(self, model=None):
+        r"""Load model and tokenizer for generator.
+        
+        """
+        if model is None:
+            from fastchat.model import load_model
+            model, tokenizer = load_model(self.model_path,
+                                            device = 'cuda', 
+                                            num_gpus = self.gpu_num,
+                                            load_8bit = False,
+                                            cpu_offloading = False,
+                                            debug = False,)
+            
+        else:
+            model.cuda()
+            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        model.eval()
+        if 'qwen' not in self.model_name:
+            tokenizer.pad_token = tokenizer.eos_token
+        tokenizer.padding_side = "left"
+
+        return model, tokenizer
+    
