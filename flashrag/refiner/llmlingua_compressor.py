@@ -1,8 +1,6 @@
+# Implementation of LLMLingua, modified from official repo: https://github.com/microsoft/LLMLingua.
 # Copyright (c) 2023 Microsoft
-# Licensed under The MIT License [see LICENSE for details]
-"""
-Implementation of LLMLingua, modified from official repo: https://github.com/microsoft/LLMLingua.
-"""
+# Licensed under The MIT License
 
 import bisect
 import copy
@@ -14,7 +12,6 @@ import os
 import random
 import string
 import yaml
-from fastchat.model import load_model
 import nltk
 import numpy as np
 import tiktoken
@@ -340,31 +337,18 @@ class PromptCompressor:
             if any(key in device_map for key in ["cuda", "cpu", "mps"])
             else "cuda"
         )
-        # if "cuda" in device_map or "cpu" in device_map:
-        #     model = MODEL_CLASS.from_pretrained(
-        #         model_name,
-        #         torch_dtype=model_config.pop(
-        #             "torch_dtype", "auto" if device_map == "cuda" else torch.float32
-        #         ),
-        #         device_map=device_map,
-        #         config=config,
-        #         ignore_mismatched_sizes=True,
-        #         **model_config,
-        #     )
-        # else:
-        #     model = MODEL_CLASS.from_pretrained(
-        #         model_name,
-        #         device_map=device_map,
-        #         torch_dtype=model_config.pop("torch_dtype", "auto"),
-        #         pad_token_id=tokenizer.pad_token_id,
-        #         **model_config,
-        #     )
-        model, tokenizer = load_model(self.model_name,
-                            device = 'cuda', 
-                            num_gpus = torch.cuda.device_count(),
-                            load_8bit = False,
-                            cpu_offloading = False,
-                            debug = False,)
+        model = MODEL_CLASS.from_pretrained(
+            model_name,
+            torch_dtype=model_config.pop(
+                "torch_dtype", "auto" if device_map == "cuda" else torch.float32
+            ),
+            device_map=device_map,
+            config=config,
+            ignore_mismatched_sizes=True,
+            **model_config,
+        )
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+    
         if model_config.get("pad_to_left", True):
             tokenizer.padding_side = "left"
             tokenizer.pad_token_id = (

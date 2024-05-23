@@ -1,7 +1,7 @@
-from transformers import AutoTokenizer
-import numpy as np
 import re
 from tqdm import tqdm
+import numpy as np
+from transformers import AutoTokenizer
 from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
 from flashrag.pipeline import BasicPipeline
@@ -9,7 +9,7 @@ from flashrag.dataset import get_batch_dataset, merge_batch_dataset
 from flashrag.prompt import PromptTemplate
 
 class IterativePipeline(BasicPipeline):
-    def __init__(self, config, prompt_template=None,iter_num = 3):
+    def __init__(self, config, prompt_template=None, iter_num = 3):
         super().__init__(config, prompt_template)
         self.iter_num = iter_num
         self.retriever = get_retriever(config)
@@ -49,6 +49,9 @@ class IterativePipeline(BasicPipeline):
         return dataset
 
 class SelfRAGPipeline(BasicPipeline):
+    # Source: https://github.com/AkariAsai/self-rag
+    # The code is released under MIT license
+
     rel_tokens_names = ["[Irrelevant]", "[Relevant]"]
     retrieval_tokens_names = ["[No Retrieval]",
                             "[Retrieval]", "[Continue to Use Evidence]"]
@@ -298,7 +301,6 @@ class SelfRAGPipeline(BasicPipeline):
 
     def postprocess_prediction(self, pred):
         def fix_spacing(input_text):
-            import re
             # Add a space after periods that lack whitespace
             output_text = re.sub(r'(?<=\w)([.!?])(?=\w)', r'\1 ', input_text)
             return output_text
@@ -455,7 +457,7 @@ class SelfRAGPipeline(BasicPipeline):
         if "splitted_sentences" not in intermediate:
             final_output = self.postprocess_prediction(pred)
         else:
-            if len(self.postprocess(pred)) == 0:
+            if len(self.postprocess_prediction(pred)) == 0:
                 intermediate["splitted_sentences"][0], intermediate["ctxs"][
                     0] = intermediate["splitted_sentences"][1], intermediate["ctxs"][1]
             for idx, (sent, doc) in enumerate(zip(intermediate["splitted_sentences"][0], intermediate["ctxs"][0])):
@@ -585,10 +587,14 @@ class SelfRAGPipeline(BasicPipeline):
         
         
 class FLAREPipeline(BasicPipeline):
-    def __init__(self, config, threshold=0.2, look_ahead_steps=64, max_generation_length=256, max_iter_num=5, prompt_template=None):
+    def __init__(self, config, 
+                 threshold=0.2, 
+                 look_ahead_steps=64, 
+                 max_generation_length=256, 
+                 max_iter_num=5, 
+                 prompt_template=None
+        ):
         super().__init__(config, prompt_template)
-        # from nltk.tokenize.punkt import PunktSentenceTokenizer
-        # self.sentence_spliter = PunktSentenceTokenizer()
 
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
@@ -599,7 +605,6 @@ class FLAREPipeline(BasicPipeline):
         self.stop_sym = list('!@#$%^&*()\n\n)(*&^%$#@!')
 
     def get_next_sentence(self, output, scores):
-        import re
         tokenizer = self.generator.tokenizer
         text_sentences = re.split(r'(?<=[^A-Z].[.?]) +', output)
         token_id_sentences = [tokenizer.encode(s, add_special_tokens=False) for s in text_sentences]
@@ -731,7 +736,6 @@ class SelfAskPipeline(BasicPipeline):
                 + "\n"
                 + res
             )
-            #gen_out = self.generator.generate(input_prompt, stop=[stop_condition])[0]
             gen_out = self.generator.generate(input_prompt, stop=["Context:", "#", stop_condition])[0]
             item.update_output(f'intermediate_output_iter{idx}', gen_out)
             
@@ -760,8 +764,6 @@ class SelfAskPipeline(BasicPipeline):
                     0
                 ].split("Follow up: ")[-1]
                 retrieval_result = self.retriever.search(new_query)
-                #retrieval_result.extend(new_retrieval_result)
-                #retrieval_result = self._remove_duplicate_doc(retrieval_result)
 
             if "So the final answer is: " in gen_out:
                 res = (

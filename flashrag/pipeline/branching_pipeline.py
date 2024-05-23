@@ -1,8 +1,9 @@
-from transformers import LogitsProcessorList
 import itertools
+from typing import List, Dict
 import re
 from tqdm import tqdm
 import numpy as np
+from transformers import LogitsProcessorList
 from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
 from flashrag.pipeline import BasicPipeline
@@ -18,9 +19,7 @@ class REPLUGPipeline(BasicPipeline):
         model = load_replug_model(config['generator_model_path'])
         self.generator = get_generator(config, model=model)
     
-
-
-    def build_single_doc_prompt(self, question, doc_list):
+    def build_single_doc_prompt(self, question: str, doc_list: List[str]):
         return [
             self.prompt_template.get_string(
                 question = question,
@@ -39,6 +38,7 @@ class REPLUGPipeline(BasicPipeline):
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         import torch
         from flashrag.pipeline.replug_utils import REPLUGLogitsProcessor
+        
         input_query = dataset.question
 
         retrieval_results, doc_scores = self.retriever.batch_search(input_query, return_score=True)

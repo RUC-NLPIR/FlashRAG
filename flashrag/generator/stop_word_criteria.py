@@ -2,9 +2,10 @@
 Created by Nestor Demeure.
 This software is released under the Apache License 2.0.
 """
+from typing import List
 import torch
 from transformers import StoppingCriteria, AutoTokenizer
-from typing import List
+
 
 class StopWordCriteria(StoppingCriteria):
     """

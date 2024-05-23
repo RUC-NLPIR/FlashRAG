@@ -1,5 +1,7 @@
-from transformers import GPT2Tokenizer, GPT2LMHeadModel, BertTokenizer
-import torch
+# Implementation of Selective-Context, modified from official repo: https://github.com/liyucheng09/Selective_Context
+# Licensed under The MIT License
+
+
 import re
 from typing import List, Tuple
 import spacy
@@ -10,6 +12,8 @@ sys.path.append("..")
 from dataclasses import dataclass
 from nltk.tokenize import sent_tokenize, word_tokenize
 import time
+import torch
+from transformers import GPT2Tokenizer, GPT2LMHeadModel, BertTokenizer
 
 @dataclass
 class LexicalUnits:

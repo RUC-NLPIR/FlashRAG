@@ -9,9 +9,8 @@ import sys
 import datetime
 
 class Config:
-    def __init__(
-        self, config_file_path = None, config_dict = {}
-    ):
+    def __init__(self, config_file_path = None, config_dict = {}):
+
         self.yaml_loader = self._build_yaml_loader()
         self.file_config = self._load_file_config(config_file_path)
         self.variable_config = config_dict
@@ -22,8 +21,6 @@ class Config:
 
         self.final_config = self._get_final_config()
 
-        # TODO: 处理文件夹路径, 包括绝对路径和相对路径
-        
         self._check_final_config()
         self._set_additional_key()
 
@@ -60,7 +57,7 @@ class Config:
         return file_config
 
     @staticmethod
-    def _update_dict(old_dict, new_dict):
+    def _update_dict(old_dict: dict, new_dict: dict):
         # Update the original update method of the dictionary:
         # If there is the same key in `old_dict` and `new_dict`, and value is of type dict, update the key in dict
         
@@ -139,12 +136,7 @@ class Config:
                 self.final_config['index_path'] = method2index[retrieval_method]
             except:
                 print("Index is empty!!")
-                assert False
-            
-    
-        
-        # if self.final_config['corpus_database_save_path'] is None:
-        #     self.final_config['corpus_database_save_path'] = os.path.join(self.final_config['index_save_dir'], 'corpus.db')
+                assert False 
 
         self.final_config['retrieval_model_path'] = retriever_model2path.get(retrieval_method, retrieval_method)
         # TODO: not support when `retrieval_model` is path

@@ -1,16 +1,15 @@
 from typing import cast, List, Union, Tuple
-from transformers import AutoModelForSeq2SeqLM,AutoTokenizer
-from flashrag.retriever.utils import load_model, pooling
 from tqdm import tqdm
-import re
-import torch
 import json
 from collections import Counter
 import numpy as np
+import torch
 import faiss
+from transformers import AutoModelForSeq2SeqLM,AutoTokenizer
+from flashrag.retriever.utils import load_model, pooling
 
 class BaseJudger:
-    r"""Base object of Judger, used for judging whether to retrieve"""
+    """Base object of Judger, used for judging whether to retrieve"""
 
     def __init__(self, config):
         self.config = config
@@ -18,7 +17,7 @@ class BaseJudger:
         self.device = config['device']
     
     def run(self, item) -> str:
-        r"""Get judgement result.
+        """Get judgement result.
 
         Args:
             item: dataset item, contains question, retrieval result...
@@ -32,7 +31,10 @@ class BaseJudger:
         return [self.run(item) for item in dataset]
 
 class SKRJudger(BaseJudger):
-    """Implementation for SKR-knn"""
+    """Implementation for SKR-knn
+    Paper link: https://aclanthology.org/2023.findings-emnlp.691.pdf
+    """
+
     def __init__(self, config):
         super().__init__(config)
         self.model_path = config['judger_model_path']

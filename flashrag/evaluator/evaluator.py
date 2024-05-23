@@ -1,13 +1,10 @@
+import os
 import json
 import sys
-import os
-import inspect
 from flashrag.evaluator.metrics import BaseMetric
 
 class Evaluator:
-    r"""Evaluator is used to summarize the results of all metrics.
-    
-    """
+    """Evaluator is used to summarize the results of all metrics."""
 
     def __init__(self, config):
         self.config = config
@@ -28,9 +25,8 @@ class Evaluator:
                 raise NotImplementedError
     
     def _collect_metrics(self):
-        f"""Collect all classes based on ```BaseMetric```.
-        
-        """
+        """Collect all classes based on ```BaseMetric```."""
+
         def find_descendants(base_class, subclasses=None):
             if subclasses is None:
                 subclasses = set()
@@ -49,9 +45,7 @@ class Evaluator:
         return avaliable_metrics
 
     def evaluate(self, data):
-        f"""Calculate all metric indicators and summarize them.
-
-        """
+        """Calculate all metric indicators and summarize them."""
 
         result_dict = {}
         for metric in self.metrics:
@@ -78,16 +72,14 @@ class Evaluator:
     def save_metric_score(self, result_dict):
         file_name = "metric_score.txt"
         save_path = os.path.join(self.save_dir, file_name)
-        with open(save_path,"w") as f:
+        with open(save_path, "w", encoding='utf-8') as f:
             for k,v in result_dict.items():
                 f.write(f"{k}: {v}\n")
 
 
     def save_data(self, data):
-        r"""Save the evaluated data, including the raw data and the score of each data 
-        sample on each metric.
-        
-        """
+        """Save the evaluated data, including the raw data and the score of each data 
+        sample on each metric."""
 
         file_name = "intermediate_data.json"
         save_path = os.path.join(self.save_dir, file_name)

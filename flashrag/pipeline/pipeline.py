@@ -4,13 +4,14 @@ from flashrag.utils import get_retriever, get_generator, get_refiner, get_judger
 from flashrag.prompt import PromptTemplate
 
 class BasicPipeline:
-    r"""Base object of all pipelines. A pipeline includes the overall process of RAG.
+    """Base object of all pipelines. A pipeline includes the overall process of RAG.
     If you want to implement a pipeline, you should inherit this class.
-    
     """
+
     def __init__(self, config, prompt_template = None):
         self.config = config
         self.device = config['device']
+        self.retriever = None
         self.evaluator = Evaluator(config)
         self.save_retrieval_cache = config['save_retrieval_cache']
         if prompt_template is None:
@@ -18,13 +19,11 @@ class BasicPipeline:
         self.prompt_template = prompt_template
 
     def run(self, dataset):
-        r"""The overall inference process of a RAG framework.
-        
-        """
+        """The overall inference process of a RAG framework."""
         pass
 
     def evaluate(self, dataset, do_eval=True, pred_process_fun=None):
-        r"""The evaluation process after finishing overall generation"""
+        """The evaluation process after finishing overall generation"""
         
         if pred_process_fun is not None:
             raw_pred = dataset.pred
@@ -50,14 +49,12 @@ class SequentialPipeline(BasicPipeline):
         inference stage:
             query -> pre-retrieval -> retriever -> post-retrieval -> generator
         """
+
         super().__init__(config, prompt_template)
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
+
         # TODO: add rewriter module
-        # if config['rewriter_path'] is not None:
-        #     self.rewriter = get_rewriter(config)
-        # else:
-        #     self.rewriter = None
         
         self.use_fid = config['use_fid']
 
@@ -79,10 +76,7 @@ class SequentialPipeline(BasicPipeline):
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         input_query = dataset.question
-        # if self.rewriter:
-        #     input_query = self.rewriter.batch_run(input_query)
-        #     dataset.update_output('rewrite_query', input_query)
-  
+        
         retrieval_results = self.retriever.batch_search(input_query)
         dataset.update_output('retrieval_result', retrieval_results)
 
@@ -134,6 +128,7 @@ class ConditionalPipeline(BasicPipeline):
         inference stage:
             query -> judger -> sequential pipeline or naive generate
         """
+
         super().__init__(config, prompt_template)
         self.judger = get_judger(config)
 
@@ -141,7 +136,8 @@ class ConditionalPipeline(BasicPipeline):
         from flashrag.prompt import PromptTemplate
         self.zero_shot_templete = PromptTemplate(
             config = config, 
-            system_prompt =  "Answer the question based on your own knowledge. Only give me the answer and do not output any other words.",
+            system_prompt =  "Answer the question based on your own knowledge. \
+                            Only give me the answer and do not output any other words.",
             user_prompt = "Question: {question}"
         )
     

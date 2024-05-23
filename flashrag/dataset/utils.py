@@ -1,7 +1,6 @@
 from flashrag.dataset import Dataset
-from copy import deepcopy
 
-def split_dataset(dataset, split_bool:list):
+def split_dataset(dataset: Dataset, split_bool:list):
     assert len(split_bool) == len(dataset)
     
     data = dataset.data
@@ -13,7 +12,7 @@ def split_dataset(dataset, split_bool:list):
 
     return pos_dataset, neg_dataset
 
-def merge_dataset(pos_dataset, neg_dataset, merge_bool: list):
+def merge_dataset(pos_dataset: Dataset, neg_dataset: Dataset, merge_bool: list):
     assert (len(merge_bool) == (len(pos_dataset) + len(neg_dataset)))
 
     pos_data_iter = iter(pos_dataset.data)
@@ -31,14 +30,14 @@ def merge_dataset(pos_dataset, neg_dataset, merge_bool: list):
     
     return final_dataset
 
-def get_batch_dataset(dataset, batch_size=16):
+def get_batch_dataset(dataset: Dataset, batch_size=16):
     data = dataset.data
     for idx in range(0, len(data), batch_size):
         batched_data = data[idx:idx+batch_size]
         batch_dataset = Dataset(config=dataset.config, data=batched_data)
         yield batch_dataset
 
-def merge_batch_dataset(dataset_list):
+def merge_batch_dataset(dataset_list: Dataset):
     dataset = dataset_list[0]
     total_data = []
     for batch_dataset in dataset_list:

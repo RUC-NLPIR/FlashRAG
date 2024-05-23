@@ -1,3 +1,4 @@
+from typing import List, Dict
 import torch
 import numpy as np
 from tqdm import tqdm
@@ -16,7 +17,7 @@ class BaseReranker:
         self.batch_size = config['rerank_batch_size']
         self.device = config['device']
 
-    def get_rerank_scores(self, query_list, doc_list, batch_size):
+    def get_rerank_scores(self, query_list: List[str], doc_list: List[str], batch_size):
         """Return flatten list of scores for each (query,doc) pair
         Args:
             query_list: List of N queries
@@ -26,7 +27,7 @@ class BaseReranker:
             [score(q1,d1), score(q1,d2),... score(q2,d1),...]
         """
         all_scores = []
-        pass
+        return all_scores
 
     @torch.no_grad()
     def rerank(self, query_list, doc_list, batch_size=None, topk=None):

@@ -1,23 +1,19 @@
-import torch
-import torch.nn.functional as F
-import torch.nn as nn
-import collections
 from typing import List, Dict
-import re
-import openai
-from tqdm import tqdm
-import torch
-import numpy as np
 from copy import deepcopy
+from tqdm import tqdm
+import numpy as np
+import torch
 from torch import Tensor
-from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM, T5ForConditionalGeneration, BartForConditionalGeneration
+from transformers import AutoTokenizer, \
+                        AutoModel,\
+                        AutoModelForCausalLM, \
+                        T5ForConditionalGeneration, \
+                        BartForConditionalGeneration
 
 
 
 class BaseGenerator:
-    r"""`BaseGenerator` is a base object of Generator model.
-    
-    """
+    """`BaseGenerator` is a base object of Generator model."""
 
     def __init__(self, config):
         self.model_name = config['generator_model']
@@ -31,7 +27,7 @@ class BaseGenerator:
         self.generation_params = config['generation_params']
     
     def generate(self, input_list: list) -> List[str]:
-        r"""Get responses from the generater.
+        """Get responses from the generater.
 
         Args:
             input_list: it contains input texts, each item represents a sample.
@@ -43,7 +39,8 @@ class BaseGenerator:
 
 
 class EncoderDecoderGenerator(BaseGenerator):
-    r"""Class for encoder-decoder model"""
+    """Class for encoder-decoder model"""
+
     def __init__(self, config):
         super().__init__(config)
         self.fid = config['use_fid']
@@ -61,12 +58,12 @@ class EncoderDecoderGenerator(BaseGenerator):
         self.model.eval()
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
 
-    def encode_passages(self, batch_text_passages):
+    def encode_passages(self, batch_text_passages: List[List[str]]):
         passage_ids, passage_masks = [], []
         for k, text_passages in enumerate(batch_text_passages):
             p = self.tokenizer.batch_encode_plus(
                 text_passages,
-                max_length=self.max_input_length,
+                max_length=self.max_input_len,
                 pad_to_max_length=True,
                 return_tensors='pt',
                 truncation=True
@@ -135,8 +132,8 @@ class EncoderDecoderGenerator(BaseGenerator):
 
 
 class VLLMGenerator(BaseGenerator):
-    r"""Class for decoder-only generator, based on vllm. 
-    """
+    """Class for decoder-only generator, based on vllm. """
+
     def __init__(self, config):
         super().__init__(config)
         
@@ -166,7 +163,7 @@ class VLLMGenerator(BaseGenerator):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
             
     @torch.no_grad()
-    def generate(self, input_list, return_raw_output=False, return_scores=False, **params):
+    def generate(self, input_list: List[str], return_raw_output=False, return_scores=False, **params):
         from vllm import SamplingParams
         if isinstance(input_list, str):
             input_list = [input_list]
@@ -185,11 +182,6 @@ class VLLMGenerator(BaseGenerator):
         if return_scores:
             if 'logprobs' not in generation_params:
                 generation_params['logprobs'] = 100
-
-        if 'stop' in generation_params:
-            generation_params['stop'].append("<|eot_id|>")
-        else:
-            generation_params['stop'] = ["<|eot_id|>"]
 
         sampling_params = SamplingParams(**generation_params)
     
@@ -224,8 +216,8 @@ class VLLMGenerator(BaseGenerator):
 
 
 class CausalLMGenerator(BaseGenerator):
-    r"""Class for decoder-only generator, based on hf. 
-    """
+    """Class for decoder-only generator, based on hf. """
+
     def __init__(self, config, model=None):
         super().__init__(config)
         lora_path = None if 'generator_lora_path' not in config else config['generator_lora_path']
@@ -235,6 +227,7 @@ class CausalLMGenerator(BaseGenerator):
             self.use_lora = True
             import peft
             self.model.load_adapter(lora_path)
+
     def _load_model(self, model=None):
         r"""Load model and tokenizer for generator.
         
@@ -261,10 +254,9 @@ class CausalLMGenerator(BaseGenerator):
         return model, tokenizer
     
     @torch.no_grad()
-    def generate(self, input_list, batch_size=None, return_scores=False, **params):
-        r"""Generate batches one by one. The generated content needs to exclude input.
-    
-        """
+    def generate(self, input_list: List[str], batch_size=None, return_scores=False, **params):
+        """Generate batches one by one. The generated content needs to exclude input."""
+
         if isinstance(input_list, str):
             input_list = [input_list]
         if batch_size is None:
@@ -286,12 +278,6 @@ class CausalLMGenerator(BaseGenerator):
                 generation_params['max_new_tokens'] = params.pop('max_tokens')
             else:
                 generation_params['max_new_tokens'] = generation_params.pop('max_tokens')
-
-        # extra_eos_tokens = [self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")]
-        # if 'eos_token_id' in generation_params:
-        #     generation_params['eos_token_id'].extend(extra_eos_tokens)
-        # else:
-        #     generation_params['eos_token_id'] = extra_eos_tokens
 
         responses = []
         scores = []

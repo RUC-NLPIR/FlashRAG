@@ -204,12 +204,10 @@ class Index_Builder:
 
     @torch.no_grad()
     def build_dense_index(self):
-        r"""Obtain the representation of documents based on the embedding model(BERT-based) and 
+        """Obtain the representation of documents based on the embedding model(BERT-based) and 
         construct a faiss index.
-        
         """
-        # TODO: disassembly overall process, use non open-source emebdding/ processed embedding
-
+        
         if os.path.exists(self.index_save_path):
             print("The index file already exists and will be overwritten.")
         

@@ -1,4 +1,4 @@
-# ----Global Paths----
+# ------------------------------------------------Global Paths------------------------------------------------#
 # Paths to retrieval models
 retriever_model2path:
   e5: "intfloat/e5-base-v2"
@@ -26,73 +26,95 @@ method2index:
   bm25: ~
   contriever: ~
 
-# ----Environment Settings----
-gpu_id: "0"
-dataset_name: "nq"
-split: ["test"] # train,dev,test
-
-# Sampling configurations for testing
-test_sample_num: ~
-random_sample: False
-
-# Seed for reproducibility
-seed: 2024
-
+# ------------------------------------------------Environment Settings------------------------------------------------#
 # Directory paths for data and outputs
 data_dir: "dataset/"
 save_dir: "output/"
 
-# ----Retrieval Settings----
-retrieval_method: "e5"  # name or path of the retrieval model
-index_path: ~ # set automatically if not provided
-corpus_path: ~  # path to corpus that store the documents
+gpu_id: "0,1,2,3"
+dataset_name: "nq" # name of the dataset in data_dir
+split: ["test"]  # dataset split to load (e.g. train,dev,test)
 
-retrieval_pooling_method: ~ # set automatically if not provided
-retrieval_batch_size: 256
-retrieval_topk: 5
-retrieval_use_fp16: True
-retrieval_query_max_length: 128
-save_retrieval_cache: True
-use_retrieval_cache: False
-retrieval_cache_path: ~
+# Sampling configurations for testing
+test_sample_num: ~  # number of samples to test (only work in dev/test split), if None, test all samples
+random_sample: False # whether to randomly sample the test samples
 
-use_reranker: False
-rerank_model_name: ~
-rerank_model_path: ~
-rerank_pooling_method: ~
-rerank_use_fp16: True
-rerank_topk: 5
-rerank_max_length: 512
-rerank_batch_size: 256
-# ----Generator Settings----
-use_vllm: False
-generator_model: "llama2-7B-chat" # name or path of the generator model
-generator_max_input_len: 1024
-generator_batch_size: 2
-generation_params:
-  max_tokens: 64
-  temperature: 1.0
-  top_p: 1.0
-use_fid: False
+# Seed for reproducibility
+seed: 2024
 
-# ----Evaluation Settings----
-metrics: ['em','f1','sub_em','precision','recall']
-metric_setting:
-  retrieval_recall_topk: 5
-save_metric_score: True
+# Whether save intermediate data
 save_intermediate_data: True
 save_note: 'experiment'
 
+# -------------------------------------------------Retrieval Settings------------------------------------------------#
+# If set the name, the model path will be find in global paths
+retrieval_method: "e5"  # name or path of the retrieval model. 
+index_path: ~ # set automatically if not provided. 
+faiss_gpu: False # whether use gpu to hold index
+corpus_path: ~  # path to corpus in '.jsonl' format that store the documents
 
-# ----Refiner Settings----
+retrieval_topk: 5 # number of retrieved documents
+retrieval_batch_size: 256  # batch size for retrieval
+retrieval_use_fp16: True  # whether to use fp16 for retrieval model
+retrieval_query_max_length: 128  # max length of the query
+save_retrieval_cache: True # whether to save the retrieval cache
+use_retrieval_cache: False # whether to use the retrieval cache
+retrieval_cache_path: ~ # path to the retrieval cache
+retrieval_pooling_method: ~ # set automatically if not provided
+
+use_reranker: False # whether to use reranker
+rerank_model_name: ~ # same as retrieval_method
+rerank_model_path: ~ # path to reranker model, path will be automatically find in `retriever_model2path`
+rerank_pooling_method: ~
+rerank_topk: 5  # number of remain documents after reranking
+rerank_max_length: 512 
+rerank_batch_size: 256 # batch size for reranker
+rerank_use_fp16: True
+
+# -------------------------------------------------Generator Settings------------------------------------------------#
+use_vllm: False
+generator_model: "llama2-7B-chat" # name or path of the generator model
+generator_max_input_len: 1024  # max length of the input
+generator_batch_size: 2 # batch size for generation, invalid for vllm
+generation_params:  
+  max_tokens: 64
+  temperature: 1.0
+  top_p: 1.0
+use_fid: False # whether to use FID, only valid in encoder-decoder model
+
+
+# -------------------------------------------------Refiner Settings------------------------------------------------#
+# If set, the refiner will be used to refine the retrieval documents.
 refiner_name: ~
 refiner_model_path: ~
 
-# Used for extractive method
-refiner_topk: 5
-refiner_pooling_method: 'mean'
-refiner_encode_max_length: 256
-# Used for abstractive method
+# Used for extractive method (e.g embedding models)
+refiner_topk: 5 # number of remain sentence after refiner
+refiner_pooling_method: 'mean' # pooling method of refiner model
+refiner_encode_max_length: 256 
+# Used for abstractive method (e.g. generation models like bart-large-cnn)
 refiner_max_input_length: 1024
 refiner_max_output_length: 512
+
+# Specify settings for llmlingua
+llmlingua_config:
+  'rate': 0.55,
+  'condition_in_question': 'after_condition',
+  'reorder_context': 'sort',
+  'dynamic_context_compression_ratio': 0.3,
+  'condition_compare': True,
+  'context_budget': "+100",
+  'rank_method': 'longllmlingua'
+sc_config:
+  'reduce_ratio': 0.5
+
+# -------------------------------------------------Evaluation Settings------------------------------------------------#
+# Metrics to evaluate the result
+metrics: ['em','f1','sub_em','precision','recall'] 
+# Specify setting for metric, will be called within certain metrics
+metric_setting: 
+  retrieval_recall_topk: 5
+save_metric_score: True #　whether to save the metric score into txt file
+
+
 

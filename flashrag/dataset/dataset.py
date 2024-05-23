@@ -1,5 +1,5 @@
-import json
 import os
+import json
 import random
 import numpy as np
 
@@ -9,8 +9,6 @@ class Item:
     Each attribute of this class can be used like a dict key(also for key in ```self.output```).
     
     """
-    # __setitem__ = dict.__setattr__
-    # __getitem__ = dict.__getattribute__
 
     def __init__(self, item_dict):
         self.id = item_dict.get("id")
@@ -36,18 +34,6 @@ class Item:
             self.output['metric_score'] = {}
         self.output['metric_score'][metric_name] = metric_score
     
-    # def __getitem__(self, key):
-    #     if key in ['id','question','golden_answers','metadata']:
-    #         return getattr(self, key)
-    #     else:
-    #         return self.output[key]
-    
-    # def __setitem__(self, key, value):
-    #     if key in ['id','question','golden_answers','metadata']:
-    #         setattr(self, key)
-    #     else:
-    #         self.output[key] = value
-
     def __getattr__(self, attr_name):
         if attr_name in ['id','question','golden_answers','metadata','output']:
             return super().__getattribute__(attr_name)
@@ -79,10 +65,9 @@ class Item:
     
 
 class Dataset:
-    r"""A container class used to store the whole dataset. Inside the class, each data sample will be stored
+    """A container class used to store the whole dataset. Inside the class, each data sample will be stored
     in ```Item``` class.
     The properties of the dataset represent the list of attributes corresponding to each item in the dataset.
-    
     """
     
     def __init__(self, config=None, dataset_path=None, data=None, sample_num = None, random_sample = False):
@@ -99,9 +84,7 @@ class Dataset:
             self.data = data
 
     def _load_data(self, dataset_name, dataset_path):
-        r"""Load data from the provided dataset_path or directly download the file(TODO). 
-        
-        """
+        """Load data from the provided dataset_path or directly download the file(TODO). """
 
         if not os.path.exists(dataset_path):
             # TODO: auto download: self._download(dataset_name, dataset_path)
@@ -123,9 +106,7 @@ class Dataset:
         return data
     
     def update_output(self, key, value_list):
-        r"""Update the overall output field for each sample in the dataset.
-        
-        """
+        """Update the overall output field for each sample in the dataset."""
 
         assert len(self.data) == len(value_list)
         for item, value in zip(self.data, value_list):
@@ -145,9 +126,7 @@ class Dataset:
         return [item.output for item in self.data]
 
     def get_batch_data(self, attr_name:str, batch_size: int):
-        r"""Get an attribute of dataset items in batch.
-        
-        """
+        """Get an attribute of dataset items in batch."""
 
         for i in range(0, len(self.data), batch_size):
             batch_items = self.data[i:i+batch_size]
@@ -158,9 +137,8 @@ class Dataset:
 
 
     def get_attr_data(self, attr_name):
-        r"""For the attributes constructed later (not implemented using property), 
+        """For the attributes constructed later (not implemented using property), 
         obtain a list of this attribute in the entire dataset. 
-        
         """
         return [item[attr_name] for item in self.data]
     
@@ -171,15 +149,11 @@ class Dataset:
         return len(self.data)
     
     def save(self, save_path):
-        f"""Save the dataset into the original format.
+        """Save the dataset into the original format."""
 
-        """
         save_data = [item.to_dict() for item in self.data]
         with open(save_path,"w") as f:
             json.dump(save_data, f, indent=4)
-            # for item in save_data:
-            #     json.dump(item, f)
-            #     f.write("\n")
 
         
 

@@ -1,8 +1,7 @@
-"""
-Implementation of REPLUG. 
-Reference: fastRAG (https://github.com/IntelLabs/fastRAG/) 
-"""
+# Source: https://github.com/IntelLabs/fastRAG/blob/main/fastrag/generators/replug.py
+# The release is licensed under the Apache License 2.0
 
+import warnings
 from typing import Dict, List, Optional, Union
 import transformers
 from transformers import (
@@ -13,16 +12,16 @@ from transformers import (
     LogitsProcessorList,
     StoppingCriteriaList,
 )
+import torch
 import torch.nn as nn
 import torch.distributed as dist
-import warnings
 from transformers.generation.stopping_criteria import validate_stopping_criteria
 from transformers.generation.utils import (
     SampleDecoderOnlyOutput,
     SampleEncoderDecoderOutput,
     SampleOutput,
 )
-import torch
+
 
 
 class REPLUG_Generation(GenerationMixin):

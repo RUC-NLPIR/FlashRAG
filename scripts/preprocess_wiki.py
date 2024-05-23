@@ -8,7 +8,10 @@ import json
 import subprocess
 from pathlib import Path
 import shutil
-from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
+from concurrent.futures import ProcessPoolExecutor,ThreadPoolExecutor
+from multiprocessing import cpu_count  
+from multiprocessing import Manager,Pool
 
 def load_corpus(dir_path):
     def iter_files(path):
@@ -142,51 +145,20 @@ def basic_process(title, text):
     return title, text
 
 
-def process_corpus(title, text):
-    global clean_corpus
-    title, text = basic_process(title, text)
-    if title is None:
-        return 
-    
-    if args.chunk_by == 'sentence':
-        segments = create_segments(text, max_length=args.seg_size, stride=args.stride)
-        for segment in segments:
-            text = segment.replace("\n", " ").replace("\t", " ")
-            clean_corpus.append({"title": title, "text": text})
+def split_list(lst, n):
+    """Split a list into n roughly equal parts."""
+    k, m = divmod(len(lst), n)
+    return [lst[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n)]
 
-    elif args.chunk_by == '100w':
-        doc = nlp.make_doc(text)
-        segments = []
-        word_count = 0
-        segment_tokens = []
-        for token in doc:
-            segment_tokens.append(token.text_with_ws)
-            if not token.is_space and not token.is_punct:
-                word_count+=1
-                if word_count == 100:
-                    word_count = 0
-                    segments.append(''.join([token for token in segment_tokens]))
-                    segment_tokens = []
-        if word_count != 0:
-            for token in doc:
-                segment_tokens.append(token.text_with_ws)
-                if not token.is_space and not token.is_punct:
-                    word_count+=1
-                    if word_count == 100:
-                        word_count = 0
-                        segments.append(''.join([token for token in segment_tokens]))
-                        break
-        if word_count != 0:
-            segments.append(''.join([token for token in segment_tokens]))
-        if len(segments) > 0:
-            segments[0] = title + " " + segments[0]
-        for segment in segments:
-            text = segment.replace("\n", " ").replace("\t", " ")
-            clean_corpus.append({"title": title, "text": text})
-        
-    else: 
-        raise NotImplementedError
-
+def single_worker(docs):
+    results = []
+    for item in tqdm(docs):
+        title,text = basic_process(item[0], item[1])
+        if title is None:
+            continue
+        results.append((title, text))
+    result_list.extend(results)
+    return results
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate clean wiki corpus file for indexing.')
@@ -194,19 +166,20 @@ if __name__ == '__main__':
     parser.add_argument('--chunk_by', default='100w', choices=['100w','sentence'], type=str)
     parser.add_argument('--seg_size', default=None, type=int)
     parser.add_argument('--stride', default=None, type=int)
+    parser.add_argument('--num_workers', default=4, type=int)
     parser.add_argument('--save_path', type=str, default='clean_corpus.jsonl')
     args = parser.parse_args()
 
-    #extract wiki dump
+    # extract wiki dump
     temp_dir = os.path.join(Path(args.save_path).parent, 'temp')
     os.makedirs(temp_dir)
     subprocess.run(['python', '-m',
                     'wikiextractor.WikiExtractor',
                     '--json', '--filter_disambig_pages', '--quiet',
                     '-o', temp_dir,
-                    '--process', '12',
+                    '--process', str(args.num_workers),
                     args.dump_path])
-    
+
     corpus = load_corpus(temp_dir)
     nlp = spacy.load("en_core_web_lg")
 
@@ -215,16 +188,71 @@ if __name__ == '__main__':
     for item in tqdm(corpus):
         title = item['title']
         text = item['text']
-        
         if title in documents:
             documents[title] += " " + text
         else:
             documents[title] = text 
-    clean_corpus = []
-    with ThreadPoolExecutor(max_workers=16) as executor:
-        for title, text in tqdm(documents.items()):
-            executor.submit(process_corpus, title, text)
+    
+    
+    documents = list(documents.items())
+    manager = Manager()
+    result_list = manager.list()
+    with Pool(processes=args.num_workers) as p:
+        r = list(tqdm(p.imap(single_worker,split_list(documents,8))))
 
+    all_title = [item[0] for item in result_list]
+    all_text = [item[1] for item in result_list]
+
+    print("Begin precessing...")
+    idx = 0
+    clean_corpus = []
+    if args.chunk_by == 'sentence':
+        for doc in tqdm(nlp.pipe(all_text, n_process=args.num_workers, batch_size=2000,exclude=["tok2vec", "tagger","attribute_ruler", "lemmatizer","ner","textcat"]), total=len(all_text)):
+            title = all_title[idx]
+            idx += 1
+            sentences = [sent.text.strip() for sent in doc.sents]
+            segments = []
+            for i in range(0, len(sentences), args.stride):
+                segment = " ".join(sentences[i:i+args.seg_size])
+                segments.append(segment)
+                if i + args.seg_size >= len(sentences):
+                    break
+            for segment in segments:
+                text = segment.replace("\n", " ").replace("\t", " ")
+                clean_corpus.append({"title": title, "text": text})
+
+    elif args.chunk_by == '100w':
+        for doc in tqdm(nlp.pipe(all_text, n_process=args.num_workers, batch_size=2000), total=len(all_text)):
+            title = all_title[idx]
+            idx += 1
+            segments = []
+            word_count = 0
+            segment_tokens = []
+            for token in doc:
+                segment_tokens.append(token.text_with_ws)
+                if not token.is_space and not token.is_punct:
+                    word_count+=1
+                    if word_count == 100:
+                        word_count = 0
+                        segments.append(''.join([token for token in segment_tokens]))
+                        segment_tokens = []
+            if word_count != 0:
+                for token in doc:
+                    segment_tokens.append(token.text_with_ws)
+                    if not token.is_space and not token.is_punct:
+                        word_count+=1
+                        if word_count == 100:
+                            word_count = 0
+                            segments.append(''.join([token for token in segment_tokens]))
+                            break
+            if word_count != 0:
+                segments.append(''.join([token for token in segment_tokens]))
+            if len(segments) > 0:
+                segments[0] = title + " " + segments[0]
+            for segment in segments:
+                text = segment.replace("\n", " ").replace("\t", " ")
+                clean_corpus.append({"title": title, "text": text})
+        
     shutil.rmtree(temp_dir)
 
     print("Start saving corpus...")

@@ -1,13 +1,13 @@
-from flashrag.evaluator.utils import normalize_answer
 import re
 import warnings 
 from collections import Counter
+from flashrag.evaluator.utils import normalize_answer
 
 class BaseMetric:
-    r"""`BaseMetric` serves as the base object of all metrics. Implemented metric should
+    """`BaseMetric` serves as the base object of all metrics. Implemented metric should
     inherit this class.
-    
     """
+
     metric_name = "base"
 
     def __init__(self, config):
@@ -15,7 +15,7 @@ class BaseMetric:
         self.dataset_name = config['dataset_name']
     
     def calculate_metric(self, data):
-        r"""Get the total score of this metric and score for each sample.
+        """Get the total score of this metric and score for each sample.
 
         Args:
             data object: it contains basic information and generated information.
@@ -30,6 +30,7 @@ class BaseMetric:
     
 class F1_Score(BaseMetric):
     """Token-level F1 score"""
+
     metric_name = "f1"
     def __init__(self, config):
         super().__init__(config)
@@ -68,6 +69,7 @@ class F1_Score(BaseMetric):
     
 class Recall_Score(F1_Score):
     """Token-level Recall score"""
+
     metric_name = "recall"
     def __init__(self, config):
         super().__init__(config)
@@ -81,6 +83,7 @@ class Recall_Score(F1_Score):
 
 class Precision_Score(F1_Score):
     """Token-level Precision score"""
+
     metric_name = "precision"
     def __init__(self, config):
         super().__init__(config)
@@ -259,8 +262,6 @@ class Rouge_L(Rouge_Score):
         score = sum(metric_score_list) / len(metric_score_list)
         
         return {"rouge-l": score}, metric_score_list
-
-
 
 
 class BLEU(BaseMetric):

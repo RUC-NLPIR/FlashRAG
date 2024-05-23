@@ -9,10 +9,7 @@ def load_model(
         use_fp16: bool = False
     ):
     model_config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
-    model_class = AutoModel
-    #model_class = T5EncoderModel if "t5" in model_config.architectures[0].lower() else AutoModel
-
-    model = model_class.from_pretrained(model_path, trust_remote_code=True)
+    model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
     model.eval()
     model.cuda()
     if use_fp16: 
@@ -65,24 +62,6 @@ def read_jsonl(file_path, content_function=None):
             
             yield new_item
 
-# def load_corpus(
-#         corpus_path: str,
-#         content_function: callable = lambda item: "\"{}\"\n{}".format(item['title'], item['text'])
-#     ):
-#     raw_corpus_sample = next(read_jsonl(corpus_path))
-#     have_contents = 'contents' in raw_corpus_sample
-
-#     import subprocess
-#     out = subprocess.getoutput("wc -l %s" % corpus_path)
-#     corpus_size = int(out.split()[0])
-    
-#     if not have_contents:
-#         corpus = read_jsonl(corpus_path, content_function)
-#     else:
-#         # use original 'contents' key
-#         corpus = read_jsonl(corpus_path)
-
-#     return corpus, have_contents, corpus_size
 
 def load_docs(corpus, doc_idxs, content_function=base_content_function):
     results = [corpus[int(idx)] for idx in doc_idxs]

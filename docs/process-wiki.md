@@ -36,4 +36,5 @@ Execute the provided script to process the wiki dump into JSONL format. Adjust t
 cd scripts
 python preprocess_wiki.py --dump_path ../enwikinews-20240420-pages-articles.xml.bz2  \
                         --save_path ../test_sample.jsonl \
+                        --chunk_by 100w
 ```

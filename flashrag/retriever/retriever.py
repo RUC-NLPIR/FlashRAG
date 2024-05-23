@@ -1,12 +1,11 @@
-import faiss
 import json
 import os
 import warnings
-from abc import ABC, abstractmethod
 from typing import List, Dict
 import functools
 from tqdm import tqdm
 from multiprocessing import Pool
+import faiss
 from pyserini.search.lucene import LuceneSearcher
 
 from flashrag.utils import get_reranker
@@ -15,6 +14,11 @@ from flashrag.retriever.encoder import Encoder
 
 
 def cache_manager(func):
+    """
+    Decorator used for retrieving document cache. 
+    With the decorator, The retriever can store each retrieved document as a file and reuse it.
+    """
+
     @functools.wraps(func)
     def wrapper(self, query_list, num = None, return_score = False):    
         if num is None:
@@ -77,6 +81,10 @@ def cache_manager(func):
     return wrapper
 
 def rerank_manager(func):
+    """
+    Decorator used for reranking retrieved documents. 
+    """
+
     @functools.wraps(func)
     def wrapper(self, query_list, num = None, return_score = False):
         results, scores = func(self, query_list, num, True)
@@ -92,8 +100,8 @@ def rerank_manager(func):
     return wrapper
 
 
-class BaseRetriever(ABC):
-    r"""Base object for all retrievers."""
+class BaseRetriever:
+    """Base object for all retrievers."""
 
     def __init__(self, config):
         self.config = config
@@ -223,7 +231,12 @@ class DenseRetriever(BaseRetriever):
     def __init__(self, config: dict):
         super().__init__(config)
         self.index = faiss.read_index(self.index_path)
-        #self.index = faiss.index_cpu_to_all_gpus(self.index)
+        if config['faiss_gpu']:
+            res = faiss.StandardGpuResources()
+            co = faiss.GpuClonerOptions()
+            co.useFloat16 = True
+            self.index = faiss.index_cpu_to_gpu(res, 0, self.index, co)
+
         self.corpus = load_corpus(self.corpus_path)
         self.encoder = Encoder(
              model_name = self.retrieval_method, 
@@ -235,7 +248,7 @@ class DenseRetriever(BaseRetriever):
         self.topk = config['retrieval_topk']
         self.batch_size = self.config['retrieval_batch_size']
 
-    def _search(self, query, num: int = None, return_score = False):
+    def _search(self, query: str, num: int = None, return_score = False):
         if num is None:
             num = self.topk
         query_emb = self.encoder.encode(query)
@@ -249,7 +262,7 @@ class DenseRetriever(BaseRetriever):
         else:
             return results
 
-    def _batch_search(self, query_list, num: int = None, return_score = False):
+    def _batch_search(self, query_list: List[str], num: int = None, return_score = False):
         if isinstance(query_list, str):
             query_list = [query_list]
         if num is None:

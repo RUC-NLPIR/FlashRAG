@@ -2,10 +2,18 @@ from transformers import AutoTokenizer, AutoConfig
 
 class PromptTemplate:
     placeholders = ['reference', 'question']
-    base_system_prompt = "Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}"
+    base_system_prompt = "Answer the question based on the given document. \
+                        Only give me the answer and do not output any other words.\
+                        \nThe following are given documents.\n\n{reference}"
     base_user_prompt = "Question: {question}"
 
-    def __init__(self, config, system_prompt = "", user_prompt = "", enable_chat = True):
+    def __init__(self, 
+                 config, 
+                system_prompt = "", 
+                user_prompt = "", 
+                enable_chat = True
+        ):
+        
         self.config = config
         self.generator_path = config['generator_model_path']
         model_config = AutoConfig.from_pretrained(self.generator_path)

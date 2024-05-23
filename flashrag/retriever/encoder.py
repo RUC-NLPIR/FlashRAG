@@ -1,3 +1,4 @@
+from typing import List, Dict
 import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModel
@@ -15,7 +16,7 @@ class Encoder:
                                                   use_fp16 = use_fp16)
         
     @torch.no_grad()
-    def encode(self, query_list, is_query=True) -> np.ndarray:
+    def encode(self, query_list: List[str], is_query=True) -> np.ndarray:
         # processing query for different encoders
         if isinstance(query_list, str):
             query_list = [query_list]
@@ -34,7 +35,6 @@ class Encoder:
                             )
         inputs = {k: v.cuda() for k, v in inputs.items()}
 
-        #TODO: support encoder-only T5 model
         if "T5" in type(self.model).__name__:
             # T5-based retrieval model
             decoder_input_ids = torch.zeros(

@@ -44,9 +44,11 @@ class LLMLinguaRefiner(BaseRefiner):
             'context_budget': "+100",
             'rank_method': 'longllmlingua'
         }
+        if 'llmlingua_config' in config and config['llmlingua_config'] is not None:
+            self.compress_config = config['llmlingua_config'] 
+        else:
+            self.compress_config = default_config
 
-        self.compress_config = config['llmlingua_config'] if 'llmlingua_config' in config else default_config
-        # load model
         from flashrag.refiner.llmlingua_compressor import PromptCompressor
         self.refiner = PromptCompressor(model_name = self.model_path)
     
@@ -100,7 +102,10 @@ class SelectiveContextRefiner(BaseRefiner):
         }
 
         self.refiner = SelectiveContext(model_type="gpt2", model_path=self.model_path, lang="en")
-        self.compress_config = config['sc_config'] if 'sc_config' in config else default_config
+        if 'sc_config' in config and config['sc_config'] is not None:
+            self.compress_config = config['sc_config'] 
+        else:
+            self.compress_config = default_config
     
     def format_reference(self, retrieval_result):
         format_reference = ''
@@ -182,11 +187,9 @@ class ExtractiveRefiner(BaseRefiner):
         questions = dataset.question
         # only use text
         retrieval_results = dataset.retrieval_result
-        retrieval_results = [["\n".join(doc_item['contents'].split("\n")[1:]) for doc_item in item_result]for item_result in retrieval_results]
+        retrieval_results = [["\n".join(doc_item['contents'].split("\n")[1:]) for doc_item in item_result] for item_result in retrieval_results]
         
         # split into sentences: [[sent1, sent2,...], [...]]
-        #spliter = re.compile('[。\!\?；;\n\r]+|[.?!]+')
-        #sent_lists = [spliter.split(res) for res in retrieval_results]
         sent_lists = [[i.strip() for i in re.split(r'(?<=[.!?])\s+', res) if len(i.strip())>5] for res in retrieval_results]
         score_lists = [] # matching scores, size == sent_lists
         for idx in tqdm(range(0, len(questions), batch_size), desc='Refining process: '):
