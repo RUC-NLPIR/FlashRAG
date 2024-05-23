@@ -38,7 +38,7 @@ With FlashRAG and provided resources, you can effortless reproduce existing SOTA
 
 - **🛠 Extensive and Customizable Framework**: Includes essential components for RAG scenarios such as retrievers, rerankers, generators, and compressors, allowing for flexible assembly of complex pipelines.
 
-- **🗂 Comprehensive Benchmark Datasets**: A collection of 35 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
+- **🗂 Comprehensive Benchmark Datasets**: A collection of 32 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
 
 - **🎯 Pre-implemented Advanced RAG Algorithms**: Features 12 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
 
