@@ -10,7 +10,7 @@ setup(
     version='0.0.1',
     packages=find_packages(),
     url='https://github.com/ignorejjj/FlashRAG',
-    license='Apache License 2.0',
+    license='MIT License',
     author='Jiajie Jin, Yutao Zhu, Chenghao Zhang, Xinyu Yang',
     author_email='jinjiajie@ruc.edu.cn',
     description='A library for efficient Retrieval-Augmented Generation research',
