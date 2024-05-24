@@ -415,7 +415,7 @@ Please kindly cite our paper if helps your research:
     title={FlashRAG: A Modular Toolkit for Efficient Retrieval-Augmented Generation Research},
     journal={CoRR},
     volume={abs/2405.13576},
-    year={2023},
+    year={2024},
     url={https://arxiv.org/abs/2405.13576},
     eprinttype={arXiv},
     eprint={2405.13576}
