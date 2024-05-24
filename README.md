@@ -399,7 +399,7 @@ For MS MARCO, it is already processed upon release and can be directly downloade
 - [How to build my own corpus, such as a specific segmented Wikipedia?](./docs/process-wiki.md) 
 - [How to index my own corpus?](./docs/building-index.md)
 
-## License
+## :bookmark: License
 
 FlashRAG is licensed under the [MIT License](./LICENSE).
 
