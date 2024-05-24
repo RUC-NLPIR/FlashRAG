@@ -403,3 +403,21 @@ For MS MARCO, it is already processed upon release and can be directly downloade
 
 FlashRAG is licensed under the [MIT License](./LICENSE).
 
+## :star2: Citation
+Please kindly cite our paper if helps your research:
+```BibTex
+@article{FlashRAG,
+    author={Jiajie Jin and
+            Yutao Zhu and
+            Xinyu Yang and
+            Chenghao Zhang and
+            Zhicheng Dou},
+    title={FlashRAG: A Modular Toolkit for Efficient Retrieval-Augmented Generation Research},
+    journal={CoRR},
+    volume={abs/2405.13576},
+    year={2023},
+    url={https://arxiv.org/abs/2405.13576},
+    eprinttype={arXiv},
+    eprint={2405.13576}
+}
+```
