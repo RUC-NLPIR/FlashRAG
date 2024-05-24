@@ -5,6 +5,8 @@ from transformers import AutoConfig
 from flashrag.dataset.dataset import Dataset
 
 def get_dataset(config):
+    """Load dataset from config."""
+
     dataset_path = config['dataset_path']
     all_split = config['split']
 
@@ -15,7 +17,7 @@ def get_dataset(config):
         if not os.path.exists(split_path):
             print(f"{split} file not exists!")
             continue
-        if split == "test" or split == 'dev' or split == 'val':
+        if split in ['test','val','dev']:
             split_dict[split] = Dataset(config, 
                                         split_path, 
                                         sample_num = config['test_sample_num'], 
@@ -26,7 +28,7 @@ def get_dataset(config):
     return split_dict
 
 def get_generator(config, **params):
-    r"""Automatically select generator class based on config."""
+    """Automatically select generator class based on config."""
     if config['framework'] == 'vllm':
         return getattr(
                 importlib.import_module("flashrag.generator"), 

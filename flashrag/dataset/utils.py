@@ -1,5 +1,14 @@
 from flashrag.dataset import Dataset
 
+def filter_dataset(dataset: Dataset, filter_func = None):
+    if filter_func is None:
+        return dataset
+    data = dataset.data
+    for item in data:
+        if not filter_func(item):
+            data.remove(item)
+    return Dataset(config=dataset.config, data=data)
+
 def split_dataset(dataset: Dataset, split_bool:list):
     assert len(split_bool) == len(dataset)
     
