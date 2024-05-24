@@ -157,7 +157,6 @@ def single_worker(docs):
         if title is None:
             continue
         results.append((title, text))
-    result_list.extend(results)
     return results
 
 if __name__ == '__main__':
@@ -195,10 +194,10 @@ if __name__ == '__main__':
     
     print("Start pre-processing...")
     documents = list(documents.items())
-    manager = Manager()
-    result_list = manager.list()
+    
     with Pool(processes=args.num_workers) as p:
-        r = list(tqdm(p.imap(single_worker,split_list(documents,8))))
+        result_list = list(tqdm(p.imap(single_worker,split_list(documents,args.num_workers))))
+    result_list = sum(result_list, [])
 
     all_title = [item[0] for item in result_list]
     all_text = [item[1] for item in result_list]
