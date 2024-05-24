@@ -124,12 +124,12 @@ class Config:
 
         # set model path
         retrieval_method = self.final_config['retrieval_method']
-        retriever_model2path = self.final_config['retriever_model2path']
+        model2path = self.final_config['model2path']
         model2pooling = self.final_config['model2pooling']
         method2index = self.final_config['method2index']
 
         generator_model = self.final_config['generator_model']
-        generator_model2path = self.final_config['generator_model2path']
+        refiner_model = self.final_config['refiner_name']
 
         if self.final_config['index_path'] is None:
             try:
@@ -138,7 +138,7 @@ class Config:
                 print("Index is empty!!")
                 assert False 
 
-        self.final_config['retrieval_model_path'] = retriever_model2path.get(retrieval_method, retrieval_method)
+        self.final_config['retrieval_model_path'] = model2path.get(retrieval_method, retrieval_method)
         # TODO: not support when `retrieval_model` is path
 
         def set_pooling_method(method, model2pooling):
@@ -162,9 +162,10 @@ class Config:
         
         if rerank_model_path is None and \
             rerank_model_name is not None:
-            self.final_config['rerank_model_path'] = retriever_model2path.get(rerank_model_name, rerank_model_name)
+            self.final_config['rerank_model_path'] = model2path.get(rerank_model_name, rerank_model_name)
 
-        self.final_config['generator_model_path'] = generator_model2path.get(generator_model, generator_model)
+        self.final_config['generator_model_path'] = model2path.get(generator_model, generator_model)
+        self.final_config['refiner_model_path'] = model2path.get(refiner_model, refiner_model)
 
     def _prepare_dir(self):
         save_note = self.final_config['save_note']

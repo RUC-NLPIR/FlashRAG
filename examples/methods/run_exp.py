@@ -57,14 +57,14 @@ def aar(args):
     else:
         index_path = "aar-ance_Flat.index" 
 
-    retriever_model2path = {"AAR-contriever": "model/AAR-Contriever-KILT",
+    model2path = {"AAR-contriever": "model/AAR-Contriever-KILT",
                             "AAR-ANCE": "model/AAR-ANCE"}
     model2pooling = {"AAR-contriever": "mean",
                     "AAR-ANCE": "cls"}
     save_note = retrieval_method
     config_dict = {
                 'retrieval_method': retrieval_method,
-                'retriever_model2path': retriever_model2path,
+                'model2path': model2path,
                 'index_path': index_path,
                 'model2pooling': model2pooling,
                 'save_note': save_note,

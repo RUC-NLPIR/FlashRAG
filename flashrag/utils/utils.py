@@ -116,8 +116,10 @@ def get_refiner(config):
             assert False, "refiner_model_path is empty!"
     
     model_config = AutoConfig.from_pretrained(refiner_path)
-
-    if "recomp" in refiner_name.lower() or "recomp" in refiner_path:
+    arch = model_config.architectures[0].lower()
+    if "recomp" in refiner_name.lower() or \
+        "recomp" in refiner_path or \
+        'bert' in arch:
         if model_config.model_type == "t5" :
             return getattr(
                 importlib.import_module("flashrag.refiner"), 

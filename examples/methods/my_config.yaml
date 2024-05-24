@@ -1,12 +1,9 @@
 # ------------------------------------------------Global Paths------------------------------------------------#
-# Paths to retrieval models
-retriever_model2path:
+# Paths to models
+model2path:
   e5: "intfloat/e5-base-v2"
   bge: "intfloat/e5-base-v2"
   contriever: "facebook/contriever"
-  
-# Paths to generation models
-generator_model2path:
   llama2-7B-chat: "meta-llama/Llama-2-7b-chat-hf"
   llama2-7B: "meta-llama/Llama-2-7b-hf"
   llama2-13B: "meta-llama/Llama-2-13b-hf"

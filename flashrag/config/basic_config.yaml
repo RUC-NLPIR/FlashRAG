@@ -1,12 +1,9 @@
 # ------------------------------------------------Global Paths------------------------------------------------#
-# Paths to retrieval models
-retriever_model2path:
+# Paths to various models
+model2path:
   e5: "intfloat/e5-base-v2"
   bge: "intfloat/e5-base-v2"
   contriever: "facebook/contriever"
-  
-# Paths to generation models
-generator_model2path:
   llama2-7B-chat: "meta-llama/Llama-2-7b-chat-hf"
   llama2-7B: "meta-llama/Llama-2-7b-hf"
   llama2-13B: "meta-llama/Llama-2-13b-hf"
@@ -49,6 +46,7 @@ save_note: 'experiment'
 # -------------------------------------------------Retrieval Settings------------------------------------------------#
 # If set the name, the model path will be find in global paths
 retrieval_method: "e5"  # name or path of the retrieval model. 
+retrieval_model_path: ~ # path to the retrieval model
 index_path: ~ # set automatically if not provided. 
 faiss_gpu: False # whether use gpu to hold index
 corpus_path: ~  # path to corpus in '.jsonl' format that store the documents
@@ -74,6 +72,7 @@ rerank_use_fp16: True
 # -------------------------------------------------Generator Settings------------------------------------------------#
 framework: hf # inference frame work of LLM, supporting: 'hf','vllm','fschat'
 generator_model: "llama2-7B-chat" # name or path of the generator model
+generator_model_path: ~
 generator_max_input_len: 1024  # max length of the input
 generator_batch_size: 2 # batch size for generation, invalid for vllm
 generation_params:  
@@ -81,32 +80,6 @@ generation_params:
   temperature: 1.0
   top_p: 1.0
 use_fid: False # whether to use FID, only valid in encoder-decoder model
-
-
-# -------------------------------------------------Refiner Settings------------------------------------------------#
-# If set, the refiner will be used to refine the retrieval documents.
-refiner_name: ~
-refiner_model_path: ~
-
-# Used for extractive method (e.g embedding models)
-refiner_topk: 5 # number of remain sentence after refiner
-refiner_pooling_method: 'mean' # pooling method of refiner model
-refiner_encode_max_length: 256 
-# Used for abstractive method (e.g. generation models like bart-large-cnn)
-refiner_max_input_length: 1024
-refiner_max_output_length: 512
-
-# Specify settings for llmlingua
-llmlingua_config:
-  'rate': 0.55,
-  'condition_in_question': 'after_condition',
-  'reorder_context': 'sort',
-  'dynamic_context_compression_ratio': 0.3,
-  'condition_compare': True,
-  'context_budget': "+100",
-  'rank_method': 'longllmlingua'
-sc_config:
-  'reduce_ratio': 0.5
 
 # -------------------------------------------------Evaluation Settings------------------------------------------------#
 # Metrics to evaluate the result

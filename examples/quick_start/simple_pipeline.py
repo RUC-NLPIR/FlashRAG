@@ -13,8 +13,7 @@ config_dict = {
                 'data_dir': 'dataset/',
                 'index_path': 'indexes/e5_flat_sample.index',
                 'corpus_path': 'indexes/sample_data.jsonl',
-                'retriever_model2path': {'e5': args.retriever_path},
-                'generator_model2path': {'llama2-7B-chat': args.model_path},
+                'model2path': {'e5': args.retriever_path, 'llama2-7B-chat': args.model_path},
                 'metrics': ['em','f1','sub_em'],
                 'retrieval_topk': 1,
                 'save_intermediate_data': True
