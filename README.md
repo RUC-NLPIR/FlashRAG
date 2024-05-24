@@ -2,9 +2,9 @@
 
 
 <div align="center">
-<a href=""target="_blank"><img src=https://img.shields.io/badge/arXiv-b5212f.svg?logo=arxiv></a>
+<a href="https://arxiv.org/abs/2405.13576"target="_blank"><img src=https://img.shields.io/badge/arXiv-b5212f.svg?logo=arxiv></a>
 <a href="" target="_blank"><img src=https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face%20Space-276cb4.svg></a>
-<a href="https://github.com/ignorejjj/FlashRAG/blob/main/LICENSE">
+<a href="https://github.com/RUC-NLPIR/FlashRAG/blob/main/LICENSE">
 <img alt="License" src="https://img.shields.io/badge/LICENSE-MIT-green">
 </a>
 </div>
@@ -51,7 +51,7 @@ With FlashRAG and provided resources, you can effortless reproduce existing SOTA
 To get started with FlashRAG, simply clone it from Github and install (requires Python 3.9+): 
 
 ```bash
-git clone https://github.com/ignorejjj/FlashRAG.git
+git clone https://github.com/RUC-NLPIR/FlashRAG.git
 cd FlashRAG
 pip install -e . 
 ```
