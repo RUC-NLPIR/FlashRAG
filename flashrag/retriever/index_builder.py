@@ -9,7 +9,7 @@ import subprocess
 import argparse
 import torch
 from tqdm import tqdm
-from flashrag.retriever.utils import load_model, load_corpus, pooling, base_content_function
+from flashrag.retriever.utils import load_model, load_corpus, pooling
 
 class Index_Builder:
     r"""A tool class used to build an index used in retrieval.
@@ -29,8 +29,7 @@ class Index_Builder:
             faiss_type=None,
             embedding_path=None,
             save_embedding=False,
-            faiss_gpu=False,
-            content_function: callable = base_content_function
+            faiss_gpu=False
         ):
         
         self.retrieval_method = retrieval_method.lower()
@@ -60,14 +59,8 @@ class Index_Builder:
         self.embedding_save_path = os.path.join(self.save_dir, f"emb_{self.retrieval_method}.memmap")
 
         self.corpus = load_corpus(self.corpus_path)
-        self.content_function = content_function
-        self.have_contents = 'contents' in self.corpus[0]
-        if not self.have_contents:
-            def add_contents(item):
-                item['contents'] = self.content_function(item)
-                return item
-            self.corpus = self.corpus.map(add_contents,num_proc=8, batched=True, batch_size=10000)
-
+       
+        print("Finish loading...")
     @staticmethod
     def _check_dir(dir_path):
         r"""Check if the dir path exists and if there is content.

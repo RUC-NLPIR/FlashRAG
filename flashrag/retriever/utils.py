@@ -35,40 +35,27 @@ def pooling(
     else:
         raise NotImplementedError("Pooling method not implemented!")
 
-def base_content_function(item):
-    if 'title' in item:
-        return "\"{}\"\n{}".format(item['title'], item['text'])
-    else:
-        return item['text']
-
 def load_corpus(corpus_path: str):
     corpus = datasets.load_dataset(
             'json', 
             data_files=corpus_path,
             split="train",
-            num_proc=8)
+            num_proc=4)
     return corpus
     
 
-def read_jsonl(file_path, content_function=None):
+def read_jsonl(file_path):
     with open(file_path, "r") as f:
         while True:
             new_line = f.readline()
             if not new_line:
                 return
             new_item = json.loads(new_line)
-            if content_function:
-                new_item['contents'] = content_function(new_item)
             
             yield new_item
 
 
-def load_docs(corpus, doc_idxs, content_function=base_content_function):
+def load_docs(corpus, doc_idxs):
     results = [corpus[int(idx)] for idx in doc_idxs]
-
-    # add content field
-    for item in results:
-        if 'contents' not in item:
-            item['contents'] = content_function(item)
 
     return results

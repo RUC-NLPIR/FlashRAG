@@ -12,12 +12,6 @@ To build an index, you first need to save your corpus in `jsonl` format as follo
 If you want to use Wikipedia as a corpus, you can refer to our documentation for [process Wikipedia](./process-wiki.md) to convert it into an indexed format.
 
 
-We also support where document item contains both title and text:
-```jsonl
-{"id": "0", "title": "doc title", "text": "doc text"}
-```
-In this case, `contents` field will be set to ```"{title}"\n{text}``` for building index.
-
 ### Step2: Indexing
 
 Then, use the following code to build your own index.

@@ -9,7 +9,7 @@ import faiss
 from pyserini.search.lucene import LuceneSearcher
 
 from flashrag.utils import get_reranker
-from flashrag.retriever.utils import base_content_function, load_corpus, load_docs
+from flashrag.retriever.utils import load_corpus, load_docs
 from flashrag.retriever.encoder import Encoder
 
 
@@ -256,7 +256,7 @@ class DenseRetriever(BaseRetriever):
         idxs = idxs[0]
         scores = scores[0]
 
-        results = load_docs(self.corpus, idxs, content_function=base_content_function)
+        results = load_docs(self.corpus, idxs)
         if return_score:
             return results, scores
         else:
@@ -281,7 +281,7 @@ class DenseRetriever(BaseRetriever):
             batch_idxs = batch_idxs.tolist()
             
             flat_idxs = sum(batch_idxs, [])
-            batch_results = load_docs(self.corpus, flat_idxs, content_function=base_content_function)
+            batch_results = load_docs(self.corpus, flat_idxs)
             batch_results = [batch_results[i*num : (i+1)*num] for i in range(len(batch_idxs))]
             
             scores.extend(batch_scores)
