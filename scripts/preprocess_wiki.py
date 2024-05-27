@@ -34,8 +34,7 @@ def load_corpus(dir_path):
     all_files = [file for file in iter_files(dir_path)]
     corpus = []
 
-
-    with ThreadPoolExecutor(max_workers=8) as executor:
+    with ThreadPoolExecutor(max_workers=args.num_workers) as executor:
         for file_path in all_files:
             executor.submit(read_jsonl_file, file_path)
     
@@ -156,6 +155,7 @@ def single_worker(docs):
         title,text = basic_process(item[0], item[1])
         if title is None:
             continue
+        title = f"\"{title}\""
         results.append((title, text))
     return results
 
@@ -246,8 +246,7 @@ if __name__ == '__main__':
                             break
             if word_count != 0:
                 segments.append(''.join([token for token in segment_tokens]))
-            if len(segments) > 0:
-                segments[0] = title + " " + segments[0]
+
             for segment in segments:
                 text = segment.replace("\n", " ").replace("\t", " ")
                 clean_corpus.append({"title": title, "text": text})
@@ -257,10 +256,10 @@ if __name__ == '__main__':
     print("Start saving corpus...")
     with open(args.save_path,"w",encoding='utf-8') as f:
         for idx,item in enumerate(clean_corpus):
+            title = f"\"{item['title']}\""
             item = {'id': idx, 
-                    'title': item['title'], 
-                    'text': item['text'], 
-                    'contents':f"{item['title']}\n{item['text']}"
+                    'title': title, 
+                    'text': item['text']
                 }
             f.write(json.dumps(item) + '\n')
     print("Finish!")
