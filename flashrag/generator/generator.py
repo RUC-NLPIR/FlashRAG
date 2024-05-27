@@ -178,7 +178,12 @@ class VLLMGenerator(BaseGenerator):
                 generation_params.pop('max_new_tokens')
             else:
                 generation_params['max_tokens'] = generation_params.pop('max_new_tokens')
-     
+        # fix for llama3
+        if 'stop' in generation_params:
+            generation_params['stop'].append("<|eot_id|>")
+        else:
+            generation_params['stop'] = ["<|eot_id|>"]
+
         if return_scores:
             if 'logprobs' not in generation_params:
                 generation_params['logprobs'] = 100
@@ -275,6 +280,12 @@ class HFCausalLMGenerator(BaseGenerator):
                 generation_params['max_new_tokens'] = params.pop('max_tokens')
             else:
                 generation_params['max_new_tokens'] = generation_params.pop('max_tokens')
+
+        extra_eos_tokens = [self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")]
+        if 'eos_token_id' in generation_params:
+            generation_params['eos_token_id'].extend(extra_eos_tokens)
+        else:
+            generation_params['eos_token_id'] = extra_eos_tokens
 
         responses = []
         scores = []
