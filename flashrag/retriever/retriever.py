@@ -6,7 +6,6 @@ import functools
 from tqdm import tqdm
 from multiprocessing import Pool
 import faiss
-from pyserini.search.lucene import LuceneSearcher
 
 from flashrag.utils import get_reranker
 from flashrag.retriever.utils import base_content_function, load_corpus, load_docs
@@ -170,6 +169,7 @@ class BM25Retriever(BaseRetriever):
 
     def __init__(self, config):
         super().__init__(config)
+        from pyserini.search.lucene import LuceneSearcher
         self.searcher = LuceneSearcher(self.index_path)
         self.contain_doc = self._check_contain_doc()
         if not self.contain_doc:
