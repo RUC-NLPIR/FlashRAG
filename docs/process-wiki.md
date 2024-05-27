@@ -38,3 +38,5 @@ python preprocess_wiki.py --dump_path ../enwikinews-20240420-pages-articles.xml.
                         --save_path ../test_sample.jsonl \
                         --chunk_by 100w
 ```
+
+We also provide the version we used for experiments. Download link: https://huggingface.co/datasets/ignore/FlashRAG_datasets/tree/main/retrieval-corpus
