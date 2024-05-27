@@ -129,7 +129,6 @@ class Config:
         method2index = self.final_config['method2index']
 
         generator_model = self.final_config['generator_model']
-        refiner_model = self.final_config['refiner_name']
 
         if self.final_config['index_path'] is None:
             try:
@@ -165,7 +164,10 @@ class Config:
             self.final_config['rerank_model_path'] = model2path.get(rerank_model_name, rerank_model_name)
 
         self.final_config['generator_model_path'] = model2path.get(generator_model, generator_model)
-        self.final_config['refiner_model_path'] = model2path.get(refiner_model, refiner_model)
+
+        if 'refiner_name' in self.final_config:
+            refiner_model = self.final_config['refiner_name']
+            self.final_config['refiner_model_path'] = model2path.get(refiner_model, refiner_model)
 
     def _prepare_dir(self):
         save_note = self.final_config['save_note']
