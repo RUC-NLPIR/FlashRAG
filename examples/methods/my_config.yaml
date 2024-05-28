@@ -2,13 +2,13 @@
 # Paths to models
 model2path:
   e5: "intfloat/e5-base-v2"
-  bge: "intfloat/e5-base-v2"
+  bge: "BAAI/bge-base-en-v1.5"
   contriever: "facebook/contriever"
   llama2-7B-chat: "meta-llama/Llama-2-7b-chat-hf"
   llama2-7B: "meta-llama/Llama-2-7b-hf"
   llama2-13B: "meta-llama/Llama-2-13b-hf"
   llama2-13B-chat: "meta-llama/Llama-2-13b-chat-hf"
-  
+
 # Pooling methods for each embedding model
 model2pooling:
   e5: "mean"
@@ -30,7 +30,7 @@ save_dir: "output/"
 
 gpu_id: "0,1,2,3"
 dataset_name: "nq" # name of the dataset in data_dir
-split: ["test"]  # dataset split to load (e.g. train,dev,test)
+split: [ "test" ]  # dataset split to load (e.g. train,dev,test)
 
 # Sampling configurations for testing
 test_sample_num: ~  # number of samples to test (only work in dev/test split), if None, test all samples
@@ -64,7 +64,7 @@ rerank_model_name: ~ # same as retrieval_method
 rerank_model_path: ~ # path to reranker model, path will be automatically find in `retriever_model2path`
 rerank_pooling_method: ~
 rerank_topk: 5  # number of remain documents after reranking
-rerank_max_length: 512 
+rerank_max_length: 512
 rerank_batch_size: 256 # batch size for reranker
 rerank_use_fp16: True
 
@@ -73,7 +73,7 @@ framework: hf # inference frame work of LLM, supporting: 'hf','vllm','fschat'
 generator_model: "llama2-7B-chat" # name or path of the generator model
 generator_max_input_len: 1024  # max length of the input
 generator_batch_size: 2 # batch size for generation, invalid for vllm
-generation_params:  
+generation_params:
   max_tokens: 64
   temperature: 1.0
   top_p: 1.0
@@ -88,28 +88,28 @@ refiner_model_path: ~
 # Used for extractive method (e.g embedding models)
 refiner_topk: 5 # number of remain sentence after refiner
 refiner_pooling_method: 'mean' # pooling method of refiner model
-refiner_encode_max_length: 256 
+refiner_encode_max_length: 256
 # Used for abstractive method (e.g. generation models like bart-large-cnn)
 refiner_max_input_length: 1024
 refiner_max_output_length: 512
 
 # Specify settings for llmlingua
 llmlingua_config:
-  'rate': 0.55,
-  'condition_in_question': 'after_condition',
-  'reorder_context': 'sort',
-  'dynamic_context_compression_ratio': 0.3,
-  'condition_compare': True,
-  'context_budget': "+100",
-  'rank_method': 'longllmlingua'
+  rate: 0.55
+  condition_in_question: 'after_condition'
+  reorder_context: 'sort'
+  dynamic_context_compression_ratio: 0.3
+  condition_compare: True
+  context_budget: "+100"
+  rank_method: 'longllmlingua'
 sc_config:
   'reduce_ratio': 0.5
 
 # -------------------------------------------------Evaluation Settings------------------------------------------------#
 # Metrics to evaluate the result
-metrics: ['em','f1','sub_em','precision','recall'] 
+metrics: [ 'em','f1','sub_em','precision','recall' ]
 # Specify setting for metric, will be called within certain metrics
-metric_setting: 
+metric_setting:
   retrieval_recall_topk: 5
 save_metric_score: True #　whether to save the metric score into txt file
 
