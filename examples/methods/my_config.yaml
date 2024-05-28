@@ -30,7 +30,7 @@ save_dir: "output/"
 
 gpu_id: "0,1,2,3"
 dataset_name: "nq" # name of the dataset in data_dir
-split: [ "test" ]  # dataset split to load (e.g. train,dev,test)
+split: ["test"]  # dataset split to load (e.g. train,dev,test)
 
 # Sampling configurations for testing
 test_sample_num: ~  # number of samples to test (only work in dev/test split), if None, test all samples
@@ -95,19 +95,19 @@ refiner_max_output_length: 512
 
 # Specify settings for llmlingua
 llmlingua_config:
-  'rate': 0.55
-  'condition_in_question': 'after_condition'
-  'reorder_context': 'sort'
-  'dynamic_context_compression_ratio': 0.3
-  'condition_compare': True
-  'context_budget': "+100"
-  'rank_method': 'longllmlingua'
+  rate: 0.55
+  condition_in_question: 'after_condition'
+  reorder_context: 'sort'
+  dynamic_context_compression_ratio: 0.3
+  condition_compare: True
+  context_budget: "+100"
+  rank_method: 'longllmlingua'
 sc_config:
   'reduce_ratio': 0.5
 
 # -------------------------------------------------Evaluation Settings------------------------------------------------#
 # Metrics to evaluate the result
-metrics: [ 'em','f1','sub_em','precision','recall' ]
+metrics: ['em','f1','sub_em','precision','recall']
 # Specify setting for metric, will be called within certain metrics
 metric_setting:
   retrieval_recall_topk: 5
