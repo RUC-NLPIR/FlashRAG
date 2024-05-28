@@ -4,6 +4,7 @@ import numpy as np
 from transformers import AutoTokenizer, AutoModel
 from flashrag.retriever.utils import load_model, pooling
 
+
 class Encoder:
     def __init__(self, model_name, model_path, pooling_method, max_length, use_fp16):
         self.model_name = model_name
@@ -12,9 +13,9 @@ class Encoder:
         self.max_length = max_length
         self.use_fp16 = use_fp16
 
-        self.model, self.tokenizer = load_model(model_path = model_path, 
-                                                  use_fp16 = use_fp16)
-        
+        self.model, self.tokenizer = load_model(model_path=model_path,
+                                                use_fp16=use_fp16)
+
     @torch.no_grad()
     def encode(self, query_list: List[str], is_query=True) -> np.ndarray:
         # processing query for different encoders
@@ -27,12 +28,16 @@ class Encoder:
             else:
                 query_list = [f"passage: {query}" for query in query_list]
 
-        inputs = self.tokenizer(query_list, 
-                                max_length = self.max_length, 
-                                padding = True, 
-                                truncation = True, 
-                                return_tensors = "pt"
-                            )
+        if "bge" in self.model_name.lower():
+            if is_query:
+                query_list = [f"Represent this sentence for searching relevant passages: {query}" for query in query_list]
+
+        inputs = self.tokenizer(query_list,
+                                max_length=self.max_length,
+                                padding=True,
+                                truncation=True,
+                                return_tensors="pt"
+                                )
         inputs = {k: v.cuda() for k, v in inputs.items()}
 
         if "T5" in type(self.model).__name__:
@@ -47,11 +52,11 @@ class Encoder:
 
         else:
             output = self.model(**inputs, return_dict=True)
-            query_emb = pooling(output.pooler_output, 
-                                output.last_hidden_state, 
+            query_emb = pooling(output.pooler_output,
+                                output.last_hidden_state,
                                 inputs['attention_mask'],
                                 self.pooling_method)
-            if  "dpr" not in self.model_name.lower():
+            if "dpr" not in self.model_name.lower():
                 query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
 
         query_emb = query_emb.detach().cpu().numpy()

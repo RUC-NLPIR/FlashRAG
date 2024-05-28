@@ -2,10 +2,9 @@
 # Paths to models
 model2path:
   e5: "intfloat/e5-base-v2"
-  bge: "intfloat/e5-base-v2"
+  bge: "BAAI/bge-base-en-v1.5"
   contriever: "facebook/contriever"
-  #  llama2-7B-chat: "meta-llama/Llama-2-7b-chat-hf"
-  llama2-7B-chat: "/home/zhangrichong/data/fengzc/LLM/checkpoints/meta-llama/Meta-Llama-3-8B-Instruct"
+  llama2-7B-chat: "meta-llama/Llama-2-7b-chat-hf"
   llama2-7B: "meta-llama/Llama-2-7b-hf"
   llama2-13B: "meta-llama/Llama-2-13b-hf"
   llama2-13B-chat: "meta-llama/Llama-2-13b-chat-hf"
