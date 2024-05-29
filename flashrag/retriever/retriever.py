@@ -59,8 +59,6 @@ def cache_manager(func):
             results, scores = func(self, query_list, num, True)
 
         if self.save_cache:
-            if not self.use_cache:
-                results, scores = func(self, query_list, num, True)
             # merge result and score
             if isinstance(query_list, str):
                 query_list = [query_list]
