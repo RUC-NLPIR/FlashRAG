@@ -6,5 +6,6 @@ CUDA_VISIBLE_DEVICES=0 python -m flashrag.retriever.index_builder \
     --use_fp16 \
     --max_length 256 \
     --batch_size 512 \
-    --pooling_method cls \
-    --faiss_type Flat 
+    --pooling_method mean \
+    --faiss_type Flat \
+    --save_embedding
