@@ -230,10 +230,10 @@ class DenseRetriever(BaseRetriever):
         super().__init__(config)
         self.index = faiss.read_index(self.index_path)
         if config['faiss_gpu']:
-            res = faiss.StandardGpuResources()
-            co = faiss.GpuClonerOptions()
+            co = faiss.GpuMultipleClonerOptions()
             co.useFloat16 = True
-            self.index = faiss.index_cpu_to_gpu(res, 0, self.index, co)
+            co.shard = True
+            self.index = faiss.index_cpu_to_all_gpus(self.index, co=co)
 
         self.corpus = load_corpus(self.corpus_path)
         self.encoder = Encoder(

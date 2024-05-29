@@ -224,6 +224,7 @@ class Index_Builder:
         if self.faiss_gpu:
             co = faiss.GpuMultipleClonerOptions()
             co.useFloat16 = True
+            co.shard = True
             faiss_index = faiss.index_cpu_to_all_gpus(faiss_index, co)
             if not faiss_index.is_trained:
                 faiss_index.train(all_embeddings)
