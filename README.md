@@ -46,6 +46,15 @@ With FlashRAG and provided resources, you can effortless reproduce existing SOTA
 
 - **🚀 Optimized Execution**: The library's efficiency is enhanced with tools like vLLM, FastChat for LLM inference acceleration, and Faiss for vector index management.
 
+## :mag_right: Roadmap
+
+FlashRAG is still under development and there are many issues and room for improvement. We will continue to update. And we also sincerely welcome contributions on this open-source toolkit.
+
+- [ ] Support multiple API based generators (e.g. ChatGPT, Claude, Gemini)
+- [ ] Integrating sentence-transformers
+- [ ] Enhance code adaptability and readability
+
+
 ## :wrench: Installation 
 
 To get started with FlashRAG, simply clone it from Github and install (requires Python 3.9+): 
