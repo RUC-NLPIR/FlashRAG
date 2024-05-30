@@ -52,6 +52,7 @@ FlashRAG is still under development and there are many issues and room for impro
 
 - [ ] Support multiple API based generators (e.g. ChatGPT, Claude, Gemini)
 - [ ] Integrating sentence-transformers
+- [ ] More RAG works
 - [ ] Add more evaluation metrics (e.g. Unieval, name-entity F1) and benchmarks (e.g. RGB benchmark)
 - [ ] Enhance code adaptability and readability
 
