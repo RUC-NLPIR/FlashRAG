@@ -21,12 +21,10 @@
 <a href="#raised_hands-additional-faqs"> FAQs</a>
 </p>
 
+</h4>
 <p>
 <a href="https://trendshift.io/repositories/10454" target="_blank"><img src="https://trendshift.io/api/badge/repositories/10454" alt="RUC-NLPIR%2FFlashRAG | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
-
-</h4>
-
 FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 32 pre-processed benchmark RAG datasets and 12 state-of-the-art RAG algorithms. 
 
 <p align="center">
