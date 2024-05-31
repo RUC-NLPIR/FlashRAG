@@ -246,18 +246,9 @@ class HFCausalLMGenerator(BaseGenerator):
         else:
             model.cuda()
         model.eval()
-
+        tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         if 'qwen' not in self.model_name:
-            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
             tokenizer.pad_token = tokenizer.eos_token
-        else:
-            tokenizer = AutoTokenizer.from_pretrained(
-                self.model_path,
-                pad_token='<|extra_0|>',
-                eos_token='<|endoftext|>',
-                trust_remote_code=True
-            )
-
         tokenizer.padding_side = "left"
 
         return model, tokenizer
@@ -288,11 +279,13 @@ class HFCausalLMGenerator(BaseGenerator):
             else:
                 generation_params['max_new_tokens'] = generation_params.pop('max_tokens')
 
-        extra_eos_tokens = [self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")]
-        if 'eos_token_id' in generation_params:
-            generation_params['eos_token_id'].extend(extra_eos_tokens)
-        else:
-            generation_params['eos_token_id'] = extra_eos_tokens
+        # set eos token for llama
+        if 'llama' in self.model_name.lower():
+            extra_eos_tokens = [self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")]
+            if 'eos_token_id' in generation_params:
+                generation_params['eos_token_id'].extend(extra_eos_tokens)
+            else:
+                generation_params['eos_token_id'] = extra_eos_tokens
 
         responses = []
         scores = []
@@ -396,16 +389,9 @@ class FastChatGenerator(HFCausalLMGenerator):
             tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         model.eval()
 
+        tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         if 'qwen' not in self.model_name:
             tokenizer.pad_token = tokenizer.eos_token
-        else:
-            tokenizer = AutoTokenizer.from_pretrained(
-                self.model_path,
-                pad_token='<|extra_0|>',
-                eos_token='<|endoftext|>',
-                trust_remote_code=True
-            )
-
         tokenizer.padding_side = "left"
 
         return model, tokenizer
