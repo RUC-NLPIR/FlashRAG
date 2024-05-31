@@ -243,14 +243,21 @@ class HFCausalLMGenerator(BaseGenerator):
                                                          torch_dtype="auto", 
                                                          device_map="auto"
                                                         )
-            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-            
         else:
             model.cuda()
-            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         model.eval()
+
         if 'qwen' not in self.model_name:
+            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
             tokenizer.pad_token = tokenizer.eos_token
+        else:
+            tokenizer = AutoTokenizer.from_pretrained(
+                self.model_path,
+                pad_token='<|extra_0|>',
+                eos_token='<|endoftext|>',
+                trust_remote_code=True
+            )
+
         tokenizer.padding_side = "left"
 
         return model, tokenizer
@@ -388,8 +395,17 @@ class FastChatGenerator(HFCausalLMGenerator):
             model.cuda()
             tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         model.eval()
+
         if 'qwen' not in self.model_name:
             tokenizer.pad_token = tokenizer.eos_token
+        else:
+            tokenizer = AutoTokenizer.from_pretrained(
+                self.model_path,
+                pad_token='<|extra_0|>',
+                eos_token='<|endoftext|>',
+                trust_remote_code=True
+            )
+
         tokenizer.padding_side = "left"
 
         return model, tokenizer
