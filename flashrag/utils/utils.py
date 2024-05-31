@@ -39,7 +39,7 @@ def get_generator(config, **params):
                 importlib.import_module("flashrag.generator"), 
                 "FastChatGenerator"
             )(config, **params)
-    else:
+    elif config['framework'] == 'hf':
         if "t5" in config['generator_model'] or "bart" in config['generator_model']:
             return getattr(
                 importlib.import_module("flashrag.generator"), 
@@ -50,6 +50,13 @@ def get_generator(config, **params):
                     importlib.import_module("flashrag.generator"), 
                     "HFCausalLMGenerator"
                 )(config, **params)
+    elif config['framework'] == 'openai':
+        return getattr(
+                    importlib.import_module("flashrag.generator"), 
+                    "OpenaiGenerator"
+                )(config, **params)
+    else:
+        raise NotImplementedError
 
 
 def get_retriever(config):

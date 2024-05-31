@@ -70,13 +70,18 @@ rerank_batch_size: 256 # batch size for reranker
 rerank_use_fp16: True
 
 # -------------------------------------------------Generator Settings------------------------------------------------#
-framework: fschat # inference frame work of LLM, supporting: 'hf','vllm','fschat'
+framework: fschat # inference frame work of LLM, supporting: 'hf','vllm','fschat', 'openai'
 generator_model: "llama3-8B-instruct" # name or path of the generator model
+# setting for openai model, only valid in openai framework
+openai_setting:
+  api_key: ~
+  base_url: ~
+
 generator_model_path: ~
 generator_max_input_len: 1024  # max length of the input
 generator_batch_size: 4 # batch size for generation, invalid for vllm
 generation_params:  
-  do_sample: false
+  #do_sample: false
   max_tokens: 32
   #temperature: 1.0
   #top_p: 1.0

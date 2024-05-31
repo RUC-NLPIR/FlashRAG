@@ -1,7 +1,7 @@
 import re
 from tqdm import tqdm
 import numpy as np
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
 from flashrag.pipeline import BasicPipeline
@@ -607,7 +607,11 @@ class FLAREPipeline(BasicPipeline):
     def get_next_sentence(self, output, scores):
         tokenizer = self.generator.tokenizer
         text_sentences = re.split(r'(?<=[^A-Z].[.?]) +', output)
-        token_id_sentences = [tokenizer.encode(s, add_special_tokens=False) for s in text_sentences]
+        if isinstance(tokenizer, (PreTrainedTokenizer,PreTrainedTokenizerFast)):
+            token_id_sentences = [tokenizer.encode(s, add_special_tokens=False) for s in text_sentences]
+        else:
+            token_id_sentences = [tokenizer.encode(s, allowed_special="all") for s in text_sentences]
+       
         output_ids = tokenizer.encode(output, add_special_tokens=False)
         
         # assert sum([len(s) for s in token_id_sentences]) == len(
@@ -623,7 +627,10 @@ class FLAREPipeline(BasicPipeline):
         new_query = None
         if not judge_result:
             tokenizer = self.generator.tokenizer
-            sent_ids = tokenizer.encode(sent, add_special_tokens=False)
+            if isinstance(tokenizer, (PreTrainedTokenizer,PreTrainedTokenizerFast)):
+                sent_ids = tokenizer.encode(sent, add_special_tokens=False)
+            else:
+                sent_ids = tokenizer.encode(sent, allowed_special="all")
             # assert len(sent_ids) == len(sent_score)
             new_query_ids = [i for i,score in zip(sent_ids,sent_score) if score > self.threshold]
             new_query = tokenizer.decode(new_query_ids)

@@ -14,7 +14,7 @@ from transformers import AutoTokenizer, \
 
 class BaseGenerator:
     """`BaseGenerator` is a base object of Generator model."""
-
+    
     def __init__(self, config):
         self.model_name = config['generator_model']
         self.model_path = config['generator_model_path']
