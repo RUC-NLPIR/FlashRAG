@@ -58,6 +58,10 @@ FlashRAG is still under development and there are many issues and room for impro
 - [ ] Enhance code adaptability and readability
 
 
+## :page_with_curl: Changelog
+
+[24/05/31] We supported Openai-series models as generator. 
+
 ## :wrench: Installation 
 
 To get started with FlashRAG, simply clone it from Github and install (requires Python 3.9+): 
