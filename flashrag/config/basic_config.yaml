@@ -62,7 +62,7 @@ retrieval_pooling_method: ~ # set automatically if not provided
 
 use_reranker: False # whether to use reranker
 rerank_model_name: ~ # same as retrieval_method
-rerank_model_path: ~ # path to reranker model, path will be automatically find in `retriever_model2path`
+rerank_model_path: ~ # path to reranker model, path will be automatically find in `model2path`
 rerank_pooling_method: ~
 rerank_topk: 5  # number of remain documents after reranking
 rerank_max_length: 512 

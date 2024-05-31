@@ -146,24 +146,23 @@ class Config:
                     return value
             return 'mean'
 
-        if self.final_config['retrieval_pooling_method'] is None:
+        if self.final_config.get('retrieval_pooling_method') is None:
             self.final_config['retrieval_pooling_method'] = set_pooling_method(retrieval_method, model2pooling)
         
 
         rerank_model_name = self.final_config['rerank_model_name']
-        rerank_model_path = self.final_config['rerank_model_path']
+        if self.final_config.get('rerank_model_path') is None:
+            if rerank_model_name is not None:
+                self.final_config['rerank_model_path'] = model2path.get(rerank_model_name, rerank_model_name)    
         if self.final_config['rerank_pooling_method'] is None:
             if rerank_model_name is not None:
                 self.final_config['rerank_pooling_method'] = set_pooling_method(
                     rerank_model_name,
                     model2pooling
                 )
-        
-        if rerank_model_path is None and \
-            rerank_model_name is not None:
-            self.final_config['rerank_model_path'] = model2path.get(rerank_model_name, rerank_model_name)
 
-        self.final_config['generator_model_path'] = model2path.get(generator_model, generator_model)
+        if self.final_config.get('generator_model_path') is None:
+            self.final_config['generator_model_path'] = model2path.get(generator_model, generator_model)
 
         if 'refiner_name' in self.final_config:
             refiner_model = self.final_config['refiner_name']
