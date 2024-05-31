@@ -52,6 +52,7 @@ FlashRAG is still under development and there are many issues and room for impro
 
 - [x] Support Openai generators
 - [ ] Support Claude and Gemini
+- [ ] Usage documents for each components
 - [ ] Integrating sentence-transformers
 - [ ] More RAG works
 - [ ] Add more evaluation metrics (e.g. Unieval, name-entity F1) and benchmarks (e.g. RGB benchmark)
