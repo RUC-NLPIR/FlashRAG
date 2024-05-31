@@ -21,6 +21,9 @@
 <a href="#raised_hands-additional-faqs"> FAQs</a>
 </p>
 
+<p>
+<a href="https://trendshift.io/repositories/10454" target="_blank"><img src="https://trendshift.io/api/badge/repositories/10454" alt="RUC-NLPIR%2FFlashRAG | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+</p>
 
 </h4>
 
