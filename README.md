@@ -50,12 +50,12 @@ With FlashRAG and provided resources, you can effortless reproduce existing SOTA
 
 FlashRAG is still under development and there are many issues and room for improvement. We will continue to update. And we also sincerely welcome contributions on this open-source toolkit.
 
-- [x] Support Openai generators
-- [ ] Support Claude and Gemini
-- [ ] Usage documents for each components
-- [ ] Integrating sentence-transformers
-- [ ] More RAG works
-- [ ] Add more evaluation metrics (e.g. Unieval, name-entity F1) and benchmarks (e.g. RGB benchmark)
+- [x] Support OpenAI models
+- [ ] Support Claude and Gemini models
+- [ ] Provdide instructions for each component
+- [ ] Integrate sentence Transformers
+- [ ] Inlcude more RAG approaches
+- [ ] Add more evaluation metrics (e.g., Unieval, name-entity F1) and benchmarks (e.g., RGB benchmark)
 - [ ] Enhance code adaptability and readability
 
 
