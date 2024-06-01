@@ -89,9 +89,8 @@ def main(
         output="lmsft.jsonl",
         topk=20,  # number of retrieved documents
 ):
-    save_note = 'naive'
     config_dict = {
-        'save_note': save_note,
+        'save_note': "replug_lsr",
         'gpu_id': gpu_id,
         'dataset_name': dataset_name,
         'test_sample_num': num,
