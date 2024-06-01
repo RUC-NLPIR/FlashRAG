@@ -22,7 +22,6 @@ class LMProb:
 
     def __init__(self, config):
         # Load your own components
-        super().__init__(config)
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
         self.prompt_template = PromptTemplate(config)
