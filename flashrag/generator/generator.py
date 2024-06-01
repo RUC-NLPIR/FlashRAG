@@ -367,7 +367,7 @@ class HFCausalLMGenerator(BaseGenerator):
             # obtain probs of target_ids
             target_probs = probs[range(len(target_ids)), target_ids].numpy()
 
-        return target_probs, logits
+        return logits, target_probs
 
 
 class FastChatGenerator(HFCausalLMGenerator):
