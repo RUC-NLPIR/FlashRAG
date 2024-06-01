@@ -76,7 +76,9 @@ pip install -e .
 ## :running: Quick Start
 
 
-#### Toy Example
+### Toy Example
+
+For beginners, we provide a [<u>a introduction to flashrag</u>](./docs/instruction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md)) to help familiarize ourselves with our toolkit. Alternatively, you can directly refer to the code below.
 
 Run the following code to implement a naive RAG pipeline using provided toy datasets. 
 The default retriever is ```e5``` and default generator is ```llama2-7B-chat```. You need to fill in the corresponding model path in the following command. If you wish to use other models, please refer to the detailed instructions below.
@@ -92,9 +94,9 @@ After the code is completed, you can view the intermediate results of the run an
 
 **Note:** This toy example is just to help test whether the entire process can run normally. Our toy retrieval document only contains 1000 pieces of data, so it may not yield good results.
 
-#### Using the ready-made pipeline
+### Using the ready-made pipeline
 
-You can use the pipeline class we have already built (as shown in [pipelines](#pipelines)) to implement the RAG process inside. In this case, you just need to configure the config and load the corresponding pipeline.
+You can use the pipeline class we have already built (as shown in [<u>pipelines</u>](#pipelines)) to implement the RAG process inside. In this case, you just need to configure the config and load the corresponding pipeline.
 
 Firstly, load the entire process's config, which records various hyperparameters required in the RAG process. You can input yaml files as parameters or directly as variables. The priority of variables as input is higher than that of files.
 
@@ -105,7 +107,7 @@ config_dict = {'data_dir': 'dataset/'}
 my_config = Config(config_file_path = 'my_config.yaml',
                 config_dict = config_dict)
 ```
-You can refer to the [basic yaml file](./flashrag/config/basic_config.yaml) we provide to set your own parameters. For specific parameter names and meanings, please refer to the [config parameter description](./flashrag/config/basic_config.yaml).
+You can refer to the [<u>basic yaml file</u>](./flashrag/config/basic_config.yaml) we provide to set your own parameters. For specific parameter names and meanings, please refer to the [<u>config parameter description</u>](./flashrag/config/basic_config.yaml).
 
 Next, load the corresponding dataset and initialize the pipeline. The components in the pipeline will be automatically loaded. 
 
@@ -142,7 +144,7 @@ output_dataset = pipeline.run(test_data, do_eval=True)
 The `output_dataset` contains the intermediate results and metric scores for each item in the input dataset.
 Meanwhile, the dataset with intermediate results and the overall evaluation score will also be saved as a file (if `save_intermediate_data` and `save_metric_score` are specified).
 
-#### Build your own pipeline
+### Build your own pipeline
 
 Sometimes you may need to implement more complex RAG process, and you can build your own pipeline to implement it.
 You just need to inherit `BasicPipeline`, initialize the components you need, and complete the `run` function.
@@ -168,12 +170,12 @@ class ToyPipeline(BasicPipeline):
     return dataset
 ```
 
-Please first understand the input and output forms of the components you need to use from our [documentation](./docs/basic_usage.md).
+Please first understand the input and output forms of the components you need to use from our [<u>documentation</u>](./docs/basic_usage.md).
 
 
-#### Just use components
+### Just use components
 
-If you already have your own code and only want to use our components to embed the original code, you can refer to the [basic introduction of the components](./docs/basic_usage.md) to obtain the input and output formats of each component.
+If you already have your own code and only want to use our components to embed the original code, you can refer to the [<u>basic introduction of the components</u>](./docs/basic_usage.md) to obtain the input and output formats of each component.
 
 ## :gear: Components
 
@@ -251,7 +253,7 @@ In FlashRAG, we have built a series of common RAG components, including retrieve
 
 #### Pipelines
 
-Referring to a [survey on retrieval-augmented generation](https://arxiv.org/abs/2312.10997), we categorized RAG methods into four types based on their inference paths.
+Referring to a [<u>survey on retrieval-augmented generation</u>](https://arxiv.org/abs/2312.10997), we categorized RAG methods into four types based on their inference paths.
 
 - **Sequential**: Sequential execuation of RAG process, like Query-(pre-retrieval)-retriever-(post-retrieval)-generator
 - **Conditional**: Implements different paths for different types of input queries
@@ -313,11 +315,11 @@ In each category, we have implemented corresponding common pipelines. Some pipel
 We have implemented 12 works with a consistent setting of:
 - **Generator:** LLAMA3-8B-instruct with input length of 4096
 - **Retriever:** e5-base-v2 as embedding model, retrieve 5 docs per query
-- **Prompt:** A consistent default prompt, templete can be found in the [code](./flashrag/prompt/base_prompt.py).
+- **Prompt:** A consistent default prompt, templete can be found in the [<u>source code</u>](./flashrag/prompt/base_prompt.py).
 
 For open-source methods, we implemented their processes using our framework. For methods where the author did not provide source code, we will try our best to follow the methods in the original paper for implementation.
 
-For necessary settings and hyperparameters specific to some methods, we have documented them in the **specific settings** column. For more details, please consult our [code](./examples/methods/run_exp.py).
+For necessary settings and hyperparameters specific to some methods, we have documented them in the **specific settings** column. For more details, please consult our [<u>experiment code</u>](./examples/methods/run_exp.py).
 
 It’s important to note that, to ensure consistency, we have utilized a uniform setting. However, this setting may differ from the original setting of the method, leading to variations in results compared to the original outcomes.
 
@@ -345,7 +347,7 @@ It’s important to note that, to ensure consistency, we have utilized a uniform
 
 ### Datasets
 
-We have collected and processed 35 datasets widely used in RAG research, pre-processing them to ensure a consistent format for ease of use. For certain datasets (such as Wiki-asp), we have adapted them to fit the requirements of RAG tasks according to the methods commonly used within the community. All datasets are available at [Huggingface datasets](https://huggingface.co/datasets/ignore/FlashRAG_datasets). 
+We have collected and processed 35 datasets widely used in RAG research, pre-processing them to ensure a consistent format for ease of use. For certain datasets (such as Wiki-asp), we have adapted them to fit the requirements of RAG tasks according to the methods commonly used within the community. All datasets are available at [<u>Huggingface datasets</u>](https://huggingface.co/datasets/ignore/FlashRAG_datasets). 
 
 For each dataset, we save each split as a `jsonl` file, and each line is a dict as follows:
 ```python
@@ -408,7 +410,7 @@ The `contents` key is essential for building the index. For documents that inclu
 In the academic research, Wikipedia and MS MARCO are the most commonly used retrieval document collections. For Wikipedia, we provide a [comprehensive script](./docs/process-wiki.md) to process any Wikipedia dump into a clean corpus. Additionally, various processed versions of the Wikipedia corpus are available in many works, and we have listed some reference links.
 
 
-For MS MARCO, it is already processed upon release and can be directly downloaded from its [hosting link](https://huggingface.co/datasets/Tevatron/msmarco-passage-corpus) on Hugging Face.
+For MS MARCO, it is already processed upon release and can be directly downloaded from its [<u>hosting link</u>](https://huggingface.co/datasets/Tevatron/msmarco-passage-corpus) on Hugging Face.
 
 
 ## :raised_hands: Additional FAQs
@@ -418,7 +420,7 @@ For MS MARCO, it is already processed upon release and can be directly downloade
 
 ## :bookmark: License
 
-FlashRAG is licensed under the [MIT License](./LICENSE).
+FlashRAG is licensed under the [<u>MIT License</u>](./LICENSE).
 
 ## :star2: Citation
 Please kindly cite our paper if helps your research:
