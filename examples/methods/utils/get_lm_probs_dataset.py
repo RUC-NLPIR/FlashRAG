@@ -1,3 +1,5 @@
+# This file is used for generating LM supervised dataset to finetune retrievers
+# Implementation details are learned from REPLUG:https://arxiv.org/abs/2301.12652
 import json
 import random
 
@@ -6,13 +8,19 @@ import torch
 from tqdm import tqdm
 
 from flashrag.config import Config
+from flashrag.prompt import PromptTemplate
 from flashrag.utils import get_dataset
-from flashrag.pipeline import BasicPipeline
 from flashrag.utils import get_retriever
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
-class LMProbPipeline(BasicPipeline):
+class LMProb:
+    """
+    Clculating the likelihood of the ground truth
+    when LM uses every document retrieved from
+    top-k retrieved ones in context
+    """
+
     def __init__(self, config):
         # Load your own components
         super().__init__(config)
@@ -23,8 +31,9 @@ class LMProbPipeline(BasicPipeline):
             torch_dtype="auto",
             device_map="auto"
         ).eval()
+        self.prompt_template = PromptTemplate(config)
 
-    def run(self, dataset, do_eval=True):
+    def run(self, dataset):
         input_query = dataset.question
         answers = [answer[0] if len(answer) == 1 else random.choice(answer) for answer in dataset.golden_answers]
         retrieval_results = self.retriever.batch_search(input_query)
@@ -83,10 +92,10 @@ class LMProbPipeline(BasicPipeline):
 
 def main(
         dataset_name='nq',  # qa dataset
-        split='test',
+        split='test',  # split
         num=4000,  # number of query-document pairs
         gpu_id='0',
-        output="lmsft.jsonl",
+        output="lmsft.jsonl",  # output path
         topk=20,  # number of retrieved documents
 ):
     config_dict = {
@@ -97,12 +106,11 @@ def main(
         'split': ['test', 'dev'],
         "retrieval_topk": topk
     }
-    # preparation
     config = Config('my_config.yaml', config_dict)
     all_split = get_dataset(config)
     test_data = all_split[split]
-    pipeline = LMProbPipeline(config)
-    data_ls = pipeline.run(test_data)
+    lmprob = LMProb(config)
+    data_ls = lmprob.run(test_data)
     with open(output, 'w') as f:
         for data in data_ls:
             f.write(json.dumps(data, ensure_ascii=False) + "\n")
