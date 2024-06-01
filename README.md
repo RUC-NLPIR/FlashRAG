@@ -21,9 +21,7 @@
 <a href="#raised_hands-additional-faqs"> FAQs</a>
 </p>
 
-
 </h4>
-
 FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 32 pre-processed benchmark RAG datasets and 12 state-of-the-art RAG algorithms. 
 
 <p align="center">
@@ -31,30 +29,39 @@ FlashRAG is a Python toolkit for the reproduction and development of Retrieval A
 </p>
 
 With FlashRAG and provided resources, you can effortless reproduce existing SOTA works in the RAG domain or implement your custom RAG processes and components.
-
+<p>
+<a href="https://trendshift.io/repositories/10454" target="_blank"><img src="https://trendshift.io/api/badge/repositories/10454" alt="RUC-NLPIR%2FFlashRAG | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+</p>
 
 
 ## :sparkles: Features
 
-- **🛠 Extensive and Customizable Framework**: Includes essential components for RAG scenarios such as retrievers, rerankers, generators, and compressors, allowing for flexible assembly of complex pipelines.
+- **Extensive and Customizable Framework**: Includes essential components for RAG scenarios such as retrievers, rerankers, generators, and compressors, allowing for flexible assembly of complex pipelines.
 
-- **🗂 Comprehensive Benchmark Datasets**: A collection of 32 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
+- **Comprehensive Benchmark Datasets**: A collection of 32 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
 
-- **🎯 Pre-implemented Advanced RAG Algorithms**: Features 12 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
+- **Pre-implemented Advanced RAG Algorithms**: Features 12 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
 
-- **🧩 Efficient Preprocessing Stage**: Simplifies the RAG workflow preparation by providing various scripts like corpus processing for retrieval, retrieval index building, and pre-retrieval of documents.
+- **Efficient Preprocessing Stage**: Simplifies the RAG workflow preparation by providing various scripts like corpus processing for retrieval, retrieval index building, and pre-retrieval of documents.
 
-- **🚀 Optimized Execution**: The library's efficiency is enhanced with tools like vLLM, FastChat for LLM inference acceleration, and Faiss for vector index management.
+- **Optimized Execution**: The library's efficiency is enhanced with tools like vLLM, FastChat for LLM inference acceleration, and Faiss for vector index management.
 
 ## :mag_right: Roadmap
 
 FlashRAG is still under development and there are many issues and room for improvement. We will continue to update. And we also sincerely welcome contributions on this open-source toolkit.
 
-- [ ] Support multiple API based generators (e.g. ChatGPT, Claude, Gemini)
+- [x] Support Openai generators
+- [ ] Support Claude and Gemini
+- [ ] Usage documents for each components
 - [ ] Integrating sentence-transformers
+- [ ] More RAG works
 - [ ] Add more evaluation metrics (e.g. Unieval, name-entity F1) and benchmarks (e.g. RGB benchmark)
 - [ ] Enhance code adaptability and readability
 
+
+## :page_with_curl: Changelog
+
+[24/05/31] We supported Openai-series models as generator. 
 
 ## :wrench: Installation 
 
@@ -66,7 +73,7 @@ cd FlashRAG
 pip install -e . 
 ```
 
-## :running: Quick Start
+## :rocket: Quick Start
 
 
 #### Toy Example

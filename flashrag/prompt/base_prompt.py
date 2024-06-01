@@ -8,20 +8,25 @@ class PromptTemplate:
     base_user_prompt = "Question: {question}"
 
     def __init__(self, 
-                 config, 
+                config, 
                 system_prompt = "", 
                 user_prompt = "", 
                 enable_chat = True
         ):
         
         self.config = config
-        self.generator_path = config['generator_model_path']
-        model_config = AutoConfig.from_pretrained(self.generator_path)
-        model_name = model_config._name_or_path.lower()
-        self.is_chat = False
-        if 'chat' in model_name or 'instruct' in model_name:
+        self.is_openai = config['framework'] == 'openai'
+        if not self.is_openai:
+            self.generator_path = config['generator_model_path']
+            model_config = AutoConfig.from_pretrained(self.generator_path)
+            model_name = model_config._name_or_path.lower()
+            self.is_chat = False
+            if 'chat' in model_name or 'instruct' in model_name:
+                self.is_chat = True
+                self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path)
+        else:
             self.is_chat = True
-            self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path)
+            self.enable_chat = True
 
         if len(system_prompt) == 0 and len(user_prompt) == 0:
             system_prompt = self.base_system_prompt
@@ -73,11 +78,16 @@ class PromptTemplate:
                 input.append({"role":"system", "content": system_prompt})
             if user_prompt != "":
                 input.append({"role":"user", "content": user_prompt})
-            input = self.tokenizer.apply_chat_template(input, tokenize=False, add_generation_prompt=True)
+            if self.is_openai:
+                for item in input:
+                    if item['role'] == 'system':
+                        item['role'] == 'assistant'
+            else:
+                input = self.tokenizer.apply_chat_template(input, tokenize=False, add_generation_prompt=True)
         else:
             input = "\n\n".join([prompt for prompt in [system_prompt, user_prompt] if prompt != ""])
         
-        if previous_gen is not None:
+        if previous_gen is not None and self.is_openai is False: 
             input += previous_gen
         
         return input

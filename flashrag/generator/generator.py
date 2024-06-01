@@ -14,7 +14,7 @@ from transformers import AutoTokenizer, \
 
 class BaseGenerator:
     """`BaseGenerator` is a base object of Generator model."""
-
+    
     def __init__(self, config):
         self.model_name = config['generator_model']
         self.model_path = config['generator_model_path']
@@ -243,12 +243,10 @@ class HFCausalLMGenerator(BaseGenerator):
                                                          torch_dtype="auto", 
                                                          device_map="auto"
                                                         )
-            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-            
         else:
             model.cuda()
-            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         model.eval()
+        tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         if 'qwen' not in self.model_name:
             tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "left"
@@ -281,11 +279,13 @@ class HFCausalLMGenerator(BaseGenerator):
             else:
                 generation_params['max_new_tokens'] = generation_params.pop('max_tokens')
 
-        extra_eos_tokens = [self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")]
-        if 'eos_token_id' in generation_params:
-            generation_params['eos_token_id'].extend(extra_eos_tokens)
-        else:
-            generation_params['eos_token_id'] = extra_eos_tokens
+        # set eos token for llama
+        if 'llama' in self.model_name.lower():
+            extra_eos_tokens = [self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|eot_id|>")]
+            if 'eos_token_id' in generation_params:
+                generation_params['eos_token_id'].extend(extra_eos_tokens)
+            else:
+                generation_params['eos_token_id'] = extra_eos_tokens
 
         responses = []
         scores = []
@@ -388,6 +388,8 @@ class FastChatGenerator(HFCausalLMGenerator):
             model.cuda()
             tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         model.eval()
+
+        tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         if 'qwen' not in self.model_name:
             tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "left"
