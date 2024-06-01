@@ -1,4 +1,4 @@
-### <div align="center">⚡FlashRAG: A Python Toolkit for Efficient RAG Research<div>
+## <div align="center">⚡FlashRAG: A Python Toolkit for Efficient RAG Research<div>
 
 
 <div align="center">
