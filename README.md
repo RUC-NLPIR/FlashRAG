@@ -7,6 +7,7 @@
 <a href="https://github.com/RUC-NLPIR/FlashRAG/blob/main/LICENSE">
 <img alt="License" src="https://img.shields.io/badge/LICENSE-MIT-green">
 </a>
+<img alt="Static Badge" src="https://img.shields.io/badge/made_with-Python-blue">
 </div>
 
 <h4 align="center">
