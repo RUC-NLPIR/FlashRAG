@@ -1,12 +1,11 @@
-### <div align="center">⚡FlashRAG: A Python Toolkit for Efficient RAG Research<div>
+# <div align="center">⚡FlashRAG: A Python Toolkit for Efficient RAG Research<div>
 
 
 <div align="center">
-<a href="https://arxiv.org/abs/2405.13576"target="_blank"><img src=https://img.shields.io/badge/arXiv-b5212f.svg?logo=arxiv></a>
+<a href="https://arxiv.org/abs/2405.13576" target="_blank"><img src=https://img.shields.io/badge/arXiv-b5212f.svg?logo=arxiv></a>
 <a href="https://huggingface.co/datasets/ignore/FlashRAG_datasets" target="_blank"><img src=https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace%20Datasets-27b3b4.svg></a>
-<a href="https://github.com/RUC-NLPIR/FlashRAG/blob/main/LICENSE">
-<img alt="License" src="https://img.shields.io/badge/LICENSE-MIT-green">
-</a>
+<a href="https://github.com/RUC-NLPIR/FlashRAG/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/LICENSE-MIT-green"></a>
+<a><img alt="Static Badge" src="https://img.shields.io/badge/made_with-Python-blue"></a>
 </div>
 
 <h4 align="center">
@@ -36,26 +35,26 @@ With FlashRAG and provided resources, you can effortless reproduce existing SOTA
 
 ## :sparkles: Features
 
-- **🛠 Extensive and Customizable Framework**: Includes essential components for RAG scenarios such as retrievers, rerankers, generators, and compressors, allowing for flexible assembly of complex pipelines.
+- **Extensive and Customizable Framework**: Includes essential components for RAG scenarios such as retrievers, rerankers, generators, and compressors, allowing for flexible assembly of complex pipelines.
 
-- **🗂 Comprehensive Benchmark Datasets**: A collection of 32 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
+- **Comprehensive Benchmark Datasets**: A collection of 32 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
 
-- **🎯 Pre-implemented Advanced RAG Algorithms**: Features 12 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
+- **Pre-implemented Advanced RAG Algorithms**: Features 12 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
 
-- **🧩 Efficient Preprocessing Stage**: Simplifies the RAG workflow preparation by providing various scripts like corpus processing for retrieval, retrieval index building, and pre-retrieval of documents.
+- **Efficient Preprocessing Stage**: Simplifies the RAG workflow preparation by providing various scripts like corpus processing for retrieval, retrieval index building, and pre-retrieval of documents.
 
-- **🚀 Optimized Execution**: The library's efficiency is enhanced with tools like vLLM, FastChat for LLM inference acceleration, and Faiss for vector index management.
+- **Optimized Execution**: The library's efficiency is enhanced with tools like vLLM, FastChat for LLM inference acceleration, and Faiss for vector index management.
 
 ## :mag_right: Roadmap
 
 FlashRAG is still under development and there are many issues and room for improvement. We will continue to update. And we also sincerely welcome contributions on this open-source toolkit.
 
-- [x] Support Openai generators
-- [ ] Support Claude and Gemini
-- [ ] Usage documents for each components
-- [ ] Integrating sentence-transformers
-- [ ] More RAG works
-- [ ] Add more evaluation metrics (e.g. Unieval, name-entity F1) and benchmarks (e.g. RGB benchmark)
+- [x] Support OpenAI models
+- [ ] Support Claude and Gemini models
+- [ ] Provdide instructions for each component
+- [ ] Integrate sentence Transformers
+- [ ] Inlcude more RAG approaches
+- [ ] Add more evaluation metrics (e.g., Unieval, name-entity F1) and benchmarks (e.g., RGB benchmark)
 - [ ] Enhance code adaptability and readability
 
 
@@ -73,7 +72,7 @@ cd FlashRAG
 pip install -e . 
 ```
 
-## :running: Quick Start
+## :rocket: Quick Start
 
 
 ### Toy Example

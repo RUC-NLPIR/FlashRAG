@@ -14,7 +14,7 @@ from transformers import AutoTokenizer, \
 
 class BaseGenerator:
     """`BaseGenerator` is a base object of Generator model."""
-    
+
     def __init__(self, config):
         self.model_name = config['generator_model']
         self.model_path = config['generator_model_path']
@@ -25,7 +25,7 @@ class BaseGenerator:
         self.gpu_num = torch.cuda.device_count()
 
         self.generation_params = config['generation_params']
-    
+
     def generate(self, input_list: list) -> List[str]:
         """Get responses from the generater.
 
@@ -44,7 +44,7 @@ class EncoderDecoderGenerator(BaseGenerator):
     def __init__(self, config):
         super().__init__(config)
         self.fid = config['use_fid']
-        if "t5" in self.model_name: 
+        if "t5" in self.model_name:
             if self.fid:
                 from flashrag.generator.fid import FiDT5
                 self.model = FiDT5.from_pretrained(self.model_path)
@@ -82,7 +82,7 @@ class EncoderDecoderGenerator(BaseGenerator):
             input_list = [input_list]
         if batch_size is None:
             batch_size = self.batch_size
-        
+
         generation_params = deepcopy(self.generation_params)
         generation_params.update(params)
 
@@ -105,25 +105,25 @@ class EncoderDecoderGenerator(BaseGenerator):
             batched_prompts = input_list[idx:idx+batch_size]
             if self.fid:
                 # assume each input in input_list is a list, contains K string
-                input_ids, attention_mask = self.encode_passages(batched_prompts) 
-                inputs = {'input_ids': input_ids.to(self.device), 
+                input_ids, attention_mask = self.encode_passages(batched_prompts)
+                inputs = {'input_ids': input_ids.to(self.device),
                           'attention_mask': attention_mask.to(self.device)}
             else:
-                inputs = self.tokenizer(batched_prompts, 
-                                        return_tensors="pt", 
+                inputs = self.tokenizer(batched_prompts,
+                                        return_tensors="pt",
                                         padding=True,
                                         truncation=True,
                                         max_length=self.max_input_len
                                     ).to(self.device)
-            
+
             # TODO: multi-gpu inference
             outputs = self.model.generate(
                 **inputs,
                 **generation_params
             )
 
-            outputs = self.tokenizer.batch_decode(outputs, 
-                                                  skip_special_tokens=True, 
+            outputs = self.tokenizer.batch_decode(outputs,
+                                                  skip_special_tokens=True,
                                                   clean_up_tokenization_spaces=False)
 
             responses += outputs
@@ -136,7 +136,7 @@ class VLLMGenerator(BaseGenerator):
 
     def __init__(self, config):
         super().__init__(config)
-        
+
         from vllm import LLM
         if 'vllm_gpu_memory_utilization' not in config:
             gpu_memory_utilization = 0.85
@@ -146,22 +146,22 @@ class VLLMGenerator(BaseGenerator):
             tensor_parallel_size = self.gpu_num - 1
         else:
             tensor_parallel_size = self.gpu_num
-        
+
         self.lora_path = None if 'generator_lora_path' not in config else config['generator_lora_path']
         self.use_lora = False
         if self.lora_path is not None:
             self.use_lora = True
 
-        self.model = LLM(self.model_path, 
+        self.model = LLM(self.model_path,
                         tensor_parallel_size = tensor_parallel_size,
                         gpu_memory_utilization = gpu_memory_utilization,
                         enable_lora = True,
                         max_lora_rank=64,
                         max_logprobs=32016
                     )
-    
+
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-            
+
     @torch.no_grad()
     def generate(self, input_list: List[str], return_raw_output=False, return_scores=False, **params):
         from vllm import SamplingParams
@@ -189,7 +189,7 @@ class VLLMGenerator(BaseGenerator):
                 generation_params['logprobs'] = 100
 
         sampling_params = SamplingParams(**generation_params)
-    
+
         if self.use_lora:
             from vllm.lora.request import LoRARequest
             outputs = self.model.generate(
@@ -239,8 +239,8 @@ class HFCausalLMGenerator(BaseGenerator):
         """
         if model is None:
             model = AutoModelForCausalLM.from_pretrained(
-                                                        self.model_path, 
-                                                         torch_dtype="auto", 
+                                                        self.model_path,
+                                                         torch_dtype="auto",
                                                          device_map="auto"
                                                         )
         else:
@@ -252,7 +252,7 @@ class HFCausalLMGenerator(BaseGenerator):
         tokenizer.padding_side = "left"
 
         return model, tokenizer
-    
+
     @torch.no_grad()
     def generate(self, input_list: List[str], batch_size=None, return_scores=False, **params):
         """Generate batches one by one. The generated content needs to exclude input."""
@@ -291,8 +291,8 @@ class HFCausalLMGenerator(BaseGenerator):
         scores = []
         for idx in tqdm(range(0, len(input_list), batch_size), desc='Generation process: '):
             batched_prompts = input_list[idx:idx+batch_size]
-            inputs = self.tokenizer(batched_prompts, 
-                                    return_tensors="pt", 
+            inputs = self.tokenizer(batched_prompts,
+                                    return_tensors="pt",
                                     padding=True,
                                     truncation=True,
                                     max_length=self.max_input_len
@@ -303,8 +303,8 @@ class HFCausalLMGenerator(BaseGenerator):
                 return_dict_in_generate=True,
                 **generation_params
             )
-            
-            
+
+
             generated_ids = outputs.sequences
             logits = torch.stack(outputs.scores, dim=1).softmax(-1)
             generated_ids = generated_ids[:, inputs['input_ids'].shape[-1]:]
@@ -314,8 +314,8 @@ class HFCausalLMGenerator(BaseGenerator):
             for i, generated_sequence in enumerate(outputs.sequences):
                 input_ids = inputs['input_ids'][i]
                 text = self.tokenizer.decode(
-                            generated_sequence, 
-                            skip_special_tokens=True, 
+                            generated_sequence,
+                            skip_special_tokens=True,
                             clean_up_tokenization_spaces=False
                         )
                 if input_ids is None:
@@ -340,7 +340,7 @@ class HFCausalLMGenerator(BaseGenerator):
                             # Adjust stop index based on whether we're stripping the stop word
                             stop_index += 0 if strip_stopword else len(sym)
                             lower_stop_index = min(stop_index, lower_stop_index)
-                    
+
                     # Cut the text at the first stop word found (if any)
                     new_text = new_text[:lower_stop_index]
 
@@ -350,21 +350,24 @@ class HFCausalLMGenerator(BaseGenerator):
             return responses, scores
         else:
             return responses
-    
+
 
     def cal_gen_probs(self, prev, next):
         input_ids = self.tokenizer.encode(prev, add_special_tokens=False)
         target_ids = self.tokenizer.encode(next, add_special_tokens=False)
-        input_tensor = torch.tensor([input_ids + target_ids]).to(self.device)
-        target_tensor = torch.tensor([[-100] * len(input_ids) + target_ids]).to(self.device)
+        context_ids = [input_ids + target_ids]
+        context_tensor = torch.tensor(context_ids).to(self.device)
         with torch.no_grad():
-            outputs = self.model(input_tensor, labels=target_tensor)
+            outputs = self.model(context_tensor)
             logits = outputs.logits
-            logits = logits[0, len(input_ids):, :]
+            logits = logits[0, len(input_ids)-1:len(context_ids)-1, :]
             logits = logits.to(torch.float32).detach().cpu().numpy()
-            logits = logits[range(len(target_ids)), target_ids]
-        
-        return target_ids, logits
+            # softmax to normalize
+            probs = torch.softmax(logits, dim=-1)
+            # obtain probs of target_ids
+            target_probs = probs[range(len(target_ids)), target_ids]
+
+        return target_probs, logits
 
 
 class FastChatGenerator(HFCausalLMGenerator):
@@ -378,12 +381,12 @@ class FastChatGenerator(HFCausalLMGenerator):
         if model is None:
             from fastchat.model import load_model
             model, tokenizer = load_model(self.model_path,
-                                            device = 'cuda', 
+                                            device = 'cuda',
                                             num_gpus = self.gpu_num,
                                             load_8bit = False,
                                             cpu_offloading = False,
                                             debug = False,)
-            
+
         else:
             model.cuda()
             tokenizer = AutoTokenizer.from_pretrained(self.model_path)
@@ -395,4 +398,3 @@ class FastChatGenerator(HFCausalLMGenerator):
         tokenizer.padding_side = "left"
 
         return model, tokenizer
-    
