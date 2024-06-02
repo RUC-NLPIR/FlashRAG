@@ -91,6 +91,8 @@ config_dict = {
     'index_path': 'indexes/e5_flat_sample.index',
     'corpus_path': 'indexes/sample_data.jsonl',
     'model2path': {'e5': <retriever_path>, 'llama2-7B-chat': <generator_path>},
+    'generator_model': 'llama2-7B-chat',
+    'retrieval_method': 'e5',
     'metrics': ['em', 'f1', 'sub_em'],
     'retrieval_topk': 1,
     'save_intermediate_data': True
@@ -137,6 +139,8 @@ config_dict = {
                 'index_path': 'indexes/e5_flat_sample.index',
                 'corpus_path': 'indexes/sample_data.jsonl',
                 'model2path': {'e5': <retriever_path>, 'llama2-7B-chat': <generator_path>},
+                'generator_model': 'llama2-7B-chat',
+                'retrieval_method': 'e5',
                 'metrics': ['em','f1','sub_em'],
                 'retrieval_topk': 1,
                 'save_intermediate_data': True
