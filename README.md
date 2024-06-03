@@ -334,7 +334,7 @@ It’s important to note that, to ensure consistency, we have utilized a uniform
 | [Ret-Robust](https://arxiv.org/abs/2310.01558)           | Sequential     | 42.9    | 68.2          | 35.8          |43.4|57.2|33.7| Use LLAMA2-13B with trained lora|
 | [SuRe](https://arxiv.org/abs/2404.13081)                 | Branching      | 37.1    | 53.2          | 33.4          |20.6|48.1|24.2| Use provided prompt|
 | [REPLUG](https://arxiv.org/abs/2301.12652)               | Branching      | 28.9    | 57.7          | 31.2          |21.1|27.8|20.2|  |
-| [SKR](https://aclanthology.org/2023.findings-emnlp.691.pdf)                  | Conditional    | 25.5    | 55.9          | 29.8          | 28.5|24.5|18.6|Use infernece-time training data|
+| [SKR](https://aclanthology.org/2023.findings-emnlp.691.pdf)                  | Conditional    | 33.2   | 56.0          | 32.4          | 23.4 |31.7|17.0|Use infernece-time training data|
 | [Self-RAG](https://arxiv.org/abs/2310.11511)             | Loop   | 36.4    | 38.2          | 29.6          | 25.1|32.7|21.9| Use trained selfrag-llama2-7B|
 | [FLARE](https://arxiv.org/abs/2305.06983)                | Loop   | 22.5    | 55.8          | 28.0          |33.9| 20.7| 20.2| |
 | [Iter-Retgen](https://arxiv.org/abs/2305.15294),      [ITRG](https://arxiv.org/abs/2310.05149)   | Loop | 36.8    | 60.1          | 38.3          | 21.6| 37.9| 18.2| |
