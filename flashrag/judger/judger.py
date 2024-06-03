@@ -104,7 +104,7 @@ class SKRJudger(BaseJudger):
                 ir_worse_num = topk_counter['ir_worse']
                 topk_delta = ir_better_num - ir_worse_num
 
-                training_data_delta = self.training_pos_num - self.training_pos_num
+                training_data_delta = self.training_pos_num - self.training_neg_num
 
                 # provide judgments based on the formula in the paper
                 if training_data_delta < 0:
