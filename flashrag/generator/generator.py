@@ -355,19 +355,19 @@ class HFCausalLMGenerator(BaseGenerator):
     def cal_gen_probs(self, prev, next):
         input_ids = self.tokenizer.encode(prev, add_special_tokens=False)
         target_ids = self.tokenizer.encode(next, add_special_tokens=False)
-        context_ids = [input_ids + target_ids]
-        context_tensor = torch.tensor(context_ids).to(self.device)
+        context_ids = input_ids + target_ids
+        context_tensor = torch.tensor([context_ids]).to(self.device)
         with torch.no_grad():
             outputs = self.model(context_tensor)
             logits = outputs.logits
             logits = logits[0, len(input_ids)-1:len(context_ids)-1, :]
-            logits = logits.to(torch.float32).detach().cpu().numpy()
+            logits = logits.to(torch.float32).detach().cpu()
             # softmax to normalize
             probs = torch.softmax(logits, dim=-1)
             # obtain probs of target_ids
-            target_probs = probs[range(len(target_ids)), target_ids]
+            target_probs = probs[range(len(target_ids)), target_ids].numpy()
 
-        return target_probs, logits
+        return logits, target_probs
 
 
 class FastChatGenerator(HFCausalLMGenerator):

@@ -13,7 +13,7 @@ from flashrag.utils import get_dataset
 from flashrag.utils import get_retriever, get_generator
 
 
-class LMProb:
+class LMProbCalculator:
     """
     Clculating the likelihood of the ground truth
     when LM uses every document retrieved from
@@ -22,7 +22,6 @@ class LMProb:
 
     def __init__(self, config):
         # Load your own components
-        super().__init__(config)
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
         self.prompt_template = PromptTemplate(config)
@@ -77,8 +76,8 @@ def main(
     config = Config('my_config.yaml', config_dict)
     all_split = get_dataset(config)
     test_data = all_split[split]
-    lmprob = LMProb(config)
-    data_ls = lmprob.run(test_data)
+    lm_prob_calculator = LMProbCalculator(config)
+    data_ls = lm_prob_calculator.run(test_data)
     with open(output, 'w') as f:
         for data in data_ls:
             f.write(json.dumps(data, ensure_ascii=False) + "\n")
