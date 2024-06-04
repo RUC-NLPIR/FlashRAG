@@ -207,6 +207,8 @@ def sc(args):
     pipeline = SequentialPipeline(config)
     result = pipeline.run(test_data)
 
+
+
 def retrobust(args):
     """
     Reference:
@@ -216,11 +218,12 @@ def retrobust(args):
     """
     model_dict = {'nq':'model/llama-2-13b-peft-nq-retrobust',
                   '2wiki':'model/llama-2-13b-peft-2wikihop-retrobust'}
-    if args.dataset_name == 'triviaqa':
+    if args.dataset_name in ['nq', 'triviaqa', 'popqa','web_questions']:
         lora_path = model_dict['nq']
-    elif args.dataset_name == 'hotpotqa':
+    elif args.dataset_name in ['hotpotqa',"2wikimultihopqa"]:
         lora_path = model_dict['2wiki']
     else:
+        print("Not use lora")
         lora_path = model_dict.get(args.dataset_name,None)
     config_dict = {'save_note':'Ret-Robust',
                'generator_model': 'llama2-13B',
