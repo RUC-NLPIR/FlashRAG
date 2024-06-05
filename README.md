@@ -60,7 +60,7 @@ FlashRAG is still under development and there are many issues and room for impro
 
 ## :page_with_curl: Changelog
 
-[24/06/05] We have provided detailed document for reproducing existing methods (see [how to reproduce ](./docs/reproduce_experiment.md) and [baseline details](./docs/baseline_details.md))
+[24/06/05] We have provided detailed document for reproducing existing methods (see [how to reproduce ](./docs/reproduce_experiment.md) and [baseline details](./docs/baseline_details.md)) and [<u>configurations settings</u>](./docs/configuration.md)
 
 [24/06/02] We have provided an introduction of FlashRAG for beginners, see [<u>a introduction to flashrag</u>](./docs/instruction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md))
 
@@ -110,7 +110,9 @@ config_dict = {'data_dir': 'dataset/'}
 my_config = Config(config_file_path = 'my_config.yaml',
                 config_dict = config_dict)
 ```
-You can refer to the [<u>basic yaml file</u>](./flashrag/config/basic_config.yaml) we provide to set your own parameters. For specific parameter names and meanings, please refer to the [<u>config parameter description</u>](./flashrag/config/basic_config.yaml).
+
+We provide comprehensive guidance on how to set configurations, you can see our [<u>configuration guidance</u>](./docs/configuration.md).
+You can also refer to the [<u>basic yaml file</u>](./flashrag/config/basic_config.yaml) we provide to set your own parameters. 
 
 Next, load the corresponding dataset and initialize the pipeline. The components in the pipeline will be automatically loaded.
 
@@ -418,6 +420,7 @@ For MS MARCO, it is already processed upon release and can be directly downloade
 
 ## :raised_hands: Additional FAQs
 
+- [How should I set different experimental parameters?](./docs/configuration.md)
 - [How to build my own corpus, such as a specific segmented Wikipedia?](./docs/process-wiki.md) 
 - [How to index my own corpus?](./docs/building-index.md)
 - [How to reproduce supporting methods?](./docs/reproduce_experiment.md)
