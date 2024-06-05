@@ -189,15 +189,49 @@ class Retrieval_Recall(BaseMetric):
             if len(doc_list) < self.topk:
                 warnings.warn(f"Length of retrieved docs is smaller than topk ({self.topk})")
             doc_list = [doc['contents'] for doc in doc_list[:self.topk]]
-            score = 0.0
-            for golden_answer in golden_answers:
-                if golden_answer in doc_list:
-                    score = 1.0
-                    break
+            hit_list = []
+            for doc in doc_list:
+                for golden_answer in golden_answers:
+                    if normalize_answer(golden_answer) in normalize_answer(doc):
+                        hit_list.append(True)
+                        break
+                else:
+                    hit_list.append(False)
+            score = 1 if any(hit_list) else 0
             recall_score_list.append(score)
         recall_score = sum(recall_score_list) / len(recall_score_list)
 
         return {f"retrieval_recall_top{self.topk}": recall_score}, recall_score_list
+
+class Retrieval_Precision(BaseMetric):
+    r"""The precision of the top-k retreived passages, we measure if any of the passage contain the answer string. """
+    metric_name = "retrieval_precision"
+    def __init__(self, config):
+        super().__init__(config)
+        self.topk = config['metric_setting']['retrieval_recall_topk']
+        
+    def calculate_metric(self, data):
+        golden_answers_list = data.golden_answers
+        retrieve_docs = data.retrieval_result
+        precision_score_list = []
+        for doc_list, golden_answers in zip(retrieve_docs, golden_answers_list):
+            if len(doc_list) < self.topk:
+                warnings.warn(f"Length of retrieved docs is smaller than topk ({self.topk})")
+            doc_list = [doc['contents'] for doc in doc_list[:self.topk]]
+            hit_list = []
+            for doc in doc_list:
+                for golden_answer in golden_answers:
+                    if normalize_answer(golden_answer) in normalize_answer(doc):
+                        hit_list.append(True)
+                        break
+                else:
+                    hit_list.append(False)
+            score = sum(hit_list) / len(hit_list)
+            precision_score_list.append(score)
+        precision_score = sum(precision_score_list) / len(precision_score_list)
+
+        return {f"retrieval_precision_top{self.topk}": precision_score}, precision_score_list
+
 
 class Rouge_Score(BaseMetric):
     metric_name = "rouge_score"
