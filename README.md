@@ -27,7 +27,7 @@ FlashRAG is a Python toolkit for the reproduction and development of Retrieval A
 <img src="asset/framework.jpg">
 </p>
 
-With FlashRAG and provided resources, you can effortless reproduce existing SOTA works in the RAG domain or implement your custom RAG processes and components.
+With FlashRAG and provided resources, you can effortlessly reproduce existing SOTA works in the RAG domain or implement your custom RAG processes and components.
 <p>
 <a href="https://trendshift.io/repositories/10454" target="_blank"><img src="https://trendshift.io/api/badge/repositories/10454" alt="RUC-NLPIR%2FFlashRAG | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
@@ -77,10 +77,10 @@ pip install -e .
 
 ### Toy Example
 
-For beginners, we provide a [<u>a introduction to flashrag</u>](./docs/instruction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md)) to help familiarize ourselves with our toolkit. Alternatively, you can directly refer to the code below.
+For beginners, we provide a [<u>a introduction to flashrag</u>](./docs/instruction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md)) to help you familiarize yourself with our toolkit. Alternatively, you can directly refer to the code below.
 
-Run the following code to implement a naive RAG pipeline using provided toy datasets. 
-The default retriever is ```e5``` and default generator is ```llama2-7B-chat```. You need to fill in the corresponding model path in the following command. If you wish to use other models, please refer to the detailed instructions below.
+Run the following code to implement a naive RAG pipeline using provided toy datasets.
+The default retriever is `e5` and default generator is `llama2-7B-chat`. You need to fill in the corresponding model path in the following command. If you wish to use other models, please refer to the detailed instructions below.
 
 ```bash
 cd examples/quick_start
@@ -108,7 +108,7 @@ my_config = Config(config_file_path = 'my_config.yaml',
 ```
 You can refer to the [<u>basic yaml file</u>](./flashrag/config/basic_config.yaml) we provide to set your own parameters. For specific parameter names and meanings, please refer to the [<u>config parameter description</u>](./flashrag/config/basic_config.yaml).
 
-Next, load the corresponding dataset and initialize the pipeline. The components in the pipeline will be automatically loaded. 
+Next, load the corresponding dataset and initialize the pipeline. The components in the pipeline will be automatically loaded.
 
 ```python
 from flashrag.utils import get_dataset
@@ -314,7 +314,7 @@ In each category, we have implemented corresponding common pipelines. Some pipel
 We have implemented 12 works with a consistent setting of:
 - **Generator:** LLAMA3-8B-instruct with input length of 4096
 - **Retriever:** e5-base-v2 as embedding model, retrieve 5 docs per query
-- **Prompt:** A consistent default prompt, templete can be found in the [<u>source code</u>](./flashrag/prompt/base_prompt.py).
+- **Prompt:** A consistent default prompt, template can be found in the [<u>source code</u>](./flashrag/prompt/base_prompt.py).
 
 For open-source methods, we implemented their processes using our framework. For methods where the author did not provide source code, we will try our best to follow the methods in the original paper for implementation.
 
@@ -404,7 +404,7 @@ Our toolkit supports jsonl format for retrieval document collections, with the f
 {"id":"0", "contents": "...."}
 {"id":"1", "contents": "..."}
 ```
-The `contents` key is essential for building the index. For documents that include both text and title, we recommend setting the value of  `contents` to `{title}\n{text}`. The corpus file can also contain other keys to record additional characteristics of the documents.
+The `contents` key is essential for building the index. For documents that include both text and title, we recommend setting the value of `contents` to `{title}\n{text}`. The corpus file can also contain other keys to record additional characteristics of the documents.
 
 In the academic research, Wikipedia and MS MARCO are the most commonly used retrieval document collections. For Wikipedia, we provide a [comprehensive script](./docs/process-wiki.md) to process any Wikipedia dump into a clean corpus. Additionally, various processed versions of the Wikipedia corpus are available in many works, and we have listed some reference links.
 
