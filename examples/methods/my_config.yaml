@@ -8,6 +8,7 @@ model2path:
   llama2-7B: "meta-llama/Llama-2-7b-hf"
   llama2-13B: "meta-llama/Llama-2-13b-hf"
   llama2-13B-chat: "meta-llama/Llama-2-13b-chat-hf"
+  llama3-8B-instruct: "meta-llama/Meta-Llama-3-8B-Instruct"
 
 # Pooling methods for each embedding model
 model2pooling:
@@ -69,14 +70,13 @@ rerank_batch_size: 256 # batch size for reranker
 rerank_use_fp16: True
 
 # -------------------------------------------------Generator Settings------------------------------------------------#
-framework: hf # inference frame work of LLM, supporting: 'hf','vllm','fschat'
-generator_model: "llama2-7B-chat" # name or path of the generator model
-generator_max_input_len: 1024  # max length of the input
+framework: vllm # inference frame work of LLM, supporting: 'hf','vllm','fschat'
+generator_model: "llama3-8B-instruct" # name or path of the generator model
+generator_max_input_len: 2048  # max length of the input
 generator_batch_size: 2 # batch size for generation, invalid for vllm
 generation_params:
-  max_tokens: 64
-  temperature: 1.0
-  top_p: 1.0
+  do_sample: False
+  max_tokens: 32
 use_fid: False # whether to use FID, only valid in encoder-decoder model
 
 
@@ -107,7 +107,7 @@ sc_config:
 
 # -------------------------------------------------Evaluation Settings------------------------------------------------#
 # Metrics to evaluate the result
-metrics: [ 'em','f1','sub_em','precision','recall' ]
+metrics: [ 'em','f1','sub_em','precision','recall']
 # Specify setting for metric, will be called within certain metrics
 metric_setting:
   retrieval_recall_topk: 5

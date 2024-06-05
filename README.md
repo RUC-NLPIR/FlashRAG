@@ -51,7 +51,7 @@ FlashRAG is still under development and there are many issues and room for impro
 
 - [x] Support OpenAI models
 - [ ] Support Claude and Gemini models
-- [ ] Provdide instructions for each component
+- [x] Provdide instructions for each component
 - [ ] Integrate sentence Transformers
 - [ ] Inlcude more RAG approaches
 - [ ] Add more evaluation metrics (e.g., Unieval, name-entity F1) and benchmarks (e.g., RGB benchmark)
@@ -60,6 +60,8 @@ FlashRAG is still under development and there are many issues and room for impro
 
 ## :page_with_curl: Changelog
 
+[24/06/05] We have provided detailed document for reproducing existing methods (see [how to reproduce ](./docs/reproduce_experiment.md) and [baseline details](./docs/baseline_details.md))
+[24/06/02] We have provided an introduction of FlashRAG for beginners, see [<u>a introduction to flashrag</u>](./docs/instruction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md))
 [24/05/31] We supported Openai-series models as generator. 
 
 ## :wrench: Installation 
