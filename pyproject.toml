@@ -1,0 +1,2 @@
+[tool.ruff.lint]
+extend-select = ["W291", "W293"]

@@ -1,11 +1,9 @@
-from typing import cast, List, Union, Tuple
-from tqdm import tqdm
+from typing import cast, List
 import json
 from collections import Counter
 import numpy as np
 import torch
 import faiss
-from transformers import AutoModelForSeq2SeqLM,AutoTokenizer
 from flashrag.retriever.utils import load_model, pooling
 
 class BaseJudger:
@@ -15,7 +13,7 @@ class BaseJudger:
         self.config = config
         self.name = config['judger_name']
         self.device = config['device']
-    
+
     def run(self, item) -> str:
         """Get judgement result.
 
@@ -39,7 +37,7 @@ class SKRJudger(BaseJudger):
         super().__init__(config)
         self.model_path = config['judger_model_path']
         self.training_data_path = config['judger_training_data_path']
-        self.encoder, self.tokenizer = load_model(model_path = self.model_path, 
+        self.encoder, self.tokenizer = load_model(model_path = self.model_path,
                                                   use_fp16 = False)
         self.topk = config['judger_topk'] if 'judger_topk' in config else 5
         self.batch_size = config['judger_batch_size'] if 'judger_batch_size' in config else 64
@@ -52,16 +50,16 @@ class SKRJudger(BaseJudger):
         self.training_pos_num = self.training_data_counter['ir_better']
         self.training_neg_num = self.training_data_counter['ir_worse']
         self.training_data_num = sum(self.training_data_counter.values())
-        
+
         # encode training question into faiss
         training_questions = [item['question'] for item in self.training_data]
         all_embeddings = self.encode(training_questions)
         faiss_index = faiss.index_factory(all_embeddings.shape[-1], 'Flat', faiss.METRIC_L2)
         faiss_index.add(all_embeddings)
         self.faiss = faiss_index
-        
 
-    
+
+
     def encode(self, contents:list):
         inputs = self.tokenizer(
                     contents,
@@ -72,8 +70,8 @@ class SKRJudger(BaseJudger):
         ).to('cuda')
         with torch.no_grad():
             output = self.encoder(**inputs, return_dict=True)
-        embeddings = pooling(output.pooler_output, 
-                                output.last_hidden_state, 
+        embeddings = pooling(output.pooler_output,
+                                output.last_hidden_state,
                                 inputs['attention_mask'],
                                 'pooler')
 
@@ -119,8 +117,8 @@ class SKRJudger(BaseJudger):
                         judgement = False
 
                 all_judgements.append(judgement)
-        
+
         return all_judgements
-            
+
 
 

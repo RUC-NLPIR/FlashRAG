@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 from transformers import AutoModelForSeq2SeqLM,AutoTokenizer
 from flashrag.retriever.utils import load_model, pooling
 from tqdm import tqdm
@@ -15,7 +15,7 @@ class BaseRefiner:
         self.model_path = config['refiner_model_path']
         self.device = config['device']
         self.input_prompt_flag = config['refiner_input_prompt_flag'] if 'refiner_input_prompt_flag' in config else False
-    
+
     def run(self, item) -> str:
         r"""Get refining result.
 
@@ -45,13 +45,13 @@ class LLMLinguaRefiner(BaseRefiner):
             'rank_method': 'longllmlingua'
         }
         if 'llmlingua_config' in config and config['llmlingua_config'] is not None:
-            self.compress_config = config['llmlingua_config'] 
+            self.compress_config = config['llmlingua_config']
         else:
             self.compress_config = default_config
 
         from flashrag.refiner.llmlingua_compressor import PromptCompressor
         self.refiner = PromptCompressor(model_name = self.model_path)
-    
+
     def format_reference(self, retrieval_result):
         format_reference = ''
         for idx, doc_item in enumerate(retrieval_result):
@@ -103,10 +103,10 @@ class SelectiveContextRefiner(BaseRefiner):
 
         self.refiner = SelectiveContext(model_type="gpt2", model_path=self.model_path, lang="en")
         if 'sc_config' in config and config['sc_config'] is not None:
-            self.compress_config = config['sc_config'] 
+            self.compress_config = config['sc_config']
         else:
             self.compress_config = default_config
-    
+
     def format_reference(self, retrieval_result):
         format_reference = ''
         for idx, doc_item in enumerate(retrieval_result):
@@ -123,7 +123,7 @@ class SelectiveContextRefiner(BaseRefiner):
         for item in dataset:
             retrieval_result = item.retrieval_result
             all_inputs.append(self.format_reference(retrieval_result))
-             
+
         output =[]
         for text in tqdm(all_inputs, desc='Refining process: '):
             compress_text,_ = self.refiner(text,**self.compress_config)
@@ -136,7 +136,7 @@ class ExtractiveRefiner(BaseRefiner):
     """
     def __init__(self, config):
         super().__init__(config)
-        # number of keeping sentences 
+        # number of keeping sentences
         self.topk = config['refiner_topk']
         self.pooling_method = config['refiner_pooling_method']
 
@@ -151,11 +151,11 @@ class ExtractiveRefiner(BaseRefiner):
                 query_list = [f"query: {query}" for query in query_list]
             else:
                 query_list = [f"passage: {query}" for query in query_list]
-        
-        inputs = self.tokenizer(query_list, 
-                                max_length = self.encode_max_length, 
-                                padding = True, 
-                                truncation = True, 
+
+        inputs = self.tokenizer(query_list,
+                                max_length = self.encode_max_length,
+                                padding = True,
+                                truncation = True,
                                 return_tensors = "pt"
                             )
         inputs = {k: v.cuda() for k, v in inputs.items()}
@@ -172,8 +172,8 @@ class ExtractiveRefiner(BaseRefiner):
 
         else:
             output = self.encoder(**inputs, return_dict=True)
-            query_emb = pooling(output.pooler_output, 
-                                output.last_hidden_state, 
+            query_emb = pooling(output.pooler_output,
+                                output.last_hidden_state,
                                 inputs['attention_mask'],
                                 self.pooling_method)
             if  "dpr" not in self.model_path.lower():
@@ -188,7 +188,7 @@ class ExtractiveRefiner(BaseRefiner):
         # only use text
         retrieval_results = dataset.retrieval_result
         retrieval_results = [["\n".join(doc_item['contents'].split("\n")[1:]) for doc_item in item_result] for item_result in retrieval_results]
-        
+
         # split into sentences: [[sent1, sent2,...], [...]]
         sent_lists = [[i.strip() for i in re.split(r'(?<=[.!?])\s+', res) if len(i.strip())>5] for res in retrieval_results]
         score_lists = [] # matching scores, size == sent_lists
@@ -226,21 +226,21 @@ class AbstractiveRecompRefiner(BaseRefiner):
 
     def __init__(self, config):
         super().__init__(config)
-        
+
         self.max_input_length = config['refiner_max_input_length']
         self.max_output_length = config['refiner_max_output_length']
-        
+
         # load model
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_path)
         self.model.cuda()
         self.model.eval()
-    
+
     def batch_run(self, dataset, batch_size = 2):
         # only use text
         retrieval_results = dataset.retrieval_result
         retrieval_results = [["\n".join(doc_item['contents'].split("\n")[1:]) for doc_item in item_result]for item_result in retrieval_results]
-        
+
         # input processing in recomp training format
         format_inputs = ['Question: {question}\n Document: {document}\n Summary: '.format(
             question = item.question,
@@ -267,6 +267,6 @@ class AbstractiveRecompRefiner(BaseRefiner):
                 batch_outputs, skip_special_tokens=True, clean_up_tokenization_spaces=False
             )
 
-            results.extend(batch_outputs)    
-        
+            results.extend(batch_outputs)
+
         return results

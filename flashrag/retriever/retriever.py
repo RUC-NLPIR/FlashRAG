@@ -4,7 +4,6 @@ import warnings
 from typing import List, Dict
 import functools
 from tqdm import tqdm
-from multiprocessing import Pool
 import faiss
 
 from flashrag.utils import get_reranker
@@ -19,7 +18,7 @@ def cache_manager(func):
     """
 
     @functools.wraps(func)
-    def wrapper(self, query_list, num = None, return_score = False):    
+    def wrapper(self, query_list, num = None, return_score = False):
         if num is None:
             num = self.topk
         if self.use_cache:
@@ -42,7 +41,7 @@ def cache_manager(func):
                 else:
                     cache_results.append(None)
                     no_cache_query.append(query)
-            
+
             if no_cache_query != []:
                 # use batch search without decorator
                 no_cache_results, no_cache_scores = self._batch_search_with_rerank(no_cache_query, num ,True)
@@ -52,9 +51,9 @@ def cache_manager(func):
                         assert new_query_list[idx] == no_cache_query[no_cache_idx]
                         cache_results = (no_cache_results[no_cache_idx], no_cache_scores[no_cache_scores])
                         no_cache_idx += 1
-    
+
             results, scores = ([t[0] for t in cache_results], [t[1] for t in cache_results])
-       
+
         else:
             results, scores = func(self, query_list, num, True)
 
@@ -93,7 +92,7 @@ def rerank_manager(func):
         if return_score:
             return results, scores
         else:
-            return results 
+            return results
     return wrapper
 
 
@@ -104,7 +103,7 @@ class BaseRetriever:
         self.config = config
         self.retrieval_method = config['retrieval_method']
         self.topk = config['retrieval_topk']
-        
+
         self.index_path = config['index_path']
         self.corpus_path = config['corpus_path']
 
@@ -123,7 +122,7 @@ class BaseRetriever:
             assert self.cache_path is not None
             with open(self.cache_path,"r") as f:
                 self.cache = json.load(f)
-    
+
     def _save_cache(self):
         with open(self.cache_save_path, "w") as f:
             json.dump(self.cache, f, indent=4)
@@ -148,16 +147,16 @@ class BaseRetriever:
     @rerank_manager
     def search(self, *args, **kwargs):
         return self._search(*args, **kwargs)
-    
+
     @cache_manager
     @rerank_manager
     def batch_search(self, *args, **kwargs):
         return self._batch_search(*args, **kwargs)
-    
+
     @rerank_manager
     def _batch_search_with_rerank(self, *args, **kwargs):
         return self._batch_search(*args, **kwargs)
-    
+
     @rerank_manager
     def _search_with_rerank(self, *args, **kwargs):
         return self._search(*args, **kwargs)
@@ -173,7 +172,7 @@ class BM25Retriever(BaseRetriever):
         if not self.contain_doc:
             self.corpus = load_corpus(self.corpus_path)
         self.max_process_num = 8
-        
+
     def _check_contain_doc(self):
         r"""Check if the index contains document content
         """
@@ -188,7 +187,7 @@ class BM25Retriever(BaseRetriever):
                 return [],[]
             else:
                 return []
-            
+
         scores = [hit.score for hit in hits]
         if len(hits) < num:
             warnings.warn('Not enough documents retrieved!')
@@ -197,7 +196,7 @@ class BM25Retriever(BaseRetriever):
 
         if self.contain_doc:
             all_contents = [json.loads(self.searcher.doc(hit.docid).raw())['contents'] for hit in hits]
-            results = [{'title': content.split("\n")[0].strip("\""), 
+            results = [{'title': content.split("\n")[0].strip("\""),
                         'text': "\n".join(content.split("\n")[1:]),
                         'contents': content} for content in all_contents]
         else:
@@ -237,7 +236,7 @@ class DenseRetriever(BaseRetriever):
 
         self.corpus = load_corpus(self.corpus_path)
         self.encoder = Encoder(
-             model_name = self.retrieval_method, 
+             model_name = self.retrieval_method,
              model_path = config['retrieval_model_path'],
              pooling_method = config['retrieval_pooling_method'],
              max_length = config['retrieval_query_max_length'],
@@ -265,7 +264,7 @@ class DenseRetriever(BaseRetriever):
             query_list = [query_list]
         if num is None:
             num = self.topk
-        
+
         batch_size = self.batch_size
 
         results = []
@@ -277,17 +276,17 @@ class DenseRetriever(BaseRetriever):
             batch_scores, batch_idxs = self.index.search(batch_emb, k=num)
             batch_scores = batch_scores.tolist()
             batch_idxs = batch_idxs.tolist()
-            
+
             flat_idxs = sum(batch_idxs, [])
             batch_results = load_docs(self.corpus, flat_idxs)
             batch_results = [batch_results[i*num : (i+1)*num] for i in range(len(batch_idxs))]
-            
+
             scores.extend(batch_scores)
             results.extend(batch_results)
-        
+
         if return_score:
             return results, scores
         else:
             return results
-        
-        
+
+

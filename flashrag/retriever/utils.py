@@ -1,18 +1,17 @@
 import json
-from typing import List, Dict
 import datasets
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 
 def load_model(
-        model_path: str, 
+        model_path: str,
         use_fp16: bool = False
     ):
     model_config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
     model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
     model.eval()
     model.cuda()
-    if use_fp16: 
+    if use_fp16:
         model = model.half()
     tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True, trust_remote_code=True)
 
@@ -37,12 +36,12 @@ def pooling(
 
 def load_corpus(corpus_path: str):
     corpus = datasets.load_dataset(
-            'json', 
+            'json',
             data_files=corpus_path,
             split="train",
             num_proc=4)
     return corpus
-    
+
 
 def read_jsonl(file_path):
     with open(file_path, "r") as f:
@@ -51,7 +50,7 @@ def read_jsonl(file_path):
             if not new_line:
                 return
             new_item = json.loads(new_line)
-            
+
             yield new_item
 
 

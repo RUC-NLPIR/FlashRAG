@@ -33,7 +33,7 @@ class Item:
         if 'metric_score' not in self.output:
             self.output['metric_score'] = {}
         self.output['metric_score'][metric_name] = metric_score
-    
+
     def __getattr__(self, attr_name):
         if attr_name in ['id','question','golden_answers','metadata','output']:
             return super().__getattribute__(attr_name)
@@ -62,14 +62,14 @@ class Item:
             output['metadata'] = self.metadata
 
         return output
-    
+
 
 class Dataset:
     """A container class used to store the whole dataset. Inside the class, each data sample will be stored
     in ```Item``` class.
     The properties of the dataset represent the list of attributes corresponding to each item in the dataset.
     """
-    
+
     def __init__(self, config=None, dataset_path=None, data=None, sample_num = None, random_sample = False):
         self.config = config
         self.dataset_name = config['dataset_name']
@@ -104,7 +104,7 @@ class Dataset:
                 data = data[:self.sample_num]
 
         return data
-    
+
     def update_output(self, key, value_list):
         """Update the overall output field for each sample in the dataset."""
 
@@ -131,7 +131,7 @@ class Dataset:
         for i in range(0, len(self.data), batch_size):
             batch_items = self.data[i:i+batch_size]
             yield [item[attr_name] for item in batch_items]
-    
+
     def __getattr__(self, attr_name):
         return [item.__getattr__(attr_name) for item in self.data]
 
@@ -141,13 +141,13 @@ class Dataset:
         obtain a list of this attribute in the entire dataset. 
         """
         return [item[attr_name] for item in self.data]
-    
+
     def __getitem__(self, index):
         return self.data[index]
-    
+
     def __len__(self):
         return len(self.data)
-    
+
     def save(self, save_path):
         """Save the dataset into the original format."""
 
@@ -155,10 +155,9 @@ class Dataset:
         with open(save_path,"w") as f:
             json.dump(save_data, f, indent=4)
 
-        
 
 
 
 
-        
-        
+
+

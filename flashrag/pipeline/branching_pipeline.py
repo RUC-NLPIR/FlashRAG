@@ -1,10 +1,9 @@
 import itertools
-from typing import List, Dict
+from typing import List
 import re
 from tqdm import tqdm
 import numpy as np
 from transformers import LogitsProcessorList
-from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
 from flashrag.pipeline import BasicPipeline
 from flashrag.prompt import PromptTemplate
@@ -18,7 +17,7 @@ class REPLUGPipeline(BasicPipeline):
         # load specify model for REPLUG
         model = load_replug_model(config['generator_model_path'])
         self.generator = get_generator(config, model=model)
-    
+
     def build_single_doc_prompt(self, question: str, doc_list: List[str]):
         return [
             self.prompt_template.get_string(
@@ -27,7 +26,7 @@ class REPLUGPipeline(BasicPipeline):
             )
             for doc in doc_list
         ]
-        
+
 
     def format_reference(self, doc_item):
         content = doc_item['contents']
@@ -38,7 +37,7 @@ class REPLUGPipeline(BasicPipeline):
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         import torch
         from flashrag.pipeline.replug_utils import REPLUGLogitsProcessor
-        
+
         input_query = dataset.question
 
         retrieval_results, doc_scores = self.retriever.batch_search(input_query, return_score=True)
@@ -52,14 +51,14 @@ class REPLUGPipeline(BasicPipeline):
             prompts = self.build_single_doc_prompt(question=item.question, doc_list=docs)
 
             scores = torch.tensor(item.doc_scores, dtype=torch.float32).to(self.device)
-            output = self.generator.generate(prompts, 
-                                    batch_size=len(docs), 
+            output = self.generator.generate(prompts,
+                                    batch_size=len(docs),
                                     logits_processor = LogitsProcessorList([REPLUGLogitsProcessor(scores)])
                                 )
             # the output of the batch is same
             output = output[0]
             pred_answer_list.append(output)
-        
+
         dataset.update_output("pred",pred_answer_list)
 
         dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
@@ -74,9 +73,9 @@ class SuRePipeline(BasicPipeline):
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
         self.load_prompts()
-    
+
     def load_prompts(self):
-        # prompt for candidates generation 
+        # prompt for candidates generation
         P_CAN_INSTRUCT = "Below are {N} passages related to the question at the end. After reading" \
                 "the passages, provide two correct candidates for the answer to the" \
                 "question at the end. Each answer should be in the form: (a) xx, (b)" \
@@ -102,7 +101,7 @@ class SuRePipeline(BasicPipeline):
                 "Passage: {summary}\n" \
                 "Does the passage correctly support the prediction? Choices: [True,False].\n" \
                 "Answer:"
-        
+
         # prompt for pair-wise ranking
         P_RANK_INSTRUCT = "Question: Given the following passages, determine which one provides a" \
                 "more informative answer to the subsequent question.\n" \
@@ -130,12 +129,12 @@ class SuRePipeline(BasicPipeline):
             formatted_ref += '\n'
             idx += 1
         return formatted_ref
-    
+
     @staticmethod
     def parse_candidates(model_response):
         """Parse candidates from model response"""
         model_response = model_response.strip("\n").strip()
-        # r'\([a-z]\) ([^,]+)' 
+        # r'\([a-z]\) ([^,]+)'
         candidates = re.findall('\((\w+)\)\s*([^()]+)', model_response)
         candidates = [cand[1].split("\n")[0].strip() for cand in candidates]
         # post-process
@@ -173,18 +172,18 @@ class SuRePipeline(BasicPipeline):
         for item in tqdm(dataset, desc='Pipeline runing: '):
             retrieval_result = item.retrieval_result
             doc_num = len(retrieval_result)
-            # format all docs 
+            # format all docs
             for doc_item in retrieval_result:
                 if 'title' not in doc_item or 'text' not in doc_item:
                     doc_item['title'] = doc_item['contents'].split("\n")[0]
                     doc_item['text'] = "\n".join(doc_item['contents'].split("\n")[1:])
-            formatted_ref = self.format_ref(titles = [i['title'] for i in retrieval_result], 
+            formatted_ref = self.format_ref(titles = [i['title'] for i in retrieval_result],
                                         texts = [i['text'] for i in retrieval_result]
                                         )
             # get candidates
 
             input_prompt = self.P_CAN_TEMPLATE.get_string(
-                                            N = doc_num, 
+                                            N = doc_num,
                                             formatted_reference = formatted_ref,
                                             question = item.question
                                     )
@@ -227,7 +226,7 @@ class SuRePipeline(BasicPipeline):
                 score_matrix[idx_tuple[0], idx_tuple[1]] = score
             ranking_scores = score_matrix.sum(axis=1).squeeze().tolist()  # ranking score for each summary
             item.update_output('ranking_scores', ranking_scores)
-        
+
             # combine two scores as the final score for each summary
             if not isinstance(ranking_scores, list):
                 ranking_scores = [ranking_scores]
@@ -238,7 +237,7 @@ class SuRePipeline(BasicPipeline):
             best_idx = np.argmax(total_scores)
             pred = candidates[best_idx]
             pred_answer_list.append(pred)
-        
+
         dataset.update_output("pred",pred_answer_list)
 
         dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)

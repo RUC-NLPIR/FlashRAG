@@ -7,9 +7,9 @@ from flashrag.prompt import PromptTemplate
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_path', type=str)
 parser.add_argument('--retriever_path', type=str)
-args = parser.parse_args() 
+args = parser.parse_args()
 
-config_dict = { 
+config_dict = {
                 'data_dir': 'dataset/',
                 'index_path': 'indexes/e5_flat_sample.index',
                 'corpus_path': 'indexes/sample_data.jsonl',
@@ -26,7 +26,7 @@ config = Config(config_dict = config_dict)
 all_split = get_dataset(config)
 test_data = all_split['test']
 prompt_templete = PromptTemplate(
-    config, 
+    config,
     system_prompt = "Answer the question based on the given document. \
                     Only give me the answer and do not output any other words. \
                     \nThe following are given documents.\n\n{reference}",

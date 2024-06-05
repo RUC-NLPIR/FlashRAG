@@ -4,16 +4,16 @@ class PromptTemplate:
     placeholders = ['reference', 'question']
     base_system_prompt = "Answer the question based on the given document." \
                         "Only give me the answer and do not output any other words." \
-                        "\nThe following are given documents.\n\n{reference}" 
+                        "\nThe following are given documents.\n\n{reference}"
     base_user_prompt = "Question: {question}"
 
-    def __init__(self, 
-                config, 
-                system_prompt = "", 
-                user_prompt = "", 
+    def __init__(self,
+                config,
+                system_prompt = "",
+                user_prompt = "",
                 enable_chat = True
         ):
-        
+
         self.config = config
         self.is_openai = config['framework'] == 'openai'
         if not self.is_openai:
@@ -36,7 +36,7 @@ class PromptTemplate:
         self.enable_chat = enable_chat
 
         self._check_placeholder()
-    
+
     def _check_placeholder(self):
         # check placeholder in prompt
         for holder in self.placeholders:
@@ -48,15 +48,15 @@ class PromptTemplate:
                     break
             if not flag and holder != 'reference':
                 assert False
-        
-    def get_string(self, 
+
+    def get_string(self,
                    question,
-                   retrieval_result = None, 
+                   retrieval_result = None,
                    formatted_reference = None,
                    previous_gen = None,
                    **params
         ):
-        
+
         if formatted_reference is None:
             if retrieval_result is not None:
                 formatted_reference = self.format_reference(retrieval_result)
@@ -86,12 +86,12 @@ class PromptTemplate:
                 input = self.tokenizer.apply_chat_template(input, tokenize=False, add_generation_prompt=True)
         else:
             input = "\n\n".join([prompt for prompt in [system_prompt, user_prompt] if prompt != ""])
-        
-        if previous_gen is not None and self.is_openai is False: 
+
+        if previous_gen is not None and self.is_openai is False:
             input += previous_gen
-        
+
         return input
-        
+
 
     def format_reference(self, retrieval_result):
         format_reference = ''
@@ -103,5 +103,4 @@ class PromptTemplate:
 
         return format_reference
 
-        
-        
+

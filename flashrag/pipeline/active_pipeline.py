@@ -2,7 +2,6 @@ import re
 from tqdm import tqdm
 import numpy as np
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
-from flashrag.evaluator import Evaluator
 from flashrag.utils import get_retriever, get_generator
 from flashrag.pipeline import BasicPipeline
 from flashrag.dataset import get_batch_dataset, merge_batch_dataset
@@ -14,7 +13,7 @@ class IterativePipeline(BasicPipeline):
         self.iter_num = iter_num
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
-    
+
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         questions = dataset.question
 
@@ -26,20 +25,20 @@ class IterativePipeline(BasicPipeline):
             else:
                 assert len(questions) == len(past_generation_result)
                 input_query = [f"{q} {r}" for q,r in zip(questions, past_generation_result)]
-            
+
             # generation-augmented retrieval
             retrieval_results = self.retriever.batch_search(input_query)
             dataset.update_output(f'retrieval_result_iter_{iter_idx}', retrieval_results)
-            
+
             # retrieval-augmented generation
             # input_prompts = self.build_prompt(questions, retrieval_results)
             input_prompts = [self.prompt_template.get_string(
-                question=q, retrieval_result=r) for q,r in zip(questions, retrieval_results)] 
+                question=q, retrieval_result=r) for q,r in zip(questions, retrieval_results)]
 
             dataset.update_output(f'prompt_iter_{iter_idx}', input_prompts)
             past_generation_result = self.generator.generate(input_prompts)
             dataset.update_output(f'pred_iter_{iter_idx}', past_generation_result)
-        
+
         # use last retrieval result for evaluation
         dataset.update_output("retrieval_result", retrieval_results)
 
@@ -63,7 +62,7 @@ class SelfRAGPipeline(BasicPipeline):
                             "<unk>", "<paragraph>", "</paragraph>"]
     control_tokens = ["[Fully supported]", "[Partially supported]", "[No support / Contradictory]", "[No Retrieval]", "[Retrieval]",
                     "[Irrelevant]", "[Relevant]", "<paragraph>", "</paragraph>", "[Utility:1]", "[Utility:2]", "[Utility:3]", "[Utility:4]", "[Utility:5]"]
-    
+
     task_inst = {"wow": "Given a chat history separated by new lines, generates an informative, knowledgeable and engaging response. ",
              "fever": "Is the following statement correct or not? Say true if it's correct; otherwise say false.",
              "eli5": "Provide a paragraph-length response using simple words to answer the following question.",
@@ -75,11 +74,11 @@ class SelfRAGPipeline(BasicPipeline):
              'normal_qa': "Answer the following question, give me a short answer."}
 
 
-    def __init__(self, config, threhsold=0.2, max_depth=2, beam_width=2,  
+    def __init__(self, config, threhsold=0.2, max_depth=2, beam_width=2,
                  w_rel=1.0, w_sup=1.0, w_use=1.0,
                  use_grounding=True, use_utility=True, use_seqscore=True, ignore_cont=True,
                  mode='adaptive_retrieval', prompt_template = None):
-        
+
         super().__init__(config, prompt_template)
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
@@ -98,7 +97,7 @@ class SelfRAGPipeline(BasicPipeline):
                 user_prompt="### Instruction:\n" + question_inst + "\n\n### Response:\n",
                 enable_chat=False
             )
-        
+
         self.threshold = threhsold
         self.max_depth = max_depth
         self.beam_width = beam_width
@@ -112,8 +111,8 @@ class SelfRAGPipeline(BasicPipeline):
         tokenizer = AutoTokenizer.from_pretrained(config['generator_model_path'], padding_side="left")
         self.ret_tokens, self.rel_tokens, self.grd_tokens, self.ut_tokens = self.load_special_tokens(
             tokenizer, use_grounding = use_grounding, use_utility = use_utility)
-        
-    
+
+
     def load_special_tokens(self, tokenizer, use_grounding, use_utility):
         ret_tokens = {token: tokenizer.convert_tokens_to_ids(
             token) for token in self.retrieval_tokens_names}
@@ -173,7 +172,7 @@ class SelfRAGPipeline(BasicPipeline):
                         score_dict["[Retrieval]"] + score_dict["[No Retrieval]"]) > self.threshold
                 else:
                     do_retrieve = "[Retrieval]" in all_pred_text[idx]
-                
+
                 retrieval_flags.append(do_retrieve)
 
         return retrieval_flags
@@ -256,7 +255,7 @@ class SelfRAGPipeline(BasicPipeline):
                                      "ut_score_dict": utility_score}
             results["retrieval_{}".format(p_idx)] = {
                 "pred": pred_text, "score": final_score}
-        
+
         # modify and add do retrieve tokens (only used in long-form generation)
         final_preds =[]
         if "[No Retrieval]" in pred_text:
@@ -304,7 +303,7 @@ class SelfRAGPipeline(BasicPipeline):
             # Add a space after periods that lack whitespace
             output_text = re.sub(r'(?<=\w)([.!?])(?=\w)', r'\1 ', input_text)
             return output_text
-        
+
         for token in self.control_tokens:
             pred = pred.replace(token, "")
         if "</s>" in pred:
@@ -320,9 +319,9 @@ class SelfRAGPipeline(BasicPipeline):
         if len(pred) == 0:
 
             return ""
-        
+
         return fix_spacing(pred)
-    
+
 
     def select_best_prediction(self, results):
         answer2score = {}
@@ -341,7 +340,7 @@ class SelfRAGPipeline(BasicPipeline):
             best_path = sorted(path2score.items(),
                                key=lambda x: x[1], reverse=True)[0][0]
             best_pred = results[best_path]["pred"]
-        
+
         return best_pred
 
     def run_single_beam(self, prompt, item_retrieval_result=None):
@@ -447,7 +446,7 @@ class SelfRAGPipeline(BasicPipeline):
                 "best_selections": best_selections,
                 "ctxs": ctxs,
                 "prediction_tree": prediction_tree}
-        
+
         return final_prediction[0], result
 
     def postprocess_long_form(self, pred, intermediate):
@@ -488,7 +487,7 @@ class SelfRAGPipeline(BasicPipeline):
         dataset.update_output('retrieval_result', retrieval_results)
 
         #input_prompts = self.build_prompt(questions)
-        input_prompts = [self.prompt_template.get_string(question=q) for q in questions] 
+        input_prompts = [self.prompt_template.get_string(question=q) for q in questions]
 
         # determine whether to retrieve
         retrieval_flags = self.judge_retrieve(input_prompts)
@@ -512,12 +511,12 @@ class SelfRAGPipeline(BasicPipeline):
             item.update_output('pred', pred)
 
         return dataset
-            
+
 
     def run(self, dataset, do_eval=True, pred_process_fun=None, batch_size=256, long_form=False):
         all_dataset_list = []
         run_func = self.run_batch_pred_long_form if long_form else self.run_batch_pred
-        # to avoid oom 
+        # to avoid oom
         for batch_dataset in tqdm(get_batch_dataset(dataset, batch_size=batch_size), desc='Batch dataset: '):
             batch_dataset = run_func(batch_dataset)
             all_dataset_list.append(batch_dataset)
@@ -532,7 +531,7 @@ class SelfRAGPipeline(BasicPipeline):
         dataset.update_output('retrieval_result', retrieval_results)
 
         #input_prompts = self.build_prompt(questions)
-        input_prompts = [self.prompt_template.get_string(question=q) for q in questions] 
+        input_prompts = [self.prompt_template.get_string(question=q) for q in questions]
 
 
         # determine whether to retrieve
@@ -555,7 +554,7 @@ class SelfRAGPipeline(BasicPipeline):
 
             item.update_output('prompt', prompt_list)
             all_input_list += prompt_list
-        
+
         batch_pred = self.generator.generate(all_input_list, return_raw_output=True, logprobs=32016)
 
         # parse output based on retrieval flag
@@ -579,19 +578,19 @@ class SelfRAGPipeline(BasicPipeline):
 
             pred = self.postprocess_prediction(pred)
             pred_answer_list.append(pred)
-        
+
         dataset.update_output("pred",pred_answer_list)
 
         return dataset
-        
-        
-        
+
+
+
 class FLAREPipeline(BasicPipeline):
-    def __init__(self, config, 
-                 threshold=0.2, 
-                 look_ahead_steps=64, 
-                 max_generation_length=256, 
-                 max_iter_num=5, 
+    def __init__(self, config,
+                 threshold=0.2,
+                 look_ahead_steps=64,
+                 max_generation_length=256,
+                 max_iter_num=5,
                  prompt_template=None
         ):
         super().__init__(config, prompt_template)
@@ -611,15 +610,15 @@ class FLAREPipeline(BasicPipeline):
             token_id_sentences = [tokenizer.encode(s, add_special_tokens=False) for s in text_sentences]
         else:
             token_id_sentences = [tokenizer.encode(s, allowed_special="all") for s in text_sentences]
-       
+
         output_ids = tokenizer.encode(output, add_special_tokens=False)
-        
+
         # assert sum([len(s) for s in token_id_sentences]) == len(
         #    output_ids), "token id sentences length not equal to output ids length"
-    
+
         first_sent_ids = token_id_sentences[0]
         first_sent_score = scores[:len(first_sent_ids)]
-        
+
         return text_sentences[0], first_sent_score
 
     def judge_sent_confidence(self, sent, sent_score):
@@ -635,7 +634,7 @@ class FLAREPipeline(BasicPipeline):
             new_query_ids = [i for i,score in zip(sent_ids,sent_score) if score > self.threshold]
             new_query = tokenizer.decode(new_query_ids)
         return judge_result, new_query
-        
+
     def run_item(self, item):
         question = item.question
         gen_length = 0
@@ -665,8 +664,8 @@ class FLAREPipeline(BasicPipeline):
                     question=question, retrieval_result=retrieval_result, previous_gen=final_gen_result)
 
                 # input_prompt = self.build_prompt(
-                #     question_list = [question], 
-                #     retrieval_results = [retrieval_result], 
+                #     question_list = [question],
+                #     retrieval_results = [retrieval_result],
                 #     previous_gen = final_gen_result)[0]
                 output, scores = self.generator.generate(
                     input_prompt, return_scores=True, stop=self.stop_sym, max_new_tokens=self.look_ahead_steps)
@@ -676,11 +675,11 @@ class FLAREPipeline(BasicPipeline):
                 item.update_output('retrieval_result', retrieval_result)
 
             final_gen_result += next_sent
-            gen_length += len(next_sent_score)   
+            gen_length += len(next_sent_score)
             iter_round += 1
 
         item.update_output('pred', final_gen_result)
-                     
+
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         for item in tqdm(dataset, desc="Inference: "):
@@ -688,7 +687,7 @@ class FLAREPipeline(BasicPipeline):
 
         dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
         return dataset
-            
+
 
 class SelfAskPipeline(BasicPipeline):
     FOLLOW_UP_PATTERN = r"Follow up:.*\n"
@@ -702,7 +701,7 @@ class SelfAskPipeline(BasicPipeline):
         self.single_hop = single_hop
         self.max_iter = max_iter
         self.P_INS = SELF_ASK_PROMPT_SINGLE_HOP if self.single_hop else SELF_ASK_PROMPT_MULTI_HOP
-    
+
     def format_reference(self, retrieval_result):
         format_reference = ''
         for idx, doc_item in enumerate(retrieval_result):
@@ -739,13 +738,13 @@ class SelfAskPipeline(BasicPipeline):
                 + self.format_reference(retrieval_result)
                 + f"\nQuesiton: {question}"
                 + "\nAre follow up questions needed here: "
-                + follow_ups 
+                + follow_ups
                 + "\n"
                 + res
             )
             gen_out = self.generator.generate(input_prompt, stop=["Context:", "#", stop_condition])[0]
             item.update_output(f'intermediate_output_iter{idx}', gen_out)
-            
+
             if stop_condition == "Intermediate answer:":
                 res += gen_out.split("Intermediate answer:")[0]
                 stop_condition = "Follow up:"
@@ -777,31 +776,31 @@ class SelfAskPipeline(BasicPipeline):
                     self.format_reference(retrieval_result)
                     + f"\nQuesiton: {question}"
                     + "\nAre follow up questions needed here: "
-                    + follow_ups 
+                    + follow_ups
                     + "\n"
                     + res
                 )
                 early_exit = True
                 # print("Success: early exit!")
-                break 
-        
+                break
+
         if not early_exit:
             res = (
                 self.format_reference(retrieval_result)
                 + f"\nQuesiton: {question}"
                 + "\nAre follow up questions needed here: "
-                + follow_ups 
+                + follow_ups
                 + "\n"
                 + res
                 )
-            
+
         item.update_output('retrieval_result', retrieval_result)
         item.update_output('pred', res)
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         for item in tqdm(dataset, desc='Inference: '):
             self.run_item(item)
-        
+
         dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
         return dataset
 

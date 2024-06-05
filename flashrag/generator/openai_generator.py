@@ -1,12 +1,11 @@
 import os
-from typing import List, Dict
+from typing import List
 from copy import deepcopy
 import warnings
 from tqdm import tqdm
 import numpy as np
 
 import asyncio
-import openai
 from openai import AsyncOpenAI
 import tiktoken
 
@@ -20,8 +19,8 @@ class OpenaiGenerator:
         self.openai_setting = config['openai_setting']
         if self.openai_setting['api_key'] is None:
             self.openai_setting['api_key'] = os.getenv('OPENAI_API_KEY')
-    
-        
+
+
         self.client = AsyncOpenAI(
              **self.openai_setting
         )
@@ -34,7 +33,7 @@ class OpenaiGenerator:
             **params
         )
         return response.choices[0]
-    
+
     async def get_batch_response(self, input_list:List[List], batch_size, **params):
         total_input = [self.get_response(input, **params) for input in input_list]
         all_result = []
@@ -42,7 +41,7 @@ class OpenaiGenerator:
             batch_input = total_input[idx:idx+batch_size]
             batch_result = await asyncio.gather(*batch_input)
             all_result.extend(batch_result)
-        
+
         return all_result
 
 
@@ -57,7 +56,7 @@ class OpenaiGenerator:
         # deal with generation params
         generation_params = deepcopy(self.generation_params)
         generation_params.update(params)
-    
+
         if return_scores:
             if generation_params.get('logprobs') is not None:
                 generation_params['logprobs'] = True
@@ -81,8 +80,8 @@ class OpenaiGenerator:
             response_text.append(res.message.content)
             if return_scores:
                 score = np.exp(list(map(lambda x: x.logprob, res.logprobs.content)))
-                scores.append(score)  
+                scores.append(score)
         if return_scores:
             return response_text, scores
         else:
-            return response_text      
+            return response_text

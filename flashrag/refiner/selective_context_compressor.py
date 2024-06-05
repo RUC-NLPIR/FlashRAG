@@ -7,10 +7,10 @@ from typing import List, Tuple
 import spacy
 import numpy as np
 import os
-import sys 
-sys.path.append("..") 
+import sys
+sys.path.append("..")
 from dataclasses import dataclass
-from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.tokenize import word_tokenize
 import time
 import torch
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, BertTokenizer
@@ -24,15 +24,15 @@ class LexicalUnits:
     def __add__(self, other):
         assert self.unit_type == other.unit_type, 'Cannot add two different unit types'
         return LexicalUnits(self.unit_type, self.text + other.text, self.self_info + other.self_info)
-    
+
     def __radd__(self, other):
         if other == 0:
             return self
         return NotImplementedError()
-    
+
     def add_to_head(self, token, self_info):
         return LexicalUnits(self.unit_type, [token] + self.text, [self_info] + self.self_info)
-    
+
     def add_to_tail(self, token, self_info):
         return LexicalUnits(self.unit_type, self.text + [token], self.self_info + [self_info])
 
@@ -53,7 +53,7 @@ class SelectiveContext:
         self.sent_mask_token = "<...some content omitted.>"
 
         self._prepare_model()
-    
+
     def _prepare_phrase_tokenizer(self):
         # we use space to tokenize sentence into phrases
         # for English, we should use `spacy.load("en_core_web_sm").add_pipe('merge_noun_chunks')`
@@ -73,7 +73,7 @@ class SelectiveContext:
             self.tokenizer = GPT2Tokenizer.from_pretrained(self.model_path)
         else:
             raise NotImplementedError()
-        
+
         if self.model_type == 'gpt2':
             if self.lang == 'zh':
                 self.model = GPT2LMHeadModel.from_pretrained('uer/gpt2-chinese-cluecorpussmall')
@@ -86,14 +86,14 @@ class SelectiveContext:
 
             self.max_token_length = self.model.config.n_positions
             self.get_self_information = self._get_self_info_via_gpt2
-                
+
         elif self.model_type == 'curie':
             global openai
             import openai
             self.max_token_length = 2048
 
             self.get_self_information = self._get_self_info_via_curie
-    
+
     def get_self_information(self, text: str) -> Tuple[List[str], List[float]]:
         # it takes text as input, and return a list of words and a list of self-information scores
         raise NotImplementedError
@@ -110,13 +110,13 @@ class SelectiveContext:
             logits = outputs.logits
             probs = torch.softmax(logits, dim=-1)
             self_info = -torch.log(probs)
-        
+
         input_ids = encoding['input_ids']
         input_ids_expaned = input_ids[:, 1:].unsqueeze(-1)
 
         tokens = [self.tokenizer.decode(token_) for token_ in input_ids.squeeze().tolist()[1:]]
         return tokens, self_info[:, :-1].gather(-1, input_ids_expaned).squeeze(-1).squeeze(0).tolist()
-    
+
     def _get_self_info_via_curie(self, text: str) -> Tuple[List[str], List[float]]:
         num_retry = 3
         openai.api_key = os.environ["OPENAI_API_KEY"]
@@ -168,13 +168,13 @@ class SelectiveContext:
                     noun_phrases[0] = f" {noun_phrases[0]}"
                 all_noun_phrases.extend(noun_phrases)
                 all_noun_phrases_info.extend(noun_phrases_info)
-            
+
             return [
                 LexicalUnits('sent', text=sents, self_info=sent_self_info),
                 LexicalUnits('phrase', text=all_noun_phrases, self_info=all_noun_phrases_info),
                 LexicalUnits('token', text=all_tokens, self_info=all_token_self_info)
             ]
-    
+
     def _calculate_lexical_unit(self, tokens, self_info):
         def _unit_info(tokens, self_info, units):
             current_unit_idx = 0
@@ -204,10 +204,10 @@ class SelectiveContext:
                     if token == " ":
                         continue
                     unit_self_info[current_unit_idx].append(info)
-            
+
             unit_self_info_ = [np.mean(info) for info in unit_self_info]
             return unit_self_info_
-        
+
         def _noun_phrases(sent):
             noun_phrases = []
             doc = self.nlp(sent)
@@ -238,7 +238,7 @@ class SelectiveContext:
         # mask_level: mask sentences, phrases, or tokens
         sents_after_mask = []
         masked_sents = []
-                
+
         self.ppl_threshold = np.nanpercentile(self_info, self.mask_ratio * 100)
 
         for sent, info in zip(sents, self_info):
@@ -248,7 +248,7 @@ class SelectiveContext:
             else:
                 sents_after_mask.append(sent)
         masked_context = " ".join(sents_after_mask) if mask_level == 'sent' else "".join(sents_after_mask)
-        
+
         return masked_context, masked_sents
 
     def mask_a_sent(self, sent, level):
@@ -262,7 +262,7 @@ class SelectiveContext:
             return leading_few_words + self.mask_token
         elif level == 'token':
             return ''
-    
+
     def __call__(self, text: str, reduce_ratio: float = 0.5, reduce_level :str = 'phrase') -> List[str]:
         context = self.beautify_context(text)
 
