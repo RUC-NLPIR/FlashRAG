@@ -2,7 +2,7 @@
 # The release is licensed under the Apache License 2.0
 
 import warnings
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 import transformers
 from transformers import (
     MODEL_FOR_CAUSAL_LM_MAPPING,
@@ -282,6 +282,6 @@ def load_replug_model(name_or_path):
                 _keys_to_ignore_on_load_unexpected = [r"cls"]
                 _tied_weights_keys = ["lm_head.weight"]
 
-            return HF  
-        
+            return HF
+
         return HF_REPLUG(name_or_path)

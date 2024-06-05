@@ -8,10 +8,8 @@ import json
 import subprocess
 from pathlib import Path
 import shutil
-import concurrent.futures
-from concurrent.futures import ProcessPoolExecutor,ThreadPoolExecutor
-from multiprocessing import cpu_count  
-from multiprocessing import Manager,Pool
+from concurrent.futures import ThreadPoolExecutor
+from multiprocessing import Pool
 
 def load_corpus(dir_path):
     def iter_files(path):
@@ -24,7 +22,7 @@ def load_corpus(dir_path):
                     yield os.path.join(dirpath, f)
         else:
             raise RuntimeError('Path %s is invalid' % path)
-    
+
     def read_jsonl_file(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
             for line in f:
@@ -37,7 +35,7 @@ def load_corpus(dir_path):
     with ThreadPoolExecutor(max_workers=args.num_workers) as executor:
         for file_path in all_files:
             executor.submit(read_jsonl_file, file_path)
-    
+
     return corpus
 
 def create_segments(doc_text, max_length, stride):
@@ -45,7 +43,7 @@ def create_segments(doc_text, max_length, stride):
     doc = nlp(doc_text)
     sentences = [sent.text.strip() for sent in doc.sents]
     segments = []
-    
+
     for i in range(0, len(sentences), stride):
         segment = " ".join(sentences[i:i+max_length])
         segments.append(segment)
@@ -58,7 +56,7 @@ def basic_process(title, text):
     title = html.unescape(title)
     text = html.unescape(text)
     text = text.strip()
-    
+
     if '(disambiguation)' in title.lower():
         return None,None
     if '(disambiguation page)' in title.lower():
@@ -71,8 +69,8 @@ def basic_process(title, text):
         return None,None
     if text.endswith(". References."):
         text = text[:-len(" References.")].strip()
-        
-    text = re.sub('\{\{cite .*?\}\}', ' ', text, flags=re.DOTALL) 
+
+    text = re.sub('\{\{cite .*?\}\}', ' ', text, flags=re.DOTALL)
     text = text.replace(r"TABLETOREPLACE", " ")
     text = text.replace(r"'''", " ")
     text = text.replace(r"[[", " ")
@@ -81,20 +79,20 @@ def basic_process(title, text):
     text = text.replace(r"}}", " ")
     text = text.replace("<br>", " ")
     text = text.replace("&quot;", "\"")
-    text = text.replace("&amp;", "&")  
+    text = text.replace("&amp;", "&")
     text = text.replace("& amp;", "&")
     text = text.replace("nbsp;", " ")
     text = text.replace("formatnum:", "")
-    
+
     #text = re.sub('<poem.*?</poem>', ' ', text, flags=re.DOTALL) # might have useful information?
     text = re.sub('<math.*?</math>', '', text, flags=re.DOTALL)
-    text = re.sub('<chem.*?</chem>', '', text, flags=re.DOTALL) 
-    text = re.sub('<score.*?</score>', '', text, flags=re.DOTALL) 
+    text = re.sub('<chem.*?</chem>', '', text, flags=re.DOTALL)
+    text = re.sub('<score.*?</score>', '', text, flags=re.DOTALL)
 
     # clean residual mess from xml dump that shouldn't have made its way here
     text = re.sub('\| ?item[0-9]?_?style= ?.*? ', ' ', text)
     text = re.sub('\| ?col[0-9]?_?style= ?.*? ', ' ', text)
-    text = re.sub('\| ?row[0-9]?_?style= ?.*? ', ' ', text)    
+    text = re.sub('\| ?row[0-9]?_?style= ?.*? ', ' ', text)
     text = re.sub('\| ?style= ?.*? ', ' ', text)
     text = re.sub('\| ?bodystyle= ?.*? ', ' ', text)
     text = re.sub('\| ?frame_?style= ?.*? ', ' ', text)
@@ -128,7 +126,7 @@ def basic_process(title, text):
     text = re.sub('&lt;ref&gt;.*?&lt;/ref&gt;', ' ', text)
     text = re.sub('&lt;.*?&gt;', ' ', text)
     text = re.sub('File:[A-Za-z0-9 ]+\.[a-z]{3,4}(\|[0-9]+px)?', '', text)
-    text = re.sub('Source: \[.*?\]', '', text)     
+    text = re.sub('Source: \[.*?\]', '', text)
     text = text.replace("Country flag|", "country:")
     text = text.replace("flag|", "country:")
     text = text.replace("flagicon|", "country:")
@@ -140,7 +138,7 @@ def basic_process(title, text):
     text = text.replace("disp=table", "")
 
     title = title.replace("\n", " ").replace("\t", " ")
-    
+
     return title, text
 
 
@@ -190,11 +188,11 @@ if __name__ == '__main__':
         if title in documents:
             documents[title] += " " + text
         else:
-            documents[title] = text 
-    
+            documents[title] = text
+
     print("Start pre-processing...")
     documents = list(documents.items())
-    
+
     with Pool(processes=args.num_workers) as p:
         result_list = list(tqdm(p.imap(single_worker,split_list(documents,args.num_workers))))
     result_list = sum(result_list, [])
@@ -250,15 +248,15 @@ if __name__ == '__main__':
             for segment in segments:
                 text = segment.replace("\n", " ").replace("\t", " ")
                 clean_corpus.append({"title": title, "text": text})
-        
+
     shutil.rmtree(temp_dir)
 
     print("Start saving corpus...")
     with open(args.save_path,"w",encoding='utf-8') as f:
         for idx,item in enumerate(clean_corpus):
             title = f"\"{item['title']}\""
-            item = {'id': idx, 
-                    'title': title, 
+            item = {'id': idx,
+                    'title': title,
                     'text': item['text']
                 }
             f.write(json.dumps(item) + '\n')

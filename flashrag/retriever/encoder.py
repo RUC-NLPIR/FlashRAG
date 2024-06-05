@@ -1,7 +1,6 @@
-from typing import List, Dict
+from typing import List
 import torch
 import numpy as np
-from transformers import AutoTokenizer, AutoModel
 from flashrag.retriever.utils import load_model, pooling
 
 

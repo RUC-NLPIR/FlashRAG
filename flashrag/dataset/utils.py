@@ -11,7 +11,7 @@ def filter_dataset(dataset: Dataset, filter_func = None):
 
 def split_dataset(dataset: Dataset, split_bool:list):
     assert len(split_bool) == len(dataset)
-    
+
     data = dataset.data
     pos_data = [x for x,flag in zip(data,split_bool) if flag]
     neg_data = [x for x,flag in zip(data,split_bool) if not flag]
@@ -26,17 +26,17 @@ def merge_dataset(pos_dataset: Dataset, neg_dataset: Dataset, merge_bool: list):
 
     pos_data_iter = iter(pos_dataset.data)
     neg_data_iter = iter(neg_dataset.data)
-    
+
     final_data = []
-    
+
     for is_pos in merge_bool:
         if is_pos:
             final_data.append(next(pos_data_iter))
         else:
             final_data.append(next(neg_data_iter))
-    
+
     final_dataset = Dataset(config=pos_dataset.config, data=final_data)
-    
+
     return final_dataset
 
 def get_batch_dataset(dataset: Dataset, batch_size=16):

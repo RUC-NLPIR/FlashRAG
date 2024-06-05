@@ -1,11 +1,9 @@
-from typing import List, Dict
+from typing import List
 from copy import deepcopy
 from tqdm import tqdm
 import numpy as np
 import torch
-from torch import Tensor
 from transformers import AutoTokenizer, \
-                        AutoModel,\
                         AutoModelForCausalLM, \
                         T5ForConditionalGeneration, \
                         BartForConditionalGeneration
@@ -230,7 +228,6 @@ class HFCausalLMGenerator(BaseGenerator):
         self.use_lora = False
         if lora_path is not None:
             self.use_lora = True
-            import peft
             self.model.load_adapter(lora_path)
 
     def _load_model(self, model=None):

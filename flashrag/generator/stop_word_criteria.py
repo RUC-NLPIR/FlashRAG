@@ -14,7 +14,7 @@ class StopWordCriteria(StoppingCriteria):
     Inspired by https://discuss.huggingface.co/t/implimentation-of-stopping-criteria-list/20040/9
     And: https://github.com/outlines-dev/outlines/blob/main/outlines/generate/api.py
     """
-    
+
     def __init__(self, tokenizer: AutoTokenizer, prompts: List[str], stop_words: List[str] = [], check_every: int = 1):
         """
         Initializes the StopWordCriteria with the necessary parameters for checking stop words during text generation.
@@ -47,21 +47,21 @@ class StopWordCriteria(StoppingCriteria):
             bool: True to stop generation, False to continue.
         """
         batch_size, seq_len = input_ids.shape
-        
+
         # Skip check if no stop words are defined or it is not yet time to check
         if (len(self.stop_words) == 0) or (seq_len % self.check_every != 0):
             return False
-        
+
         for i in range(batch_size):
             # Calculate starting index for new tokens
             prompt_size = self.input_sizes[i]
             max_new_tokens = (2 * self.max_stop_word_size) + self.check_every
             latest_tokens = input_ids[i, prompt_size:][-max_new_tokens:]
-            
+
             # Check for stop words in the decoded text
             if not any(word in self.tokenizer.decode(latest_tokens, skip_special_tokens=True) for word in self.stop_words):
                 return False  # Continue generation if any batch item lacks stop words
-                
+
         return True  # Stop generation if all conditions are met
 
     def extract_answers(self, input_ids: torch.LongTensor, strip_stopword: bool = True) -> List[str]:
@@ -77,13 +77,13 @@ class StopWordCriteria(StoppingCriteria):
         """
         batch_size, _ = input_ids.shape
         result = []
-        
+
         for i in range(batch_size):
             # Decode generated tokens to text, excluding the prompt
             prompt_size = self.input_sizes[i]
             answer_tokens = input_ids[i, prompt_size:]
             answer_text = self.tokenizer.decode(answer_tokens, skip_special_tokens=True)
-            
+
             # Find the first occurrence of any stop word
             lower_stop_index = len(answer_text)  # Default to end of text
             for word in self.stop_words:
@@ -92,9 +92,9 @@ class StopWordCriteria(StoppingCriteria):
                     # Adjust stop index based on whether we're stripping the stop word
                     stop_index += 0 if strip_stopword else len(word)
                     lower_stop_index = min(stop_index, lower_stop_index)
-            
+
             # Cut the text at the first stop word found (if any)
             answer_text = answer_text[:lower_stop_index]
             result.append(answer_text)
-        
+
         return result

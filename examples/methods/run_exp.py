@@ -16,7 +16,7 @@ def naive(args):
 
     pred_process_fun = lambda x: x.split("\n")[0]
     pipeline = SequentialPipeline(config)
-    
+
     result = pipeline.run(test_data)
 
 def zero_shot(args):
@@ -33,7 +33,7 @@ def zero_shot(args):
     from flashrag.pipeline import SequentialPipeline
     from flashrag.prompt import PromptTemplate
     templete = PromptTemplate(
-        config = config, 
+        config = config,
         system_prompt =  "Answer the question based on your own knowledge. Only give me the answer and do not output any other words.",
         user_prompt = "Question: {question}"
     )
@@ -53,9 +53,9 @@ def aar(args):
     # index path of this retriever
     retrieval_method = args.method_name
     if 'contriever' in retrieval_method:
-        index_path = "aar-contriever_Flat.index" 
+        index_path = "aar-contriever_Flat.index"
     else:
-        index_path = "aar-ance_Flat.index" 
+        index_path = "aar-ance_Flat.index"
 
     model2path = {"AAR-contriever": "model/AAR-Contriever-KILT",
                             "AAR-ANCE": "model/AAR-ANCE"}
@@ -92,7 +92,7 @@ def llmlingua(args):
         in ICLR MEFoMo 2024.
         Official repo: https://github.com/microsoft/LLMLingua
     """
-    refiner_name = "longllmlingua" # 
+    refiner_name = "longllmlingua" #
     refiner_model_path = "model/llama-2-7b-hf"
 
     config_dict = {
@@ -183,7 +183,7 @@ def sc(args):
             pip install en_core_web_sm-3.6.0.tar.gz
             ```
     """
-    refiner_name = "selective-context"  
+    refiner_name = "selective-context"
     refiner_model_path = "model/gpt2"
 
     config_dict = {
@@ -239,7 +239,7 @@ def retrobust(args):
     from flashrag.pipeline import SelfAskPipeline
     from flashrag.utils import selfask_pred_parse
     pipeline = SelfAskPipeline(config, max_iter=5, single_hop=False)
-    # use specify prediction parse function 
+    # use specify prediction parse function
     result = pipeline.run(test_data, pred_process_fun=selfask_pred_parse)
 
 def sure(args):
@@ -349,7 +349,7 @@ def selfrag(args):
     test_data = all_split[args.split]
 
     from flashrag.pipeline import SelfRAGPipeline
-    pipeline = SelfRAGPipeline(config, threhsold=0.2, max_depth=2, beam_width=2, 
+    pipeline = SelfRAGPipeline(config, threhsold=0.2, max_depth=2, beam_width=2,
                             w_rel=1.0, w_sup=1.0, w_use=1.0,
                             use_grounding=True, use_utility=True, use_seqscore=True, ignore_cont=True,
                                 mode='adaptive_retrieval')
@@ -363,7 +363,7 @@ def flare(args):
         Official repo: https://github.com/bbuing9/ICLR24_SuRe
 
     """
-    config_dict={'save_note':'flare', 'gpu_id':args.gpu_id, 
+    config_dict={'save_note':'flare', 'gpu_id':args.gpu_id,
                 'dataset_name':args.dataset_name}
     config = Config('my_config.yaml',config_dict)
     all_split = get_dataset(config)

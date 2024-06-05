@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 import torch
 import numpy as np
 from tqdm import tqdm
@@ -40,7 +40,7 @@ class BaseReranker:
             query_list = [query_list]
         if not isinstance(doc_list[0], list):
             doc_list = [doc_list]
-    
+
         assert len(query_list) == len(doc_list)
         assert topk < min([len(docs) for docs in doc_list]), "The number of doc returned by the retriever is less than the topk."
 
@@ -52,7 +52,7 @@ class BaseReranker:
         all_scores = self.get_rerank_scores(query_list, doc_contents, batch_size)
         assert len(all_scores) == sum([len(docs) for docs in doc_list])
 
-        # sort docs 
+        # sort docs
         start_idx = 0
         final_scores = []
         final_docs = []
@@ -61,7 +61,7 @@ class BaseReranker:
             doc_scores = [float(score) for score in doc_scores]
             sort_idxs = np.argsort(doc_scores)[::-1][:topk]
             start_idx += len(docs)
-            
+
             final_docs.append([docs[idx] for idx in sort_idxs])
             final_scores.append([doc_scores[idx] for idx in sort_idxs])
 
@@ -71,7 +71,7 @@ class CrossReranker(BaseReranker):
     def __init__(self, config):
         super().__init__(config)
         self.tokenizer = AutoTokenizer.from_pretrained(self.reranker_model_path)
-        self.ranker = AutoModelForSequenceClassification.from_pretrained(self.reranker_model_path, 
+        self.ranker = AutoModelForSequenceClassification.from_pretrained(self.reranker_model_path,
                                                                          num_labels=1)
         self.ranker.eval()
         self.ranker.to(self.device)
@@ -85,19 +85,19 @@ class CrossReranker(BaseReranker):
         all_scores = []
         for start_idx in tqdm(range(0, len(all_pairs), batch_size), desc='Reranking process: '):
             pair_batch = all_pairs[start_idx:start_idx + batch_size]
-            
+
             inputs = self.tokenizer(
-                pair_batch, 
-                padding=True, 
-                truncation=True, 
-                return_tensors='pt', 
+                pair_batch,
+                padding=True,
+                truncation=True,
+                return_tensors='pt',
                 max_length=self.max_length
             ).to(self.device)
             batch_scores = self.ranker(**inputs, return_dict=True).logits.view(-1, ).float().cpu()
             all_scores.extend(batch_scores)
 
         return all_scores
-        
+
 
 class BiReranker(BaseReranker):
     def __init__(self, config):
@@ -109,7 +109,7 @@ class BiReranker(BaseReranker):
             max_length = self.max_length,
             use_fp16 = config['rerank_use_fp16']
         )
-    
+
     def get_rerank_scores(self, query_list, doc_list, batch_size):
         query_emb = []
         for start_idx in range(0, len(query_list), batch_size):

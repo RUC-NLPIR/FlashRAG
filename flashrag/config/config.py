@@ -1,11 +1,7 @@
 import re
 import os
 import yaml
-import json
 import random
-import copy
-import importlib
-import sys
 import datetime
 
 class Config:
@@ -60,7 +56,7 @@ class Config:
     def _update_dict(old_dict: dict, new_dict: dict):
         # Update the original update method of the dictionary:
         # If there is the same key in `old_dict` and `new_dict`, and value is of type dict, update the key in dict
-        
+
         same_keys = []
         for key,value in new_dict.items():
             if key in old_dict and isinstance(value, dict):
@@ -73,7 +69,7 @@ class Config:
 
         old_dict.update(new_dict)
         return old_dict
-        
+
 
     def _merge_external_config(self):
         external_config = dict()
@@ -84,11 +80,11 @@ class Config:
 
     def _get_internal_config(self):
         current_path = os.path.dirname(os.path.realpath(__file__))
-        init_config_path = os.path.join(current_path, "basic_config.yaml")    
+        init_config_path = os.path.join(current_path, "basic_config.yaml")
         internal_config = self._load_file_config(init_config_path)
 
         return internal_config
-        
+
     def _get_final_config(self):
         final_config = dict()
         final_config = self._update_dict(final_config, self.internal_config)
@@ -114,7 +110,7 @@ class Config:
         else:
             import torch
             self.final_config['device'] = torch.device('cpu')
-        
+
 
     def _set_additional_key(self):
         # set dataset
@@ -135,7 +131,7 @@ class Config:
                 self.final_config['index_path'] = method2index[retrieval_method]
             except:
                 print("Index is empty!!")
-                assert False 
+                assert False
 
         self.final_config['retrieval_model_path'] = model2path.get(retrieval_method, retrieval_method)
         # TODO: not support when `retrieval_model` is path
@@ -148,12 +144,12 @@ class Config:
 
         if self.final_config.get('retrieval_pooling_method') is None:
             self.final_config['retrieval_pooling_method'] = set_pooling_method(retrieval_method, model2pooling)
-        
+
 
         rerank_model_name = self.final_config['rerank_model_name']
         if self.final_config.get('rerank_model_path') is None:
             if rerank_model_name is not None:
-                self.final_config['rerank_model_path'] = model2path.get(rerank_model_name, rerank_model_name)    
+                self.final_config['rerank_model_path'] = model2path.get(rerank_model_name, rerank_model_name)
         if self.final_config['rerank_pooling_method'] is None:
             if rerank_model_name is not None:
                 self.final_config['rerank_pooling_method'] = set_pooling_method(
@@ -171,7 +167,7 @@ class Config:
     def _prepare_dir(self):
         save_note = self.final_config['save_note']
         current_time = datetime.datetime.now()
-        self.final_config['save_dir'] = os.path.join(self.final_config['save_dir'], 
+        self.final_config['save_dir'] = os.path.join(self.final_config['save_dir'],
                                      f"{self.final_config['dataset_name']}_{current_time.strftime('%Y_%m_%d_%H_%M')}_{save_note}")
         os.makedirs(self.final_config['save_dir'], exist_ok=True)
         # save config parameters
@@ -190,9 +186,9 @@ class Config:
         torch.cuda.manual_seed_all(seed)
         torch.backends.cudnn.benchmark = False
         torch.backends.cudnn.deterministic = True
-    
 
-    
+
+
     def __setitem__(self, key, value):
         if not isinstance(key, str):
             raise TypeError("index must be a str.")
@@ -201,7 +197,7 @@ class Config:
     def __getattr__(self, item):
         if "final_config" not in self.__dict__:
             raise AttributeError(
-                f"'Config' object has no attribute 'final_config'"
+                "'Config' object has no attribute 'final_config'"
             )
         if item in self.final_config:
             return self.final_config[item]
@@ -214,6 +210,6 @@ class Config:
         if not isinstance(key, str):
             raise TypeError("index must be a str.")
         return key in self.final_config
-    
+
     def __repr__(self):
         return self.final_config.__str__()

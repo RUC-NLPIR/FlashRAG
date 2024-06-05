@@ -8,8 +8,6 @@ import json
 import re
 from collections import defaultdict
 from typing import List, Union
-import os
-import random
 import string
 import yaml
 import nltk
@@ -348,7 +346,7 @@ class PromptCompressor:
             **model_config,
         )
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-    
+
         if model_config.get("pad_to_left", True):
             tokenizer.padding_side = "left"
             tokenizer.pad_token_id = (
