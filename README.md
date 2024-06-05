@@ -314,13 +314,13 @@ In each category, we have implemented corresponding common pipelines. Some pipel
 ## :robot: Supporting Methods
 
 We have implemented 12 works with a consistent setting of:
-- **Generator:** LLAMA3-8B-instruct with input length of 4096
+- **Generator:** LLAMA3-8B-instruct with input length of 2048
 - **Retriever:** e5-base-v2 as embedding model, retrieve 5 docs per query
-- **Prompt:** A consistent default prompt, template can be found in the [<u>source code</u>](./flashrag/prompt/base_prompt.py).
+- **Prompt:** A consistent default prompt, template can be found in the [<u>method details</u>](./docs/baseline_details.md).
 
 For open-source methods, we implemented their processes using our framework. For methods where the author did not provide source code, we will try our best to follow the methods in the original paper for implementation.
 
-For necessary settings and hyperparameters specific to some methods, we have documented them in the **specific settings** column. For more details, please consult our [<u>experiment code</u>](./examples/methods/run_exp.py).
+For necessary settings and hyperparameters specific to some methods, we have documented them in the **specific settings** column. For more details, please consult our [<u>reproduce guidance</u>](./docs/reproduce_experiment.md) and [<u>method details</u>](./docs/baseline_details.md).
 
 It’s important to note that, to ensure consistency, we have utilized a uniform setting. However, this setting may differ from the original setting of the method, leading to variations in results compared to the original outcomes.
 
@@ -408,7 +408,7 @@ Our toolkit supports jsonl format for retrieval document collections, with the f
 ```
 The `contents` key is essential for building the index. For documents that include both text and title, we recommend setting the value of `contents` to `{title}\n{text}`. The corpus file can also contain other keys to record additional characteristics of the documents.
 
-In the academic research, Wikipedia and MS MARCO are the most commonly used retrieval document collections. For Wikipedia, we provide a [comprehensive script](./docs/process-wiki.md) to process any Wikipedia dump into a clean corpus. Additionally, various processed versions of the Wikipedia corpus are available in many works, and we have listed some reference links.
+In the academic research, Wikipedia and MS MARCO are the most commonly used retrieval document collections. For Wikipedia, we provide a [<u>comprehensive script</u>](./docs/process-wiki.md) to process any Wikipedia dump into a clean corpus. Additionally, various processed versions of the Wikipedia corpus are available in many works, and we have listed some reference links.
 
 
 For MS MARCO, it is already processed upon release and can be directly downloaded from its [<u>hosting link</u>](https://huggingface.co/datasets/Tevatron/msmarco-passage-corpus) on Hugging Face.
