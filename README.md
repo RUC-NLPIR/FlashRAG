@@ -76,7 +76,7 @@ cd FlashRAG
 pip install -e . 
 ```
 
-Due to the possibility of incompatibility when installing `faiss` using `pip`, it is necessary to use the following conda command for installation.
+Due to the incompatibility when installing `faiss` using `pip`, it is necessary to use the following conda command for installation.
 ```bash
 # CPU-only version
 conda install -c pytorch faiss-cpu=1.8.0
