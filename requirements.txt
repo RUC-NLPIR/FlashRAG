@@ -1,6 +1,5 @@
 cohere
 datasets>=2.14.6
-faiss_cpu
 fschat
 nltk
 numpy
