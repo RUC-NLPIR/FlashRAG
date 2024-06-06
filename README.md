@@ -344,8 +344,8 @@ It’s important to note that, to ensure consistency, we have utilized a uniform
 | Naive Generation     | Sequential     | 22.6    | 55.7          | 28.4          |  33.9| 21.7| 18.8| |
 | Standard RAG         | Sequential     | 35.1    | 58.9          | 35.3          | 21.0 | 36.7|15.7| |
 | [AAR-contriever-kilt](https://aclanthology.org/2023.acl-long.136.pdf)  | Sequential     | 30.1    | 56.8          | 33.4          | 19.8 | 36.1  | 16.1| |
-| [LongLLMLingua](https://aclanthology.org/2023.acl-long.136.pdf)        | Sequential     | 32.2    | 59.2          | 37.5          |25.0| 38.7| 17.5| Compress Ratio=0.5 |
-| [RECOMP-abstractive](https://aclanthology.org/2023.acl-long.136.pdf)   | Sequential     | 33.1    | 56.4          | 37.5          | 32.4 | 39.9| 20.2| |
+| [LongLLMLingua](https://arxiv.org/abs/2310.06839)        | Sequential     | 32.2    | 59.2          | 37.5          |25.0| 38.7| 17.5| Compress Ratio=0.5 |
+| [RECOMP-abstractive](https://arxiv.org/abs/2310.04408)   | Sequential     | 33.1    | 56.4          | 37.5          | 32.4 | 39.9| 20.2| |
 | [Selective-Context](https://arxiv.org/abs/2310.06201)    | Sequential     | 30.5    | 55.6          | 34.4          |18.5| 33.5| 17.3| Compress Ratio=0.5|
 | [Ret-Robust](https://arxiv.org/abs/2310.01558)           | Sequential     | 42.9    | 68.2          | 35.8          |43.4|57.2|33.7| Use LLAMA2-13B with trained lora|
 | [SuRe](https://arxiv.org/abs/2404.13081)                 | Branching      | 37.1    | 53.2          | 33.4          |20.6|48.1|24.2| Use provided prompt|
