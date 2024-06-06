@@ -11,9 +11,9 @@ class Item:
     """
 
     def __init__(self, item_dict):
-        self.id = item_dict.get("id")
-        self.question = item_dict.get("question")
-        self.golden_answers = item_dict.get("golden_answers")
+        self.id = item_dict.get("id", None)
+        self.question = item_dict.get("question", None)
+        self.golden_answers = item_dict.get("golden_answers", [])
         self.metadata = item_dict.get("metadata",{})
         self.output = item_dict.get("output", {})
 
