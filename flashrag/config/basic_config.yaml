@@ -89,10 +89,11 @@ use_fid: False # whether to use FID, only valid in encoder-decoder model
 
 # -------------------------------------------------Evaluation Settings------------------------------------------------#
 # Metrics to evaluate the result
-metrics: ['em','f1','sub_em','precision','recall'] 
+metrics: ['em','f1','sub_em','precision','recall','input_tokens'] 
 # Specify setting for metric, will be called within certain metrics
 metric_setting: 
   retrieval_recall_topk: 5
+  tokenizer_name: 'gpt-4'
 save_metric_score: True #　whether to save the metric score into txt file
 
 

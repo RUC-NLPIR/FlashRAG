@@ -164,6 +164,15 @@ class Config:
             refiner_model = self.final_config['refiner_name']
             self.final_config['refiner_model_path'] = model2path.get(refiner_model, refiner_model)
 
+        # set model path in metric setting
+        metric_setting = self.final_config['metric_setting']
+        metric_tokenizer_name = metric_setting.get('tokenizer_name', None)
+        from flashrag.utils.constants import OPENAI_MODEL_DICT
+        if metric_tokenizer_name  not in OPENAI_MODEL_DICT:
+            metric_tokenizer_name = model2path.get(metric_tokenizer_name, metric_tokenizer_name)
+            metric_setting['tokenizer_name'] = metric_tokenizer_name
+            self.final_config['metric_setting'] = metric_setting
+
     def _prepare_dir(self):
         save_note = self.final_config['save_note']
         current_time = datetime.datetime.now()

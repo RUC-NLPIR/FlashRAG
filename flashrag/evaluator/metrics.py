@@ -336,3 +336,34 @@ class BLEU(BaseMetric):
             score_list.append(bleu)
 
         return {"bleu": total_bleu}, score_list
+    
+class CountToken(BaseMetric):
+    metric_name = "input_tokens"
+    def __init__(self, config):
+        super().__init__(config)
+        tokenizer_name = config['metric_setting'].get('tokenizer_name', None)
+        is_hf_tokenizer = True
+        from flashrag.utils.constants import OPENAI_MODEL_DICT
+        if tokenizer_name is None or tokenizer_name in OPENAI_MODEL_DICT:
+            # use gpt4 tokenizer
+            import tiktoken
+            if tokenizer_name is None:
+                tokenizer_name = 'gpt-4'
+            tokenizer = tiktoken.encoding_for_model(tokenizer_name)
+            is_hf_tokenizer = False
+        else:
+            from transformers import AutoTokenizer
+            tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+        
+        self.tokenizer = tokenizer
+        self.is_hf_tokenizer = is_hf_tokenizer
+
+    def calculate_metric(self, data):
+        input_prompts = data.prompt
+        if self.is_hf_tokenizer:
+            token_counts = [len(self.tokenizer.tokenize(text)) for text in input_prompts]
+        else:
+            token_counts = [len(self.tokenizer.encode(text)) for text in input_prompts]
+        avg_tokens = sum(token_counts) / len(token_counts)
+        
+        return {"avg_input_tokens": avg_tokens}, token_counts
