@@ -25,6 +25,8 @@ Question:{question}
 ```
 These prompts are combined using the `tokenizer.apply_chat_template` function, serving as the final input to the generator model.
 
+**Dataset Setting**: For datasets with a test set, we use the test set for testing. Otherwise, we use the dev set for testing (i.e. nq, tqa, popqa, webq is test, and the rest is dev). All results used the first 1000 samples from each dataset (set `test_sample_num` to 1000 in config and turn off `random_sample`). We have tested on a full dataset and found that the results differ slightly from those of 1000 data points.
+
 ## Method Specific Setting
 
 In addition to the general settings mentioned above, each method often has its own settings and configurations. For methods with specific settings, we will introduce each method's own settings below.
