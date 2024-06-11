@@ -29,7 +29,8 @@ class Index_Builder:
             faiss_type=None,
             embedding_path=None,
             save_embedding=False,
-            faiss_gpu=False
+            faiss_gpu=False,
+            use_sentence_transformer=False
         ):
 
         self.retrieval_method = retrieval_method.lower()
@@ -44,6 +45,7 @@ class Index_Builder:
         self.embedding_path = embedding_path
         self.save_embedding = save_embedding
         self.faiss_gpu = faiss_gpu
+        self.use_sentence_transformer = use_sentence_transformer
 
         self.gpu_num = torch.cuda.device_count()
         # prepare save dir
@@ -141,6 +143,21 @@ class Index_Builder:
         else:
             memmap[:] = all_embeddings
 
+    def st_encode_all(self):
+        if self.gpu_num > 1:
+            print("Use multi gpu!")
+            self.batch_size = self.batch_size * self.gpu_num
+
+        sentence_list = [item['contents'] for item in self.corpus]
+        if self.retrieval_method == "e5":
+            sentence_list = [f"passage: {doc}" for doc in sentence_list]
+        all_embeddings = self.encode(
+            sentence_list, 
+            batch_size = self.batch_size
+        )
+
+        return all_embeddings
+
     def encode_all(self):
         if self.gpu_num > 1:
             print("Use multi gpu!")
@@ -204,14 +221,25 @@ class Index_Builder:
         if os.path.exists(self.index_save_path):
             print("The index file already exists and will be overwritten.")
 
-        self.encoder, self.tokenizer = load_model(model_path = self.model_path,
-                                                  use_fp16 = self.use_fp16)
-        if self.embedding_path is not None:
+        if self.use_sentence_transformer:
+            from flashrag.retriever.encoder import STEncoder
+            self.encoder = STEncoder(
+                model_name = self.retrieval_method,
+                model_path = self.model_path,
+                max_length = self.max_length,
+                use_fp16 = self.use_fp16
+            )
+            hidden_size = self.encoder.model.get_sentence_embedding_dimension()
+        else:
+            self.encoder, self.tokenizer = load_model(model_path = self.model_path,
+                                                    use_fp16 = self.use_fp16)
             hidden_size = self.encoder.config.hidden_size
+
+        if self.embedding_path is not None:
             corpus_size = len(self.corpus)
             all_embeddings = self._load_embedding(self.embedding_path, corpus_size, hidden_size)
         else:
-            all_embeddings = self.encode_all()
+            all_embeddings = self.st_encode_all() if self.use_sentence_transformer else self.encode_all()
             if self.save_embedding:
                 self._save_embedding(all_embeddings)
             del self.corpus
@@ -265,6 +293,7 @@ def main():
     parser.add_argument('--embedding_path', default=None, type=str)
     parser.add_argument('--save_embedding', action='store_true', default=False)
     parser.add_argument('--faiss_gpu', default=False, action='store_true')
+    parser.add_argument('--sentence_transformer', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -293,7 +322,8 @@ def main():
                         faiss_type = args.faiss_type,
                         embedding_path = args.embedding_path,
                         save_embedding = args.save_embedding,
-                        faiss_gpu = args.faiss_gpu
+                        faiss_gpu = args.faiss_gpu,
+                        use_sentence_transformer = args.sentence_transformer
                     )
     index_builder.build_index()
 

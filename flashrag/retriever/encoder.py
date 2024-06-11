@@ -4,6 +4,27 @@ import numpy as np
 from flashrag.retriever.utils import load_model, pooling
 
 
+def parse_query(model_name, query_list, is_query=True):
+    """
+    processing query for different encoders
+    """
+
+    if isinstance(query_list, str):
+        query_list = [query_list]
+
+    if "e5" in model_name.lower():
+        if is_query:
+            query_list = [f"query: {query}" for query in query_list]
+        else:
+            query_list = [f"passage: {query}" for query in query_list]
+
+    if "bge" in model_name.lower():
+        if is_query:
+            query_list = [f"Represent this sentence for searching relevant passages: {query}" for query in query_list]
+    
+    return query_list
+
+
 class Encoder:
     def __init__(self, model_name, model_path, pooling_method, max_length, use_fp16):
         self.model_name = model_name
@@ -17,19 +38,7 @@ class Encoder:
 
     @torch.no_grad()
     def encode(self, query_list: List[str], is_query=True) -> np.ndarray:
-        # processing query for different encoders
-        if isinstance(query_list, str):
-            query_list = [query_list]
-
-        if "e5" in self.model_name.lower():
-            if is_query:
-                query_list = [f"query: {query}" for query in query_list]
-            else:
-                query_list = [f"passage: {query}" for query in query_list]
-
-        if "bge" in self.model_name.lower():
-            if is_query:
-                query_list = [f"Represent this sentence for searching relevant passages: {query}" for query in query_list]
+        query_list = parse_query(self.model_name, query_list, is_query)
 
         inputs = self.tokenizer(query_list,
                                 max_length=self.max_length,
@@ -55,9 +64,49 @@ class Encoder:
                                 output.last_hidden_state,
                                 inputs['attention_mask'],
                                 self.pooling_method)
-            if "dpr" not in self.model_name.lower():
-                query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
 
         query_emb = query_emb.detach().cpu().numpy()
         query_emb = query_emb.astype(np.float32, order="C")
         return query_emb
+
+class STEncoder:
+    def __init__(self, model_name, model_path, max_length, use_fp16):
+        import torch
+        from sentence_transformers import SentenceTransformer
+
+        self.model_name = model_name
+        self.model_path = model_path
+        self.max_length = max_length
+        self.use_fp16 = use_fp16
+
+        self.model = SentenceTransformer(model_path, model_kwargs = {"torch_dtype": torch.float16 if use_fp16 else torch.float})
+
+
+    @torch.no_grad()
+    def encode(self, query_list: List[str], is_query=True) -> np.ndarray:
+        query_list = parse_query(self.model_name, query_list, is_query)
+        query_emb = self.model.encode(
+                        query_list,
+                        batch_size = len(query_list),
+                        convert_to_numpy = True,
+                        normalize_embeddings = True
+                    )
+        query_emb = query_emb.astype(np.float32, order="C")
+
+        return query_emb
+    
+    @torch.no_grad()
+    def multi_gpu_encode(self, query_list: List[str], is_query=True, batch_size=None) -> np.ndarray:
+        query_list = parse_query(self.model_name, query_list, is_query)
+        pool = self.model.start_multi_process_pool()
+        query_emb = self.model.encode_multi_process(
+            query_list, pool,
+            convert_to_numpy = True,
+            normalize_embeddings = True,
+            batch_size = batch_size
+        )
+        self.model.stop_multi_process_pool(pool)
+        query_emb.astype(np.float32, order="C")
+
+        return query_emb
+        

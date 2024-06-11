@@ -8,7 +8,7 @@ import faiss
 
 from flashrag.utils import get_reranker
 from flashrag.retriever.utils import load_corpus, load_docs
-from flashrag.retriever.encoder import Encoder
+from flashrag.retriever.encoder import Encoder, STEncoder
 
 
 def cache_manager(func):
@@ -235,12 +235,21 @@ class DenseRetriever(BaseRetriever):
             self.index = faiss.index_cpu_to_all_gpus(self.index, co=co)
 
         self.corpus = load_corpus(self.corpus_path)
-        self.encoder = Encoder(
-             model_name = self.retrieval_method,
-             model_path = config['retrieval_model_path'],
-             pooling_method = config['retrieval_pooling_method'],
-             max_length = config['retrieval_query_max_length'],
-             use_fp16 = config['retrieval_use_fp16']
+
+        if config['use_sentence_transformer']:
+            self.encoder = STEncoder(
+                model_name = self.retrieval_method,
+                model_path = config['retrieval_model_path'],
+                max_length = config['retrieval_query_max_length'],
+                use_fp16 = config['retrieval_use_fp16']
+            )
+        else:
+            self.encoder = Encoder(
+                model_name = self.retrieval_method,
+                model_path = config['retrieval_model_path'],
+                pooling_method = config['retrieval_pooling_method'],
+                max_length = config['retrieval_query_max_length'],
+                use_fp16 = config['retrieval_use_fp16']
             )
         self.topk = config['retrieval_topk']
         self.batch_size = self.config['retrieval_batch_size']

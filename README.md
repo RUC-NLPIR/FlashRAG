@@ -52,13 +52,15 @@ FlashRAG is still under development and there are many issues and room for impro
 - [x] Support OpenAI models
 - [ ] Support Claude and Gemini models
 - [x] Provdide instructions for each component
-- [ ] Integrate sentence Transformers
+- [x] Integrate sentence Transformers
 - [ ] Inlcude more RAG approaches
 - [ ] Add more evaluation metrics (e.g., Unieval, name-entity F1) and benchmarks (e.g., RGB benchmark)
 - [ ] Enhance code adaptability and readability
 
 
 ## :page_with_curl: Changelog
+
+[24/06/11] We have integrated `sentence transformers` in the retriever module. More retrievers can be used.
 
 [24/06/05] We have provided detailed document for reproducing existing methods (see [how to reproduce ](./docs/reproduce_experiment.md) and [baseline details](./docs/baseline_details.md)) and [<u>configurations settings</u>](./docs/configuration.md)
 

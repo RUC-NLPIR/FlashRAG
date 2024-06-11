@@ -41,6 +41,26 @@ python -m flashrag.retriever.index_builder \
 
 * ```--pooling_method```: If this is not specified, we will automatically select based on the model name. However, due to the different pooling methods used by different embedding models, **we may not have fully implemented them**. To ensure accuracy, you can **specify the pooling method corresponding to the retrieval model** you are using (`mean`, `pooler` or `cls`).
 
+
+If the retrieval model support `sentence transformers` library, you can use following code to build index (**no need to consider pooling method**).
+
+```bash
+python -m flashrag.retriever.index_builder \
+    --retrieval_method e5 \
+    --model_path /model/e5-base-v2/ \
+    --corpus_path indexes/sample_corpus.jsonl \
+    --save_dir indexes/ \
+    --use_fp16 \
+    --max_length 200 \
+    --batch_size 32 \
+    --pooling_method mean \
+    --sentence_transformer \
+    --faiss_type Flat 
+```
+
+
+
+
 #### For sparse retrieval method (BM25)
 
 If building a bm25 index, there is no need to specify `model_path`:
