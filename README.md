@@ -60,11 +60,11 @@ FlashRAG is still under development and there are many issues and room for impro
 
 ## :page_with_curl: Changelog
 
-[24/06/11] We have integrated `sentence transformers` in the retriever module. More retrievers can be used.
+[24/06/11] We have integrated `sentence transformers` in the retriever module. Now it's easier to use the retriever without setting pooling methods.
 
-[24/06/05] We have provided detailed document for reproducing existing methods (see [how to reproduce ](./docs/reproduce_experiment.md) and [baseline details](./docs/baseline_details.md)) and [<u>configurations settings</u>](./docs/configuration.md)
+[24/06/05] We have provided detailed document for reproducing existing methods (see [how to reproduce](./docs/reproduce_experiment.md) and [baseline details](./docs/baseline_details.md)) and [<u>configuration settings</u>](./docs/configuration.md).
 
-[24/06/02] We have provided an introduction of FlashRAG for beginners, see [<u>a introduction to flashrag</u>](./docs/instruction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md))
+[24/06/02] We have provided an introduction of FlashRAG for beginners, see [<u>an introduction to flashrag</u>](./docs/introduction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md)).
 
 [24/05/31] We supported Openai-series models as generator. 
 
@@ -93,7 +93,7 @@ conda install -c pytorch -c nvidia faiss-gpu=1.8.0
 
 ### Toy Example
 
-For beginners, we provide a [<u>a introduction to flashrag</u>](./docs/instruction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md)) to help you familiarize yourself with our toolkit. Alternatively, you can directly refer to the code below.
+For beginners, we provide a [<u>an introduction to flashrag</u>](./docs/introduction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md)) to help you familiarize yourself with our toolkit. Alternatively, you can directly refer to the code below.
 
 Run the following code to implement a naive RAG pipeline using provided toy datasets.
 The default retriever is `e5` and default generator is `llama2-7B-chat`. You need to fill in the corresponding model path in the following command. If you wish to use other models, please refer to the detailed instructions below.
