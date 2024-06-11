@@ -91,7 +91,7 @@ conda install -c pytorch -c nvidia faiss-gpu=1.8.0
 
 ### Toy Example
 
-For beginners, we provide a [<u>a introduction to flashrag</u>](./docs/instruction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md)) to help you familiarize yourself with our toolkit. Alternatively, you can directly refer to the code below.
+For beginners, we provide a [<u>an introduction to flashrag</u>](./docs/instruction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md)) to help you familiarize yourself with our toolkit. Alternatively, you can directly refer to the code below.
 
 Run the following code to implement a naive RAG pipeline using provided toy datasets.
 The default retriever is `e5` and default generator is `llama2-7B-chat`. You need to fill in the corresponding model path in the following command. If you wish to use other models, please refer to the detailed instructions below.
