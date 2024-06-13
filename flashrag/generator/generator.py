@@ -170,12 +170,15 @@ class VLLMGenerator(BaseGenerator):
         generation_params.update(params)
         if 'do_sample' in generation_params:
             generation_params.pop('do_sample')
-        if 'max_new_tokens' in generation_params:
-            if 'max_new_tokens' in params:
-                generation_params['max_tokens'] = params.pop('max_new_tokens')
-                generation_params.pop('max_new_tokens')
-            else:
-                generation_params['max_tokens'] = generation_params.pop('max_new_tokens')
+ 
+        max_tokens = params.pop('max_tokens', None) or params.pop('max_new_tokens', None)
+        if max_tokens is not None:
+            generation_params['max_tokens'] = max_tokens
+        else:
+            generation_params['max_tokens'] = generation_params.get('max_tokens', generation_params.pop('max_new_tokens', None))
+        generation_params.pop('max_new_tokens', None)
+
+
         # fix for llama3
         if 'stop' in generation_params:
             generation_params['stop'].append("<|eot_id|>")
@@ -270,11 +273,12 @@ class HFCausalLMGenerator(BaseGenerator):
             stopping_criteria = [StopWordCriteria(tokenizer=self.tokenizer, prompts=input_list, stop_words=stop_sym)]
             generation_params['stopping_criteria'] = stopping_criteria
 
-        if 'max_tokens' in generation_params:
-            if 'max_tokens' in params:
-                generation_params['max_new_tokens'] = params.pop('max_tokens')
-            else:
-                generation_params['max_new_tokens'] = generation_params.pop('max_tokens')
+        max_tokens = params.pop('max_tokens', None) or params.pop('max_new_tokens', None)
+        if max_tokens is not None:
+            generation_params['max_new_tokens'] = max_tokens
+        else:
+            generation_params['max_new_tokens'] = generation_params.get('max_new_tokens', generation_params.pop('max_tokens', None))
+        generation_params.pop('max_tokens', None)
 
         # set eos token for llama
         if 'llama' in self.model_name.lower():
