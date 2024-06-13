@@ -183,7 +183,7 @@ class Index_Builder:
             inputs = {k: v.cuda() for k, v in inputs.items()}
 
             #TODO: support encoder-only T5 model
-            if "T5" in type(self.encoder).__name__:
+            if "T5" in type(self.encoder).__name__ or "T5" in type(self.encoder.module).__name__:
                 # T5-based retrieval model
                 decoder_input_ids = torch.zeros(
                     (inputs['input_ids'].shape[0], 1), dtype=torch.long
