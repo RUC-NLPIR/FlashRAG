@@ -11,8 +11,8 @@ args = parser.parse_args()
 
 config_dict = {
                 'data_dir': 'dataset/',
-                'index_path': 'indexes/e5_flat_sample.index',
-                'corpus_path': 'indexes/sample_data.jsonl',
+                'index_path': 'indexes/e5_Flat.index',
+                'corpus_path': 'indexes/general_knowledge.jsonl',
                 'model2path': {'e5': args.retriever_path, 'llama2-7B-chat': args.model_path},
                 'generator_model': 'llama2-7B-chat',
                 'retrieval_method': 'e5',

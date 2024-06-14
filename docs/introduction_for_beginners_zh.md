@@ -17,8 +17,8 @@ Standard RAG的流程包括以下三个步骤:
 1. 安装本项目以及对应的依赖库
 2. 下载需要的各种模型
 3. 下载需要的数据集 (已提供[toy dataset](../examples/quick_start/dataset/nq))
-4. 下载用于检索的文档集合(已提供[toy corpus](../examples/quick_start/indexes/sample_data.jsonl))
-5. 构建用于检索的index (已提供[toy index](../examples/quick_start/indexes/e5_flat_sample.index))
+4. 下载用于检索的文档集合(已提供[toy corpus](../examples/quick_start/indexes/general_knowledge.jsonl))
+5. 构建用于检索的index (已提供[toy index](../examples/quick_start/indexes/e5_Flat.index))
 
 
 为了能够节省入门所需要的时间，我们提供了玩具数据集、文档集合以及对应的index。因此实际上只需要进行前两步就可以顺利完成整个流程。
@@ -54,8 +54,8 @@ pip install -e .
 
 ### 2.4 下载文档集合
 
-文档集合包含了大量的切分好的段落，是RAG系统的外部知识来源。由于常用的文档集合往往非常大(~5G以上)，我们这里从维基百科文档集合中抽取出了10000条文本作为toy集合， 地址为 [examples/quick_start/indexes/sample_data.jsonl](../examples/quick_start/indexes/sample_data.jsonl)。
-> 由于文档数量非常少，可能很多query都无法搜到相关的文本，这可能会影响最终的检索结果。
+文档集合包含了大量的切分好的段落，是RAG系统的外部知识来源。由于常用的文档集合往往非常大(~5G以上)，我们使用了一个通用知识数据集作为检索文档， 地址为 [examples/quick_start/indexes/general_knowledge.jsonl](../examples/quick_start/indexes/general_knowledge.jsonl)。
+> 由于文档数量较少，可能很多query都无法搜到相关的文本，这可能会影响最终的检索结果。
 
 
 如果需要获取完整的文档集合，可以访问我们[huggingface上的数据集](https://huggingface.co/datasets/ignore/FlashRAG_datasets)进行下载和使用。
@@ -65,7 +65,7 @@ pip install -e .
 
 为了提高检索的查询效率，我们往往需要提前构建检索的索引。对于BM25方法，索引往往是倒排表(在我们项目中是一个文件夹)。对于各类embedding方法，索引是一个包含检索文档集合中所有文本的embedding的faiss数据库(一个.index文件)。**每个索引对应着一个corpus和一种检索方式**，也就是每当想使用一种新的embedding模型，都得重新构建索引。
 
-在这里我们提供了一个[toy index](../examples/quick_start/indexes/e5_flat_sample.index)，其使用E5-base-v2以及前面的toy corpus进行构建。
+在这里我们提供了一个[toy index](../examples/quick_start/indexes/e5_Flat.index)，其使用E5-base-v2以及前面的toy corpus进行构建。
 
 如果想使用自己的检索模型和检索文档，可以参考我们的[索引构建文档](./building-index.md)来构建。
 
@@ -88,8 +88,8 @@ from flashrag.config import Config
 
 config_dict = { 
     'data_dir': 'dataset/',
-    'index_path': 'indexes/e5_flat_sample.index',
-    'corpus_path': 'indexes/sample_data.jsonl',
+    'index_path': 'indexes/e5_Flat.index',
+    'corpus_path': 'indexes/general_knowledge.jsonl',
     'model2path': {'e5': <retriever_path>, 'llama2-7B-chat': <generator_path>},
     'generator_model': 'llama2-7B-chat',
     'retrieval_method': 'e5',
@@ -136,8 +136,8 @@ from flashrag.pipeline import SequentialPipeline
 
 config_dict = { 
                 'data_dir': 'dataset/',
-                'index_path': 'indexes/e5_flat_sample.index',
-                'corpus_path': 'indexes/sample_data.jsonl',
+                'index_path': 'indexes/e5_Flat.index',
+                'corpus_path': 'indexes/general_knowledge.jsonl',
                 'model2path': {'e5': <retriever_path>, 'llama2-7B-chat': <generator_path>},
                 'generator_model': 'llama2-7B-chat',
                 'retrieval_method': 'e5',

@@ -16,8 +16,8 @@ To smoothly run the entire RAG process, you need to complete the following five 
 1. Install the project and its dependencies.
 2. Download the required models.
 3. Download the necessary datasets (a [toy dataset](../examples/quick_start/dataset/nq) is provided).
-4. Download the document collection for retrieval (a [toy corpus](../examples/quick_start/indexes/sample_data.jsonl) is provided).
-5. Build the index for retrieval (a [toy index](../examples/quick_start/indexes/e5_flat_sample.index) is provided).
+4. Download the document collection for retrieval (a [toy corpus](../examples/quick_start/indexes/general_knowledge.jsonl) is provided).
+5. Build the index for retrieval (a [toy index](../examples/quick_start/indexes/e5_Flat.index) is provided).
 
 To save time in getting started, we provide toy datasets, document collections, and corresponding indices. Therefore, you only need to complete the first two steps to successfully run the entire process.
 
@@ -52,7 +52,7 @@ Our repository also provides a large number of processed benchmark datasets. You
 
 ### 2.4 Downloading the Document Collection
 
-The document collection contains a large number of segmented paragraphs, serving as the external knowledge source for the RAG system. Since commonly used document collections are often very large (~5G or more), we have extracted 10,000 texts from the Wikipedia document collection as a toy collection, located at  [examples/quick_start/indexes/sample_data.jsonl](../examples/quick_start/indexes/sample_data.jsonl)。
+The document collection contains a large number of segmented paragraphs, serving as the external knowledge source for the RAG system. Since commonly used document collections are often very large (~5G or more), we use a [general knowledge dataset](https://huggingface.co/datasets/MuskumPillerum/General-Knowledge) as a toy collection, located at  [examples/quick_start/indexes/general_knowledge.jsonl](../examples/quick_start/indexes/general_knowledge.jsonl)。
 
 > Due to the small number of documents, many queries may not find relevant texts, which could affect the final retrieval results.
 
@@ -64,7 +64,7 @@ If you need to obtain the full document collection, you can visit our [huggingfa
 
 To improve retrieval efficiency, we often need to build the retrieval index in advance. For the BM25 method, the index is usually an inverted index (a directory in our project). For various embedding methods, the index is a Faiss database containing the embeddings of all texts in the document collection (an .index file). **Each index corresponds to a corpus and a retrieval method**, meaning that every time you want to use a new embedding model, you need to rebuild the index.
 
-Here, we provide a [toy index](../examples/quick_start/indexes/e5_flat_sample.index), built using E5-base-v2 and the aforementioned toy corpus.
+Here, we provide a [toy index](../examples/quick_start/indexes/e5_Flat.index), built using E5-base-v2 and the aforementioned toy corpus.
 
 If you want to use your own retrieval model and documents, you can refer to our [index building document](./building-index.md) to build your index.
 
@@ -88,8 +88,8 @@ from flashrag.config import Config
 
 config_dict = { 
     'data_dir': 'dataset/',
-    'index_path': 'indexes/e5_flat_sample.index',
-    'corpus_path': 'indexes/sample_data.jsonl',
+    'index_path': 'indexes/e5_Flat.index',
+    'corpus_path': 'indexes/general_knowledge.jsonl',
     'model2path': {'e5': <retriever_path>, 'llama2-7B-chat': <generator_path>},
     'generator_model': 'llama2-7B-chat',
     'retrieval_method': 'e5',
@@ -137,8 +137,8 @@ from flashrag.pipeline import SequentialPipeline
 
 config_dict = { 
                 'data_dir': 'dataset/',
-                'index_path': 'indexes/e5_flat_sample.index',
-                'corpus_path': 'indexes/sample_data.jsonl',
+                'index_path': 'indexes/e5_Flat.index',
+                'corpus_path': 'indexes/general_knowledge.jsonl',
                 'model2path': {'e5': <retriever_path>, 'llama2-7B-chat': <generator_path>},
                 'generator_model': 'llama2-7B-chat',
                 'retrieval_method': 'e5',
