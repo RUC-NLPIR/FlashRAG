@@ -8,6 +8,16 @@ def parse_query(model_name, query_list, is_query=True):
     """
     processing query for different encoders
     """
+    def is_zh(str):
+        import unicodedata
+        zh_char = 0
+        for c in str:
+            if 'CJK' in unicodedata.name(c):
+                zh_char += 1
+        if  zh_char / len(str) > 0.2:
+            return True
+        else:
+            return False
 
     if isinstance(query_list, str):
         query_list = [query_list]
@@ -20,7 +30,10 @@ def parse_query(model_name, query_list, is_query=True):
 
     if "bge" in model_name.lower():
         if is_query:
-            query_list = [f"Represent this sentence for searching relevant passages: {query}" for query in query_list]
+            if is_zh(query_list[0]):
+                query_list = [f"为这个句子生成表示以用于检索相关文章：{query}" for query in query_list]
+            else:
+                query_list = [f"Represent this sentence for searching relevant passages: {query}" for query in query_list]
     
     return query_list
 
