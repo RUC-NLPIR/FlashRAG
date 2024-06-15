@@ -103,10 +103,10 @@ We provide a toy demo to implement a simple RAG process. You can freely change t
 
 <div style="display: flex; justify-content: space-around;">
   <div style="text-align: center;">
-    <img src="./asset/demo_en.gif" style="width: 45%;">
+    <img src="./asset/demo_en.gif" style="width: 40%;">
   </div>
   <div style="text-align: center;">
-    <img src="./asset/demo_zh.gif" alt="Second Image" style="width: 45%;">
+    <img src="./asset/demo_zh.gif" alt="Second Image" style="width: 40%;">
   </div>
 </div>
 
