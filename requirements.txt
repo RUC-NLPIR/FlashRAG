@@ -18,3 +18,4 @@ transformers>=4.40.0
 vllm>=0.4.1
 voyageai
 sentence-transformers
+streamlit

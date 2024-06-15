@@ -60,6 +60,8 @@ FlashRAG is still under development and there are many issues and room for impro
 
 ## :page_with_curl: Changelog
 
+[24/06/15] We provide a [<u>demo</u>](./examples/quick_start/demo_en.py) to perform the RAG process using our toolkit.
+
 [24/06/11] We have integrated `sentence transformers` in the retriever module. Now it's easier to use the retriever without setting pooling methods.
 
 [24/06/05] We have provided detailed document for reproducing existing methods (see [how to reproduce](./docs/reproduce_experiment.md), [baseline details](./docs/baseline_details.md)), and [<u>configurations settings</u>](./docs/configuration.md).
@@ -95,19 +97,40 @@ conda install -c pytorch -c nvidia faiss-gpu=1.8.0
 
 For beginners, we provide a [<u>an introduction to flashrag</u>](./docs/introduction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md)) to help you familiarize yourself with our toolkit. Alternatively, you can directly refer to the code below.
 
+#### Demo 
+
+We provide a toy demo to implement a simple RAG process. You can freely change the corpus and model you want to use. The English demo uses [general knowledge](https://huggingface.co/datasets/MuskumPillerum/General-Knowledge) as the corpus, `e5-base-v2` as the retriever, and `Llama3-8B-instruct` as generator. The Chinese demo uses data crawled from the official website of Remin University of China as the corpus, `bge-large-zh-v1.5` as the retriever, and qwen1.5-14B as the generator. Please fill in the corresponding path in the file.
+
+To run the demo:
+
+```bash
+cd examples/quick_start
+# run english demo
+streamlit run demo_en.py
+
+# run chinese demo
+streamlit run demo_zh.py
+```
+
+<figure class="half">
+    <img src="./asset/demo_en.gif" >
+    <img src="./asset/demo_zh.gif" >
+</figure>
+
+#### Pipeline
+
+We also provide an example to use our framework for pipeline execution.
 Run the following code to implement a naive RAG pipeline using provided toy datasets.
-The default retriever is `e5` and default generator is `llama2-7B-chat`. You need to fill in the corresponding model path in the following command. If you wish to use other models, please refer to the detailed instructions below.
+The default retriever is `e5-base-v2` and default generator is `Llama3-8B-instruct`. You need to fill in the corresponding model path in the following command. If you wish to use other models, please refer to the detailed instructions below.
 
 ```bash
 cd examples/quick_start
 python simple_pipeline.py \
-    --model_path=<LLAMA2-7B-Chat-PATH> \
+    --model_path=<Llama-3-8B-instruct-PATH> \
     --retriever_path=<E5-PATH>
 ```
 
 After the code is completed, you can view the intermediate results of the run and the final evaluation score in the output folder under the corresponding path.
-
-**Note:** This toy example is just to help test whether the entire process can run normally. Our toy retrieval document only contains 1000 pieces of data, so it may not yield good results.
 
 ### Using the ready-made pipeline
 
