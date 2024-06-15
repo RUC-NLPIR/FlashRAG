@@ -101,6 +101,17 @@ For beginners, we provide a [<u>an introduction to flashrag</u>](./docs/introduc
 
 We provide a toy demo to implement a simple RAG process. You can freely change the corpus and model you want to use. The English demo uses [general knowledge](https://huggingface.co/datasets/MuskumPillerum/General-Knowledge) as the corpus, `e5-base-v2` as the retriever, and `Llama3-8B-instruct` as generator. The Chinese demo uses data crawled from the official website of Remin University of China as the corpus, `bge-large-zh-v1.5` as the retriever, and qwen1.5-14B as the generator. Please fill in the corresponding path in the file.
 
+<div style="display: flex; justify-content: space-around;">
+  <div style="text-align: center;">
+    <img src="./asset/demo_en.gif" style="width: 50%;">
+
+  </div>
+  <div style="text-align: center;">
+    <img src="./asset/demo_zh.gif" alt="Second Image" style="width: 50%;">
+
+  </div>
+</div>
+
 To run the demo:
 
 ```bash
@@ -112,10 +123,6 @@ streamlit run demo_en.py
 streamlit run demo_zh.py
 ```
 
-<figure class="half">
-    <img src="./asset/demo_en.gif" >
-    <img src="./asset/demo_zh.gif" >
-</figure>
 
 #### Pipeline
 
