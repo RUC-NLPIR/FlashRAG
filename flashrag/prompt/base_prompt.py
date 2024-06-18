@@ -11,6 +11,7 @@ class PromptTemplate:
                 config,
                 system_prompt = "",
                 user_prompt = "",
+                reference_template = None,
                 enable_chat = True
         ):
 
@@ -34,6 +35,7 @@ class PromptTemplate:
         self.system_prompt = system_prompt
         self.user_prompt = user_prompt
         self.enable_chat = enable_chat
+        self.reference_template = reference_template
 
         self._check_placeholder()
 
@@ -87,7 +89,7 @@ class PromptTemplate:
         else:
             input = "\n\n".join([prompt for prompt in [system_prompt, user_prompt] if prompt != ""])
 
-        if previous_gen is not None and self.is_openai is False:
+        if previous_gen is not None and previous_gen not in ['', ' '] and self.is_openai is False:
             input += previous_gen
 
         return input
@@ -99,7 +101,10 @@ class PromptTemplate:
             content = doc_item['contents']
             title = content.split("\n")[0]
             text = "\n".join(content.split("\n")[1:])
-            format_reference += f"Doc {idx+1}(Title: {title}) {text}\n"
+            if self.reference_template is None:
+                format_reference += self.reference_template.format(idx=idx, title=title, text=text)
+            else:
+                format_reference += f"Doc {idx+1}(Title: {title}) {text}\n"
 
         return format_reference
 

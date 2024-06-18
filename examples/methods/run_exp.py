@@ -397,6 +397,22 @@ def iterretgen(args):
     pipeline = IterativePipeline(config, iter_num=iter_num)
     result = pipeline.run(test_data)
 
+def ircot(args):
+    save_note = 'ircot'
+    config_dict = {'save_note': save_note,
+                'gpu_id':args.gpu_id,
+                'dataset_name':args.dataset_name}
+
+    from flashrag.pipeline import IRCOTPipeline
+    # preparation
+    config = Config('my_config.yaml',config_dict)
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+    print(config['generator_model_path'])
+    pipeline = IRCOTPipeline(config)
+    
+    result = pipeline.run(test_data)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "Running exp")
     parser.add_argument('--method_name', type=str)
@@ -418,7 +434,8 @@ if __name__ == '__main__':
         'skr': skr,
         'selfrag': selfrag,
         'flare': flare,
-        'iterretgen': iterretgen
+        'iterretgen': iterretgen,
+        'ircot': ircot
     }
 
     args = parser.parse_args()
