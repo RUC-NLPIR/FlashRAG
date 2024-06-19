@@ -101,7 +101,7 @@ class PromptTemplate:
             content = doc_item['contents']
             title = content.split("\n")[0]
             text = "\n".join(content.split("\n")[1:])
-            if self.reference_template is None:
+            if self.reference_template is not None:
                 format_reference += self.reference_template.format(idx=idx, title=title, text=text)
             else:
                 format_reference += f"Doc {idx+1}(Title: {title}) {text}\n"
