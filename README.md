@@ -112,6 +112,10 @@ To run the demo:
 
 ```bash
 cd examples/quick_start
+
+# copy the config file here, otherwise, streamlit will complain that file s
+cp ../methods/my_config.yaml .
+
 # run english demo
 streamlit run demo_en.py
 
