@@ -8,8 +8,8 @@ config_dict = {"save_note":"demo",
                 'model2path': {'e5': 'intfloat/e5-base-v2', 'llama3-8B-instruct': 'meta-llama/Meta-Llama-3-8B-Instruct'},
                 "retrieval_method":"e5",
                 'generator_model': 'llama3-8B-instruct',
-                "corpus_path":"indexses/general_knowledge.jsonl",
-                "index_path":"indexses/e5_Flat.index"}
+                "corpus_path":"indexes/general_knowledge.jsonl",
+                "index_path":"indexes/e5_Flat.index"}
 
 @st.cache_resource
 def load_retriever(_config):
