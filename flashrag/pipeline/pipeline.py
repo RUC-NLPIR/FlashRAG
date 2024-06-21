@@ -115,6 +115,9 @@ class SequentialPipeline(BasicPipeline):
                 input_prompts.append(
                     [q + " " + doc for doc in docs]
                 )
+        # delete used refiner to release memory
+        if self.refiner:
+            del self.refiner
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred",pred_answer_list)
 
