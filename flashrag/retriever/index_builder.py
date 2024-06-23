@@ -97,13 +97,7 @@ class Index_Builder:
         temp_dir = self.save_dir + "/temp"
         temp_file_path = temp_dir + "/temp.jsonl"
         os.makedirs(temp_dir)
-
-        if self.have_contents:
-            shutil.copyfile(self.corpus_path, temp_file_path)
-        else:
-            with open(temp_file_path, "w") as f:
-                for item in self.corpus:
-                    f.write(json.dumps(item) + "\n")
+        shutil.copyfile(self.corpus_path, temp_file_path)
 
         print("Start building bm25 index...")
         pyserini_args = ["--collection", "JsonCollection",
