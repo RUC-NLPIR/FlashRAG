@@ -118,11 +118,10 @@ def get_refiner(config):
     if refiner_path is None:
         if refiner_name in default_path_dict:
             refiner_path = default_path_dict[refiner_name]
-        else:
-            assert False, "refiner_model_path is empty!"
-
-    model_config = AutoConfig.from_pretrained(refiner_path)
-    arch = model_config.architectures[0].lower()
+    else:
+        model_config = AutoConfig.from_pretrained(refiner_path)
+        arch = model_config.architectures[0].lower()
+        
     if "recomp" in refiner_name.lower() or \
         "recomp" in refiner_path or \
         'bert' in arch:
