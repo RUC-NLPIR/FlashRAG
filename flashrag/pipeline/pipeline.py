@@ -52,7 +52,6 @@ class SequentialPipeline(BasicPipeline):
 
         super().__init__(config, prompt_template)
         self.retriever = get_retriever(config)
-        self.generator = get_generator(config)
 
         # TODO: add rewriter module
 
@@ -62,6 +61,7 @@ class SequentialPipeline(BasicPipeline):
             self.refiner = get_refiner(config)
         else:
             self.refiner = None
+            self.generator = get_generator(config)
 
     def naive_run(self, dataset, do_eval=True, pred_process_fun=None):
         # direct generation without RAG
@@ -118,6 +118,7 @@ class SequentialPipeline(BasicPipeline):
         # delete used refiner to release memory
         if self.refiner:
             del self.refiner
+            self.generator = get_generator(self.config)
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred",pred_answer_list)
 

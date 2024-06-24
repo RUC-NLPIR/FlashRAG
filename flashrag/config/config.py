@@ -162,7 +162,8 @@ class Config:
 
         if 'refiner_name' in self.final_config:
             refiner_model = self.final_config['refiner_name']
-            self.final_config['refiner_model_path'] = model2path.get(refiner_model, refiner_model)
+            if 'refiner_model_path' not in self.final_config or self.final_config['refiner_model_path'] is None:
+                self.final_config['refiner_model_path'] = model2path.get(refiner_model, refiner_model)
 
         # set model path in metric setting
         metric_setting = self.final_config['metric_setting']
