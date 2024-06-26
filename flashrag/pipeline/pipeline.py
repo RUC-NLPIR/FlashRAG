@@ -57,8 +57,11 @@ class SequentialPipeline(BasicPipeline):
 
         self.use_fid = config['use_fid']
 
+        self.generator = None
         if config['refiner_name'] is not None:
             self.refiner = get_refiner(config)
+            if 'kg' in config['refiner_name'].lower():
+                self.generator = get_generator(config)
         else:
             self.refiner = None
             self.generator = get_generator(config)
@@ -118,7 +121,8 @@ class SequentialPipeline(BasicPipeline):
         # delete used refiner to release memory
         if self.refiner:
             del self.refiner
-            self.generator = get_generator(self.config)
+            if self.generator is None:
+                self.generator = get_generator(self.config)
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred",pred_answer_list)
 
