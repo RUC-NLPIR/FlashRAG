@@ -123,7 +123,7 @@ def get_refiner(config):
         arch = model_config.architectures[0].lower()
         
     if "recomp" in refiner_name.lower() or \
-        "recomp" in refiner_path or \
+        (refiner_path is not None and "recomp" in refiner_path) or \
         'bert' in arch:
         if model_config.model_type == "t5" :
             return getattr(
@@ -145,5 +145,10 @@ def get_refiner(config):
                 importlib.import_module("flashrag.refiner"),
                 "SelectiveContextRefiner"
             )(config)
+    elif 'kg' in refiner_name.lower():
+        return getattr(
+                importlib.import_module("flashrag.refiner"),
+                "KGRefiner"
+        )(config)
     else:
         assert False, "No implementation!"
