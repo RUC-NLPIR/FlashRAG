@@ -115,6 +115,7 @@ def get_refiner(config):
         'recomp:abstractive_hotpotqa': 'fangyuan/hotpotqa_abstractive',
     }
 
+    arch = ""
     if refiner_path is None:
         if refiner_name in default_path_dict:
             refiner_path = default_path_dict[refiner_name]
