@@ -295,6 +295,7 @@ class HFCausalLMGenerator(BaseGenerator):
         generated_token_logits = []
 
         for idx in tqdm(range(0, len(input_list), batch_size), desc='Generation process: '):
+            torch.cuda.empty_cache()
             batched_prompts = input_list[idx:idx+batch_size]
             inputs = self.tokenizer(batched_prompts,
                                     return_tensors="pt",
@@ -317,17 +318,18 @@ class HFCausalLMGenerator(BaseGenerator):
             scores.extend(gen_score)
 
             # get additinoal info
-            batch_generated_token_ids = generated_ids.detach().cpu()
-            batch_generated_token_logits = torch.cat([token_scores.unsqueeze(1) for token_scores in outputs.scores], dim=1).detach().cpu()
-            if batch_generated_token_ids.shape[1] < generation_params['max_new_tokens']:
-                real_batch_size, num_generated_tokens = batch_generated_token_ids.shape 
-                padding_length = generation_params['max_new_tokens'] - num_generated_tokens
-                padding_token_ids = torch.zeros((real_batch_size, padding_length), dtype=batch_generated_token_ids.dtype).fill_(self.tokenizer.pad_token_id)
-                padding_token_logits = torch.zeros((real_batch_size, padding_length, batch_generated_token_logits.shape[-1]), dtype=batch_generated_token_logits.dtype)
-                batch_generated_token_ids = torch.cat([batch_generated_token_ids, padding_token_ids], dim=1)
-                batch_generated_token_logits = torch.cat([batch_generated_token_logits, padding_token_logits], dim=1)
-            generated_token_ids.append(batch_generated_token_ids)
-            generated_token_logits.append(batch_generated_token_logits)
+            if return_dict:
+                batch_generated_token_ids = generated_ids.detach().cpu()
+                batch_generated_token_logits = torch.cat([token_scores.unsqueeze(1) for token_scores in outputs.scores], dim=1).detach().cpu()
+                if batch_generated_token_ids.shape[1] < generation_params['max_new_tokens']:
+                    real_batch_size, num_generated_tokens = batch_generated_token_ids.shape 
+                    padding_length = generation_params['max_new_tokens'] - num_generated_tokens
+                    padding_token_ids = torch.zeros((real_batch_size, padding_length), dtype=batch_generated_token_ids.dtype).fill_(self.tokenizer.pad_token_id)
+                    padding_token_logits = torch.zeros((real_batch_size, padding_length, batch_generated_token_logits.shape[-1]), dtype=batch_generated_token_logits.dtype)
+                    batch_generated_token_ids = torch.cat([batch_generated_token_ids, padding_token_ids], dim=1)
+                    batch_generated_token_logits = torch.cat([batch_generated_token_logits, padding_token_logits], dim=1)
+                generated_token_ids.append(batch_generated_token_ids)
+                generated_token_logits.append(batch_generated_token_logits)
 
             for i, generated_sequence in enumerate(outputs.sequences):
                 input_ids = inputs['input_ids'][i]
@@ -365,9 +367,9 @@ class HFCausalLMGenerator(BaseGenerator):
 
                 responses.append(new_text.strip())
         
-        generated_token_ids = torch.cat(generated_token_ids, dim=0)
-        generated_token_logits = torch.cat(generated_token_logits, dim=0)
         if return_dict:
+            generated_token_ids = torch.cat(generated_token_ids, dim=0)
+            generated_token_logits = torch.cat(generated_token_logits, dim=0)
             return {'generated_token_ids': generated_token_ids, 
                     'generated_token_logits': generated_token_logits,
                     'responses': responses,
