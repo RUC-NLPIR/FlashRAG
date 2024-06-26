@@ -29,7 +29,7 @@ class BaseReranker:
         all_scores = []
         return all_scores
 
-    @torch.no_grad()
+    @torch.inference_mode(mode=True)
     def rerank(self, query_list, doc_list, batch_size=None, topk=None):
         r"""Rerank doc_list."""
         if batch_size is None:
@@ -76,7 +76,7 @@ class CrossReranker(BaseReranker):
         self.ranker.eval()
         self.ranker.to(self.device)
 
-    @torch.no_grad()
+    @torch.inference_mode(mode=True)
     def get_rerank_scores(self, query_list, doc_list, batch_size):
         # flatten all pairs
         all_pairs = []

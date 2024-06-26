@@ -356,7 +356,7 @@ class PromptCompressor:
         self.model = model
         self.context_idxs = []
         self.max_position_embeddings = config.max_position_embeddings
-
+    
     def get_ppl(
         self,
         text: str,
@@ -380,7 +380,7 @@ class PromptCompressor:
         if end is None:
             end = input_ids.shape[1]
         end = min(end, past_length + self.max_position_embeddings)
-        with torch.no_grad():
+        with torch.inference_mode(mode=True):
             response = self.model(
                 input_ids[:, past_length:end],
                 attention_mask=attention_mask[:, :end],
@@ -2106,7 +2106,7 @@ class PromptCompressor:
                 )
                 self.retrieval_model = [tokenizer, model]
                 self.retrieval_model_name = rank_method
-            with torch.no_grad():
+            with torch.inference_mode(mode=True):
                 inputs = self.retrieval_model[0](
                     pairs,
                     padding=True,
@@ -2143,7 +2143,7 @@ class PromptCompressor:
             instruction_qa_key = "Represent this document for retrieval: "
             queries = [instruction_qa_query + query for _ in corpus]
             keys = [instruction_qa_key + key for key in corpus]
-            with torch.no_grad():
+            with torch.inference_mode(mode=True):
                 query_inputs = self.retrieval_model[0](
                     queries,
                     padding=True,
@@ -2367,7 +2367,7 @@ class PromptCompressor:
 
         chunk_probs = []
         chunk_words = []
-        with torch.no_grad():
+        with torch.inference_mode(mode=True):
             for batch in dataloader:
                 ids = batch["ids"].to(self.device, dtype=torch.long)
                 mask = batch["mask"].to(self.device, dtype=torch.long) == 1
@@ -2546,7 +2546,7 @@ class PromptCompressor:
         compressed_chunk_list = []
         word_list = []
         word_label_list = []
-        with torch.no_grad():
+        with torch.inference_mode(mode=True):
             for batch in dataloader:
                 ids = batch["ids"].to(self.device, dtype=torch.long)
                 mask = batch["mask"].to(self.device, dtype=torch.long) == 1

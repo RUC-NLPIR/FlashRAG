@@ -49,7 +49,7 @@ class Encoder:
         self.model, self.tokenizer = load_model(model_path=model_path,
                                                 use_fp16=use_fp16)
 
-    @torch.no_grad()
+    @torch.inference_mode(mode=True)
     def encode(self, query_list: List[str], is_query=True) -> np.ndarray:
         query_list = parse_query(self.model_name, query_list, is_query)
 
@@ -95,7 +95,7 @@ class STEncoder:
         self.model = SentenceTransformer(model_path, model_kwargs = {"torch_dtype": torch.float16 if use_fp16 else torch.float})
 
 
-    @torch.no_grad()
+    @torch.inference_mode(mode=True)
     def encode(self, query_list: List[str], is_query=True) -> np.ndarray:
         query_list = parse_query(self.model_name, query_list, is_query)
         query_emb = self.model.encode(
@@ -108,7 +108,7 @@ class STEncoder:
 
         return query_emb
     
-    @torch.no_grad()
+    @torch.inference_mode(mode=True)
     def multi_gpu_encode(self, query_list: List[str], is_query=True, batch_size=None) -> np.ndarray:
         query_list = parse_query(self.model_name, query_list, is_query)
         pool = self.model.start_multi_process_pool()

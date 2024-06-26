@@ -74,7 +74,7 @@ class EncoderDecoderGenerator(BaseGenerator):
         return passage_ids, passage_masks.bool()
 
 
-    @torch.no_grad()
+    @torch.inference_mode(mode=True)
     def generate(self, input_list: List, batch_size=None, **params):
         if isinstance(input_list, str):
             input_list = [input_list]
@@ -160,7 +160,7 @@ class VLLMGenerator(BaseGenerator):
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
 
-    @torch.no_grad()
+    @torch.inference_mode(mode=True)
     def generate(self, input_list: List[str], return_raw_output=False, return_scores=False, **params):
         from vllm import SamplingParams
         if isinstance(input_list, str):
@@ -254,7 +254,7 @@ class HFCausalLMGenerator(BaseGenerator):
 
         return model, tokenizer
 
-    @torch.no_grad()
+    @torch.inference_mode(mode=True)
     def generate(self, input_list: List[str], batch_size=None, return_scores=False, return_dict=False, **params):
         """Generate batches one by one. The generated content needs to exclude input."""
 
@@ -301,7 +301,7 @@ class HFCausalLMGenerator(BaseGenerator):
                                     padding=True,
                                     truncation=True,
                                     max_length=self.max_input_len
-                                ).to('cuda')
+                                ).to(self.model.device)
             outputs = self.model.generate(
                 **inputs,
                 output_scores=True,
@@ -379,7 +379,7 @@ class HFCausalLMGenerator(BaseGenerator):
         else:
             return responses
 
-
+    @torch.inference_mode(mode=True)
     def cal_gen_probs(self, prev, next):
         input_ids = self.tokenizer.encode(prev, add_special_tokens=False)
         target_ids = self.tokenizer.encode(next, add_special_tokens=False)

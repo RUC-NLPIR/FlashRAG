@@ -59,7 +59,7 @@ class SKRJudger(BaseJudger):
         self.faiss = faiss_index
 
 
-
+    @torch.inference_mode(mode=True)
     def encode(self, contents:list):
         inputs = self.tokenizer(
                     contents,
@@ -68,8 +68,7 @@ class SKRJudger(BaseJudger):
                     return_tensors='pt',
                     max_length=self.max_length,
         ).to('cuda')
-        with torch.no_grad():
-            output = self.encoder(**inputs, return_dict=True)
+        output = self.encoder(**inputs, return_dict=True)
         embeddings = pooling(output.pooler_output,
                                 output.last_hidden_state,
                                 inputs['attention_mask'],

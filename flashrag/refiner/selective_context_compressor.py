@@ -103,7 +103,7 @@ class SelectiveContext:
             text = f"<|endoftext|>{text}"
         elif self.lang == 'zh':
             text = f"[CLS]{text}"
-        with torch.no_grad():
+        with torch.inference_mode(mode=True):
             encoding = self.tokenizer(text, add_special_tokens=False, return_tensors='pt')
             encoding = encoding.to(self.model.device)
             outputs = self.model(**encoding)
