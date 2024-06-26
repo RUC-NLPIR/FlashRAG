@@ -136,10 +136,10 @@ class VLLMGenerator(BaseGenerator):
         super().__init__(config)
 
         from vllm import LLM
-        if 'vllm_gpu_memory_utilization' not in config:
+        if 'gpu_memory_utilization' not in config:
             gpu_memory_utilization = 0.85
         else:
-            gpu_memory_utilization = config['vllm_gpu_memory_utilization']
+            gpu_memory_utilization = config['gpu_memory_utilization']
         if self.gpu_num != 1 and self.gpu_num %2 != 0:
             tensor_parallel_size = self.gpu_num - 1
         else:
@@ -226,6 +226,7 @@ class HFCausalLMGenerator(BaseGenerator):
 
     def __init__(self, config, model=None):
         super().__init__(config)
+        self.config = config
         lora_path = None if 'generator_lora_path' not in config else config['generator_lora_path']
         self.model, self.tokenizer = self._load_model(model=model)
         self.use_lora = False
@@ -400,16 +401,45 @@ class HFCausalLMGenerator(BaseGenerator):
 class FastChatGenerator(HFCausalLMGenerator):
     def __init__(self, config, model=None):
         super().__init__(config)
-
     def _load_model(self, model=None):
         r"""Load model and tokenizer for generator.
         
         """
+
+        def get_gpu_memory(max_gpus=None):
+            """Get available memory for each GPU."""
+            gpu_memory = []
+            num_gpus = (
+                torch.cuda.device_count()
+                if max_gpus is None
+                else min(max_gpus, torch.cuda.device_count())
+            )
+            for gpu_id in range(num_gpus):
+                with torch.cuda.device(gpu_id):
+                    device = torch.cuda.current_device()
+                    gpu_properties = torch.cuda.get_device_properties(device)
+                    total_memory = gpu_properties.total_memory / (1024**3)
+                    allocated_memory = torch.cuda.memory_allocated() / (1024**3)
+                    available_memory = total_memory - allocated_memory
+                    gpu_memory.append(available_memory)
+            return gpu_memory
+
         if model is None:
             from fastchat.model import load_model
+
+            if 'gpu_memory_utilization' not in self.config:
+                gpu_memory_utilization = 0.85
+            else:
+                gpu_memory_utilization = self.config['gpu_memory_utilization']
+            max_gpu_memory = None
+            if self.gpu_num != 1:
+                available_gpu_memory = get_gpu_memory(self.gpu_num)
+                max_gpu_memory = str(int(min(available_gpu_memory) * gpu_memory_utilization)) + "GiB"
+            
             model, tokenizer = load_model(self.model_path,
                                             device = 'cuda',
                                             num_gpus = self.gpu_num,
+                                            max_gpu_memory = max_gpu_memory,
                                             load_8bit = False,
                                             cpu_offloading = False,
                                             debug = False,)

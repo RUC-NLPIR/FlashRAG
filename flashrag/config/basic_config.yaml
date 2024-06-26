@@ -87,6 +87,7 @@ generation_params:
   #temperature: 1.0
   #top_p: 1.0
 use_fid: False # whether to use FID, only valid in encoder-decoder model
+gpu_memory_utilization: 0.85 # ratio of gpu's memory usage for generator
 
 # -------------------------------------------------Evaluation Settings------------------------------------------------#
 # Metrics to evaluate the result
