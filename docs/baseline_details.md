@@ -46,3 +46,5 @@ In addition to the general settings mentioned above, each method often has its o
 **SKR**: We implement the SKR-knn method, which requires an encoder model and inference-time training data. Specifically, it identifies the most similar queries from the training data based on the input query, determining whether the input query needs retrieval. Our library includes the training data provided by the authors; the corresponding encoder model can be downloaded [here](https://huggingface.co/princeton-nlp/sup-simcse-bert-base-uncased).
 
 **Self-RAG**: We use the Llama2-7B checkpoint provided by Self-RAG [here](https://huggingface.co/selfrag/selfrag_llama2_7b), setting the max output tokens to 100 to ensure proper operation. The temperature is set to 0, and `top_p` is set to 1.
+
+**IRCoT**: For all experiments, we used one shot example to add prompts. The example comes from [the demonstration file](https://github.com/StonyBrookNLP/ircot/blob/main/prompts/2wikimultihopqa/gold_with_3_distractors_context_cot_qa_codex.txt) provided by IRCoT. Max iter is set to 2.
