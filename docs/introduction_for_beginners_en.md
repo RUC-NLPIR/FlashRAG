@@ -93,7 +93,7 @@ config_dict = {
     'model2path': {'e5': <retriever_path>, 'llama2-7B-chat': <generator_path>},
     'generator_model': 'llama2-7B-chat',
     'retrieval_method': 'e5',
-    'metrics': ['em', 'f1', 'sub_em'],
+    'metrics': ['em', 'f1', 'acc'],
     'retrieval_topk': 1,
     'save_intermediate_data': True
 }
@@ -142,7 +142,7 @@ config_dict = {
                 'model2path': {'e5': <retriever_path>, 'llama2-7B-chat': <generator_path>},
                 'generator_model': 'llama2-7B-chat',
                 'retrieval_method': 'e5',
-                'metrics': ['em','f1','sub_em'],
+                'metrics': ['em','f1','acc'],
                 'retrieval_topk': 1,
                 'save_intermediate_data': True
             }

@@ -139,7 +139,7 @@ class ExactMatch(BaseMetric):
 class Sub_ExactMatch(BaseMetric):
     r"""Sub-Exact match measure whether the predicted answer contains the standard answer.
     """
-    metric_name = "sub_em"
+    metric_name = "acc"
 
     def __init__(self, config):
         super().__init__(config)
@@ -172,7 +172,7 @@ class Sub_ExactMatch(BaseMetric):
         metric_score_list = [self.calculate_sub_em(pred, golden_answers) for pred, golden_answers in zip(pred_list, golden_answers_list)]
         sub_em_score = sum(metric_score_list) / len(metric_score_list)
 
-        return {"sub_em": sub_em_score}, metric_score_list
+        return {"acc": sub_em_score}, metric_score_list
 
 class Retrieval_Recall(BaseMetric):
     r"""The recall of the top-k retreived passages, we measure if any of the passage contain the answer string. """

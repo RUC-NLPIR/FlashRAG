@@ -91,7 +91,7 @@ gpu_memory_utilization: 0.85 # ratio of gpu's memory usage for generator
 
 # -------------------------------------------------Evaluation Settings------------------------------------------------#
 # Metrics to evaluate the result
-metrics: ['em','f1','sub_em','precision','recall','input_tokens'] 
+metrics: ['em','f1','acc','precision','recall','input_tokens'] 
 # Specify setting for metric, will be called within certain metrics
 metric_setting: 
   retrieval_recall_topk: 5

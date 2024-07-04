@@ -16,7 +16,7 @@ config_dict = {
                 'model2path': {'e5': args.retriever_path, 'llama3-8B-instruct': args.model_path},
                 'generator_model': 'llama3-8B-instruct',
                 'retrieval_method': 'e5',
-                'metrics': ['em','f1','sub_em'],
+                'metrics': ['em','f1','acc'],
                 'retrieval_topk': 1,
                 'save_intermediate_data': True
             }

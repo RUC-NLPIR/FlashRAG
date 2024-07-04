@@ -161,7 +161,7 @@ use_fid: False # whether to use FID, only valid in encoder-decoder model
 
 # -------------------------------------------------Evaluation Settings------------------------------------------------#
 # Metrics to evaluate the result
-metrics: ['em','f1','sub_em','precision','recall'] 
+metrics: ['em','f1','acc,'precision','recall'] 
 # Specify setting for metric, will be called within certain metrics
 metric_setting: 
   retrieval_recall_topk: 5
@@ -301,7 +301,7 @@ This section sets various settings used during evaluation. If you use a custom e
 
 ```yaml
 # Metrics to evaluate the result
-metrics: ['em','f1','sub_em','precision','recall'] 
+metrics: ['em','f1','acc','precision','recall'] 
 # Specify setting for metric, will be called within certain metrics
 metric_setting: 
   retrieval_recall_topk: 5
