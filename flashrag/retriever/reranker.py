@@ -47,7 +47,10 @@ class BaseReranker:
         # get doc contents
         doc_contents = []
         for docs in doc_list:
-            doc_contents.append([doc['contents'] for doc in docs])
+            if all([isinstance(doc, str) for doc in docs]):
+                doc_contents.append([doc for doc in docs])
+            else:
+                doc_contents.append([doc['contents'] for doc in docs])
 
         all_scores = self.get_rerank_scores(query_list, doc_contents, batch_size)
         assert len(all_scores) == sum([len(docs) for docs in doc_list])
