@@ -9,7 +9,7 @@ from flashrag.prompt import PromptTemplate
 from flashrag.retriever.encoder import Encoder, STEncoder
 from flashrag.utils import hash_object
 
-class KGRefiner(BaseRefiner):
+class KGTraceRefiner(BaseRefiner):
     def __init__(self, config, retriever=None, generator=None):
         super().__init__(config)
         self.config = config
@@ -28,8 +28,8 @@ class KGRefiner(BaseRefiner):
             'triple_save_path': os.path.join(config['save_dir'], 'save_triples.json'),
             'triple_load_path': None
         } 
-        if 'kg_config' in config and config['kg_config'] is not None:
-            default_setting.update(config['kg_config'])
+        if 'trace_config' in config and config['trace_config'] is not None:
+            default_setting.update(config['trace_config'])
         self.kg_setting = default_setting
 
         self.num_examplars = self.kg_setting['num_examplars']

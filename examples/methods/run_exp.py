@@ -429,6 +429,7 @@ def trace(args):
     config_dict = {'save_note': save_note,
                 'gpu_id':args.gpu_id,
                 'dataset_name':args.dataset_name,
+                'refiner_name': 'kg-trace',
                 'trace_config': trace_config}
 
     # preparation

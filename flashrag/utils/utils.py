@@ -146,10 +146,10 @@ def get_refiner(config, retriever=None, generator=None):
                 importlib.import_module("flashrag.refiner"),
                 "SelectiveContextRefiner"
             )(config)
-    elif 'kg' in refiner_name.lower():
+    elif 'kg-trace' in refiner_name.lower():
         return getattr(
                 importlib.import_module("flashrag.refiner"),
-                "KGRefiner"
+                "KGTraceRefiner"
         )(config, retriever, generator)
     else:
         assert False, "No implementation!"
