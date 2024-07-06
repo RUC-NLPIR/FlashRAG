@@ -693,7 +693,7 @@ class SelfAskPipeline(BasicPipeline):
 
     def __init__(self, config, prompt_template=None, max_iter=5, single_hop=True):
         super().__init__(config, prompt_template)
-        from flashrag.utils import SELF_ASK_PROMPT_SINGLE_HOP, SELF_ASK_PROMPT_MULTI_HOP
+        from flashrag.prompt.selfask_examplars import SELF_ASK_PROMPT_SINGLE_HOP, SELF_ASK_PROMPT_MULTI_HOP
         self.retriever = get_retriever(config)
         self.generator = get_generator(config)
 
