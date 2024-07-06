@@ -59,6 +59,9 @@ FlashRAG is still under development and there are many issues and room for impro
 
 
 ## :page_with_curl: Changelog
+
+[24/07/06] We add support for a new method: [<u>Trace</u>](https://arxiv.org/abs/2406.11460), which refine text by constructing a knowledge graph. See it [<u>results</u>](#robot-supporting-methods) and [<u>details</u>](./docs/baseline_details.md).
+
 [24/06/19] We add support for a new method: [<u>IRCoT</u>](https://arxiv.org/abs/2212.10509), and update the [<u>result table</u>](#robot-supporting-methods).
 
 [24/06/15] We provide a [<u>demo</u>](./examples/quick_start/demo_en.py) to perform the RAG process using our toolkit.
@@ -262,7 +265,7 @@ In FlashRAG, we have built a series of common RAG components, including retrieve
       <td>Calculate matching score using cross-encoder</td>
     </tr>
     <tr>
-      <td rowspan="4">Refiner</td>
+      <td rowspan="5">Refiner</td>
       <td>Extractive Refiner</td>
       <td>Refine input by extracting important context</td>
     </tr>
@@ -278,6 +281,9 @@ In FlashRAG, we have built a series of common RAG components, including retrieve
       <td>SelectiveContext Refiner</td>
       <td><a href="https://arxiv.org/abs/2310.06201">Selective-Context</a> prompt compressor</td>
     </tr>
+    <tr>
+      <td> KG Refiner </td>
+      <td>Use <a hred='https://arxiv.org/abs/2406.11460'>Trace method to construct a knowledge graph</td>
     <tr>
       <td rowspan="4">Generator</td>
       <td>Encoder-Decoder Generator</td>
@@ -384,6 +390,7 @@ It’s important to note that, to ensure consistency, we have utilized a uniform
 | [RECOMP-abstractive](https://arxiv.org/pdf/2310.04408)   | Sequential     | 33.1    | 56.4          | 37.5          | 32.4 | 39.9| 20.2| |
 | [Selective-Context](https://arxiv.org/abs/2310.06201)    | Sequential     | 30.5    | 55.6          | 34.4          |18.5| 33.5| 17.3| Compress Ratio=0.5|
 | [Ret-Robust](https://arxiv.org/abs/2310.01558)           | Sequential     | 42.9    | 68.2          | 35.8          |43.4|57.2|33.7| Use LLAMA2-13B with trained lora|
+| [Trace](https://arxiv.org/abs/2406.11460) | Sequential | 30.7 | 50.2 | 34.0 | 15.5 | 37.4 | 19.9 | |
 | [SuRe](https://arxiv.org/abs/2404.13081)                 | Branching      | 37.1    | 53.2          | 33.4          |20.6|48.1|24.2| Use provided prompt|
 | [REPLUG](https://arxiv.org/abs/2301.12652)               | Branching      | 28.9    | 57.7          | 31.2          |21.1|27.8|20.2|  |
 | [SKR](https://aclanthology.org/2023.findings-emnlp.691.pdf)                  | Conditional    | 33.2   | 56.0          | 32.4          | 23.4 |31.7|17.0|Use infernece-time training data|

@@ -103,5 +103,5 @@ python run_exp.py --method_name 'naive' \
 
 The method can be selected from the following:
 ```
-naive zero-shot AAR-contriever llmlingua recomp selective-context sure replug skr flare iterretgen
+naive zero-shot AAR-contriever llmlingua recomp selective-context sure replug skr flare iterretgen trace
 ```

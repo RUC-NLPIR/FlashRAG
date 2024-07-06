@@ -105,7 +105,7 @@ def get_judger(config):
     else:
         assert False, "No implementation!"
 
-def get_refiner(config):
+def get_refiner(config, retriever=None, generator=None):
     refiner_name = config['refiner_name']
     refiner_path = config['refiner_model_path']
 
@@ -150,6 +150,19 @@ def get_refiner(config):
         return getattr(
                 importlib.import_module("flashrag.refiner"),
                 "KGRefiner"
-        )(config)
+        )(config, retriever, generator)
     else:
         assert False, "No implementation!"
+
+def hash_object(o) -> str:
+    """Returns a character hash code of arbitrary Python objects."""
+    import hashlib
+    import io
+    import dill
+    import base58
+
+    m = hashlib.blake2b()
+    with io.BytesIO() as buffer:
+        dill.dump(o, buffer)
+        m.update(buffer.getbuffer())
+        return base58.b58encode(m.digest()).decode()

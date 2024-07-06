@@ -59,9 +59,9 @@ class SequentialPipeline(BasicPipeline):
 
         self.generator = None
         if config['refiner_name'] is not None:
-            self.refiner = get_refiner(config)
             if 'kg' in config['refiner_name'].lower():
                 self.generator = get_generator(config)
+            self.refiner = get_refiner(config, self.retriever, self.generator)
         else:
             self.refiner = None
             self.generator = get_generator(config)

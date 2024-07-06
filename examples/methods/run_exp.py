@@ -413,6 +413,33 @@ def ircot(args):
     
     result = pipeline.run(test_data)
 
+def trace(args):
+    save_note = 'trace'
+    trace_config = {
+        'num_examplars': 3,
+        'max_chain_length': 4,
+        'topk_triple_select': 5, # num of candidate triples
+        'num_choices': 20,
+        'min_triple_prob': 1e-4,
+        'num_beams': 5, # number of selected prob at each step of constructing chain
+        'num_chains': 20, # number of generated chains 
+        'n_context': 5, # number of used chains in generation
+        'context_type': 'triples', # triples/triple-doc
+    }
+    config_dict = {'save_note': save_note,
+                'gpu_id':args.gpu_id,
+                'dataset_name':args.dataset_name,
+                'trace_config': trace_config}
+
+    # preparation
+    config = Config('my_config.yaml',config_dict)
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+    from flashrag.pipeline import SequentialPipeline
+    pipeline = SequentialPipeline(config)
+    
+    result = pipeline.run(test_data)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "Running exp")
     parser.add_argument('--method_name', type=str)
@@ -435,7 +462,8 @@ if __name__ == '__main__':
         'selfrag': selfrag,
         'flare': flare,
         'iterretgen': iterretgen,
-        'ircot': ircot
+        'ircot': ircot,
+        'trace': trace,
     }
 
     args = parser.parse_args()
