@@ -47,4 +47,6 @@ In addition to the general settings mentioned above, each method often has its o
 
 **Self-RAG**: We use the Llama2-7B checkpoint provided by Self-RAG [here](https://huggingface.co/selfrag/selfrag_llama2_7b), setting the max output tokens to 100 to ensure proper operation. The temperature is set to 0, and `top_p` is set to 1.
 
+**IRCoT**: For all experiments, we used one shot example to add prompts. The example comes from [the demonstration file](https://github.com/StonyBrookNLP/ircot/blob/main/prompts/2wikimultihopqa/gold_with_3_distractors_context_cot_qa_codex.txt) provided by IRCoT. Max iter is set to 2.
+
 **Trace**: This method requires first extracting triples from the search results and then constructing a reasoning chain. These two steps depend on the prompt of the feed shot for LLM. Follow the original work, we use Llama3-8B-instruct to do these steps, use 3 examplars in each prompt. For datasets that don't have examplars, we use the examplars from 2WikiMultihopQA as a substitute. Other hyperparameters follow default settings in our code.
