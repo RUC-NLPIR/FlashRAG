@@ -1,6 +1,7 @@
 from typing import List
 from copy import deepcopy
 from tqdm import tqdm
+from tqdm.auto import trange
 import numpy as np
 import torch
 from transformers import AutoTokenizer, \
@@ -99,7 +100,7 @@ class EncoderDecoderGenerator(BaseGenerator):
                 generation_params['max_new_tokens'] = generation_params.pop('max_tokens')
 
         responses = []
-        for idx in tqdm(range(0, len(input_list), batch_size), desc='Generation process: '):
+        for idx in trange(0, len(input_list), batch_size, desc='Generation process: '):
             batched_prompts = input_list[idx:idx+batch_size]
             if self.fid:
                 # assume each input in input_list is a list, contains K string
@@ -294,7 +295,7 @@ class HFCausalLMGenerator(BaseGenerator):
         generated_token_ids = []
         generated_token_logits = []
 
-        for idx in tqdm(range(0, len(input_list), batch_size), desc='Generation process: '):
+        for idx in trange(0, len(input_list), batch_size, desc='Generation process: '):
             torch.cuda.empty_cache()
             batched_prompts = input_list[idx:idx+batch_size]
             inputs = self.tokenizer(batched_prompts,
