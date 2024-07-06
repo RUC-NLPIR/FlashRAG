@@ -1,6 +1,7 @@
 cohere
 datasets>=2.14.6
 fschat
+base58
 nltk
 numpy
 openai
