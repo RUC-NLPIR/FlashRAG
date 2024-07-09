@@ -151,7 +151,11 @@ class Dataset:
     def save(self, save_path):
         """Save the dataset into the original format."""
 
-        save_data = [item.to_dict() for item in self.data]
+        def convert_to_float(d):
+            return {k: (v.item() if isinstance(v, np.generic) else v) for k, v in d.items()}
+
+        save_data = [convert_to_float(item.to_dict()) for item in self.data]
+        
         with open(save_path,"w") as f:
             json.dump(save_data, f, indent=4)
 
