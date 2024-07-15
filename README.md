@@ -93,6 +93,12 @@ conda install -c pytorch faiss-cpu=1.8.0
 conda install -c pytorch -c nvidia faiss-gpu=1.8.0
 ```
 
+Note: It is impossible to install the latest version of `faiss` on certain systems.
+
+From the official Faiss repository ([source](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md)):
+
+> - The CPU-only faiss-cpu conda package is currently available on Linux (x86_64 and arm64), OSX (arm64 only), and Windows (x86_64)
+> - faiss-gpu, containing both CPU and GPU indices, is available on Linux (x86_64 only) for CUDA 11.4 and 12.1
 
 ## :rocket: Quick Start
 
