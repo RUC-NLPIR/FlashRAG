@@ -150,15 +150,20 @@ class VLLMGenerator(BaseGenerator):
         self.use_lora = False
         if self.lora_path is not None:
             self.use_lora = True
-
-        self.model = LLM(self.model_path,
-                        tensor_parallel_size = tensor_parallel_size,
-                        gpu_memory_utilization = gpu_memory_utilization,
-                        enable_lora = True,
-                        max_lora_rank=64,
-                        max_logprobs=32016
-                    )
-
+        if self.use_lora:
+            self.model = LLM(self.model_path,
+                            tensor_parallel_size = tensor_parallel_size,
+                            gpu_memory_utilization = gpu_memory_utilization,
+                            enable_lora = True,
+                            max_lora_rank=64,
+                            max_logprobs=32016
+                        )
+        else:
+            self.model = LLM(self.model_path,
+                            tensor_parallel_size = tensor_parallel_size,
+                            gpu_memory_utilization = gpu_memory_utilization,
+                            max_logprobs=32016
+                        )
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
 
     @torch.inference_mode(mode=True)
