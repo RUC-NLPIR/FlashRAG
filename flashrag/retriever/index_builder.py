@@ -145,7 +145,7 @@ class Index_Builder:
         sentence_list = [item['contents'] for item in self.corpus]
         if self.retrieval_method == "e5":
             sentence_list = [f"passage: {doc}" for doc in sentence_list]
-        all_embeddings = self.encode(
+        all_embeddings = self.encoder.encode(
             sentence_list, 
             batch_size = self.batch_size
         )

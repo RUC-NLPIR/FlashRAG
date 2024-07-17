@@ -96,11 +96,11 @@ class STEncoder:
 
 
     @torch.inference_mode(mode=True)
-    def encode(self, query_list: List[str], is_query=True) -> np.ndarray:
+    def encode(self, query_list: List[str], batch_size=64, is_query=True) -> np.ndarray:
         query_list = parse_query(self.model_name, query_list, is_query)
         query_emb = self.model.encode(
                         query_list,
-                        batch_size = len(query_list),
+                        batch_size = batch_size,
                         convert_to_numpy = True,
                         normalize_embeddings = True
                     )
