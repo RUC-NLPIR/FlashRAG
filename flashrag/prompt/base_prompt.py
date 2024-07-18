@@ -20,12 +20,12 @@ class PromptTemplate:
         self.is_openai = config['framework'] == 'openai'
         if not self.is_openai:
             self.generator_path = config['generator_model_path']
-            model_config = AutoConfig.from_pretrained(self.generator_path)
+            model_config = AutoConfig.from_pretrained(self.generator_path, trust_remote_code=True)
             model_name = model_config._name_or_path.lower()
             self.is_chat = False
             if 'chat' in model_name or 'instruct' in model_name:
                 self.is_chat = True
-                self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path)
+                self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path, trust_remote_code=True)
         else:
             self.is_chat = True
             self.enable_chat = True

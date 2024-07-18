@@ -164,7 +164,7 @@ class VLLMGenerator(BaseGenerator):
                             gpu_memory_utilization = gpu_memory_utilization,
                             max_logprobs=32016
                         )
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
 
     @torch.inference_mode(mode=True)
     def generate(self, input_list: List[str], return_raw_output=False, return_scores=False, **params):
@@ -248,12 +248,13 @@ class HFCausalLMGenerator(BaseGenerator):
             model = AutoModelForCausalLM.from_pretrained(
                                                         self.model_path,
                                                          torch_dtype="auto",
-                                                         device_map="auto"
+                                                         device_map="auto",
+                                                         trust_remote_code=True
                                                         )
         else:
             model.cuda()
         model.eval()
-        tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
         if 'qwen' not in self.model_name:
             tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "left"
@@ -454,10 +455,10 @@ class FastChatGenerator(HFCausalLMGenerator):
 
         else:
             model.cuda()
-            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+            tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
         model.eval()
 
-        tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
         if 'qwen' not in self.model_name:
             tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "left"
