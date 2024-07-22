@@ -67,19 +67,17 @@ class Evaluator:
 
         return result_dict
 
-    def save_metric_score(self, result_dict):
-        file_name = "metric_score.txt"
+    def save_metric_score(self, result_dict, file_name="metric_score.txt"):
         save_path = os.path.join(self.save_dir, file_name)
         with open(save_path, "w", encoding='utf-8') as f:
             for k,v in result_dict.items():
                 f.write(f"{k}: {v}\n")
 
 
-    def save_data(self, data):
+    def save_data(self, data, file_name="intermediate_data.json"):
         """Save the evaluated data, including the raw data and the score of each data 
         sample on each metric."""
 
-        file_name = "intermediate_data.json"
         save_path = os.path.join(self.save_dir, file_name)
 
         data.save(save_path)
