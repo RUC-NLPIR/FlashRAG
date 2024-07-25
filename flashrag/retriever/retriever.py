@@ -62,9 +62,12 @@ def cache_manager(func):
             if isinstance(query_list, str):
                 query_list = [query_list]
                 if 'batch' not in func.__name__:
-                    results = [results]
-                    scores = [scores]
-            for query, doc_items, doc_scores in zip(query_list, results, scores):
+                    new_results = [results]
+                    new_scores = [scores]
+                else:
+                    new_results = results
+                    new_scores = scores
+            for query, doc_items, doc_scores in zip(query_list, new_results, new_scores):
                 for item, score in zip(doc_items, doc_scores):
                     item['score'] = score
                 self.cache[query] = doc_items
