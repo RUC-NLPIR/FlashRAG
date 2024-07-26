@@ -7,9 +7,8 @@ import torch
 from transformers import AutoTokenizer, \
                         AutoModelForCausalLM, \
                         T5ForConditionalGeneration, \
-                        BartForConditionalGeneration
-
-
+                        BartForConditionalGeneration, \
+                        AutoConfig
 
 class BaseGenerator:
     """`BaseGenerator` is a base object of Generator model."""
@@ -43,7 +42,9 @@ class EncoderDecoderGenerator(BaseGenerator):
     def __init__(self, config):
         super().__init__(config)
         self.fid = config['use_fid']
-        if "t5" in self.model_name:
+        model_config = AutoConfig.from_pretrained(self.model_path)
+        arch = model_config.architectures[0].lower()
+        if "t5" in arch:
             if self.fid:
                 from flashrag.generator.fid import FiDT5
                 self.model = FiDT5.from_pretrained(self.model_path)
