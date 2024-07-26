@@ -39,7 +39,9 @@ def get_generator(config, **params):
                 "FastChatGenerator"
             )(config, **params)
     elif config['framework'] == 'hf':
-        if "t5" in config['generator_model'] or "bart" in config['generator_model']:
+        model_config = AutoConfig.from_pretrained(config['generator_model_path'])
+        arch = model_config.architectures[0]
+        if "t5" in arch.lower() or 'bart' in arch.lower():
             return getattr(
                 importlib.import_module("flashrag.generator"),
                 "EncoderDecoderGenerator"
