@@ -14,6 +14,7 @@ class Item:
         self.id = item_dict.get("id", None)
         self.question = item_dict.get("question", None)
         self.golden_answers = item_dict.get("golden_answers", [])
+        self.choices = item_dict.get("choices", [])
         self.metadata = item_dict.get("metadata",{})
         self.output = item_dict.get("output", {})
 
@@ -35,7 +36,7 @@ class Item:
         self.output['metric_score'][metric_name] = metric_score
 
     def __getattr__(self, attr_name):
-        if attr_name in ['id','question','golden_answers','metadata','output']:
+        if attr_name in ['id','question','golden_answers','metadata','output', 'choices']:
             return super().__getattribute__(attr_name)
         else:
             output = super().__getattribute__('output')

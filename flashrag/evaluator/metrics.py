@@ -27,6 +27,19 @@ class BaseMetric:
         
         """
         return {}, []
+    
+    def get_dataset_answer(self, data):
+        if data.choices != []:
+            # multi-choice dataset
+            all_choices_list = data.choices
+            golden_choice_idx_list = data.golden_answers
+            golden_answers_list = [
+                [choices[idx] for idx in idx_list]
+                for choices, idx_list in zip(all_choices_list, golden_choice_idx_list)
+            ]
+        else:
+            golden_answers_list = data.golden_answers
+        return golden_answers_list
 
 class F1_Score(BaseMetric):
     """Token-level F1 score"""
@@ -62,7 +75,8 @@ class F1_Score(BaseMetric):
 
     def calculate_metric(self, data):
         pred_list = data.pred
-        golden_answers_list = data.golden_answers
+        golden_answers_list = self.get_dataset_answer(data)
+
         metric_score_list = [self.token_level_scores(pred, golden_answers)['f1'] for pred, golden_answers in zip(pred_list, golden_answers_list)]
         f1 = sum(metric_score_list) / len(metric_score_list)
         return {"f1": f1}, metric_score_list
@@ -76,7 +90,7 @@ class Recall_Score(F1_Score):
 
     def calculate_metric(self, data):
         pred_list = data.pred
-        golden_answers_list = data.golden_answers
+        golden_answers_list = self.get_dataset_answer(data)
         metric_score_list = [self.token_level_scores(pred, golden_answers)['recall'] for pred, golden_answers in zip(pred_list, golden_answers_list)]
         precision = sum(metric_score_list) / len(metric_score_list)
         return {"recall": precision}, metric_score_list
@@ -90,7 +104,7 @@ class Precision_Score(F1_Score):
 
     def calculate_metric(self, data):
         pred_list = data.pred
-        golden_answers_list = data.golden_answers
+        golden_answers_list = self.get_dataset_answer(data)
         metric_score_list = [self.token_level_scores(pred, golden_answers)['precision'] for pred, golden_answers in zip(pred_list, golden_answers_list)]
         precision = sum(metric_score_list) / len(metric_score_list)
         return {"precision": precision}, metric_score_list
@@ -128,8 +142,8 @@ class ExactMatch(BaseMetric):
         return score
 
     def calculate_metric(self, data):
-        golden_answers_list = data.golden_answers
         pred_list = data.pred
+        golden_answers_list = self.get_dataset_answer(data)
 
         metric_score_list = [self.calculate_em(pred, golden_answers) for pred, golden_answers in zip(pred_list, golden_answers_list)]
         em_score = sum(metric_score_list) / len(metric_score_list)
@@ -166,7 +180,7 @@ class Sub_ExactMatch(BaseMetric):
         return score
 
     def calculate_metric(self, data):
-        golden_answers_list = data.golden_answers
+        golden_answers_list = self.get_dataset_answer(data)
         pred_list = data.pred
 
         metric_score_list = [self.calculate_sub_em(pred, golden_answers) for pred, golden_answers in zip(pred_list, golden_answers_list)]
@@ -182,7 +196,7 @@ class Retrieval_Recall(BaseMetric):
         self.topk = config['metric_setting']['retrieval_recall_topk']
 
     def calculate_metric(self, data):
-        golden_answers_list = data.golden_answers
+        golden_answers_list = self.get_dataset_answer(data)
         retrieve_docs = data.retrieval_result
         recall_score_list = []
         for doc_list, golden_answers in zip(retrieve_docs, golden_answers_list):
@@ -211,7 +225,7 @@ class Retrieval_Precision(BaseMetric):
         self.topk = config['metric_setting']['retrieval_recall_topk']
 
     def calculate_metric(self, data):
-        golden_answers_list = data.golden_answers
+        golden_answers_list = self.get_dataset_answer(data)
         retrieve_docs = data.retrieval_result
         precision_score_list = []
         for doc_list, golden_answers in zip(retrieve_docs, golden_answers_list):
@@ -260,7 +274,7 @@ class Rouge_1(Rouge_Score):
         super().__init__(config)
 
     def calculate_metric(self, data):
-        golden_answers_list = data.golden_answers
+        golden_answers_list = self.get_dataset_answer(data)
         pred_list = data.pred
 
         metric_score_list = [self.calculate_rouge(pred, golden_answers)['rouge-1'] for pred, golden_answers in zip(pred_list, golden_answers_list)]
@@ -275,7 +289,7 @@ class Rouge_2(Rouge_Score):
         super().__init__(config)
 
     def calculate_metric(self, data):
-        golden_answers_list = data.golden_answers
+        golden_answers_list = self.get_dataset_answer(data)
         pred_list = data.pred
 
         metric_score_list = [self.calculate_rouge(pred, golden_answers)['rouge-2'] for pred, golden_answers in zip(pred_list, golden_answers_list)]
@@ -289,7 +303,7 @@ class Rouge_L(Rouge_Score):
         super().__init__(config)
 
     def calculate_metric(self, data):
-        golden_answers_list = data.golden_answers
+        golden_answers_list = self.get_dataset_answer(data)
         pred_list = data.pred
 
         metric_score_list = [self.calculate_rouge(pred, golden_answers)['rouge-l'] for pred, golden_answers in zip(pred_list, golden_answers_list)]
@@ -309,7 +323,7 @@ class BLEU(BaseMetric):
 
     def calculate_metric(self, data):
         from ._bleu import compute_bleu
-        golden_answers_list = data.golden_answers
+        golden_answers_list = self.get_dataset_answer(data)
         pred_list = data.pred
 
         pred_list = [self.tokenizer(pred) for pred in pred_list]
