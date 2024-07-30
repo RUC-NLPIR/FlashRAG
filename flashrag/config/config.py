@@ -4,8 +4,9 @@ import yaml
 import random
 import datetime
 
+
 class Config:
-    def __init__(self, config_file_path = None, config_dict = {}):
+    def __init__(self, config_file_path=None, config_dict={}):
 
         self.yaml_loader = self._build_yaml_loader()
         self.file_config = self._load_file_config(config_file_path)
@@ -23,7 +24,6 @@ class Config:
         self._init_device()
         self._set_seed()
         self._prepare_dir()
-
 
     def _build_yaml_loader(self):
         loader = yaml.FullLoader
@@ -43,13 +43,11 @@ class Config:
         )
         return loader
 
-    def _load_file_config(self, config_file_path:str):
+    def _load_file_config(self, config_file_path: str):
         file_config = dict()
         if config_file_path:
             with open(config_file_path, "r", encoding="utf-8") as f:
-                file_config.update(
-                    yaml.load(f.read(), Loader=self.yaml_loader)
-                )
+                file_config.update(yaml.load(f.read(), Loader=self.yaml_loader))
         return file_config
 
     @staticmethod
@@ -58,7 +56,7 @@ class Config:
         # If there is the same key in `old_dict` and `new_dict`, and value is of type dict, update the key in dict
 
         same_keys = []
-        for key,value in new_dict.items():
+        for key, value in new_dict.items():
             if key in old_dict and isinstance(value, dict):
                 same_keys.append(key)
         for key in same_keys:
@@ -69,7 +67,6 @@ class Config:
 
         old_dict.update(new_dict)
         return old_dict
-
 
     def _merge_external_config(self):
         external_config = dict()
@@ -94,101 +91,102 @@ class Config:
 
     def _check_final_config(self):
         # check split
-        split = self.final_config['split']
+        split = self.final_config["split"]
         if split is None:
-            split = ['train','dev','test']
+            split = ["train", "dev", "test"]
         if isinstance(split, str):
             split = [split]
-        self.final_config['split'] = split
+        self.final_config["split"] = split
 
     def _init_device(self):
-        gpu_id = self.final_config['gpu_id']
+        gpu_id = self.final_config["gpu_id"]
         if gpu_id is not None:
             os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
             import torch
-            self.final_config['device'] = torch.device('cuda')
+
+            self.final_config["device"] = torch.device("cuda")
         else:
             import torch
-            self.final_config['device'] = torch.device('cpu')
 
+            self.final_config["device"] = torch.device("cpu")
 
     def _set_additional_key(self):
         # set dataset
-        dataset_name = self.final_config['dataset_name']
-        data_dir = self.final_config['data_dir']
-        self.final_config['dataset_path'] = os.path.join(data_dir, dataset_name)
+        dataset_name = self.final_config["dataset_name"]
+        data_dir = self.final_config["data_dir"]
+        self.final_config["dataset_path"] = os.path.join(data_dir, dataset_name)
 
         # set model path
-        retrieval_method = self.final_config['retrieval_method']
-        model2path = self.final_config['model2path']
-        model2pooling = self.final_config['model2pooling']
-        method2index = self.final_config['method2index']
+        retrieval_method = self.final_config["retrieval_method"]
+        model2path = self.final_config["model2path"]
+        model2pooling = self.final_config["model2pooling"]
+        method2index = self.final_config["method2index"]
 
-        generator_model = self.final_config['generator_model']
+        generator_model = self.final_config["generator_model"]
 
-        if self.final_config['index_path'] is None:
+        if self.final_config["index_path"] is None:
             try:
-                self.final_config['index_path'] = method2index[retrieval_method]
+                self.final_config["index_path"] = method2index[retrieval_method]
             except:
                 print("Index is empty!!")
                 assert False
 
-        self.final_config['retrieval_model_path'] = model2path.get(retrieval_method, retrieval_method)
+        self.final_config["retrieval_model_path"] = model2path.get(retrieval_method, retrieval_method)
         # TODO: not support when `retrieval_model` is path
 
         def set_pooling_method(method, model2pooling):
-            for key,value in model2pooling.items():
+            for key, value in model2pooling.items():
                 if key.lower() in method.lower():
                     return value
-            return 'mean'
+            return "mean"
 
-        if self.final_config.get('retrieval_pooling_method') is None:
-            self.final_config['retrieval_pooling_method'] = set_pooling_method(retrieval_method, model2pooling)
+        if self.final_config.get("retrieval_pooling_method") is None:
+            self.final_config["retrieval_pooling_method"] = set_pooling_method(retrieval_method, model2pooling)
 
-
-        rerank_model_name = self.final_config['rerank_model_name']
-        if self.final_config.get('rerank_model_path') is None:
+        rerank_model_name = self.final_config["rerank_model_name"]
+        if self.final_config.get("rerank_model_path") is None:
             if rerank_model_name is not None:
-                self.final_config['rerank_model_path'] = model2path.get(rerank_model_name, rerank_model_name)
-        if self.final_config['rerank_pooling_method'] is None:
+                self.final_config["rerank_model_path"] = model2path.get(rerank_model_name, rerank_model_name)
+        if self.final_config["rerank_pooling_method"] is None:
             if rerank_model_name is not None:
-                self.final_config['rerank_pooling_method'] = set_pooling_method(
-                    rerank_model_name,
-                    model2pooling
-                )
+                self.final_config["rerank_pooling_method"] = set_pooling_method(rerank_model_name, model2pooling)
 
-        if self.final_config.get('generator_model_path') is None:
-            self.final_config['generator_model_path'] = model2path.get(generator_model, generator_model)
+        if self.final_config.get("generator_model_path") is None:
+            self.final_config["generator_model_path"] = model2path.get(generator_model, generator_model)
 
-        if 'refiner_name' in self.final_config:
-            refiner_model = self.final_config['refiner_name']
-            if 'refiner_model_path' not in self.final_config or self.final_config['refiner_model_path'] is None:
-                self.final_config['refiner_model_path'] = model2path.get(refiner_model, None)
+        if "refiner_name" in self.final_config:
+            refiner_model = self.final_config["refiner_name"]
+            if "refiner_model_path" not in self.final_config or self.final_config["refiner_model_path"] is None:
+                self.final_config["refiner_model_path"] = model2path.get(refiner_model, None)
 
         # set model path in metric setting
-        metric_setting = self.final_config['metric_setting']
-        metric_tokenizer_name = metric_setting.get('tokenizer_name', None)
+        metric_setting = self.final_config["metric_setting"]
+        metric_tokenizer_name = metric_setting.get("tokenizer_name", None)
         from flashrag.utils.constants import OPENAI_MODEL_DICT
-        if metric_tokenizer_name  not in OPENAI_MODEL_DICT:
+
+        if metric_tokenizer_name not in OPENAI_MODEL_DICT:
             metric_tokenizer_name = model2path.get(metric_tokenizer_name, metric_tokenizer_name)
-            metric_setting['tokenizer_name'] = metric_tokenizer_name
-            self.final_config['metric_setting'] = metric_setting
+            metric_setting["tokenizer_name"] = metric_tokenizer_name
+            self.final_config["metric_setting"] = metric_setting
 
     def _prepare_dir(self):
-        save_note = self.final_config['save_note']
+        save_note = self.final_config["save_note"]
         current_time = datetime.datetime.now()
-        self.final_config['save_dir'] = os.path.join(self.final_config['save_dir'],
-                                     f"{self.final_config['dataset_name']}_{current_time.strftime('%Y_%m_%d_%H_%M')}_{save_note}")
-        os.makedirs(self.final_config['save_dir'], exist_ok=True)
+        self.final_config["save_dir"] = os.path.join(
+            self.final_config["save_dir"],
+            f"{self.final_config['dataset_name']}_{current_time.strftime('%Y_%m_%d_%H_%M')}_{save_note}",
+        )
+        os.makedirs(self.final_config["save_dir"], exist_ok=True)
         # save config parameters
-        config_save_path = os.path.join(self.final_config['save_dir'],'config.yaml')
-        with open(config_save_path, 'w') as f:
+        config_save_path = os.path.join(self.final_config["save_dir"], "config.yaml")
+        with open(config_save_path, "w") as f:
             yaml.dump(self.final_config, f)
 
     def _set_seed(self):
         import torch
         import numpy as np
-        seed = self.final_config['seed']
+
+        seed = self.final_config["seed"]
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
@@ -197,8 +195,6 @@ class Config:
         torch.backends.cudnn.benchmark = False
         torch.backends.cudnn.deterministic = True
 
-
-
     def __setitem__(self, key, value):
         if not isinstance(key, str):
             raise TypeError("index must be a str.")
@@ -206,9 +202,7 @@ class Config:
 
     def __getattr__(self, item):
         if "final_config" not in self.__dict__:
-            raise AttributeError(
-                "'Config' object has no attribute 'final_config'"
-            )
+            raise AttributeError("'Config' object has no attribute 'final_config'")
         if item in self.final_config:
             return self.final_config[item]
         raise AttributeError(f"'Config' object has no attribute '{item}'")

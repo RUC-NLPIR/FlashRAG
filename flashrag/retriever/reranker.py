@@ -6,17 +6,18 @@ from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from flashrag.retriever.encoder import Encoder
 
+
 class BaseReranker:
     r"""Base object for all rerankers."""
 
     def __init__(self, config):
         self.config = config
-        self.reranker_model_name = config['rerank_model_name']
-        self.reranker_model_path = config['rerank_model_path']
-        self.topk = config['rerank_topk']
-        self.max_length = config['rerank_max_length']
-        self.batch_size = config['rerank_batch_size']
-        self.device = config['device']
+        self.reranker_model_name = config["rerank_model_name"]
+        self.reranker_model_path = config["rerank_model_path"]
+        self.topk = config["rerank_topk"]
+        self.max_length = config["rerank_max_length"]
+        self.batch_size = config["rerank_batch_size"]
+        self.device = config["device"]
 
     def get_rerank_scores(self, query_list: List[str], doc_list: List[str], batch_size):
         """Return flatten list of scores for each (query,doc) pair
@@ -52,7 +53,7 @@ class BaseReranker:
             if all([isinstance(doc, str) for doc in docs]):
                 doc_contents.append([doc for doc in docs])
             else:
-                doc_contents.append([doc['contents'] for doc in docs])
+                doc_contents.append([doc["contents"] for doc in docs])
 
         all_scores = self.get_rerank_scores(query_list, doc_contents, batch_size)
         assert len(all_scores) == sum([len(docs) for docs in doc_list])
@@ -62,7 +63,7 @@ class BaseReranker:
         final_scores = []
         final_docs = []
         for docs in doc_list:
-            doc_scores = all_scores[start_idx:start_idx+len(docs)]
+            doc_scores = all_scores[start_idx : start_idx + len(docs)]
             doc_scores = [float(score) for score in doc_scores]
             sort_idxs = np.argsort(doc_scores)[::-1][:topk]
             start_idx += len(docs)
@@ -72,12 +73,12 @@ class BaseReranker:
 
         return final_docs, final_scores
 
+
 class CrossReranker(BaseReranker):
     def __init__(self, config):
         super().__init__(config)
         self.tokenizer = AutoTokenizer.from_pretrained(self.reranker_model_path)
-        self.ranker = AutoModelForSequenceClassification.from_pretrained(self.reranker_model_path,
-                                                                         num_labels=1)
+        self.ranker = AutoModelForSequenceClassification.from_pretrained(self.reranker_model_path, num_labels=1)
         self.ranker.eval()
         self.ranker.to(self.device)
 
@@ -88,17 +89,20 @@ class CrossReranker(BaseReranker):
         for query, docs in zip(query_list, doc_list):
             all_pairs.extend([[query, doc] for doc in docs])
         all_scores = []
-        for start_idx in tqdm(range(0, len(all_pairs), batch_size), desc='Reranking process: '):
-            pair_batch = all_pairs[start_idx:start_idx + batch_size]
+        for start_idx in tqdm(range(0, len(all_pairs), batch_size), desc="Reranking process: "):
+            pair_batch = all_pairs[start_idx : start_idx + batch_size]
 
             inputs = self.tokenizer(
-                pair_batch,
-                padding=True,
-                truncation=True,
-                return_tensors='pt',
-                max_length=self.max_length
+                pair_batch, padding=True, truncation=True, return_tensors="pt", max_length=self.max_length
             ).to(self.device)
-            batch_scores = self.ranker(**inputs, return_dict=True).logits.view(-1, ).float().cpu()
+            batch_scores = (
+                self.ranker(**inputs, return_dict=True)
+                .logits.view(
+                    -1,
+                )
+                .float()
+                .cpu()
+            )
             all_scores.extend(batch_scores)
 
         return all_scores
@@ -108,17 +112,17 @@ class BiReranker(BaseReranker):
     def __init__(self, config):
         super().__init__(config)
         self.encoder = Encoder(
-            model_name = self.reranker_model_name,
-            model_path = self.reranker_model_path,
-            pooling_method = config['rerank_pooling_method'],
-            max_length = self.max_length,
-            use_fp16 = config['rerank_use_fp16']
+            model_name=self.reranker_model_name,
+            model_path=self.reranker_model_path,
+            pooling_method=config["rerank_pooling_method"],
+            max_length=self.max_length,
+            use_fp16=config["rerank_use_fp16"],
         )
 
     def get_rerank_scores(self, query_list, doc_list, batch_size):
         query_emb = []
         for start_idx in range(0, len(query_list), batch_size):
-            query_batch = query_list[start_idx:start_idx + batch_size]
+            query_batch = query_list[start_idx : start_idx + batch_size]
             batch_emb = self.encoder.encode(query_batch, is_query=True)
             query_emb.append(batch_emb)
         query_emb = np.concatenate(query_emb, axis=0)
@@ -126,7 +130,7 @@ class BiReranker(BaseReranker):
         flat_doc_list = sum(doc_list, [])
         doc_emb = []
         for start_idx in range(0, len(flat_doc_list), batch_size):
-            doc_batch = flat_doc_list[start_idx:start_idx + batch_size]
+            doc_batch = flat_doc_list[start_idx : start_idx + batch_size]
             batch_emb = self.encoder.encode(doc_batch, is_query=False)
             doc_emb.append(batch_emb)
         doc_emb = np.concatenate(doc_emb, axis=0)
@@ -134,8 +138,8 @@ class BiReranker(BaseReranker):
         scores = query_emb @ doc_emb.T  # K*L
         all_scores = []
         score_idx = 0
-        for idx,doc in enumerate(doc_list):
-            all_scores.extend(scores[idx, score_idx:score_idx+len(doc)])
+        for idx, doc in enumerate(doc_list):
+            all_scores.extend(scores[idx, score_idx : score_idx + len(doc)])
             score_idx += len(doc)
 
         return all_scores

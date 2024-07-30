@@ -3,10 +3,7 @@ import datasets
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 
-def load_model(
-        model_path: str,
-        use_fp16: bool = False
-    ):
+def load_model(model_path: str, use_fp16: bool = False):
     model_config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
     model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
     model.eval()
@@ -18,12 +15,7 @@ def load_model(
     return model, tokenizer
 
 
-def pooling(
-        pooler_output,
-        last_hidden_state,
-        attention_mask = None,
-        pooling_method = "mean"
-    ):
+def pooling(pooler_output, last_hidden_state, attention_mask=None, pooling_method="mean"):
     if pooling_method == "mean":
         last_hidden = last_hidden_state.masked_fill(~attention_mask[..., None].bool(), 0.0)
         return last_hidden.sum(dim=1) / attention_mask.sum(dim=1)[..., None]
@@ -34,12 +26,9 @@ def pooling(
     else:
         raise NotImplementedError("Pooling method not implemented!")
 
+
 def load_corpus(corpus_path: str):
-    corpus = datasets.load_dataset(
-            'json',
-            data_files=corpus_path,
-            split="train",
-            num_proc=4)
+    corpus = datasets.load_dataset("json", data_files=corpus_path, split="train", num_proc=4)
     return corpus
 
 

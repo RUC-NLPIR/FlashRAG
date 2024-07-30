@@ -40,15 +40,9 @@ class LMProbCalculator:
                 input_prompt = self.prompt_template.get_string(question=q, retrieval_result=[res])
                 score = self.calculate_prob(input_prompt, answer)
                 scores.append(score)
-                docs.append(res['contents'])
+                docs.append(res["contents"])
             scores = torch.softmax(torch.tensor(scores), dim=-1).tolist()
-            data_ls.append(
-                {
-                    "query": q,
-                    "pos": docs,
-                    "scores": scores
-                }
-            )
+            data_ls.append({"query": q, "pos": docs, "scores": scores})
         return data_ls
 
     def calculate_prob(self, prompt, answer):
@@ -57,31 +51,31 @@ class LMProbCalculator:
 
 
 def main(
-        dataset_name='nq',  # qa dataset
-        split='test',  # split
-        num=4000,  # number of query-document pairs
-        gpu_id='0',
-        output="lmsft.jsonl",  # output path
-        topk=20,  # number of retrieved documents
+    dataset_name="nq",  # qa dataset
+    split="test",  # split
+    num=4000,  # number of query-document pairs
+    gpu_id="0",
+    output="lmsft.jsonl",  # output path
+    topk=20,  # number of retrieved documents
 ):
     config_dict = {
-        'save_note': "replug_lsr",
-        'gpu_id': gpu_id,
-        'dataset_name': dataset_name,
-        'test_sample_num': num,
-        'split': ['test', 'dev'],
+        "save_note": "replug_lsr",
+        "gpu_id": gpu_id,
+        "dataset_name": dataset_name,
+        "test_sample_num": num,
+        "split": ["test", "dev"],
         "retrieval_topk": topk,
-        "framework": "hf"
+        "framework": "hf",
     }
-    config = Config('my_config.yaml', config_dict)
+    config = Config("my_config.yaml", config_dict)
     all_split = get_dataset(config)
     test_data = all_split[split]
     lm_prob_calculator = LMProbCalculator(config)
     data_ls = lm_prob_calculator.run(test_data)
-    with open(output, 'w') as f:
+    with open(output, "w") as f:
         for data in data_ls:
             f.write(json.dumps(data, ensure_ascii=False) + "\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     fire.Fire(main)

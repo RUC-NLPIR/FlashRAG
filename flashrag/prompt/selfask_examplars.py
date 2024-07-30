@@ -106,5 +106,3 @@ Follow up: When did Elio Petri die?
 Intermediate answer: Elio Petri died on 10 November 1982.
 So the final answer is: The Working Class Goes to Heaven
 #"""
-
-

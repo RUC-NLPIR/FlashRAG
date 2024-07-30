@@ -11,6 +11,7 @@ def selfask_pred_parse(pred):
 
     return answer
 
+
 def ircot_pred_parse(pred):
     FINAL_ANSWER_PREFIX = "So the answer is:"
     if FINAL_ANSWER_PREFIX in pred:

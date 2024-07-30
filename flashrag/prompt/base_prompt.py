@@ -1,29 +1,25 @@
 from transformers import AutoTokenizer, AutoConfig
 
+
 class PromptTemplate:
-    placeholders = ['reference', 'question']
-    base_system_prompt = "Answer the question based on the given document." \
-                        "Only give me the answer and do not output any other words." \
-                        "\nThe following are given documents.\n\n{reference}"
+    placeholders = ["reference", "question"]
+    base_system_prompt = (
+        "Answer the question based on the given document."
+        "Only give me the answer and do not output any other words."
+        "\nThe following are given documents.\n\n{reference}"
+    )
     base_user_prompt = "Question: {question}"
 
-    def __init__(
-            self,
-            config,
-            system_prompt = "",
-            user_prompt = "",
-            reference_template = None,
-            enable_chat = True
-        ):
+    def __init__(self, config, system_prompt="", user_prompt="", reference_template=None, enable_chat=True):
 
         self.config = config
-        self.is_openai = config['framework'] == 'openai'
+        self.is_openai = config["framework"] == "openai"
         if not self.is_openai:
-            self.generator_path = config['generator_model_path']
+            self.generator_path = config["generator_model_path"]
             model_config = AutoConfig.from_pretrained(self.generator_path, trust_remote_code=True)
             model_name = model_config._name_or_path.lower()
             self.is_chat = False
-            if 'chat' in model_name or 'instruct' in model_name:
+            if "chat" in model_name or "instruct" in model_name:
                 self.is_chat = True
                 self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path, trust_remote_code=True)
         else:
@@ -38,28 +34,21 @@ class PromptTemplate:
         self.enable_chat = enable_chat
         self.reference_template = reference_template
 
-        #self._check_placeholder()
+        # self._check_placeholder()
 
     def _check_placeholder(self):
         # check placeholder in prompt
         for holder in self.placeholders:
             flag = False
             for prompt in [self.system_prompt, self.user_prompt]:
-                if f'{holder}' in prompt:
+                if f"{holder}" in prompt:
                     print(f"Find `{holder}` in template")
                     flag = True
                     break
-            if not flag and holder != 'reference':
+            if not flag and holder != "reference":
                 assert False
 
-    def get_string(
-            self,
-            question,
-            retrieval_result = None,
-            formatted_reference = None,
-            previous_gen = None,
-            **params
-        ):
+    def get_string(self, question, retrieval_result=None, formatted_reference=None, previous_gen=None, **params):
 
         if formatted_reference is None:
             if retrieval_result is not None:
@@ -67,10 +56,7 @@ class PromptTemplate:
             else:
                 formatted_reference = ""
 
-        input_params = {
-            "question": question,
-            "reference": formatted_reference
-        }
+        input_params = {"question": question, "reference": formatted_reference}
         input_params.update(**params)
 
         system_prompt = self.system_prompt.format(**input_params)
@@ -79,34 +65,34 @@ class PromptTemplate:
         if self.is_chat and self.enable_chat:
             input = []
             if system_prompt != "":
-                input.append({"role":"system", "content": system_prompt})
+                input.append({"role": "system", "content": system_prompt})
             if user_prompt != "":
-                input.append({"role":"user", "content": user_prompt})
+                input.append({"role": "user", "content": user_prompt})
             if self.is_openai:
                 for item in input:
-                    if item['role'] == 'system':
-                        item['role'] == 'assistant'
+                    if item["role"] == "system":
+                        item["role"] == "assistant"
             else:
                 input = self.tokenizer.apply_chat_template(input, tokenize=False, add_generation_prompt=True)
         else:
             input = "\n\n".join([prompt for prompt in [system_prompt, user_prompt] if prompt != ""])
 
-        if previous_gen is not None and previous_gen not in ['', ' '] and self.is_openai is False:
+        if previous_gen is not None and previous_gen not in ["", " "] and self.is_openai is False:
             input += previous_gen
 
         return input
 
     def get_string_with_varying_examplars(
-            self, 
-            question,
-            retrieval_result = None,
-            formatted_reference = None,
-            previous_gen = None,
-            examplars = [],
-            tokenizer = None,
-            max_length = 2048,
-            **params
-        ):
+        self,
+        question,
+        retrieval_result=None,
+        formatted_reference=None,
+        previous_gen=None,
+        examplars=[],
+        tokenizer=None,
+        max_length=2048,
+        **params,
+    ):
         """
         Select the maximum number of examplars that can be placed in the prompt
         """
@@ -116,14 +102,14 @@ class PromptTemplate:
         while len(examplars) > 0:
             for num in range(len(examplars), 0, -1):
                 possible_prompt = self.get_string(
-                    question = question,
-                    retrieval_result = retrieval_result,
-                    formatted_reference = formatted_reference,
-                    previous_gen = previous_gen,
-                    examplars = "\n\n".join(examplars[:num]),
-                    **params
+                    question=question,
+                    retrieval_result=retrieval_result,
+                    formatted_reference=formatted_reference,
+                    previous_gen=previous_gen,
+                    examplars="\n\n".join(examplars[:num]),
+                    **params,
                 )
-                
+
                 possible_prompt_tokens = tokenizer.encode(possible_prompt)
                 if len(possible_prompt_tokens) <= max_length:
                     final_examplars = examplars[:num]
@@ -135,22 +121,21 @@ class PromptTemplate:
         if final_examplars is None:
             final_examplars = []
 
-        final_prompt  = self.get_string(
-            question = question,
-            retrieval_result = retrieval_result,
-            formatted_reference = formatted_reference,
-            previous_gen = previous_gen,
-            examplars = "\n\n".join(final_examplars[:num]),
-            **params
+        final_prompt = self.get_string(
+            question=question,
+            retrieval_result=retrieval_result,
+            formatted_reference=formatted_reference,
+            previous_gen=previous_gen,
+            examplars="\n\n".join(final_examplars[:num]),
+            **params,
         )
-        
+
         return final_prompt
 
-
     def format_reference(self, retrieval_result):
-        format_reference = ''
+        format_reference = ""
         for idx, doc_item in enumerate(retrieval_result):
-            content = doc_item['contents']
+            content = doc_item["contents"]
             title = content.split("\n")[0]
             text = "\n".join(content.split("\n")[1:])
             if self.reference_template is not None:
@@ -159,5 +144,3 @@ class PromptTemplate:
                 format_reference += f"Doc {idx+1}(Title: {title}) {text}\n"
 
         return format_reference
-
-

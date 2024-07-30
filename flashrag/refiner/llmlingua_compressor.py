@@ -15,13 +15,14 @@ import numpy as np
 import tiktoken
 import torch
 import torch.nn.functional as F
-from torch.utils.data import DataLoader,Dataset
+from torch.utils.data import DataLoader, Dataset
 from transformers import (
     AutoConfig,
     AutoModelForCausalLM,
     AutoModelForTokenClassification,
     AutoTokenizer,
 )
+
 
 class TokenClfDataset(Dataset):
     def __init__(
@@ -57,16 +58,12 @@ class TokenClfDataset(Dataset):
         text = self.texts[index]
         tokenized_text = self.tokenizer.tokenize(text)
 
-        tokenized_text = (
-            [self.cls_token] + tokenized_text + [self.sep_token]
-        )  # add special tokens
+        tokenized_text = [self.cls_token] + tokenized_text + [self.sep_token]  # add special tokens
 
         if len(tokenized_text) > self.max_len:
             tokenized_text = tokenized_text[: self.max_len]
         else:
-            tokenized_text = tokenized_text + [
-                self.pad_token for _ in range(self.max_len - len(tokenized_text))
-            ]
+            tokenized_text = tokenized_text + [self.pad_token for _ in range(self.max_len - len(tokenized_text))]
 
         attn_mask = [1 if tok != self.pad_token else 0 for tok in tokenized_text]
 
@@ -83,17 +80,11 @@ class TokenClfDataset(Dataset):
 
 def is_begin_of_new_word(token, model_name, force_tokens, token_map):
     if "bert-base-multilingual-cased" in model_name:
-        if token.lstrip("##") in force_tokens or token.lstrip("##") in set(
-            token_map.values()
-        ):
+        if token.lstrip("##") in force_tokens or token.lstrip("##") in set(token_map.values()):
             return True
         return not token.startswith("##")
     elif "xlm-roberta-large" in model_name:
-        if (
-            token in string.punctuation
-            or token in force_tokens
-            or token in set(token_map.values())
-        ):
+        if token in string.punctuation or token in force_tokens or token in set(token_map.values()):
             return True
         return token.startswith("▁")
     else:
@@ -120,12 +111,8 @@ def process_structured_json_data(json_data, json_config):
         with open(json_config, "r") as file:
             json_config = yaml.safe_load(file)
     elif not isinstance(json_config, dict):
-        raise ValueError(
-            "Invalid json config file. It should be a dictionary or a path to a yaml file."
-        )
-    assert set(json_data.keys()) == set(
-        json_config.keys()
-    ), "Keys in json data and json config file do not match."
+        raise ValueError("Invalid json config file. It should be a dictionary or a path to a yaml file.")
+    assert set(json_data.keys()) == set(json_config.keys()), "Keys in json data and json config file do not match."
     context = ["<llmlingua, compress=False>{</llmlingua>"]
     forced_context_ids = [0]
     for i, (k, v) in enumerate(json_data.items()):
@@ -148,23 +135,11 @@ def process_structured_json_data(json_data, json_config):
 
 def precess_jsonKVpair(k, v, value_type, rate):
     if rate == 1:
-        return (
-            "<llmlingua, compress=False>"
-            + f"{json.dumps({k:v})[1:-1]}, "
-            + "</llmlingua>"
-        )
+        return "<llmlingua, compress=False>" + f"{json.dumps({k:v})[1:-1]}, " + "</llmlingua>"
     if value_type == "str" or value_type == "string":
         v = str(v)
-        new_v = (
-            f"</llmlingua><llmlingua, rate={rate}>"
-            + v
-            + "</llmlingua><llmlingua, compress=False>"
-        )
-        return (
-            "<llmlingua, compress=False>"
-            + f"{json.dumps({k:new_v})[1:-1]}, "
-            + "</llmlingua>"
-        )
+        new_v = f"</llmlingua><llmlingua, rate={rate}>" + v + "</llmlingua><llmlingua, compress=False>"
+        return "<llmlingua, compress=False>" + f"{json.dumps({k:new_v})[1:-1]}, " + "</llmlingua>"
     elif value_type in ["int", "float", "integer", "number"]:
         if value_type in ["int", "integer"]:
             v = int(v)
@@ -181,34 +156,17 @@ def precess_jsonKVpair(k, v, value_type, rate):
             v = "false"
         else:
             raise ValueError(f"Invalid boolean value: {v}")
-        new_v = (
-            f"</llmlingua><llmlingua, rate={rate}>"
-            + v
-            + "</llmlingua><llmlingua, compress=False>"
-        )
-        return (
-            "<llmlingua, compress=False>"
-            + f"{json.dumps({k:new_v})[1:-1]}, "
-            + "</llmlingua>"
-        )
+        new_v = f"</llmlingua><llmlingua, rate={rate}>" + v + "</llmlingua><llmlingua, compress=False>"
+        return "<llmlingua, compress=False>" + f"{json.dumps({k:new_v})[1:-1]}, " + "</llmlingua>"
     elif value_type == "list" or value_type == "List":
-        return (
-            "<llmlingua, compress=False>"
-            + f'"{k}": {process_sequence_data(rate, "[", "]", v)}'
-        )
+        return "<llmlingua, compress=False>" + f'"{k}": {process_sequence_data(rate, "[", "]", v)}'
     elif value_type == "dict" or value_type == "dictionary":
-        return (
-            "<llmlingua, compress=False>"
-            + f'"{k}": {process_sequence_data(rate, "[", "]", v, is_dict=True)}'
-        )
+        return "<llmlingua, compress=False>" + f'"{k}": {process_sequence_data(rate, "[", "]", v, is_dict=True)}'
     elif value_type == "set":
         raise ValueError(f"Invalid value type: {value_type}")
         # return '<llmlingua, compress=False>' + f'"{k}": {process_sequence_data(rate, "{", "}", v)}'
     elif value_type == "tuple":
-        return (
-            "<llmlingua, compress=False>"
-            + f'"{k}": {process_sequence_data(rate, "(", ")", v)}'
-        )
+        return "<llmlingua, compress=False>" + f'"{k}": {process_sequence_data(rate, "(", ")", v)}'
     else:
         raise ValueError(f"Invalid value type: {value_type}")
 
@@ -237,6 +195,7 @@ def remove_consecutive_commas(text):
     text = re.sub(r",\s*", ",", text)
     text = re.sub(r",+", ",", text)
     return text
+
 
 class PromptCompressor:
     """
@@ -304,22 +263,14 @@ class PromptCompressor:
         self.max_seq_len = 512
         self.max_force_token = max_force_token
         self.special_tokens = set(
-            [
-                v
-                for k, v in self.tokenizer.special_tokens_map.items()
-                if k != "additional_special_tokens"
-            ]
+            [v for k, v in self.tokenizer.special_tokens_map.items() if k != "additional_special_tokens"]
         )
 
         self.added_tokens = [f"[NEW{i}]" for i in range(max_force_token)]
-        self.tokenizer.add_special_tokens(
-            {"additional_special_tokens": self.added_tokens}
-        )
+        self.tokenizer.add_special_tokens({"additional_special_tokens": self.added_tokens})
         self.model.resize_token_embeddings(len(self.tokenizer))
 
-    def load_model(
-        self, model_name: str, device_map: str = "cuda", model_config: dict = {}
-    ):
+    def load_model(self, model_name: str, device_map: str = "cuda", model_config: dict = {}):
         trust_remote_code = model_config.get("trust_remote_code", True)
         if "trust_remote_code" not in model_config:
             model_config["trust_remote_code"] = trust_remote_code
@@ -330,16 +281,10 @@ class PromptCompressor:
             if any("ForTokenClassification" in ar for ar in config.architectures)
             else AutoModelForCausalLM
         )
-        self.device = (
-            device_map
-            if any(key in device_map for key in ["cuda", "cpu", "mps"])
-            else "cuda"
-        )
+        self.device = device_map if any(key in device_map for key in ["cuda", "cpu", "mps"]) else "cuda"
         model = MODEL_CLASS.from_pretrained(
             model_name,
-            torch_dtype=model_config.pop(
-                "torch_dtype", "auto" if device_map == "cuda" else torch.float32
-            ),
+            torch_dtype=model_config.pop("torch_dtype", "auto" if device_map == "cuda" else torch.float32),
             device_map=device_map,
             config=config,
             ignore_mismatched_sizes=True,
@@ -349,14 +294,12 @@ class PromptCompressor:
 
         if model_config.get("pad_to_left", True):
             tokenizer.padding_side = "left"
-            tokenizer.pad_token_id = (
-                config.pad_token_id if config.pad_token_id else tokenizer.eos_token_id
-            )
+            tokenizer.pad_token_id = config.pad_token_id if config.pad_token_id else tokenizer.eos_token_id
         self.tokenizer = tokenizer
         self.model = model
         self.context_idxs = []
         self.max_position_embeddings = config.max_position_embeddings
-    
+
     def get_ppl(
         self,
         text: str,
@@ -431,9 +374,7 @@ class PromptCompressor:
         condition_compare: bool = False,
         rank_method: str = "llmlingua",
     ):
-        context, force_context_ids = process_structured_json_data(
-            json_data, json_config
-        )
+        context, force_context_ids = process_structured_json_data(json_data, json_config)
         compressed_res = self.structured_compress_prompt(
             context=context,
             instruction=instruction,
@@ -460,9 +401,7 @@ class PromptCompressor:
             concate_question=False,
             strict_preserve_uncompressed=False,
         )
-        compressed_json_text = remove_consecutive_commas(
-            compressed_res["compressed_prompt"]
-        )
+        compressed_json_text = remove_consecutive_commas(compressed_res["compressed_prompt"])
         compressed_res["compressed_prompt"] = json.loads(compressed_json_text)
         return compressed_res
 
@@ -559,22 +498,14 @@ class PromptCompressor:
             context = [" "]
         if isinstance(context, str):
             context = [context]
-        context = [
-            self.tokenizer.decode(self.tokenizer(c, add_special_tokens=False).input_ids)
-            for c in context
-        ]
+        context = [self.tokenizer.decode(self.tokenizer(c, add_special_tokens=False).input_ids) for c in context]
         context_tokens_length = [self.get_token_length(c) for c in context]
-        instruction_tokens_length, question_tokens_length = self.get_token_length(
-            instruction
-        ), self.get_token_length(question)
+        instruction_tokens_length, question_tokens_length = self.get_token_length(instruction), self.get_token_length(
+            question
+        )
         if target_token == -1:
             target_token = (
-                (
-                    instruction_tokens_length
-                    + question_tokens_length
-                    + sum(context_tokens_length)
-                )
-                * rate
+                (instruction_tokens_length + question_tokens_length + sum(context_tokens_length)) * rate
                 - instruction_tokens_length
                 - (question_tokens_length if concate_question else 0)
             )
@@ -765,28 +696,15 @@ class PromptCompressor:
             if condition_in_question == "none":
                 condition_in_question = "after"
         elif rank_method == "llmlingua":
-            condition_in_question = (
-                "none"
-                if "_condition" not in condition_in_question
-                else "none_condition"
-            )
-        origin_tokens = len(
-            self.oai_tokenizer.encode(
-                "\n\n".join([instruction] + context + [question]).strip()
-            )
-        )
+            condition_in_question = "none" if "_condition" not in condition_in_question else "none_condition"
+        origin_tokens = len(self.oai_tokenizer.encode("\n\n".join([instruction] + context + [question]).strip()))
         context_tokens_length = [self.get_token_length(c) for c in context]
-        instruction_tokens_length, question_tokens_length = self.get_token_length(
-            instruction
-        ), self.get_token_length(question)
+        instruction_tokens_length, question_tokens_length = self.get_token_length(instruction), self.get_token_length(
+            question
+        )
         if target_token == -1:
             target_token = (
-                (
-                    instruction_tokens_length
-                    + question_tokens_length
-                    + sum(context_tokens_length)
-                )
-                * rate
+                (instruction_tokens_length + question_tokens_length + sum(context_tokens_length)) * rate
                 - instruction_tokens_length
                 - (question_tokens_length if concate_question else 0)
             )
@@ -814,9 +732,7 @@ class PromptCompressor:
             if context_segs is not None:
                 context_segs = [context_segs[idx] for idx in context_used]
                 context_segs_rate = [context_segs_rate[idx] for idx in context_used]
-                context_segs_compress = [
-                    context_segs_compress[idx] for idx in context_used
-                ]
+                context_segs_compress = [context_segs_compress[idx] for idx in context_used]
         else:
             dynamic_ratio = [0.0] * len(context)
 
@@ -849,25 +765,16 @@ class PromptCompressor:
                         )
                     ]
                 )
-        segments_info = [
-            self.concate_segment_info(segment_info) for segment_info in segments_info
-        ]
+        segments_info = [self.concate_segment_info(segment_info) for segment_info in segments_info]
 
         if condition_flag:
             prefix = question + "\n\n" + instruction if add_instruction else question
-            if (
-                self.get_token_length(prefix + "\n\n") + iterative_size * 2
-                > self.max_position_embeddings
-            ):
+            if self.get_token_length(prefix + "\n\n") + iterative_size * 2 > self.max_position_embeddings:
                 tokens = self.tokenizer(prefix, add_special_tokens=False).input_ids
                 prefix = self.tokenizer.decode(
                     tokens[: self.prefix_bos_num]
                     + tokens[
-                        len(tokens)
-                        - self.max_position_embeddings
-                        + 2
-                        + self.prefix_bos_num
-                        + 2 * iterative_size :
+                        len(tokens) - self.max_position_embeddings + 2 + self.prefix_bos_num + 2 * iterative_size :
                     ]
                 )
             start = self.get_prefix_length(prefix + "\n\n", context[0])
@@ -886,11 +793,7 @@ class PromptCompressor:
                 condition_compare=condition_compare,
                 segments_info=segments_info,
             )
-            compressed_prompt = (
-                self.tokenizer.batch_decode(context[0])[0]
-                .replace("<s> ", "")
-                .replace("<s>", "")
-            )
+            compressed_prompt = self.tokenizer.batch_decode(context[0])[0].replace("<s> ", "").replace("<s>", "")
         else:
             if condition_flag:
                 context = context[1:]
@@ -1001,38 +904,24 @@ class PromptCompressor:
         n_original_token = 0
         context_chunked = []
         for i in range(len(context)):
-            n_original_token += self.get_token_length(
-                context[i], use_oai_tokenizer=True
-            )
+            n_original_token += self.get_token_length(context[i], use_oai_tokenizer=True)
             for ori_token, new_token in token_map.items():
                 context[i] = context[i].replace(ori_token, new_token)
-            context_chunked.append(
-                self.__chunk_context(context[i], chunk_end_tokens=chunk_end_tokens)
-            )
+            context_chunked.append(self.__chunk_context(context[i], chunk_end_tokens=chunk_end_tokens))
 
         if use_context_level_filter:
             # want use_context_level_filter but do not specify any parameters in context level?
             # we will set context_level_rate = (rate + 1.0) / 2 if specify rate or target_token * 2 if specify target_token
-            if (
-                target_context <= 0
-                and context_level_rate >= 1.0
-                and context_level_target_token <= 0
-            ):
+            if target_context <= 0 and context_level_rate >= 1.0 and context_level_target_token <= 0:
                 if target_token < 0 and rate < 1.0:
-                    context_level_rate = (
-                        (rate + 1.0) / 2 if use_token_level_filter else rate
-                    )
+                    context_level_rate = (rate + 1.0) / 2 if use_token_level_filter else rate
                 if target_token >= 0:
-                    context_level_target_token = (
-                        target_token * 2 if use_token_level_filter else target_token
-                    )
+                    context_level_target_token = target_token * 2 if use_token_level_filter else target_token
 
             if target_context >= 0:
                 context_level_rate = min(target_context / len(context), 1.0)
             if context_level_target_token >= 0:
-                context_level_rate = min(
-                    context_level_target_token / n_original_token, 1.0
-                )
+                context_level_rate = min(context_level_target_token / n_original_token, 1.0)
 
             context_probs, context_words = self.__get_context_prob(
                 context_chunked,
@@ -1042,16 +931,12 @@ class PromptCompressor:
                 force_reserve_digit=force_reserve_digit,
             )
 
-            threshold = np.percentile(
-                context_probs, int(100 * (1 - context_level_rate))
-            )
+            threshold = np.percentile(context_probs, int(100 * (1 - context_level_rate)))
 
             reserved_context = []
             context_label = [False] * len(context_probs)
             for i, p in enumerate(context_probs):
-                if p >= threshold or (
-                    force_context_ids is not None and i in force_context_ids
-                ):
+                if p >= threshold or (force_context_ids is not None and i in force_context_ids):
                     reserved_context.append(context_chunked[i])
                     context_label[i] = True
             n_reserved_token = 0
@@ -1086,9 +971,7 @@ class PromptCompressor:
             for c in compressed_context:
                 n_compressed_token += self.get_token_length(c, use_oai_tokenizer=True)
             saving = (n_original_token - n_compressed_token) * 0.06 / 1000
-            ratio = (
-                1 if n_compressed_token == 0 else n_original_token / n_compressed_token
-            )
+            ratio = 1 if n_compressed_token == 0 else n_original_token / n_compressed_token
             res = {
                 "compressed_prompt": "\n\n".join(compressed_context),
                 "compressed_prompt_list": compressed_context,
@@ -1110,9 +993,7 @@ class PromptCompressor:
                     else:
                         words.extend(context_words[i])
                         labels.extend([0] * len(context_words[i]))
-                word_label_lines = word_sep.join(
-                    [f"{word}{label_sep}{label}" for word, label in zip(words, labels)]
-                )
+                word_label_lines = word_sep.join([f"{word}{label_sep}{label}" for word, label in zip(words, labels)])
                 res["fn_labeled_original_prompt"] = word_label_lines
             return res
 
@@ -1161,9 +1042,7 @@ class PromptCompressor:
                 words.extend(w_list)
                 labels.extend(l_list)
 
-            word_label_lines = word_sep.join(
-                [f"{word}{label_sep}{label}" for word, label in zip(words, labels)]
-            )
+            word_label_lines = word_sep.join([f"{word}{label_sep}{label}" for word, label in zip(words, labels)])
             res["fn_labeled_original_prompt"] = word_label_lines
         return res
 
@@ -1176,15 +1055,11 @@ class PromptCompressor:
         if use_oai_tokenizer:
             return len(self.oai_tokenizer.encode(text))
         else:
-            return len(
-                self.tokenizer(text, add_special_tokens=add_special_tokens).input_ids
-            )
+            return len(self.tokenizer(text, add_special_tokens=add_special_tokens).input_ids)
 
     def get_prefix_length(self, prefix: str, text: str):
         possible_prefix_token = max(self.get_token_length(prefix, False) - 3, 1)
-        full_input_ids = self.tokenizer(
-            prefix + text[:100], add_special_tokens=False
-        ).input_ids
+        full_input_ids = self.tokenizer(prefix + text[:100], add_special_tokens=False).input_ids
         for i in range(possible_prefix_token, len(full_input_ids)):
             cur_prefix = self.tokenizer.decode(full_input_ids[:i])
             if cur_prefix == prefix:
@@ -1235,26 +1110,18 @@ class PromptCompressor:
         res, idx, last, last_target = [], 0, 1, []
         while idx < len(context_length):
             if last + context_length[idx] >= iterative_size:
-                last_target.append(
-                    (iterative_size - last, get_ratio(tau, dynamic_ratio[idx]))
-                )
+                last_target.append((iterative_size - last, get_ratio(tau, dynamic_ratio[idx])))
                 res.append(last_target)
                 last = last + context_length[idx] - iterative_size
                 if last > iterative_size:
                     k = last // iterative_size
-                    res.extend(
-                        [[(iterative_size, get_ratio(tau, dynamic_ratio[idx]))]] * k
-                    )
+                    res.extend([[(iterative_size, get_ratio(tau, dynamic_ratio[idx]))]] * k)
                     last -= k * iterative_size
 
-                last_target = (
-                    [(last, get_ratio(tau, dynamic_ratio[idx]))] if last else []
-                )
+                last_target = [(last, get_ratio(tau, dynamic_ratio[idx]))] if last else []
             else:
                 last += context_length[idx]
-                last_target.append(
-                    (context_length[idx], get_ratio(tau, dynamic_ratio[idx]))
-                )
+                last_target.append((context_length[idx], get_ratio(tau, dynamic_ratio[idx])))
             idx += 1
         if last_target:
             res.append(last_target)
@@ -1275,14 +1142,9 @@ class PromptCompressor:
         global_dynamic_rate, global_dynamic_compress, segments = [], [], []
         for context_idx, text in enumerate(pure_context):
             text_seen = 0
-            for seg_idx, (seg_len, seg_rate, seg_compress) in enumerate(
-                seg_info[context_idx]
-            ):
+            for seg_idx, (seg_len, seg_rate, seg_compress) in enumerate(seg_info[context_idx]):
                 seg_text = text[text_seen : text_seen + seg_len]
-                if (
-                    seg_idx == len(seg_info[context_idx]) - 1
-                    and context_idx != len(pure_context) - 1
-                ):
+                if seg_idx == len(seg_info[context_idx]) - 1 and context_idx != len(pure_context) - 1:
                     seg_text += "\n\n"
                 segments.append(seg_text)
                 if seg_compress:
@@ -1295,9 +1157,7 @@ class PromptCompressor:
         assert len("".join(segments)) == len(origin_text)
         assert len(segments) == len(global_dynamic_rate) == len(global_dynamic_compress)
 
-        text_input_ids = self.tokenizer(
-            "\n\n".join(context), add_special_tokens=False
-        ).input_ids[start:]
+        text_input_ids = self.tokenizer("\n\n".join(context), add_special_tokens=False).input_ids[start:]
         assert self.tokenizer.decode(text_input_ids) == origin_text
         dynamic_compression_ratio = self.token_segment(
             text_input_ids,
@@ -1327,15 +1187,11 @@ class PromptCompressor:
                     text_input_ids[i - decode_window + 1 : i],
                     text_input_ids[i - decode_window + 1 : i + 1],
                 )
-            cur_word = self.tokenizer.decode(id_cur)[
-                len(self.tokenizer.decode(id_pre)) :
-            ]
+            cur_word = self.tokenizer.decode(id_cur)[len(self.tokenizer.decode(id_pre)) :]
             cur_word_len = len(cur_word)
             if cur_word_len and cur_word_len >= len(segments[seg_idx]) - seg_seen:
                 possible_rate, possible_compress = [], []
-                while (
-                    cur_word_len and cur_word_len >= len(segments[seg_idx]) - seg_seen
-                ):
+                while cur_word_len and cur_word_len >= len(segments[seg_idx]) - seg_seen:
                     possible_rate.append(global_dynamic_rate[seg_idx])
                     possible_compress.append(global_dynamic_compress[seg_idx])
                     cur_word_len -= len(segments[seg_idx]) - seg_seen
@@ -1359,9 +1215,7 @@ class PromptCompressor:
                 dynamic_compression_rate.append(local_compresssion_rate[:])
                 local_compresssion_rate = []
         if token_seen_num != len(text_input_ids):
-            local_compresssion_rate.append(
-                (len(text_input_ids) - token_seen_num, last_rate)
-            )
+            local_compresssion_rate.append((len(text_input_ids) - token_seen_num, last_rate))
         if local_compresssion_rate != []:
             dynamic_compression_rate.append(local_compresssion_rate[:])
         return dynamic_compression_rate
@@ -1409,24 +1263,19 @@ class PromptCompressor:
             target_token -= context_tokens_length[idx]
             if idx not in used:
                 used.append(idx)
-            if target_token < 0 or (
-                force_context_number is not None and len(res) >= force_context_number
-            ):
+            if target_token < 0 or (force_context_number is not None and len(res) >= force_context_number):
                 break
         original_used = used
         if reorder_context == "original":
             used = sorted(used)
         elif reorder_context == "two_stage":
-            l, r = [_ for idx, _ in enumerate(used) if idx % 2 == 0], [
-                _ for idx, _ in enumerate(used) if idx % 2 == 1
-            ]
+            l, r = [_ for idx, _ in enumerate(used) if idx % 2 == 0], [_ for idx, _ in enumerate(used) if idx % 2 == 1]
             used = l + r[::-1]
 
         if dynamic_context_compression_ratio > 0:
             N = len(used)
             dynamic_ratio = [
-                i * (abs(dynamic_context_compression_ratio) / (N - 1)) if N > 1 else 0
-                for i in range(-(N - 1), N, 2)
+                i * (abs(dynamic_context_compression_ratio) / (N - 1)) if N > 1 else 0 for i in range(-(N - 1), N, 2)
             ][::-1]
             dynamic_ratio_map = {i: j for i, j in zip(original_used, dynamic_ratio)}
             dynamic_ratio = [dynamic_ratio_map[i] for i in used]
@@ -1466,9 +1315,7 @@ class PromptCompressor:
                 if i == sentence_num - 1:
                     new_sentences.append(text[seen_text:])
                     break
-                next_sentence_start = text.find(
-                    sentences[i + 1][:5], seen_text + len(s)
-                )
+                next_sentence_start = text.find(sentences[i + 1][:5], seen_text + len(s))
                 new_sentences.append(text[seen_text:next_sentence_start])
                 seen_text = next_sentence_start
             assert "".join(new_sentences) == text
@@ -1519,9 +1366,7 @@ class PromptCompressor:
                     idx += 1
 
         context_sentences = [s for ii in sentences for s in ii]
-        sentence_tokens_length = [
-            self.get_token_length(sentence) for sentence in context_sentences
-        ]
+        sentence_tokens_length = [self.get_token_length(sentence) for sentence in context_sentences]
         N = len(context_sentences)
         flags = list(range(len(context_sentences)))
         if len(sentence_tokens_length) == 1:
@@ -1531,29 +1376,22 @@ class PromptCompressor:
             return context, segments_info
         if rank_method == "longllmlingua":
             sentence_ppl = [
-                self.get_condition_ppl(sentence, question, condition_in_question)
-                .cpu()
-                .numpy()
-                .item()
+                self.get_condition_ppl(sentence, question, condition_in_question).cpu().numpy().item()
                 for sentence in context_sentences
             ]
             if keep_first_sentence:
                 sentence_ppl[:keep_first_sentence] = [
-                    ii + high_priority_bonus
-                    for ii in sentence_ppl[:keep_first_sentence]
+                    ii + high_priority_bonus for ii in sentence_ppl[:keep_first_sentence]
                 ]
             if keep_last_sentence:
                 sentence_ppl[-keep_last_sentence:] = [
-                    ii + high_priority_bonus
-                    for ii in sentence_ppl[-keep_last_sentence:]
+                    ii + high_priority_bonus for ii in sentence_ppl[-keep_last_sentence:]
                 ]
             if keep_sentence_number:
                 for dem_idx in range(len(sentences)):
                     keep_sentence(dem_idx, keep_sentence_number)
             sort_direct = -1 if condition_in_question == "none" else 1
-            sent_sort = sorted(
-                enumerate(sentence_ppl), key=lambda x: sort_direct * x[1]
-            )
+            sent_sort = sorted(enumerate(sentence_ppl), key=lambda x: sort_direct * x[1])
         else:
             sent_sort = self.get_rank_results(
                 context_sentences,
@@ -1641,9 +1479,7 @@ class PromptCompressor:
             need_idx = torch.cat(
                 [
                     need_idx,
-                    torch.ones(
-                        input_ids.shape[1] - need_idx.shape[0], dtype=torch.bool
-                    ).to(need_idx.device),
+                    torch.ones(input_ids.shape[1] - need_idx.shape[0], dtype=torch.bool).to(need_idx.device),
                 ]
             )
         elif need_idx.shape[0] > input_ids.shape[1]:
@@ -1657,26 +1493,18 @@ class PromptCompressor:
                 if need_idx[ii] != 1:
                     continue
                 now = input_ids[0][ii].detach().cpu().item()
-                if (
-                    now == split_token_id
-                    and last == split_token_id
-                    and keep_flag[ii].detach().cpu().item() == 0
-                ):
+                if now == split_token_id and last == split_token_id and keep_flag[ii].detach().cpu().item() == 0:
                     need_idx[ii] = 0
                 else:
                     last = now
         compressed_input_ids = input_ids[attention_mask == 1][need_idx].unsqueeze(0)
-        compressed_attention_mask = attention_mask[attention_mask == 1][
-            need_idx
-        ].unsqueeze(0)
+        compressed_attention_mask = attention_mask[attention_mask == 1][need_idx].unsqueeze(0)
 
         if self_loss is not None:
-            self_compressed_input_ids = self_input_ids[self_attention_mask == 1][
-                need_idx[start:]
-            ].unsqueeze(0)
-            self_compressed_attention_mask = self_attention_mask[
-                self_attention_mask == 1
-            ][need_idx[start:]].unsqueeze(0)
+            self_compressed_input_ids = self_input_ids[self_attention_mask == 1][need_idx[start:]].unsqueeze(0)
+            self_compressed_attention_mask = self_attention_mask[self_attention_mask == 1][need_idx[start:]].unsqueeze(
+                0
+            )
         else:
             self_compressed_input_ids, self_compressed_attention_mask = None, None
         if keep_flag is not None:
@@ -1702,20 +1530,12 @@ class PromptCompressor:
             self_compressed_attention_mask,
         )
 
-    def get_estimate_threshold_base_distribution(
-        self, ppl, ratio: float, condition_flag: bool = False
-    ):
+    def get_estimate_threshold_base_distribution(self, ppl, ratio: float, condition_flag: bool = False):
         if ratio == 1.0:
             return float("-inf")
         ppl = ppl[ppl != 10000]
         target_token = max(0, min(len(ppl) - 1, int(len(ppl) * ratio) - 1))
-        return (
-            ppl.sort(descending=not condition_flag)
-            .values[target_token]
-            .detach()
-            .cpu()
-            .item()
-        )
+        return ppl.sort(descending=not condition_flag).values[target_token].detach().cpu().item()
 
     def iterative_compress_prompt(
         self,
@@ -1738,9 +1558,7 @@ class PromptCompressor:
                 context, iterative_size, dynamic_ratio, start, segments_info
             )
         context = "\n\n".join(context)
-        tokenized_text = self.tokenizer(
-            context, return_tensors="pt", add_special_tokens=False
-        )
+        tokenized_text = self.tokenizer(context, return_tensors="pt", add_special_tokens=False)
         input_ids = tokenized_text["input_ids"].to(self.device)
         attention_mask = tokenized_text["attention_mask"].to(self.device)
 
@@ -1763,11 +1581,7 @@ class PromptCompressor:
             N = len(input_ids_numpy)
             keep_flag = [
                 int(
-                    (
-                        ii > 0
-                        and input_ids_numpy[ii] == split_token_id
-                        and input_ids_numpy[ii - 1] == split_token_id
-                    )
+                    (ii > 0 and input_ids_numpy[ii] == split_token_id and input_ids_numpy[ii - 1] == split_token_id)
                     or (
                         ii < N - 1
                         and input_ids_numpy[ii] == split_token_id
@@ -1784,9 +1598,7 @@ class PromptCompressor:
         while end <= compressed_input_ids.shape[1]:
             if end > self.max_position_embeddings and past_key_values is not None:
                 # KV-Cache Compression
-                e, s = end - self.max_position_embeddings, min(
-                    self.cache_bos_num + start, self.max_position_embeddings
-                )
+                e, s = end - self.max_position_embeddings, min(self.cache_bos_num + start, self.max_position_embeddings)
                 if pop_compressed_input_ids is None:
                     pop_compressed_input_ids = compressed_input_ids[:, :e]
                 else:
@@ -1819,9 +1631,7 @@ class PromptCompressor:
                             dim=-1,
                         )
                     self_compressed_input_ids = self_compressed_input_ids[:, e:]
-                    self_compressed_attention_mask = self_compressed_attention_mask[
-                        :, e:
-                    ]
+                    self_compressed_attention_mask = self_compressed_attention_mask[:, e:]
                     self_past_key_values = [
                         [
                             torch.cat([k[..., :s, :], k[..., s + e :, :]], dim=-2),
@@ -1843,17 +1653,14 @@ class PromptCompressor:
                 break
             if past_loss is not None:
                 if end - 1 > len(past_loss):
-                    past_loss = torch.cat(
-                        [past_loss, torch.zeros_like(loss)[: end - 1 - len(past_loss)]]
-                    )
+                    past_loss = torch.cat([past_loss, torch.zeros_like(loss)[: end - 1 - len(past_loss)]])
                 past_loss[ready_end : end - 1] = loss
                 loss = past_loss
             else:
                 past_loss = loss
             if idx:
                 past_key_values = [
-                    [k[:, :, : end - iterative_size], v[:, :, : end - iterative_size]]
-                    for k, v in past_key_values
+                    [k[:, :, : end - iterative_size], v[:, :, : end - iterative_size]] for k, v in past_key_values
                 ]
             else:
                 past_key_values = None
@@ -1873,9 +1680,7 @@ class PromptCompressor:
                         self_past_loss = torch.cat(
                             [
                                 self_past_loss,
-                                torch.zeros_like(self_loss)[
-                                    : end - 1 - start - len(self_past_loss)
-                                ],
+                                torch.zeros_like(self_loss)[: end - 1 - start - len(self_past_loss)],
                             ]
                         )
                     self_past_loss[self_ready_end : end - start - 1] = self_loss
@@ -1893,9 +1698,7 @@ class PromptCompressor:
                 else:
                     self_past_key_values = None
 
-                self_ready_end = (
-                    end - start - iterative_size if not (start and idx == 0) else 0
-                )
+                self_ready_end = end - start - iterative_size if not (start and idx == 0) else 0
             ready_end = end - iterative_size if not (start and idx == 0) else 0
 
             for delta_end, ratio in iterative_ratios[idx]:
@@ -1906,9 +1709,7 @@ class PromptCompressor:
                         self_loss[: loss[start:].shape[0]] - loss[start:], ratio, False
                     )
                 else:
-                    threshold = self.get_estimate_threshold_base_distribution(
-                        loss, ratio, False
-                    )
+                    threshold = self.get_estimate_threshold_base_distribution(loss, ratio, False)
 
                 (
                     compressed_input_ids,
@@ -1930,19 +1731,13 @@ class PromptCompressor:
                     split_token_id=split_token_id,
                     start=start,
                     self_loss=self_loss if condition_compare else None,
-                    self_input_ids=(
-                        self_compressed_input_ids if condition_compare else None
-                    ),
-                    self_attention_mask=(
-                        self_compressed_attention_mask if condition_compare else None
-                    ),
+                    self_input_ids=(self_compressed_input_ids if condition_compare else None),
+                    self_attention_mask=(self_compressed_attention_mask if condition_compare else None),
                 )
                 end += iterative_size
             idx += 1
         if pop_compressed_input_ids is not None:
-            compressed_input_ids = torch.cat(
-                [pop_compressed_input_ids, compressed_input_ids], dim=-1
-            )
+            compressed_input_ids = torch.cat([pop_compressed_input_ids, compressed_input_ids], dim=-1)
         return compressed_input_ids[:, start:], compressed_attention_mask[:, start:]
 
     def recover(
@@ -1952,9 +1747,7 @@ class PromptCompressor:
         response: str,
     ):
         def match_from_compressed(response_word):
-            response_input_ids = self.tokenizer(
-                response_word, add_special_tokens=False
-            )["input_ids"]
+            response_input_ids = self.tokenizer(response_word, add_special_tokens=False)["input_ids"]
             response_set, response_c = set(response_input_ids), defaultdict(list)
             for idx in range(M):
                 if original_input_ids[idx] in response_set:
@@ -1965,10 +1758,7 @@ class PromptCompressor:
                 x, y, c = 0, l, 1
                 for x in range(1, n):
                     idx = bisect.bisect_right(response_c[response_input_ids[x]], y)
-                    if (
-                        idx >= len(response_c[response_input_ids[x]])
-                        or response_c[response_input_ids[x]][idx] - y > 10
-                    ):
+                    if idx >= len(response_c[response_input_ids[x]]) or response_c[response_input_ids[x]][idx] - y > 10:
                         continue
                     c += 1
                     y = response_c[response_input_ids[x]][idx]
@@ -1990,9 +1780,7 @@ class PromptCompressor:
 
         response_words = response.split(" ")
 
-        original_input_ids = self.tokenizer(original_prompt, add_special_tokens=False)[
-            "input_ids"
-        ]
+        original_input_ids = self.tokenizer(original_prompt, add_special_tokens=False)["input_ids"]
         N, M = len(response_words), len(original_input_ids)
         recovered_response_words = []
         l = 0
@@ -2002,9 +1790,7 @@ class PromptCompressor:
                 l += 1
                 continue
             r = l
-            while (
-                r + 1 < N and " ".join(response_words[l : r + 2]) in compressed_prompt
-            ):
+            while r + 1 < N and " ".join(response_words[l : r + 2]) in compressed_prompt:
                 r += 1
 
             match_words = match_from_compressed(" ".join(response_words[l : r + 1]))
@@ -2059,17 +1845,13 @@ class PromptCompressor:
             from sentence_transformers import util
 
             openai.api_key = self.open_api_config.get("api_key", "")
-            openai.api_base = self.open_api_config.get(
-                "api_base", "https://api.openai.com/v1"
-            )
+            openai.api_base = self.open_api_config.get("api_base", "https://api.openai.com/v1")
             openai.api_type = self.open_api_config.get("api_type", "open_ai")
             openai.api_version = self.open_api_config.get("api_version", "2023-05-15")
             engine = self.open_api_config.get("engine", "text-embedding-ada-002")
 
             def get_embed(text):
-                return openai.Embedding.create(
-                    input=[text.replace("\n", " ")], engine=engine
-                )["data"][0]["embedding"]
+                return openai.Embedding.create(input=[text.replace("\n", " ")], engine=engine)["data"][0]["embedding"]
 
             doc_embeds = [get_embed(i) for i in corpus]
             query = get_embed(query)
@@ -2083,9 +1865,7 @@ class PromptCompressor:
             if self.retrieval_model is None or self.retrieval_model_name != rank_method:
                 self.retrieval_model = SentenceTransformer("BAAI/bge-large-en-v1.5")
                 self.retrieval_model_name = rank_method
-            doc_embeds = self.retrieval_model.encode(
-                [i for i in corpus], normalize_embeddings=True
-            )
+            doc_embeds = self.retrieval_model.encode([i for i in corpus], normalize_embeddings=True)
             query = self.retrieval_model.encode(query, normalize_embeddings=True)
             doc_scores = -util.dot_score(doc_embeds, query).cpu().numpy().reshape(-1)
             idx = [(ii, 0) for ii in np.argsort(doc_scores)]
@@ -2098,11 +1878,7 @@ class PromptCompressor:
             if self.retrieval_model is None or self.retrieval_model_name != rank_method:
                 tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-reranker-large")
                 model = (
-                    AutoModelForSequenceClassification.from_pretrained(
-                        "BAAI/bge-reranker-large"
-                    )
-                    .eval()
-                    .to(self.device)
+                    AutoModelForSequenceClassification.from_pretrained("BAAI/bge-reranker-large").eval().to(self.device)
                 )
                 self.retrieval_model = [tokenizer, model]
                 self.retrieval_model_name = rank_method
@@ -2129,17 +1905,11 @@ class PromptCompressor:
 
             if self.retrieval_model is None or self.retrieval_model_name != rank_method:
                 tokenizer = AutoTokenizer.from_pretrained("BAAI/llm-embedder")
-                model = (
-                    AutoModel.from_pretrained("BAAI/llm-embedder")
-                    .eval()
-                    .to(self.device)
-                )
+                model = AutoModel.from_pretrained("BAAI/llm-embedder").eval().to(self.device)
                 self.retrieval_model = [tokenizer, model]
                 self.retrieval_model_name = rank_method
 
-            instruction_qa_query = (
-                "Represent this query for retrieving relevant documents: "
-            )
+            instruction_qa_query = "Represent this query for retrieving relevant documents: "
             instruction_qa_key = "Represent this document for retrieval: "
             queries = [instruction_qa_query + query for _ in corpus]
             keys = [instruction_qa_key + key for key in corpus]
@@ -2164,12 +1934,8 @@ class PromptCompressor:
                 query_embeddings = query_outputs.last_hidden_state[:, 0]
                 key_embeddings = key_outputs.last_hidden_state[:, 0]
                 # Normalize
-                query_embeddings = torch.nn.functional.normalize(
-                    query_embeddings, p=2, dim=1
-                )
-                key_embeddings = torch.nn.functional.normalize(
-                    key_embeddings, p=2, dim=1
-                )
+                query_embeddings = torch.nn.functional.normalize(query_embeddings, p=2, dim=1)
+                key_embeddings = torch.nn.functional.normalize(key_embeddings, p=2, dim=1)
                 similarity = query_embeddings @ key_embeddings.T
             idx = [(ii, 0) for ii in np.argsort(-similarity[0].cpu())]
             return idx
@@ -2183,9 +1949,7 @@ class PromptCompressor:
 
             if self.retrieval_model is None or self.retrieval_model_name != rank_method:
                 model = (
-                    AutoModel.from_pretrained(
-                        "jinaai/jina-embeddings-v2-base-en", trust_remote_code=True
-                    )
+                    AutoModel.from_pretrained("jinaai/jina-embeddings-v2-base-en", trust_remote_code=True)
                     .eval()
                     .to(self.device)
                 )
@@ -2218,9 +1982,7 @@ class PromptCompressor:
 
             api_key = self.open_api_config.get("cohere_api_key", "")
             co = cohere.Client(api_key)
-            results = co.rerank(
-                model="rerank-english-v2.0", query=query, documents=corpus, top_n=20
-            )
+            results = co.rerank(model="rerank-english-v2.0", query=query, documents=corpus, top_n=20)
             c_map = {jj: ii for ii, jj in enumerate(corpus)}
             doc_rank = [c_map[ii.document["text"]] for ii in results]
             idx = [(ii, 0) for ii in doc_rank]
@@ -2230,8 +1992,7 @@ class PromptCompressor:
             context_ppl = [
                 self.get_condition_ppl(
                     d,
-                    query
-                    + " We can get the answer to this question in the given documents.",
+                    query + " We can get the answer to this question in the given documents.",
                     condition_in_question,
                 )
                 - dl * 2 / 250 * 0
@@ -2291,25 +2052,14 @@ class PromptCompressor:
             segments = [match[4] for match in matches]
 
             # Extracting rate and compress, considering their possible positions
-            segs_rate = [
-                float(match[0]) if match[0] else (float(match[2]) if match[2] else None)
-                for match in matches
-            ]
+            segs_rate = [float(match[0]) if match[0] else (float(match[2]) if match[2] else None) for match in matches]
             segs_compress = [
-                (
-                    match[1] == "True"
-                    if match[1]
-                    else (match[3] == "True" if match[3] else None)
-                )
-                for match in matches
+                (match[1] == "True" if match[1] else (match[3] == "True" if match[3] else None)) for match in matches
             ]
 
-            segs_compress = [
-                compress if compress is not None else True for compress in segs_compress
-            ]
+            segs_compress = [compress if compress is not None else True for compress in segs_compress]
             segs_rate = [
-                rate if rate else (global_rate if compress else 1.0)
-                for rate, compress in zip(segs_rate, segs_compress)
+                rate if rate else (global_rate if compress else 1.0) for rate, compress in zip(segs_rate, segs_compress)
             ]
             assert (
                 len(segments) == len(segs_rate) == len(segs_compress)
@@ -2331,11 +2081,7 @@ class PromptCompressor:
     ):
         new_segment_info = []
         for i, (seg_len, seg_ratio, seg_compress) in enumerate(segment_info):
-            if (
-                new_segment_info
-                and new_segment_info[-1][1] == seg_ratio
-                and new_segment_info[-1][2] == seg_compress
-            ):
+            if new_segment_info and new_segment_info[-1][1] == seg_ratio and new_segment_info[-1][2] == seg_compress:
                 new_segment_info[-1] = (
                     new_segment_info[-1][0] + seg_len,
                     seg_ratio,
@@ -2358,12 +2104,8 @@ class PromptCompressor:
             for c in chunks:
                 chunk_list.append(c)
 
-        dataset = TokenClfDataset(
-            chunk_list, tokenizer=self.tokenizer, max_len=self.max_seq_len
-        )
-        dataloader = DataLoader(
-            dataset, batch_size=self.max_batch_size, shuffle=False, drop_last=False
-        )
+        dataset = TokenClfDataset(chunk_list, tokenizer=self.tokenizer, max_len=self.max_seq_len)
+        dataloader = DataLoader(dataset, batch_size=self.max_batch_size, shuffle=False, drop_last=False)
 
         chunk_probs = []
         chunk_words = []
@@ -2384,9 +2126,7 @@ class PromptCompressor:
                     active_probs = torch.masked_select(_probs, _mask)
                     active_ids = torch.masked_select(_ids, _mask)
 
-                    tokens = self.tokenizer.convert_ids_to_tokens(
-                        active_ids.squeeze().tolist()
-                    )
+                    tokens = self.tokenizer.convert_ids_to_tokens(active_ids.squeeze().tolist())
                     token_probs = [prob for prob in active_probs.cpu().numpy()]
 
                     (
@@ -2442,16 +2182,12 @@ class PromptCompressor:
                     if origin_tokens[ed - j] in chunk_end_tokens:
                         ed = ed - j
                         break
-                chunk = self.tokenizer.convert_tokens_to_string(
-                    origin_tokens[st : ed + 1]
-                )
+                chunk = self.tokenizer.convert_tokens_to_string(origin_tokens[st : ed + 1])
                 origin_list.append(chunk)
                 st = ed + 1
         return origin_list
 
-    def __merge_token_to_word(
-        self, tokens, token_probs, force_tokens, token_map, force_reserve_digit
-    ):
+    def __merge_token_to_word(self, tokens, token_probs, force_tokens, token_map, force_reserve_digit):
         words = []
         word_probs = []
         word_probs_no_force = []
@@ -2467,23 +2203,13 @@ class PromptCompressor:
                     prob = 1.0
                 token = replace_added_token(token, token_map)
                 words.append(token)
-                word_probs.append(
-                    [
-                        1.0
-                        if force_reserve_digit and bool(re.search(r"\d", token))
-                        else prob
-                    ]
-                )
+                word_probs.append([1.0 if force_reserve_digit and bool(re.search(r"\d", token)) else prob])
                 word_probs_no_force.append([prob_no_force])
             # concatenate with previous token
             else:
                 pure_token = get_pure_token(token, self.model_name)
                 words[-1] += pure_token
-                word_probs[-1].append(
-                    1.0
-                    if force_reserve_digit and bool(re.search(r"\d", token))
-                    else prob
-                )
+                word_probs[-1].append(1.0 if force_reserve_digit and bool(re.search(r"\d", token)) else prob)
                 word_probs_no_force[-1].append(prob_no_force)
 
         return words, word_probs, word_probs_no_force
@@ -2536,12 +2262,8 @@ class PromptCompressor:
             for c in chunks:
                 chunk_list.append(c)
 
-        dataset = TokenClfDataset(
-            chunk_list, tokenizer=self.tokenizer, max_len=self.max_seq_len
-        )
-        dataloader = DataLoader(
-            dataset, batch_size=self.max_batch_size, shuffle=False, drop_last=False
-        )
+        dataset = TokenClfDataset(chunk_list, tokenizer=self.tokenizer, max_len=self.max_seq_len)
+        dataloader = DataLoader(dataset, batch_size=self.max_batch_size, shuffle=False, drop_last=False)
 
         compressed_chunk_list = []
         word_list = []
@@ -2563,9 +2285,7 @@ class PromptCompressor:
                     active_probs = torch.masked_select(chunk_probs, chunk_mask)
                     active_ids = torch.masked_select(chunk_ids, chunk_mask)
 
-                    tokens = self.tokenizer.convert_ids_to_tokens(
-                        active_ids.squeeze().tolist()
-                    )
+                    tokens = self.tokenizer.convert_ids_to_tokens(active_ids.squeeze().tolist())
                     token_probs = [prob for prob in active_probs.cpu().numpy()]
 
                     words, valid_token_probs, _ = self.__merge_token_to_word(
@@ -2575,9 +2295,7 @@ class PromptCompressor:
                         token_map=token_map,
                         force_reserve_digit=force_reserve_digit,
                     )
-                    word_probs = self.__token_prob_to_word_prob(
-                        valid_token_probs, convert_mode=token_to_word
-                    )
+                    word_probs = self.__token_prob_to_word_prob(valid_token_probs, convert_mode=token_to_word)
 
                     if drop_consecutive:
                         threshold = np.percentile(word_probs, int(100 * reduce_rate))
@@ -2597,9 +2315,7 @@ class PromptCompressor:
                     for word, word_prob in zip(words, word_probs):
                         num_token = len(self.oai_tokenizer.encode(word))
                         new_token_probs.extend([word_prob for _ in range(num_token)])
-                    threshold = np.percentile(
-                        new_token_probs, int(100 * reduce_rate + 1)
-                    )
+                    threshold = np.percentile(new_token_probs, int(100 * reduce_rate + 1))
 
                     keep_words = []
                     word_labels = []
@@ -2633,9 +2349,7 @@ class PromptCompressor:
         prev_idx = 0
         for chunk_list in context_list:
             n_chunk = len(chunk_list)
-            compressed_context_list.append(
-                "".join(compressed_chunk_list[prev_idx : prev_idx + n_chunk])
-            )
+            compressed_context_list.append("".join(compressed_chunk_list[prev_idx : prev_idx + n_chunk]))
             original_word_list.append([])
             original_word_label_list.append([])
             for i in range(n_chunk):

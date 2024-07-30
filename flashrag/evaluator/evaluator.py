@@ -1,16 +1,17 @@
 import os
 from flashrag.evaluator.metrics import BaseMetric
 
+
 class Evaluator:
     """Evaluator is used to summarize the results of all metrics."""
 
     def __init__(self, config):
         self.config = config
-        self.save_dir = config['save_dir']
+        self.save_dir = config["save_dir"]
 
-        self.save_metric_flag = config['save_metric_score']
-        self.save_data_flag = config['save_intermediate_data']
-        self.metrics = [metric.lower() for metric in self.config['metrics']]
+        self.save_metric_flag = config["save_metric_score"]
+        self.save_data_flag = config["save_intermediate_data"]
+        self.metrics = [metric.lower() for metric in self.config["metrics"]]
 
         self.avaliable_metrics = self._collect_metrics()
 
@@ -54,7 +55,7 @@ class Evaluator:
                 for metric_score, item in zip(metric_scores, data):
                     item.update_evaluation_score(metric, metric_score)
             except Exception as e:
-                print(f'Error in {metric}!')
+                print(f"Error in {metric}!")
                 print(e)
                 continue
 
@@ -64,18 +65,16 @@ class Evaluator:
         if self.save_data_flag:
             self.save_data(data)
 
-
         return result_dict
 
     def save_metric_score(self, result_dict, file_name="metric_score.txt"):
         save_path = os.path.join(self.save_dir, file_name)
-        with open(save_path, "w", encoding='utf-8') as f:
-            for k,v in result_dict.items():
+        with open(save_path, "w", encoding="utf-8") as f:
+            for k, v in result_dict.items():
                 f.write(f"{k}: {v}\n")
 
-
     def save_data(self, data, file_name="intermediate_data.json"):
-        """Save the evaluated data, including the raw data and the score of each data 
+        """Save the evaluated data, including the raw data and the score of each data
         sample on each metric."""
 
         save_path = os.path.join(self.save_dir, file_name)
