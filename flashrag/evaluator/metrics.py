@@ -30,7 +30,9 @@ class BaseMetric:
         return {}, []
 
     def get_dataset_answer(self, data):
-        if data.choices != []:
+        if any(choice == [] for choice in data.choices):
+            golden_answers_list = data.golden_answers
+        else:
             # multi-choice dataset
             all_choices_list = data.choices
             golden_choice_idx_list = data.golden_answers
@@ -38,8 +40,7 @@ class BaseMetric:
                 [choices[idx] for idx in idx_list]
                 for choices, idx_list in zip(all_choices_list, golden_choice_idx_list)
             ]
-        else:
-            golden_answers_list = data.golden_answers
+
         return golden_answers_list
 
 
