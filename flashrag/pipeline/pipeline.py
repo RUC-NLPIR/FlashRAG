@@ -45,14 +45,19 @@ class BasicPipeline:
 
 
 class SequentialPipeline(BasicPipeline):
-    def __init__(self, config, prompt_template=None):
+    def __init__(
+        self, config, prompt_template=None, retriever=None, generator=None
+    ):
         """
         inference stage:
             query -> pre-retrieval -> retriever -> post-retrieval -> generator
         """
 
         super().__init__(config, prompt_template)
-        self.retriever = get_retriever(config)
+        if retriever is None:
+            self.retriever = get_retriever(config)
+        else:
+            self.retriever = retriever
 
         # TODO: add rewriter module
 
@@ -60,22 +65,33 @@ class SequentialPipeline(BasicPipeline):
 
         self.generator = None
         if config["refiner_name"] is not None:
-            if "kg" in config["refiner_name"].lower():
-                self.generator = get_generator(config)
             self.refiner = get_refiner(config, self.retriever, self.generator)
+
+            # For refiners other than kg, do not load the generator for now to save memory
+            if "kg" in config["refiner_name"].lower():
+                self.generator = (
+                    get_generator(config) if generator is None else generator
+                )
         else:
             self.refiner = None
-            self.generator = get_generator(config)
+            self.generator = self.generator = (
+                get_generator(config) if generator is None else generator
+            )
 
     def naive_run(self, dataset, do_eval=True, pred_process_fun=None):
         # direct generation without RAG
-        input_prompts = [self.prompt_template.get_string(question=q) for q in dataset.question]
+        input_prompts = [
+            self.prompt_template.get_string(question=q)
+            for q in dataset.question
+        ]
         dataset.update_output("prompt", input_prompts)
 
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred", pred_answer_list)
 
-        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
+        dataset = self.evaluate(
+            dataset, do_eval=do_eval, pred_process_fun=pred_process_fun
+        )
         return dataset
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):
@@ -89,7 +105,9 @@ class SequentialPipeline(BasicPipeline):
             if "llmlingua" in self.refiner.name and input_prompt_flag:
                 # input prompt
                 input_prompts = [
-                    self.prompt_template.get_string(question=q, retrieval_result=r)
+                    self.prompt_template.get_string(
+                        question=q, retrieval_result=r
+                    )
                     for q, r in zip(dataset.question, dataset.retrieval_result)
                 ]
                 dataset.update_output("prompt", input_prompts)
@@ -99,7 +117,9 @@ class SequentialPipeline(BasicPipeline):
                 refine_results = self.refiner.batch_run(dataset)
                 dataset.update_output("refine_result", refine_results)
                 input_prompts = [
-                    self.prompt_template.get_string(question=q, formatted_reference=r)
+                    self.prompt_template.get_string(
+                        question=q, formatted_reference=r
+                    )
                     for q, r in zip(dataset.question, refine_results)
                 ]
 
@@ -125,7 +145,9 @@ class SequentialPipeline(BasicPipeline):
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred", pred_answer_list)
 
-        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
+        dataset = self.evaluate(
+            dataset, do_eval=do_eval, pred_process_fun=pred_process_fun
+        )
 
         return dataset
 
@@ -160,11 +182,15 @@ class ConditionalPipeline(BasicPipeline):
 
         pos_dataset = self.sequential_pipeline.run(pos_dataset, do_eval=False)
         self.sequential_pipeline.prompt_template = self.zero_shot_templete
-        neg_dataset = self.sequential_pipeline.naive_run(neg_dataset, do_eval=False)
+        neg_dataset = self.sequential_pipeline.naive_run(
+            neg_dataset, do_eval=False
+        )
 
         # merge datasets into original format
         dataset = merge_dataset(pos_dataset, neg_dataset, judge_result)
 
-        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
+        dataset = self.evaluate(
+            dataset, do_eval=do_eval, pred_process_fun=pred_process_fun
+        )
 
         return dataset
