@@ -415,6 +415,11 @@ def iterretgen(args):
 
 
 def ircot(args):
+    """
+    Reference:
+        Harsh Trivedi et al. "Interleaving Retrieval with Chain-of-Thought Reasoning for Knowledge-Intensive Multi-Step Questions"
+        in ACL 2023
+    """
     save_note = "ircot"
     config_dict = {"save_note": save_note, "gpu_id": args.gpu_id, "dataset_name": args.dataset_name}
 
@@ -431,6 +436,11 @@ def ircot(args):
 
 
 def trace(args):
+    """
+    Reference:
+        Jinyuan Fang et al. "TRACE the Evidence: Constructing Knowledge-Grounded Reasoning Chains for Retrieval-Augmented Generation"
+    """
+
     save_note = "trace"
     trace_config = {
         "num_examplars": 3,
@@ -460,6 +470,54 @@ def trace(args):
     pipeline = SequentialPipeline(config)
 
     result = pipeline.run(test_data)
+
+def spring(args):
+    """
+    Reference:
+        Yutao Zhu et al. "One Token Can Help! Learning Scalable and Pluggable Virtual Tokens for Retrieval-Augmented Large Language Models"
+    """
+
+    save_note = "spring"
+    config_dict = {
+        "save_note": save_note,
+        "gpu_id": args.gpu_id,
+        "dataset_name": args.dataset_name,
+        "framework": "hf"
+    }
+    config = Config("my_config.yaml", config_dict)
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+
+    # download token embedding from: https://huggingface.co/yutaozhu94/SPRING
+    token_embedding_path = "llama2.7b.chat.added_token_embeddings.pt"
+    
+    from flashrag.prompt import PromptTemplate
+    from flashrag.pipeline import SequentialPipeline
+    from flashrag.utils import get_generator, get_retriever
+
+    # prepare prompt and generator for Spring method
+    system_prompt = (
+        "Answer the question based on the given document."
+        "\nThe following are given documents.\n\n{reference}"
+    )
+    added_tokens = [f" [ref{i}]" for i in range(1, 51)]
+    added_tokens = "".join(added_tokens)
+    user_prompt = added_tokens + "Question: {question}\nAnswer:"
+    prompt_template = PromptTemplate(
+        config, system_prompt, user_prompt, enable_chat=False
+    )
+
+    generator = get_generator(config)
+    generator.add_new_tokens(
+        token_embedding_path, token_name_func=lambda idx: f"[ref{idx+1}]"
+    )
+
+    pipeline = SequentialPipeline(
+        config=config, prompt_template=prompt_template, generator=generator
+    )
+    result = pipeline.run(test_data)
+
+
 
 
 if __name__ == "__main__":

@@ -50,3 +50,5 @@ In addition to the general settings mentioned above, each method often has its o
 **IRCoT**: For all experiments, we used one shot example to add prompts. The example comes from [the demonstration file](https://github.com/StonyBrookNLP/ircot/blob/main/prompts/2wikimultihopqa/gold_with_3_distractors_context_cot_qa_codex.txt) provided by IRCoT. Max iter is set to 2.
 
 **Trace**: This method requires first extracting triples from the search results and then constructing a reasoning chain. These two steps depend on the prompt of the feed shot for LLM. Follow the original work, we use Llama3-8B-instruct to do these steps, use 3 examplars in each prompt. For datasets that don't have examplars, we use the examplars from 2WikiMultihopQA as a substitute. Other hyperparameters follow default settings in our code.
+
+**Spring**: This model needs to incorporate the embedding of virtual tokens for training on top of its own generator. Due to only training models from the llama2 series, we conducted experiments on `llama2-7B-chat`.

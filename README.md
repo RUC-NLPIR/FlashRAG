@@ -21,7 +21,7 @@
 </p>
 
 </h4>
-FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 32 pre-processed benchmark RAG datasets and 13 state-of-the-art RAG algorithms. 
+FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 32 pre-processed benchmark RAG datasets and 14 state-of-the-art RAG algorithms. 
 
 <p align="center">
 <img src="asset/framework.jpg">
@@ -39,7 +39,7 @@ With FlashRAG and provided resources, you can effortlessly reproduce existing SO
 
 - **Comprehensive Benchmark Datasets**: A collection of 32 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
 
-- **Pre-implemented Advanced RAG Algorithms**: Features 13 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
+- **Pre-implemented Advanced RAG Algorithms**: Features 14 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
 
 - **Efficient Preprocessing Stage**: Simplifies the RAG workflow preparation by providing various scripts like corpus processing for retrieval, retrieval index building, and pre-retrieval of documents.
 
@@ -59,6 +59,8 @@ FlashRAG is still under development and there are many issues and room for impro
 
 
 ## :page_with_curl: Changelog
+
+[24/08/02] We add support for a new method [<u>Spring</u>](https://arxiv.org/abs/2405.19670), significantly improve the performance of LLM by adding only a few token embeddings. See it result in [<u>result table</u>](#robot-supporting-methods).
 
 [24/07/17] Due to some unknown issues with HuggingFace, our original dataset link has been invalid. We have updaded it. Please check the [new link](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/) if you encounter any problems.
 
@@ -377,7 +379,7 @@ In each category, we have implemented corresponding common pipelines. Some pipel
 
 ## :robot: Supporting Methods
 
-We have implemented 13 works with a consistent setting of:
+We have implemented 14 works with a consistent setting of:
 - **Generator:** LLAMA3-8B-instruct with input length of 2048
 - **Retriever:** e5-base-v2 as embedding model, retrieve 5 docs per query
 - **Prompt:** A consistent default prompt, template can be found in the [<u>method details</u>](./docs/baseline_details.md).
@@ -397,11 +399,12 @@ It’s important to note that, to ensure consistency, we have utilized a uniform
 | [LongLLMLingua](https://arxiv.org/abs/2310.06839)        | Sequential     | 32.2    | 59.2          | 37.5          |25.0| 38.7| 17.5| Compress Ratio=0.5 |
 | [RECOMP-abstractive](https://arxiv.org/pdf/2310.04408)   | Sequential     | 33.1    | 56.4          | 37.5          | 32.4 | 39.9| 20.2| |
 | [Selective-Context](https://arxiv.org/abs/2310.06201)    | Sequential     | 30.5    | 55.6          | 34.4          |18.5| 33.5| 17.3| Compress Ratio=0.5|
-| [Ret-Robust](https://arxiv.org/abs/2310.01558)           | Sequential     | 42.9    | 68.2          | 35.8          |43.4|57.2|33.7| Use LLAMA2-13B with trained lora|
 | [Trace](https://arxiv.org/abs/2406.11460) | Sequential | 30.7 | 50.2 | 34.0 | 15.5 | 37.4 | 19.9 | |
+| [Spring](https://arxiv.org/abs/2405.19670) | Sequential | 37.9 | 64.6 |42.6 | 37.3 |54.8 |27.7 | Use Llama2-7B-chat with trained embedding table |
 | [SuRe](https://arxiv.org/abs/2404.13081)                 | Branching      | 37.1    | 53.2          | 33.4          |20.6|48.1|24.2| Use provided prompt|
 | [REPLUG](https://arxiv.org/abs/2301.12652)               | Branching      | 28.9    | 57.7          | 31.2          |21.1|27.8|20.2|  |
 | [SKR](https://aclanthology.org/2023.findings-emnlp.691.pdf)                  | Conditional    | 33.2   | 56.0          | 32.4          | 23.4 |31.7|17.0|Use infernece-time training data|
+| [Ret-Robust](https://arxiv.org/abs/2310.01558)           | Loop     | 42.9    | 68.2          | 35.8          |43.4|57.2|33.7| Use LLAMA2-13B with trained lora|
 | [Self-RAG](https://arxiv.org/abs/2310.11511)             | Loop   | 36.4    | 38.2          | 29.6          | 25.1|32.7|21.9| Use trained selfrag-llama2-7B|
 | [FLARE](https://arxiv.org/abs/2305.06983)                | Loop   | 22.5    | 55.8          | 28.0          |33.9| 20.7| 20.2| |
 | [Iter-Retgen](https://arxiv.org/abs/2305.15294),      [ITRG](https://arxiv.org/abs/2310.05149)   | Loop | 36.8    | 60.1          | 38.3          | 21.6| 37.9| 18.2| |

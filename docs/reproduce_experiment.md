@@ -34,6 +34,7 @@ Table of Contents:
 - [Ret-Robust](#ret-robust)
 - [SKR](#skr)
 - [Self-RAG](#self-rag)
+- [Spring](#spring)
 
 #### AAR
 
@@ -89,6 +90,12 @@ This method requires using a trained model and currently only supports running i
 
 - Additional Step1: Download the Self-RAG model (from [7B model](https://huggingface.co/selfrag/selfrag_llama2_7b), [13B model](https://huggingface.co/selfrag/selfrag_llama2_13b))
 - Additional Step2: Modify the `generator_model_path` in the `selfrag` function.
+
+#### Spring
+This method requires a virtual token embedding file and currently only supports running in the `hf` framework.
+
+- Additional Step1: Download virtual token embedding file from [official repo](https://huggingface.co/yutaozhu94/SPRING)
+- Additional Step2: Modify the `token_embedding_path` in teh `spring` function.
 
 ### 3. Run methods
 
