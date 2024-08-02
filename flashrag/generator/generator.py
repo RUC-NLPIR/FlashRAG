@@ -314,14 +314,17 @@ class HFCausalLMGenerator(BaseGenerator):
     def add_new_tokens(
         self, token_embedding_path, token_name_func=lambda idx: f"[ref{idx+1}]"
     ):
+        del self.model
+        self.model = AutoModelForCausalLM.from_pretrained(
+                self.model_path,
+                trust_remote_code=True,
+        )
         # get original embedding weight matrix
         embedding_layer = self.model.get_input_embeddings()
         embedding_weights = embedding_layer.weight
         original_vocab_size, embedding_dim = embedding_weights.shape
-
-        new_tokens_weights = torch.load(
-            token_embedding_path, map_location=embedding_layer.weight.device
-        )
+    
+        new_tokens_weights = torch.load(token_embedding_path)
         new_tokens_length = new_tokens_weights.shape[0]
 
         # expand vocabulary
@@ -343,6 +346,7 @@ class HFCausalLMGenerator(BaseGenerator):
         # update the embedding table
         # note: we should avoid using the function resize_token_embeddings() because this function will also change the lm_head of the model
         embedding_layer.weight.data = new_embedding_weights
+        self.model.eval()
         self.model.cuda()
 
     @torch.inference_mode(mode=True)
