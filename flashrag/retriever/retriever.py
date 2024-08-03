@@ -292,6 +292,7 @@ class DenseRetriever(BaseRetriever):
             num = self.topk
         query_emb = self.encoder.encode(query)
         scores, idxs = self.index.search(query_emb, k=num)
+        scores = scores.tolist()
         idxs = idxs[0]
         scores = scores[0]
 
