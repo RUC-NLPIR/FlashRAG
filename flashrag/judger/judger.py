@@ -1,9 +1,11 @@
 from typing import cast, List
 import json
+from tqdm.auto import trange
 from collections import Counter
 import numpy as np
 import torch
 import faiss
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from flashrag.retriever.utils import load_model, pooling
 
 
@@ -48,9 +50,7 @@ class SKRJudger(BaseJudger):
         with open(self.training_data_path, "r") as f:
             self.training_data = json.load(f)
         # count number of pos & neg samples in training data
-        self.training_data_counter = Counter(
-            [item["judgement"].strip() for item in self.training_data]
-        )
+        self.training_data_counter = Counter([item["judgement"].strip() for item in self.training_data])
         self.training_pos_num = self.training_data_counter["ir_better"]
         self.training_neg_num = self.training_data_counter["ir_worse"]
         self.training_data_num = sum(self.training_data_counter.values())
@@ -72,9 +72,7 @@ class SKRJudger(BaseJudger):
             max_length=self.max_length,
         ).to("cuda")
         output = self.encoder(**inputs, return_dict=True)
-        embeddings = pooling(
-            output.pooler_output, output.last_hidden_state, inputs["attention_mask"], "pooler"
-        )
+        embeddings = pooling(output.pooler_output, output.last_hidden_state, inputs["attention_mask"], "pooler")
 
         embeddings = cast(torch.Tensor, embeddings)
         embeddings = torch.nn.functional.normalize(embeddings, dim=-1).detach()
@@ -107,16 +105,12 @@ class SKRJudger(BaseJudger):
 
                 # provide judgments based on the formula in the paper
                 if training_data_delta < 0:
-                    if topk_delta < 0 and topk_delta <= int(
-                        training_data_delta * self.topk / self.training_data_num
-                    ):
+                    if topk_delta < 0 and topk_delta <= int(training_data_delta * self.topk / self.training_data_num):
                         judgement = False
                     else:
                         judgement = True
                 else:
-                    if topk_delta > 0 and topk_delta >= int(
-                        training_data_delta * self.topk / self.training_data_num
-                    ):
+                    if topk_delta > 0 and topk_delta >= int(training_data_delta * self.topk / self.training_data_num):
                         judgement = True
                     else:
                         judgement = False
@@ -124,3 +118,69 @@ class SKRJudger(BaseJudger):
                 all_judgements.append(judgement)
 
         return all_judgements
+
+
+class AdaptiveJudger(BaseJudger):
+    """Implementation for Adaptive-RAG
+    Paper link: https://aclanthology.org/2024.naacl-long.389.pdf
+    """
+
+    def __init__(self, config):
+        super().__init__(config)
+        self.model_path = self.judger_config["model_path"]
+        self.batch_size = self.judger_config.get("batch_size", 16)
+        self.max_length = self.judger_config.get("max_length", 512)
+
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_path)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        self.model.eval()
+        self.model.cuda()
+
+    @torch.inference_mode(mode=True)
+    def judge(self, dataset):
+        questions = dataset.question
+        questions = [q.strip() for q in questions]
+
+        all_preds = []
+        for idx in trange(0, len(questions), self.batch_size, desc="Judger process: "):
+            batch_input = questions[idx : idx + self.batch_size]
+            batch_input = self.tokenizer(
+                batch_input,
+                truncation=True,
+                max_length=512,
+                stride=128,
+                return_overflowing_tokens=True,
+                return_offsets_mapping=True,
+                padding=True,
+            ).to(self.model.device)
+
+            scores = self.model.generate(
+                **batch_input, return_dict_in_generate=True, output_scores=True, max_length=self.max_length
+            ).scores[0]
+
+            probs = (
+                torch.nn.functional.softmax(
+                    torch.stack(
+                        [
+                            scores[:, self.tokenizer("A").input_ids[0]],
+                            scores[:, self.tokenizer("B").input_ids[0]],
+                            scores[:, self.tokenizer("C").input_ids[0]],
+                        ]
+                    ),
+                    dim=0,
+                )
+                .detach()
+                .cpu()
+                .numpy()
+            )
+
+            preds_labels = np.argmax(probs, 0)
+            label_to_option = {
+                0: "A",
+                1: "B",
+                2: "C",
+            }
+            preds = [label_to_option[pred] for pred in preds_labels]
+            all_preds.extend(preds)
+
+        return all_preds

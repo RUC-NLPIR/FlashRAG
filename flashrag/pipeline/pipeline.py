@@ -175,3 +175,71 @@ class ConditionalPipeline(BasicPipeline):
         dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
 
         return dataset
+
+
+class AdaptivePipeline(BasicPipeline):
+    def __init__(
+        self,
+        config,
+        norag_template=None,
+        single_hop_prompt_template=None,
+        multi_hop_prompt_template=None,
+    ):
+        super().__init__(config)
+        # load adaptive classifier as judger
+        self.judger = get_judger(config)
+
+        retriever = get_retriever(config)
+        generator = get_generator(config)
+
+        # Load three pipeline for three types of query: naive/single-hop/multi-hop
+        from flashrag.pipeline import IRCOTPipeline
+
+        if norag_template is None:
+            norag_templete = PromptTemplate(
+                config=config,
+                system_prompt="Answer the question based on your own knowledge. Only give me the answer and do not output any other words.",
+                user_prompt="Question: {question}",
+            )
+        self.norag_pipeline = SequentialPipeline(
+            config,
+            prompt_template=norag_templete,
+            retriever=retriever,
+            generator=generator,
+        )
+
+        self.single_hop_pipeline = SequentialPipeline(
+            config,
+            prompt_template=single_hop_prompt_template,
+            retriever=retriever,
+            generator=generator,
+        )
+
+        self.multi_hop_pipeline = IRCOTPipeline(
+            config,
+            prompt_template=multi_hop_prompt_template,
+            retriever=retriever,
+            generator=generator,
+        )
+
+    def run(self, dataset, do_eval=True, pred_process_fun=None):
+        # judge_result: choice result representing which pipeline to use(e.g. A, B, C)
+        judge_result = self.judger.judge(dataset)
+        dataset.update_output("judge_result", judge_result)
+
+        # split dataset based on judge_result
+        dataset_split = split_dataset(dataset, judge_result)
+        norag_dataset = dataset_split["A"]
+        single_hop_dataset = dataset_split["B"]
+        multi_hop_dataset = dataset_split["C"]
+
+        norag_dataset = self.norag_pipeline.naive_run(norag_dataset, do_eval=False)
+        single_hop_dataset = self.single_hop_pipeline.run(single_hop_dataset, do_eval=False)
+        multi_hop_dataset = self.multi_hop_pipeline.run(multi_hop_dataset, do_eval=False)
+
+        # merge datasets into original format
+        dataset = merge_dataset(dataset_split, judge_result)
+
+        dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
+
+        return dataset
