@@ -218,7 +218,10 @@ def retrobust(args):
         in ICLR 2024.
         Official repo: https://github.com/oriyor/ret-robust
     """
-    model_dict = {"nq": "model/llama-2-13b-peft-nq-retrobust", "2wiki": "model/llama-2-13b-peft-2wikihop-retrobust"}
+    model_dict = {
+        "nq": "model/llama-2-13b-peft-nq-retrobust",
+        "2wiki": "model/llama-2-13b-peft-2wikihop-retrobust",
+    }
     if args.dataset_name in ["nq", "triviaqa", "popqa", "web_questions"]:
         lora_path = model_dict["nq"]
     elif args.dataset_name in ["hotpotqa", "2wikimultihopqa"]:
@@ -313,9 +316,13 @@ def skr(args):
 
     config_dict = {
         "judger_name": judger_name,
-        "judger_model_path": model_path,
-        "judger_training_data_path": training_data_path,
-        "judger_topk": 5,
+        "judger_config": {
+            "model_path": model_path,
+            "training_data_path": training_data_path,
+            "topk": 5,
+            "batch_size": 64,
+            "max_length": 128,
+        },
         "save_note": "skr",
         "gpu_id": args.gpu_id,
         "dataset_name": args.dataset_name,
@@ -345,7 +352,12 @@ def selfrag(args):
         "framework": "vllm",
         "save_note": "self-rag",
         "gpu_id": args.gpu_id,
-        "generation_params": {"max_new_tokens": 100, "temperature": 0.0, "top_p": 1.0, "skip_special_tokens": False},
+        "generation_params": {
+            "max_new_tokens": 100,
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "skip_special_tokens": False,
+        },
         "dataset_name": args.dataset_name,
     }
     config = Config("my_config.yaml", config_dict)
@@ -402,7 +414,11 @@ def iterretgen(args):
         in EMNLP Findings 2023.
     """
     iter_num = 3
-    config_dict = {"save_note": "iter-retgen", "gpu_id": args.gpu_id, "dataset_name": args.dataset_name}
+    config_dict = {
+        "save_note": "iter-retgen",
+        "gpu_id": args.gpu_id,
+        "dataset_name": args.dataset_name,
+    }
     # preparation
     config = Config("my_config.yaml", config_dict)
     all_split = get_dataset(config)
@@ -471,6 +487,7 @@ def trace(args):
 
     result = pipeline.run(test_data)
 
+
 def spring(args):
     """
     Reference:
@@ -482,7 +499,7 @@ def spring(args):
         "save_note": save_note,
         "gpu_id": args.gpu_id,
         "dataset_name": args.dataset_name,
-        "framework": "hf"
+        "framework": "hf",
     }
     config = Config("my_config.yaml", config_dict)
     all_split = get_dataset(config)
@@ -490,7 +507,7 @@ def spring(args):
 
     # download token embedding from: https://huggingface.co/yutaozhu94/SPRING
     token_embedding_path = "llama2.7b.chat.added_token_embeddings.pt"
-    
+
     from flashrag.prompt import PromptTemplate
     from flashrag.pipeline import SequentialPipeline
     from flashrag.utils import get_generator, get_retriever
@@ -503,21 +520,15 @@ def spring(args):
     added_tokens = [f" [ref{i}]" for i in range(1, 51)]
     added_tokens = "".join(added_tokens)
     user_prompt = added_tokens + "Question: {question}\nAnswer:"
-    prompt_template = PromptTemplate(
-        config, system_prompt, user_prompt, enable_chat=False
-    )
+    prompt_template = PromptTemplate(config, system_prompt, user_prompt, enable_chat=False)
 
     generator = get_generator(config)
-    generator.add_new_tokens(
-        token_embedding_path, token_name_func=lambda idx: f"[ref{idx+1}]"
-    )
+    generator.add_new_tokens(token_embedding_path, token_name_func=lambda idx: f"[ref{idx+1}]")
 
     pipeline = SequentialPipeline(
         config=config, prompt_template=prompt_template, generator=generator
     )
     result = pipeline.run(test_data)
-
-
 
 
 if __name__ == "__main__":

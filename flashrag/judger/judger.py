@@ -12,7 +12,8 @@ class BaseJudger:
 
     def __init__(self, config):
         self.config = config
-        self.name = config["judger_name"]
+        self.name = config["judger_name"] if "judger_name" in config else None
+        self.judger_config = config["judger_config"] if "judger_config" in config else {}
         self.device = config["device"]
 
     def run(self, item) -> str:
@@ -37,17 +38,19 @@ class SKRJudger(BaseJudger):
 
     def __init__(self, config):
         super().__init__(config)
-        self.model_path = config["judger_model_path"]
-        self.training_data_path = config["judger_training_data_path"]
+        self.model_path = self.judger_config["model_path"]
+        self.training_data_path = self.judger_config["training_data_path"]
         self.encoder, self.tokenizer = load_model(model_path=self.model_path, use_fp16=False)
-        self.topk = config["judger_topk"] if "judger_topk" in config else 5
-        self.batch_size = config["judger_batch_size"] if "judger_batch_size" in config else 64
-        self.max_length = config["judger_max_length"] if "judger_max_length" in config else 128
+        self.topk = self.judger_config["topk"] if "topk" in self.judger_config else 5
+        self.batch_size = self.judger_config["batch_size"] if "batch_size" in config else 64
+        self.max_length = self.judger_config["max_length"] if "max_length" in config else 128
 
         with open(self.training_data_path, "r") as f:
             self.training_data = json.load(f)
         # count number of pos & neg samples in training data
-        self.training_data_counter = Counter([item["judgement"].strip() for item in self.training_data])
+        self.training_data_counter = Counter(
+            [item["judgement"].strip() for item in self.training_data]
+        )
         self.training_pos_num = self.training_data_counter["ir_better"]
         self.training_neg_num = self.training_data_counter["ir_worse"]
         self.training_data_num = sum(self.training_data_counter.values())
@@ -69,7 +72,9 @@ class SKRJudger(BaseJudger):
             max_length=self.max_length,
         ).to("cuda")
         output = self.encoder(**inputs, return_dict=True)
-        embeddings = pooling(output.pooler_output, output.last_hidden_state, inputs["attention_mask"], "pooler")
+        embeddings = pooling(
+            output.pooler_output, output.last_hidden_state, inputs["attention_mask"], "pooler"
+        )
 
         embeddings = cast(torch.Tensor, embeddings)
         embeddings = torch.nn.functional.normalize(embeddings, dim=-1).detach()
@@ -102,12 +107,16 @@ class SKRJudger(BaseJudger):
 
                 # provide judgments based on the formula in the paper
                 if training_data_delta < 0:
-                    if topk_delta < 0 and topk_delta <= int(training_data_delta * self.topk / self.training_data_num):
+                    if topk_delta < 0 and topk_delta <= int(
+                        training_data_delta * self.topk / self.training_data_num
+                    ):
                         judgement = False
                     else:
                         judgement = True
                 else:
-                    if topk_delta > 0 and topk_delta >= int(training_data_delta * self.topk / self.training_data_num):
+                    if topk_delta > 0 and topk_delta >= int(
+                        training_data_delta * self.topk / self.training_data_num
+                    ):
                         judgement = True
                     else:
                         judgement = False
