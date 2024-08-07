@@ -76,6 +76,8 @@ def get_judger(config):
     judger_name = config["judger_name"]
     if "skr" in judger_name.lower():
         return getattr(importlib.import_module("flashrag.judger"), "SKRJudger")(config)
+    elif "adaptive" in judger_name.lower():
+        return getattr(importlib.import_module("flashrag.judger"), "AdaptiveJudger")(config)
     else:
         assert False, "No implementation!"
 

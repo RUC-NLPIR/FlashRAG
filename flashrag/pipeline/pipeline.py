@@ -229,13 +229,15 @@ class AdaptivePipeline(BasicPipeline):
 
         # split dataset based on judge_result
         dataset_split = split_dataset(dataset, judge_result)
-        norag_dataset = dataset_split["A"]
-        single_hop_dataset = dataset_split["B"]
-        multi_hop_dataset = dataset_split["C"]
-
-        norag_dataset = self.norag_pipeline.naive_run(norag_dataset, do_eval=False)
-        single_hop_dataset = self.single_hop_pipeline.run(single_hop_dataset, do_eval=False)
-        multi_hop_dataset = self.multi_hop_pipeline.run(multi_hop_dataset, do_eval=False)
+        for symbol, symbol_dataset in dataset_split.items():
+            if symbol == "A":
+                symbol_dataset = self.norag_pipeline.naive_run(symbol_dataset, do_eval=False)
+            elif symbol == "B":
+                symbol_dataset = self.single_hop_pipeline.run(symbol_dataset, do_eval=False)
+            elif symbol == "C":
+                symbol_dataset = self.multi_hop_pipeline.run(symbol_dataset, do_eval=False)
+            else:
+                assert False, "Unknown symbol!"
 
         # merge datasets into original format
         dataset = merge_dataset(dataset_split, judge_result)
