@@ -70,9 +70,7 @@ class SequentialPipeline(BasicPipeline):
                 self.generator = get_generator(config) if generator is None else generator
         else:
             self.refiner = None
-            self.generator = self.generator = (
-                get_generator(config) if generator is None else generator
-            )
+            self.generator = get_generator(config) if generator is None else generator
 
     def naive_run(self, dataset, do_eval=True, pred_process_fun=None):
         # direct generation without RAG
