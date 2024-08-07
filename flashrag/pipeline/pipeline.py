@@ -63,11 +63,10 @@ class SequentialPipeline(BasicPipeline):
 
         self.generator = None
         if config["refiner_name"] is not None:
-            self.refiner = get_refiner(config, self.retriever, self.generator)
-
             # For refiners other than kg, do not load the generator for now to save memory
             if "kg" in config["refiner_name"].lower():
                 self.generator = get_generator(config) if generator is None else generator
+            self.refiner = get_refiner(config, self.retriever, self.generator)
         else:
             self.refiner = None
             self.generator = get_generator(config) if generator is None else generator
@@ -124,9 +123,11 @@ class SequentialPipeline(BasicPipeline):
                 input_prompts.append([q + " " + doc for doc in docs])
         # delete used refiner to release memory
         if self.refiner:
-            del self.refiner
-            if self.generator is None:
+            if "kg" in self.config["refiner_name"].lower():
+                self.generator = self.refiner.generator
+            else:
                 self.generator = get_generator(self.config)
+            del self.refiner
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred", pred_answer_list)
 
