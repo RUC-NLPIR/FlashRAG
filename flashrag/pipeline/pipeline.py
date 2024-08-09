@@ -63,16 +63,13 @@ class SequentialPipeline(BasicPipeline):
 
         self.generator = None
         if config["refiner_name"] is not None:
-            self.refiner = get_refiner(config, self.retriever, self.generator)
-
             # For refiners other than kg, do not load the generator for now to save memory
             if "kg" in config["refiner_name"].lower():
                 self.generator = get_generator(config) if generator is None else generator
+            self.refiner = get_refiner(config, self.retriever, self.generator)
         else:
             self.refiner = None
-            self.generator = self.generator = (
-                get_generator(config) if generator is None else generator
-            )
+            self.generator = get_generator(config) if generator is None else generator
 
     def naive_run(self, dataset, do_eval=True, pred_process_fun=None):
         # direct generation without RAG
@@ -126,9 +123,11 @@ class SequentialPipeline(BasicPipeline):
                 input_prompts.append([q + " " + doc for doc in docs])
         # delete used refiner to release memory
         if self.refiner:
-            del self.refiner
-            if self.generator is None:
+            if "kg" in self.config["refiner_name"].lower():
+                self.generator = self.refiner.generator
+            else:
                 self.generator = get_generator(self.config)
+            del self.refiner
         pred_answer_list = self.generator.generate(input_prompts)
         dataset.update_output("pred", pred_answer_list)
 
@@ -146,8 +145,12 @@ class ConditionalPipeline(BasicPipeline):
 
         super().__init__(config, prompt_template)
         self.judger = get_judger(config)
+        self.retriever = get_retriever(config)
+        self.generator = get_generator(config)
 
-        self.sequential_pipeline = SequentialPipeline(config, prompt_template)
+        self.sequential_pipeline = SequentialPipeline(
+            config, prompt_template, retriever=self.retriever, generator=self.generator
+        )
 
         self.zero_shot_templete = PromptTemplate(
             config=config,
@@ -229,13 +232,15 @@ class AdaptivePipeline(BasicPipeline):
 
         # split dataset based on judge_result
         dataset_split = split_dataset(dataset, judge_result)
-        norag_dataset = dataset_split["A"]
-        single_hop_dataset = dataset_split["B"]
-        multi_hop_dataset = dataset_split["C"]
-
-        norag_dataset = self.norag_pipeline.naive_run(norag_dataset, do_eval=False)
-        single_hop_dataset = self.single_hop_pipeline.run(single_hop_dataset, do_eval=False)
-        multi_hop_dataset = self.multi_hop_pipeline.run(multi_hop_dataset, do_eval=False)
+        for symbol, symbol_dataset in dataset_split.items():
+            if symbol == "A":
+                symbol_dataset = self.norag_pipeline.naive_run(symbol_dataset, do_eval=False)
+            elif symbol == "B":
+                symbol_dataset = self.single_hop_pipeline.run(symbol_dataset, do_eval=False)
+            elif symbol == "C":
+                symbol_dataset = self.multi_hop_pipeline.run(symbol_dataset, do_eval=False)
+            else:
+                assert False, "Unknown symbol!"
 
         # merge datasets into original format
         dataset = merge_dataset(dataset_split, judge_result)

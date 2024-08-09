@@ -146,8 +146,8 @@ The default retriever is `e5-base-v2` and default generator is `Llama3-8B-instru
 ```bash
 cd examples/quick_start
 python simple_pipeline.py \
-    --model_path=<Llama-3-8B-instruct-PATH> \
-    --retriever_path=<E5-PATH>
+    --model_path <Llama-3-8B-instruct-PATH> \
+    --retriever_path <E5-PATH>
 ```
 
 After the code is completed, you can view the intermediate results of the run and the final evaluation score in the output folder under the corresponding path.

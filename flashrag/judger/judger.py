@@ -147,11 +147,9 @@ class AdaptiveJudger(BaseJudger):
             batch_input = self.tokenizer(
                 batch_input,
                 truncation=True,
-                max_length=512,
-                stride=128,
-                return_overflowing_tokens=True,
-                return_offsets_mapping=True,
                 padding=True,
+                max_length=512,
+                return_tensors="pt",
             ).to(self.model.device)
 
             scores = self.model.generate(

@@ -515,6 +515,7 @@ def spring(args):
     # prepare prompt and generator for Spring method
     system_prompt = (
         "Answer the question based on the given document."
+        "Only give me the answer and do not output any other words."
         "\nThe following are given documents.\n\n{reference}"
     )
     added_tokens = [f" [ref{i}]" for i in range(1, 51)]

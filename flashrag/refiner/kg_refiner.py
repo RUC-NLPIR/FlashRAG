@@ -131,7 +131,7 @@ class KGTraceRefiner(BaseRefiner):
             self.extracted_doc_triples = {}  # id: triples
         self.token_id_to_choice_map = None
 
-    def get_examplars_for_triple(self, doc_list):
+    def get_examplars_for_triple(self, doc_list, batch_size=64):
         # load demonstrations for each doc
         doc_examplars = []
 
@@ -140,7 +140,13 @@ class KGTraceRefiner(BaseRefiner):
             title = doc_content.split("\n")[0]
             text = "\n".join(doc_content.split("\n")[1:])
             doc_text_list.append(f"title: {title} text: {text}")
-        doc_embeddings = self.encoder.encode(doc_text_list, is_query=True)
+
+        doc_embeddings = []
+        for idx in range(0, len(doc_text_list), batch_size):
+            batch_data = doc_text_list[idx : idx + batch_size]
+            batch_embedding = self.encoder.encode(batch_data, is_query=True)
+            doc_embeddings.append(batch_embedding)
+        doc_embeddings = np.concatenate(doc_embeddings, axis=0)
         doc_embeddings = torch.tensor(doc_embeddings)
 
         similarities = torch.matmul(doc_embeddings, self.triple_examplars_embeddings.T)

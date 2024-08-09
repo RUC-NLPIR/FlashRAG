@@ -30,15 +30,14 @@ def merge_dataset(dataset_split: dict, split_symbol: list):
         [len(data) for data in dataset_split.values()]
     )
     dataset_split_iter = {
-        symbol: iter(data) for symbol, data in dataset_split.items()
+        symbol: iter(dataset.data) for symbol, dataset in dataset_split.items()
     }
 
     final_data = []
     for item_symbol in split_symbol:
         final_data.append(next(dataset_split_iter[item_symbol]))
-
     final_dataset = Dataset(
-        config=list(dataset_split.values())[0], data=final_data
+        config=list(dataset_split.values())[0].config, data=final_data
     )
 
     return final_dataset
