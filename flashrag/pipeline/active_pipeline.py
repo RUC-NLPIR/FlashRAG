@@ -932,6 +932,13 @@ class IRCOTPipeline(BasicPipeline):
             thoughts.append(new_thought)
             iter_num += 1
             if "So the answer is:" in new_thought:
+                item.update_output(
+                    f"intermediate_output_iter{iter_num}",
+                    {
+                        "input_prompt": input_prompt,
+                        "new_thought": new_thought,
+                    },
+                )
                 break
 
             # retrieve new docs and merge
@@ -958,6 +965,7 @@ class IRCOTPipeline(BasicPipeline):
 
         item.update_output("retrieval_result", retrieval_result)
         item.update_output("pred", " ".join(thoughts))
+        return item
 
     def run(self, dataset, do_eval=True, pred_process_fun=ircot_pred_parse):
         for item in tqdm(dataset, desc="Inference: "):
