@@ -83,36 +83,41 @@ def get_judger(config):
 
 
 def get_refiner(config, retriever=None, generator=None):
-    refiner_name = config["refiner_name"]
-    refiner_path = config["refiner_model_path"]
-
-    default_path_dict = {
+    # 预定义默认路径字典
+    DEFAULT_PATH_DICT = {
         "recomp_abstractive_nq": "fangyuan/nq_abstractive_compressor",
         "recomp:abstractive_tqa": "fangyuan/tqa_abstractive_compressor",
         "recomp:abstractive_hotpotqa": "fangyuan/hotpotqa_abstractive",
     }
+    REFINER_MODULE = importlib.import_module("flashrag.refiner")
 
-    arch = ""
+    refiner_name = config["refiner_name"]
+    refiner_path = config["refiner_model_path"]
+
     if refiner_path is None:
-        if refiner_name in default_path_dict:
-            refiner_path = default_path_dict[refiner_name]
-    else:
-        model_config = AutoConfig.from_pretrained(refiner_path)
-        arch = model_config.architectures[0].lower()
+        refiner_path = DEFAULT_PATH_DICT.get(refiner_name)
 
-    if "recomp" in refiner_name.lower() or (refiner_path is not None and "recomp" in refiner_path) or "bert" in arch:
+    if refiner_path is None:
+        raise ValueError("Refiner path is not specified and no default path available!")
+
+    model_config = AutoConfig.from_pretrained(refiner_path)
+    arch = model_config.architectures[0].lower()
+
+    if "recomp" in refiner_name or "recomp" in refiner_path or "bert" in arch:
         if model_config.model_type == "t5":
-            return getattr(importlib.import_module("flashrag.refiner"), "AbstractiveRecompRefiner")(config)
+            refiner_class = "AbstractiveRecompRefiner"
         else:
-            return getattr(importlib.import_module("flashrag.refiner"), "ExtractiveRefiner")(config)
-    elif "lingua" in refiner_name.lower():
-        return getattr(importlib.import_module("flashrag.refiner"), "LLMLinguaRefiner")(config)
-    elif "selective-context" in refiner_name.lower() or "sc" in refiner_name.lower():
-        return getattr(importlib.import_module("flashrag.refiner"), "SelectiveContextRefiner")(config)
-    elif "kg-trace" in refiner_name.lower():
-        return getattr(importlib.import_module("flashrag.refiner"), "KGTraceRefiner")(config, retriever, generator)
+            refiner_class = "ExtractiveRefiner"
+    elif "lingua" in refiner_name:
+        refiner_class = "LLMLinguaRefiner"
+    elif "selective-context" in refiner_name or "sc" in refiner_name:
+        refiner_class = "SelectiveContextRefiner"
+    elif "kg-trace" in refiner_name:
+        return getattr(REFINER_MODULE, "KGTraceRefiner")(config, retriever, generator)
     else:
-        assert False, "No implementation!"
+        raise ValueError("No implementation!")
+
+    return getattr(REFINER_MODULE, refiner_class)(config)
 
 
 def hash_object(o) -> str:
