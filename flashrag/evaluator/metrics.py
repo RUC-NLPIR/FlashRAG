@@ -404,6 +404,74 @@ class BLEU(BaseMetric):
         return {"bleu": total_bleu}, score_list
 
 
+class LLMJudge(BaseMetric):
+    metric_name = "llm_judge"
+    JUDGE_PROMPT = """
+    You will be given a user_question and system_answer couple.
+    Your task is to provide a 'total rating' scoring how well the system_answer answers the user concerns expressed in the user_question.
+    Give your answer as a float on a scale of 0 to 10, where 0 means that the system_answer is not helpful at all, and 10 means that the answer completely and helpfully addresses the question.
+
+    Provide your feedback as follows:
+
+    Feedback:::
+    Total rating: (your rating, as a float between 0 and 10)
+
+    Now here are the question and answer.
+
+    Question: {question}
+    Answer: {answer}
+
+    Feedback:::
+    Total rating: """
+
+    def __init__(self, config):
+        super().__init__(config)
+        if "llm_judge_setting" in config["metric_setting"]:
+            llm_setting = config["metric_setting"]["llm_judge_setting"]
+        else:
+            assert False, "No available LLM settings!"
+        # TODO: integrate generator class
+        llm_name = llm_setting["model_name"]
+        if "model_path" not in llm_setting:
+            model_path = config["model2path"].get(llm_name, None)
+        else:
+            model_path = llm_setting["model_path"]
+        if model_path is None:
+            assert False, "None model path "
+
+        from transformers import pipeline
+
+        self.llm_pipeline = pipeline("text2text-generation", model=model_path, device=0)
+
+    def extract_judge_score(answer: str, split_str: str = "Total rating:") -> int:
+        try:
+            if split_str in answer:
+                rating = answer.split(split_str)[1]
+            else:
+                rating = answer
+            digit_groups = [el.strip() for el in re.findall(r"\d+(?:\.\d+)?", rating)]
+            return float(digit_groups[0])
+        except Exception as e:
+            print(e)
+            return 0
+
+    def calculate_metric(self, data):
+        question_list = data.question
+        pred_list = data.pred
+
+        judge_input_prompt = [self.JUDGE_PROMPT.format(question=q, answer=a) for q, a in zip(question_list, pred_list)]
+        judge_output = self.llm_pipeline(judge_input_prompt, max_new_tokens=100, batch_size=8)
+        judge_output = [item["generated_text"] for item in judge_output]
+
+        metric_score_list = [self.extract_judge_score(o) for o in judge_output]
+        # rescale score
+        metric_score_list = [score / 10 + 1 for score in metric_score_list]
+
+        score = sum(metric_score_list) / len(metric_score_list)
+
+        return {"llm_judge_score": score}, metric_score_list
+
+
 class CountToken(BaseMetric):
     metric_name = "input_tokens"
 
