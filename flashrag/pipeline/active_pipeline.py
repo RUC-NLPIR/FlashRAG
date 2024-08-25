@@ -724,6 +724,8 @@ class FLAREPipeline(BasicPipeline):
             # assert len(sent_ids) == len(sent_score)
             new_query_ids = [i for i, score in zip(sent_ids, sent_score) if score > self.threshold]
             new_query = tokenizer.decode(new_query_ids)
+            if len(new_query) == 0:
+                judge_result = True
         return judge_result, new_query
 
     def run_item(self, item):
