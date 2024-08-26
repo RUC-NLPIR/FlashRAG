@@ -33,8 +33,8 @@ python -m flashrag.retriever.index_builder \
     --corpus_path indexes/sample_corpus.jsonl \
     --save_dir indexes/ \
     --use_fp16 \
-    --max_length 200 \
-    --batch_size 32 \
+    --max_length 512 \
+    --batch_size 256 \
     --pooling_method mean \
     --faiss_type Flat 
 ```
@@ -51,8 +51,8 @@ python -m flashrag.retriever.index_builder \
     --corpus_path indexes/sample_corpus.jsonl \
     --save_dir indexes/ \
     --use_fp16 \
-    --max_length 200 \
-    --batch_size 32 \
+    --max_length 512 \
+    --batch_size 256 \
     --pooling_method mean \
     --sentence_transformer \
     --faiss_type Flat 
