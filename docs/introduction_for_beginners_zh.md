@@ -50,7 +50,7 @@ pip install -e .
 
 为了简便，我们从NQ中采样了17条数据作为toy dataset, 其地址在 [examples/quick_start/dataset/nq](../examples/quick_start/dataset/nq/)。后续RAG流程将在这些questions上进行。
 
-我们的仓库中同样提供了大量处理好的基准数据集，可以访问我们[huggingface上的数据集](https://huggingface.co/datasets/ignore/FlashRAG_datasets)进行下载和使用。
+我们的仓库中同样提供了大量处理好的基准数据集，可以访问我们[huggingface上的数据集](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets)进行下载和使用。
 
 ### 2.4 下载文档集合
 
