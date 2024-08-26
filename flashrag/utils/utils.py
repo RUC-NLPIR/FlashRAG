@@ -95,10 +95,7 @@ def get_refiner(config, retriever=None, generator=None):
     refiner_path = config["refiner_model_path"]
 
     if refiner_path is None:
-        refiner_path = DEFAULT_PATH_DICT.get(refiner_name)
-
-    if refiner_path is None:
-        raise ValueError("Refiner path is not specified and no default path available!")
+        refiner_path = DEFAULT_PATH_DICT.get(refiner_name, None)
 
     model_config = AutoConfig.from_pretrained(refiner_path)
     arch = model_config.architectures[0].lower()
