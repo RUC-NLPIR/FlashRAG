@@ -57,7 +57,7 @@ The document collection contains a large number of segmented paragraphs, serving
 > Due to the small number of documents, many queries may not find relevant texts, which could affect the final retrieval results.
 
 
-If you need to obtain the full document collection, you can visit our [huggingface dataset](https://huggingface.co/datasets/ignore/FlashRAG_datasets) to download and use them.
+If you need to obtain the full document collection, you can visit our [huggingface dataset](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets) to download and use them.
 
 
 ### 2.5 Building the Retrieval Index

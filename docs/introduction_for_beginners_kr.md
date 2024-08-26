@@ -49,7 +49,7 @@ pip install -e .
 
 간단히 하기 위해 NQ에서 17개의 데이터를 샘플링한 토이 데이터셋을 제공하며, 이는 [examples/quick_start/dataset/nq](../examples/quick_start/dataset/nq/)에 있습니다. 이후의 RAG 프로세스는 이 질문들에 대해 수행될 것입니다.
 
-저희 리포지토리에는 많은 양의 처리된 벤치마크 데이터셋도 제공합니다. [huggingface datasets](https://huggingface.co/datasets/ignore/FlashRAG_datasets)에서 다운로드하여 사용할 수 있습니다.
+저희 리포지토리에는 많은 양의 처리된 벤치마크 데이터셋도 제공합니다. [huggingface datasets](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets)에서 다운로드하여 사용할 수 있습니다.
 
 ### 2.4 문서 컬렉션 다운로드
 
