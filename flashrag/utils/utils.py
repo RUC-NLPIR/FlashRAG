@@ -104,7 +104,7 @@ def get_refiner(config, retriever=None, generator=None):
     except:
         model_config, arch = "", ""
 
-    if "recomp" in refiner_name or "recomp" in refiner_path or "bert" in arch:
+    if "recomp" in refiner_name or "bert" in arch:
         if model_config.model_type == "t5":
             refiner_class = "AbstractiveRecompRefiner"
         else:
