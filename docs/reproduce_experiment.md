@@ -6,8 +6,8 @@ In this document, we will introduce how to reproduce the results of various meth
 
 - Install FlashRAG and dependencies
 - Download [Llama3-8B-instruct](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct), [E5-base-v2](https://huggingface.co/intfloat/e5-base-v2)
-- Download datasets (you can download from our repo: [here](https://huggingface.co/datasets/ignore/FlashRAG_datasets))
-- Download retrieval corpus (from [here](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets))
+- Download datasets (you can download from our repo: [here](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets))
+- Download retrieval corpus (from [here](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/tree/main/retrieval-corpus))
 - Build index for retrieval, using E5 for embedding (see [how to build index?](./building-index.md))
 
 ## Reproduce Step
