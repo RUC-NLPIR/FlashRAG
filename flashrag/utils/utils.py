@@ -92,13 +92,17 @@ def get_refiner(config, retriever=None, generator=None):
     REFINER_MODULE = importlib.import_module("flashrag.refiner")
 
     refiner_name = config["refiner_name"]
-    refiner_path = config["refiner_model_path"]
+    refiner_path = (
+        config["refiner_model_path"]
+        if config["refiner_model_path"] is not None
+        else DEFAULT_PATH_DICT.get(refiner_name, None)
+    )
 
-    if refiner_path is None:
-        refiner_path = DEFAULT_PATH_DICT.get(refiner_name, None)
-
-    model_config = AutoConfig.from_pretrained(refiner_path)
-    arch = model_config.architectures[0].lower()
+    try:
+        model_config = AutoConfig.from_pretrained(refiner_path)
+        arch = model_config.architectures[0].lower()
+    except:
+        model_config, arch = "", ""
 
     if "recomp" in refiner_name or "recomp" in refiner_path or "bert" in arch:
         if model_config.model_type == "t5":
