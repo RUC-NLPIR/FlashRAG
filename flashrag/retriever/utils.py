@@ -28,7 +28,7 @@ def pooling(pooler_output, last_hidden_state, attention_mask=None, pooling_metho
 
 
 def load_corpus(corpus_path: str):
-    corpus = datasets.load_dataset("json", data_files=corpus_path, split="train", num_proc=4)
+    corpus = datasets.load_dataset("json", data_files=corpus_path, split="train")
     return corpus
 
 
