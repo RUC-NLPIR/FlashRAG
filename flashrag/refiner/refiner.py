@@ -191,7 +191,8 @@ class ExtractiveRefiner(BaseRefiner):
 
         # split into sentences: [[sent1, sent2,...], [...]]
         sent_lists = [
-            [i.strip() for i in re.split(r"(?<=[.!?])\s+", res) if len(i.strip()) > 5] for res in retrieval_results
+            [i.strip() for i in re.split(r"(?<=[.!?])\s+", " ".join(res)) if len(i.strip()) > 5]
+            for res in retrieval_results
         ]
         score_lists = []  # matching scores, size == sent_lists
         for idx in tqdm(range(0, len(questions), batch_size), desc="Refining process: "):
