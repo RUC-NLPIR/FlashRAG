@@ -12,8 +12,9 @@ class IterativePipeline(BasicPipeline):
     def __init__(self, config, prompt_template=None, iter_num=3):
         super().__init__(config, prompt_template)
         self.iter_num = iter_num
-        self.retriever = get_retriever(config)
         self.generator = get_generator(config)
+        self.retriever = get_retriever(config)
+        
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         questions = dataset.question
@@ -107,8 +108,8 @@ class SelfRAGPipeline(BasicPipeline):
     ):
 
         super().__init__(config, prompt_template)
-        self.retriever = get_retriever(config)
         self.generator = get_generator(config)
+        self.retriever = get_retriever(config)
 
         assert mode in ["adaptive_retrieval", "always_retrieve", "no_retrieval"]
 
@@ -686,8 +687,9 @@ class FLAREPipeline(BasicPipeline):
     ):
         super().__init__(config, prompt_template)
 
-        self.retriever = get_retriever(config)
         self.generator = get_generator(config)
+        self.retriever = get_retriever(config)
+
         self.threshold = threshold
         self.max_generation_length = max_generation_length
         self.max_iter_num = max_iter_num
@@ -790,8 +792,8 @@ class SelfAskPipeline(BasicPipeline):
         super().__init__(config, prompt_template)
         from flashrag.prompt.selfask_examplars import SELF_ASK_PROMPT_SINGLE_HOP, SELF_ASK_PROMPT_MULTI_HOP
 
-        self.retriever = get_retriever(config)
         self.generator = get_generator(config)
+        self.retriever = get_retriever(config)
 
         self.single_hop = single_hop
         self.max_iter = max_iter
@@ -914,8 +916,9 @@ class IRCOTPipeline(BasicPipeline):
             )
 
         super().__init__(config, prompt_template)
-        self.retriever = get_retriever(config) if retriever is None else retriever
         self.generator = get_generator(config) if generator is None else generator
+        self.retriever = get_retriever(config) if retriever is None else retriever
+
         self.max_iter = max_iter
 
     def run_item(self, item):

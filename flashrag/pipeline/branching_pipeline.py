@@ -14,10 +14,11 @@ class REPLUGPipeline(BasicPipeline):
         from flashrag.pipeline.replug_utils import load_replug_model
 
         super().__init__(config, prompt_template)
-        self.retriever = get_retriever(config)
         # load specify model for REPLUG
         model = load_replug_model(config["generator_model_path"])
         self.generator = get_generator(config, model=model)
+
+        self.retriever = get_retriever(config)
 
     def build_single_doc_prompt(self, question: str, doc_list: List[str]):
         return [self.prompt_template.get_string(question=question, formatted_reference=doc) for doc in doc_list]
@@ -63,8 +64,9 @@ class SuRePipeline(BasicPipeline):
     def __init__(self, config, prompt_template=None):
         super().__init__(config, prompt_template)
         self.config = config
-        self.retriever = get_retriever(config)
         self.generator = get_generator(config)
+        self.retriever = get_retriever(config)
+
         self.load_prompts()
 
     def load_prompts(self):

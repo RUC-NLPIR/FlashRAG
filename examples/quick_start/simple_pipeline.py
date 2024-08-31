@@ -32,7 +32,17 @@ prompt_templete = PromptTemplate(
                     \nThe following are given documents.\n\n{reference}",
     user_prompt="Question: {question}\nAnswer:",
 )
-pipeline = SequentialPipeline(config, prompt_template=prompt_templete)
+
+from flashrag.utils import get_generator
+
+generator = get_generator(config)
+
+tokenizer = AutoTokenizer.from_pretrained(args.model_path)
+tokenizer.pad_token = "<lendoftext|>"
+generator.tokenizer = tokenizer
+
+pipeline = SequentialPipeline(config, prompt_template=prompt_templete, generator=generator)
+
 
 output_dataset = pipeline.run(test_data, do_eval=True)
 print("---generation output---")

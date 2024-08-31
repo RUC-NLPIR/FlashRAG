@@ -141,8 +141,8 @@ class ConditionalPipeline(BasicPipeline):
 
         super().__init__(config, prompt_template)
         self.judger = get_judger(config)
-        self.retriever = get_retriever(config)
         self.generator = get_generator(config)
+        self.retriever = get_retriever(config)
 
         self.sequential_pipeline = SequentialPipeline(
             config, prompt_template, retriever=self.retriever, generator=self.generator
@@ -188,8 +188,10 @@ class AdaptivePipeline(BasicPipeline):
         # load adaptive classifier as judger
         self.judger = get_judger(config)
 
-        retriever = get_retriever(config)
         generator = get_generator(config)
+        retriever = get_retriever(config)
+        self.generator = generator
+        self.retriever = retriever
 
         # Load three pipeline for three types of query: naive/single-hop/multi-hop
         from flashrag.pipeline import IRCOTPipeline
