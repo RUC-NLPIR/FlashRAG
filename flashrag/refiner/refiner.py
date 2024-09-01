@@ -203,7 +203,7 @@ class ExtractiveRefiner(BaseRefiner):
             sent_embs = self.encode(sum(batch_sents, []), is_query=False)  # n*d
             scores = question_embs @ sent_embs.T
             start_idx = 0
-            for row_score, single_list in zip(scores, sent_lists):
+            for row_score, single_list in zip(scores, batch_sents):
                 row_score = row_score.tolist()
                 score_lists.append(row_score[start_idx : start_idx + len(single_list)])
                 start_idx += len(single_list)
@@ -211,11 +211,13 @@ class ExtractiveRefiner(BaseRefiner):
         # select topk sents
         retain_lists = []
         for sent_scores, sent_list in zip(score_lists, sent_lists):
+            assert len(sent_scores) == len(sent_list)
             if len(sent_scores) < self.topk:
                 retain_lists.append(sent_list)
                 continue
-            topk_idxs = torch.topk(torch.Tensor(sent_scores), self.topk).indices.tolist()
-            retain_lists.append([sent_list[idx] for idx in sorted(topk_idxs)])
+
+            topk_idxs = torch.topk(torch.Tensor(sent_scores), min(self.topk, len(sent_scores))).indices.tolist()
+            retain_lists.append([sent_list[idx] for idx in sorted(topk_idxs) if idx < len(sent_list)])
 
         return [" ".join(sents) for sents in retain_lists]
 
