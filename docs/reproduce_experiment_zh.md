@@ -95,6 +95,16 @@
 - 额外步骤1：从[官方仓库](https://huggingface.co/yutaozhu94/SPRING)下载 embedding 文件
 - 额外步骤2：在 `spring` 函数中修改 `token_embedding_path`
 
+#### Adaptive-RAG
+
+该方法需要一个分类器对查询进行分类。由于作者没有提供官方的检查点，我们使用了其他人在Huggingface上训练的检查点进行实验（这可能会导致结果不一致）。
+
+后续如果官方开源了checkpoint，我们将更新实验结果。
+
+- 额外步骤1：从 Huggingface 仓库下载分类器模型（**非官方**）：[illuminoplanet/combined_flan_t5_xl_classifier](https://huggingface.co/illuminoplanet/combined_flan_t5_xl_classifier)
+- 额外步骤2：修改 `adaptive` 函数中的 `model_path`。
+
+
 ### 3. 运行方法
 
 使用以下命令在 NQ 数据集上运行实验。

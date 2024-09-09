@@ -531,6 +531,27 @@ def spring(args):
     )
     result = pipeline.run(test_data)
 
+def adaptive(args):
+    judger_name = "adaptive-rag"
+    model_path = "illuminoplanet/adaptive-rag-classifier"
+
+    config_dict = {
+        "judger_name": judger_name,
+        "judger_config": {"model_path": model_path},
+        "save_note": "adaptive-rag",
+        "gpu_id": args.gpu_id,
+        "dataset_name": args.dataset_name,
+    }
+    # preparation
+    config = Config("my_config.yaml", config_dict)
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+
+    from flashrag.pipeline import AdaptivePipeline
+
+    pipeline = AdaptivePipeline(config)
+    result = pipeline.run(test_data)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Running exp")
@@ -556,6 +577,7 @@ if __name__ == "__main__":
         "iterretgen": iterretgen,
         "ircot": ircot,
         "trace": trace,
+        'adaptive': adaptive, 
     }
 
     args = parser.parse_args()

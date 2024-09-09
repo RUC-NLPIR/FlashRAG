@@ -95,7 +95,16 @@ This method requires using a trained model and currently only supports running i
 This method requires a virtual token embedding file and currently only supports running in the `hf` framework.
 
 - Additional Step1: Download virtual token embedding file from [official repo](https://huggingface.co/yutaozhu94/SPRING)
-- Additional Step2: Modify the `token_embedding_path` in teh `spring` function.
+- Additional Step2: Modify the `token_embedding_path` in the `spring` function.
+
+#### Adaptive-RAG
+
+This method requires a classifier to classify the query. Since the author did not provide an official checkpoint, we used a checkpoint trained by others on Huggingface for the experiment (which may result in inconsistent results).
+
+If the official open-source checkpoint is released in the future, we will update the experimental results.
+
+- Additional Step1: Download classifier model from huggingface repo (**not official**): [illuminoplanet/combined_flan_t5_xl_classifier](https://huggingface.co/illuminoplanet/combined_flan_t5_xl_classifier)
+- Additional Step2: Modify the `model_path` in `adaptive` function.
 
 ### 3. Run methods
 
