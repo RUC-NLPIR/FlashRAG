@@ -46,8 +46,9 @@ st.write("This demo retrieves documents and generates responses based on user in
 query = st.text_area("Enter your prompt:")
 
 config = Config("my_config.yaml", config_dict=config_dict)
-retriever = load_retriever(config)
 generator = load_generator(config)
+retriever = load_retriever(config)
+
 
 system_prompt_rag = (
     "You are a friendly AI Assistant."
