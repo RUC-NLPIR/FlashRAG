@@ -14,8 +14,11 @@ def parse_query(model_name, query_list, is_query=True):
 
         zh_char = 0
         for c in str:
-            if "CJK" in unicodedata.name(c):
-                zh_char += 1
+            try:
+                if "CJK" in unicodedata.name(c):
+                    zh_char += 1
+            except:
+                continue
         if zh_char / len(str) > 0.2:
             return True
         else:
