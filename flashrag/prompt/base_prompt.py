@@ -71,7 +71,7 @@ class PromptTemplate:
             if self.is_openai:
                 for item in input:
                     if item["role"] == "system":
-                        item["role"] == "assistant"
+                        item["role"] = "assistant"
             else:
                 input = self.tokenizer.apply_chat_template(input, tokenize=False, add_generation_prompt=True)
         else:
