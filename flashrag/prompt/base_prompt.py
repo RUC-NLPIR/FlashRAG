@@ -48,7 +48,26 @@ class PromptTemplate:
             if not flag and holder != "reference":
                 assert False
 
-    def get_string(self, question, retrieval_result=None, formatted_reference=None, previous_gen=None, **params):
+    def get_string(self, question, retrieval_result=None, formatted_reference=None, previous_gen=None, messages=None, **params):
+        if messages is not None:
+            if isinstance(messages, str):
+                return messages
+            if self.is_chat and self.enable_chat:
+                if self.is_openai:
+                    for item in input:
+                        if item["role"] == "system":
+                            item["role"] = "assistant"
+                    return messages
+                else:
+                    prompt = self.tokenizer.apply_chat_template(
+                        messages, tokenize=False, add_generation_prompt=True
+                    )
+                    return prompt
+            else:
+                prompt = "\n\n".join(
+                    [message['content'] for message in messages if message['content']]
+                )
+                return prompt
 
         if formatted_reference is None:
             if retrieval_result is not None:
