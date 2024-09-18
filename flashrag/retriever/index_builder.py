@@ -7,6 +7,7 @@ from typing import cast
 import shutil
 import subprocess
 import argparse
+import datasets
 import torch
 from tqdm import tqdm
 from flashrag.retriever.utils import load_model, load_corpus, pooling
@@ -30,6 +31,7 @@ class Index_Builder:
         save_embedding=False,
         faiss_gpu=False,
         use_sentence_transformer=False,
+        bm25_backend='bm25s'
     ):
 
         self.retrieval_method = retrieval_method.lower()
@@ -45,6 +47,7 @@ class Index_Builder:
         self.save_embedding = save_embedding
         self.faiss_gpu = faiss_gpu
         self.use_sentence_transformer = use_sentence_transformer
+        self.bm25_backend = bm25_backend
 
         self.gpu_num = torch.cuda.device_count()
         # prepare save dir
@@ -77,11 +80,16 @@ class Index_Builder:
     def build_index(self):
         r"""Constructing different indexes based on selective retrieval method."""
         if self.retrieval_method == "bm25":
-            self.build_bm25_index()
+            if self.bm25_backend == 'pyserini':
+                self.build_bm25_index_pyserini()
+            elif self.bm25_backend == 'bm25s':
+                self.build_bm25_index_bm25s()
+            else:
+                assert False, "Invalid bm25 backend!"
         else:
             self.build_dense_index()
 
-    def build_bm25_index(self):
+    def build_bm25_index_pyserini(self):
         """Building BM25 index based on Pyserini library.
 
         Reference: https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation
@@ -114,6 +122,23 @@ class Index_Builder:
         shutil.rmtree(temp_dir)
 
         print("Finish!")
+
+    def build_bm25_index_bm25s(self):
+        """Building BM25 index based on bm25s library."""
+
+        import bm25s
+        
+        self.save_dir = os.path.join(self.save_dir, 'bm25')
+        os.makedirs(self.save_dir, exist_ok=True)
+
+        corpus = datasets.load_dataset("json", data_files=self.corpus_path, split="train")
+        corpus_text = corpus['contents']
+        retriever = bm25s.BM25(corpus=corpus, backend='numba')
+        retriever.index(corpus_text)
+        retriever.save(self.save_dir,corpus=corpus)
+
+        print("Finish!")
+
 
     def _load_embedding(self, embedding_path, corpus_size, hidden_size):
         all_embeddings = np.memmap(embedding_path, mode="r", dtype=np.float32).reshape(corpus_size, hidden_size)
@@ -270,6 +295,7 @@ def main():
     parser.add_argument("--save_embedding", action="store_true", default=False)
     parser.add_argument("--faiss_gpu", default=False, action="store_true")
     parser.add_argument("--sentence_transformer", action="store_true", default=False)
+    parser.add_argument("--bm25_backend", default='bm25s', choices=['bm25s','pyserini'])
 
     args = parser.parse_args()
 
@@ -299,6 +325,7 @@ def main():
         save_embedding=args.save_embedding,
         faiss_gpu=args.faiss_gpu,
         use_sentence_transformer=args.sentence_transformer,
+        bm25_backend=args.bm25_backend
     )
     index_builder.build_index()
 

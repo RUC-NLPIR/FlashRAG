@@ -179,13 +179,27 @@ class BM25Retriever(BaseRetriever):
 
     def __init__(self, config):
         super().__init__(config)
-        from pyserini.search.lucene import LuceneSearcher
+        self.backend = config['bm25_backend']
 
-        self.searcher = LuceneSearcher(self.index_path)
-        self.contain_doc = self._check_contain_doc()
-        if not self.contain_doc:
-            self.corpus = load_corpus(self.corpus_path)
-        self.max_process_num = 8
+        if self.backend == 'pyserini':
+            # Warning: the method based on pyserini will be deprecated
+            from pyserini.search.lucene import LuceneSearcher
+
+            self.searcher = LuceneSearcher(self.index_path)
+            self.contain_doc = self._check_contain_doc()
+            if not self.contain_doc:
+                self.corpus = load_corpus(self.corpus_path)
+            self.max_process_num = 8
+        elif self.backend == 'bm25s':
+            import Stemmer
+            import bm25s
+
+            stemmer = Stemmer.Stemmer('english')
+            self.searcher = bm25s.BM25.load(self.index_path, mmap=True, load_corpus=True)
+            self.searcher.backend = 'numba'
+            self.tokenizer = bm25s.tokenization.Tokenizer(stemmer=stemmer)
+        else:
+            assert False, 'Invalid bm25 backend!'
 
     def _check_contain_doc(self):
         r"""Check if the index contains document content"""
@@ -194,31 +208,39 @@ class BM25Retriever(BaseRetriever):
     def _search(self, query: str, num: int = None, return_score=False) -> List[Dict[str, str]]:
         if num is None:
             num = self.topk
-        hits = self.searcher.search(query, num)
-        if len(hits) < 1:
-            if return_score:
-                return [], []
+        if self.backend == 'pyserini': 
+            hits = self.searcher.search(query, num)
+            if len(hits) < 1:
+                if return_score:
+                    return [], []
+                else:
+                    return []
+
+            scores = [hit.score for hit in hits]
+            if len(hits) < num:
+                warnings.warn("Not enough documents retrieved!")
             else:
-                return []
+                hits = hits[:num]
 
-        scores = [hit.score for hit in hits]
-        if len(hits) < num:
-            warnings.warn("Not enough documents retrieved!")
+            if self.contain_doc:
+                all_contents = [json.loads(self.searcher.doc(hit.docid).raw())["contents"] for hit in hits]
+                results = [
+                    {
+                        "title": content.split("\n")[0].strip('"'),
+                        "text": "\n".join(content.split("\n")[1:]),
+                        "contents": content,
+                    }
+                    for content in all_contents
+                ]
+            else:
+                results = load_docs(self.corpus, [hit.docid for hit in hits])
+        elif self.backend == 'bm25s':
+            query_tokens = self.tokenizer.tokenize([query])
+            results, scores = self.searcher.retrieve(query_tokens, k=num)
+            results = results[0]
+            scores = scores[0]
         else:
-            hits = hits[:num]
-
-        if self.contain_doc:
-            all_contents = [json.loads(self.searcher.doc(hit.docid).raw())["contents"] for hit in hits]
-            results = [
-                {
-                    "title": content.split("\n")[0].strip('"'),
-                    "text": "\n".join(content.split("\n")[1:]),
-                    "contents": content,
-                }
-                for content in all_contents
-            ]
-        else:
-            results = load_docs(self.corpus, [hit.docid for hit in hits])
+            assert False, 'Invalid bm25 backend!'
 
         if return_score:
             return results, scores
@@ -226,13 +248,19 @@ class BM25Retriever(BaseRetriever):
             return results
 
     def _batch_search(self, query_list, num: int = None, return_score=False):
-        # TODO: modify batch method
-        results = []
-        scores = []
-        for query in query_list:
-            item_result, item_score = self._search(query, num, True)
-            results.append(item_result)
-            scores.append(item_score)
+        if self.backend == 'pyserini': 
+            # TODO: modify batch method
+            results = []
+            scores = []
+            for query in query_list:
+                item_result, item_score = self._search(query, num, True)
+                results.append(item_result)
+                scores.append(item_score)
+        elif self.backend == 'bm25s':
+            query_tokens = self.tokenizer.tokenize(query_list)
+            results, scores = self.searcher.retrieve(query_tokens, k=num)
+        else:
+            assert False, 'Invalid bm25 backend!'
 
         if return_score:
             return results, scores

@@ -19,7 +19,7 @@ Then, use the following code to build your own index.
 
 * For **dense retrieval methods**, especially the popular embedding models, we use `faiss` to build index. 
 
-* For **sparse retrieval method (BM25)**, we construct corpus as Lucene inverted indexes based on `Pyserini`. The constructed index contains the original doc.
+* For **sparse retrieval method (BM25)**, we construct corpus as Lucene inverted indexes based on `Pyserini` or `bm25s`. The constructed index contains the original doc.
 
 
 #### For dense retrieval methods
@@ -63,11 +63,25 @@ python -m flashrag.retriever.index_builder \
 
 #### For sparse retrieval method (BM25)
 
-If building a bm25 index, there is no need to specify `model_path`:
+If building a bm25 index, there is no need to specify `model_path`.
+
+##### Use BM25s to build index
+
 ```bash
 python -m flashrag.retriever.index_builder \
     --retrieval_method bm25 \
     --corpus_path indexes/sample_corpus.jsonl \
+    --bm25_backend bm25s \
+    --save_dir indexes/ 
+```
+
+##### Use Pyserini to build index
+
+```bash
+python -m flashrag.retriever.index_builder \
+    --retrieval_method bm25 \
+    --corpus_path indexes/sample_corpus.jsonl \
+    --bm25_backend pyserini \
     --save_dir indexes/ 
 ```
 
