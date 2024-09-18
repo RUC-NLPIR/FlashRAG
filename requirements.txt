@@ -13,3 +13,6 @@ torch
 tqdm
 transformers>=4.40.0
 bm25s[full]
+vllm>=0.4.1
+fschat
+streamlit

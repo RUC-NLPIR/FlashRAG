@@ -89,7 +89,19 @@ To get started with FlashRAG, simply clone it from Github and install (requires 
 ```bash
 git clone https://github.com/RUC-NLPIR/FlashRAG.git
 cd FlashRAG
-pip install -e . 
+pip install -e .[core] 
+```
+
+If you want to use sentence-transformers or pyserini, you can install the optional dependencies:
+```bash
+# Install all extra dependencies
+pip install -e .[full]
+
+# Install sentence-transformers
+pip install sentence-transformers
+
+# Install pyserini for bm25
+pip install pyserini
 ```
 
 Due to the incompatibility when installing `faiss` using `pip`, it is necessary to use the following conda command for installation.

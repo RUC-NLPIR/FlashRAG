@@ -8,8 +8,6 @@ with open("README.md", "r") as fh:
 extras_requir = {
     'core': requirements,
     'retriever': ['pyserini', 'sentence-transformers>=3.0.1'],
-    'generator': ['vllm>=0.4.1', 'fschat'],
-    'demo': ['streamlit']
 }
 extras_requir['full'] = sum(extras_requir.values(), [])
 
