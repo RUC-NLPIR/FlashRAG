@@ -66,9 +66,12 @@ FlashRAG is still under development and there are many issues and room for impro
 
 [24/08/02] We add support for a new method [<u>Spring</u>](https://arxiv.org/abs/2405.19670), significantly improve the performance of LLM by adding only a few token embeddings. See it result in [<u>result table</u>](#robot-supporting-methods).
 
-[24/07/17] Due to some unknown issues with HuggingFace, our original dataset link has been invalid. We have updaded it. Please check the [new link](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/) if you encounter any problems.
+[24/07/17] Due to some unknown issues with HuggingFace, our original dataset link has been invalid. We have updated it. Please check the [new link](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/) if you encounter any problems.
 
 [24/07/06] We add support for a new method: [<u>Trace</u>](https://arxiv.org/abs/2406.11460), which refine text by constructing a knowledge graph. See it [<u>results</u>](#robot-supporting-methods) and [<u>details</u>](./docs/baseline_details.md).
+
+<details>
+<summary>Show more</summary>
 
 [24/06/19] We add support for a new method: [<u>IRCoT</u>](https://arxiv.org/abs/2212.10509), and update the [<u>result table</u>](#robot-supporting-methods).
 
@@ -80,7 +83,10 @@ FlashRAG is still under development and there are many issues and room for impro
 
 [24/06/02] We have provided an introduction of FlashRAG for beginners, see [<u>an introduction to flashrag</u>](./docs/introduction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md) [<u>한국어</u>](./docs/introduction_for_beginners_kr.md)).
 
-[24/05/31] We supported Openai-series models as generator. 
+[24/05/31] We supported Openai-series models as generator.
+
+</details>
+
 
 ## :wrench: Installation 
 
