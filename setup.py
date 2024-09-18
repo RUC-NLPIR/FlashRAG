@@ -5,11 +5,11 @@ with open("requirements.txt") as fp:
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-extras_requir = {
+extras_require = {
     'core': requirements,
     'retriever': ['pyserini', 'sentence-transformers>=3.0.1'],
 }
-extras_requir['full'] = sum(extras_requir.values(), [])
+extras_require['full'] = sum(extras_require.values(), [])
 
 setup(
     name="flashrag",
@@ -25,6 +25,6 @@ setup(
     include_package_data=True,
     package_data={"flashrag": ["/config/basic_config.yaml"]},
     install_requires=extras_requir['core'],
-    extras_requir=extras_requir,
+    extras_require=extras_require,
     python_requires=">=3.8",
 )
