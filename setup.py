@@ -24,7 +24,7 @@ setup(
     long_description_content_type="text/markdown",
     include_package_data=True,
     package_data={"flashrag": ["/config/basic_config.yaml"]},
-    install_requires=extras_requir['core'],
+    install_requires=extras_require['core'],
     extras_require=extras_require,
     python_requires=">=3.8",
 )
