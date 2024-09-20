@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
-with open("requirements.txt") as fp:
+with open("requirements.txt",encoding='utf-8') as fp:
     requirements = fp.read().splitlines()
-with open("README.md", "r") as fh:
+with open("README.md", "r",encoding='utf-8') as fh:
     long_description = fh.read()
 
 extras_require = {
