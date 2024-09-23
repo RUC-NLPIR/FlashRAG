@@ -1,11 +1,10 @@
 from typing import List
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-from flashrag.retriever.utils import load_model, pooling
+from flashrag.retriever.encoder import Encoder
 from tqdm import tqdm
 import re
 import torch
 import numpy as np
-
 
 class BaseRefiner:
     r"""Base object of Refiner method"""
@@ -142,43 +141,16 @@ class ExtractiveRefiner(BaseRefiner):
         # number of keeping sentences
         self.topk = config["refiner_topk"]
         self.pooling_method = config["refiner_pooling_method"]
-
         self.encode_max_length = config["refiner_encode_max_length"]
-
+        self.mini_batch_size = config['refiner_mini_batch_size'] if 'refiner_mini_batch_size' in config else 256
         # load model
-        self.encoder, self.tokenizer = load_model(self.model_path, use_fp16=True)
-
-    def encode(self, query_list: List[str], is_query=True):
-        if "e5" in self.model_path.lower():
-            if is_query:
-                query_list = [f"query: {query}" for query in query_list]
-            else:
-                query_list = [f"passage: {query}" for query in query_list]
-
-        inputs = self.tokenizer(
-            query_list, max_length=self.encode_max_length, padding=True, truncation=True, return_tensors="pt"
+        self.encoder = Encoder(
+            model_name=self.name, 
+            model_path=self.model_path, 
+            pooling_method=self.pooling_method, 
+            max_length=self.encode_max_length, 
+            use_fp16=True
         )
-        inputs = {k: v.cuda() for k, v in inputs.items()}
-
-        if "T5" in type(self.encoder).__name__:
-            # T5-based retrieval model
-            decoder_input_ids = torch.zeros((inputs["input_ids"].shape[0], 1), dtype=torch.long).to(
-                inputs["input_ids"].device
-            )
-            output = self.encoder(**inputs, decoder_input_ids=decoder_input_ids, return_dict=True)
-            query_emb = output.last_hidden_state[:, 0, :]
-
-        else:
-            output = self.encoder(**inputs, return_dict=True)
-            query_emb = pooling(
-                output.pooler_output, output.last_hidden_state, inputs["attention_mask"], self.pooling_method
-            )
-            if "dpr" not in self.model_path.lower():
-                query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
-
-        query_emb = query_emb.detach().cpu().numpy()
-        query_emb = query_emb.astype(np.float32)
-        return query_emb
 
     def batch_run(self, dataset, batch_size=16):
         questions = dataset.question
@@ -198,9 +170,16 @@ class ExtractiveRefiner(BaseRefiner):
         for idx in tqdm(range(0, len(questions), batch_size), desc="Refining process: "):
             batch_questions = questions[idx : idx + batch_size]
             batch_sents = sent_lists[idx : idx + batch_size]
+            question_embs = self.encoder.encode(batch_questions, is_query=True)
+            
+            flatten_batch_sents = sum(batch_sents, [])
+            sent_embs = []
+            for s_index in tqdm(range(0, len(flatten_batch_sents), self.mini_batchsize), desc='Sentence encoding..,'):
+                mini_batch_sents = flatten_batch_sents[s_index:s_index+self.mini_batchsize]
+                mini_sent_embs = self.encoder.encode(mini_batch_sents, is_query=False)
+                sent_embs.append(mini_sent_embs)
+            sent_embs = np.concatenate(sent_embs, axis=0)
 
-            question_embs = self.encode(batch_questions, is_query=True)
-            sent_embs = self.encode(sum(batch_sents, []), is_query=False)  # n*d
             scores = question_embs @ sent_embs.T
             start_idx = 0
             for row_score, single_list in zip(scores, batch_sents):
