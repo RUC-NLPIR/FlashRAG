@@ -103,10 +103,13 @@ cd FlashRAG
 pip install -e .[core] 
 ```
 
-If you want to use sentence-transformers or pyserini, you can install the optional dependencies:
+If you want to use vllm, sentence-transformers or pyserini, you can install the optional dependencies:
 ```bash
 # Install all extra dependencies
 pip install flashrag[full]
+
+# Install vllm for faster speed
+pip install vllm>=0.4.1
 
 # Install sentence-transformers
 pip install sentence-transformers

@@ -58,7 +58,7 @@ pip install -e .
 > 由于文档数量较少，可能很多query都无法搜到相关的文本，这可能会影响最终的检索结果。
 
 
-如果需要获取完整的文档集合，可以访问我们[huggingface上的数据集](https://huggingface.co/datasets/ignore/FlashRAG_datasets)进行下载和使用。
+如果需要获取完整的文档集合，可以访问我们[huggingface上的数据集](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/tree/main/retrieval-corpus)进行下载和使用。
 
 
 ### 2.5 构建用于检索的索引
