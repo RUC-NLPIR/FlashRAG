@@ -38,7 +38,7 @@ def cache_manager(func):
                         warnings.warn(f"The number of cached retrieval results is less than topk ({num})")
                     cache_res = cache_res[:num]
                     # separate the doc score
-                    doc_scores = [item.pop("score") for item in cache_res]
+                    doc_scores = [item["score"] for item in cache_res]
                     cache_results.append((cache_res, doc_scores))
                 else:
                     cache_results.append(None)
