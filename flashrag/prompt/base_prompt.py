@@ -1,5 +1,5 @@
 from transformers import AutoTokenizer, AutoConfig
-
+import tiktoken
 
 class PromptTemplate:
     placeholders = ["reference", "question"]
@@ -14,6 +14,7 @@ class PromptTemplate:
 
         self.config = config
         self.is_openai = config["framework"] == "openai"
+        self.max_input_len = config['generator_max_input_len']
         if not self.is_openai:
             self.generator_path = config["generator_model_path"]
             model_config = AutoConfig.from_pretrained(self.generator_path, trust_remote_code=True)
@@ -21,10 +22,11 @@ class PromptTemplate:
             self.is_chat = False
             if "chat" in model_name or "instruct" in model_name:
                 self.is_chat = True
-                self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path, trust_remote_code=True)
+            self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path, trust_remote_code=True)
         else:
             self.is_chat = True
             self.enable_chat = True
+            self.tokenizer = tiktoken.encoding_for_mode("gpt-4o")
 
         if len(system_prompt) == 0 and len(user_prompt) == 0:
             system_prompt = self.base_system_prompt
@@ -48,26 +50,61 @@ class PromptTemplate:
             if not flag and holder != "reference":
                 assert False
 
+    def truncate_prompt(self, prompt):
+        if self.is_openai:
+            truncated_messages = []
+            total_tokens = 0
+            assert isinstance(prompt, list)
+            for message in prompt:
+                role_content = message['content']
+                encoded_message = self.tokenizer.encode(role_content)
+
+                if total_tokens + len(encoded_message) <= self.max_input_len:
+                    truncated_messages.append(message)
+                    total_tokens += len(encoded_message)
+                else:
+                    print(f"The input text length is greater than the maximum length ({total_tokens + len(encoded_message)} > {self.max_input_len}) and has been truncated!")
+                    remaining_tokens = self.max_input_len - total_tokens
+                    truncated_message = self.encoding.decode(encoded_message[:remaining_tokens])
+                    message['content'] = truncated_message
+                    truncated_messages.append(message)
+                    break
+
+            return truncated_messages
+
+        else:
+            assert isinstance(prompt, str)
+            tokenized_prompt = self.tokenizer(prompt, truncation=False, return_tensors="pt").input_ids[0]
+
+            if len(tokenized_prompt) > self.max_input_len:
+                print(f"The input text length is greater than the maximum length ({len(tokenized_prompt)} > {self.max_input_len}) and has been truncated!")
+                half = int(self.max_input_len / 2)
+                prompt = self.tokenizer.decode(tokenized_prompt[:half], skip_special_tokens=True) + \
+                        self.tokenizer.decode(tokenized_prompt[-half:], skip_special_tokens=True)
+            return prompt
+
+
+
     def get_string(self, question=None, retrieval_result=None, formatted_reference=None, previous_gen=None, messages=None, **params):
         if messages is not None:
             if isinstance(messages, str):
-                return messages
+                return self.truncate_prompt(messages)
             if self.is_chat and self.enable_chat:
                 if self.is_openai:
                     for item in input:
                         if item["role"] == "system":
                             item["role"] = "assistant"
-                    return messages
+                    self.truncate_prompt(messages)
                 else:
                     prompt = self.tokenizer.apply_chat_template(
                         messages, tokenize=False, add_generation_prompt=True
                     )
-                    return prompt
+                    return self.truncate_prompt(prompt)
             else:
                 prompt = "\n\n".join(
                     [message['content'] for message in messages if message['content']]
                 )
-                return prompt
+                return self.truncate_prompt(prompt)
 
         if formatted_reference is None:
             if retrieval_result is not None:
@@ -99,7 +136,7 @@ class PromptTemplate:
         if previous_gen is not None and previous_gen not in ["", " "] and self.is_openai is False:
             input += previous_gen
 
-        return input
+        return self.truncate_prompt(input)
 
     def get_string_with_varying_examplars(
         self,
