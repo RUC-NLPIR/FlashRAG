@@ -174,8 +174,8 @@ class ExtractiveRefiner(BaseRefiner):
             
             flatten_batch_sents = sum(batch_sents, [])
             sent_embs = []
-            for s_index in tqdm(range(0, len(flatten_batch_sents), self.mini_batchsize), desc='Sentence encoding..,'):
-                mini_batch_sents = flatten_batch_sents[s_index:s_index+self.mini_batchsize]
+            for s_index in tqdm(range(0, len(flatten_batch_sents), self.mini_batch_size), desc='Sentence encoding..,'):
+                mini_batch_sents = flatten_batch_sents[s_index:s_index+self.mini_batch_size]
                 mini_sent_embs = self.encoder.encode(mini_batch_sents, is_query=False)
                 sent_embs.append(mini_sent_embs)
             sent_embs = np.concatenate(sent_embs, axis=0)

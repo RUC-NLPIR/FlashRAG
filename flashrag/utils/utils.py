@@ -101,7 +101,9 @@ def get_refiner(config, retriever=None, generator=None):
     try:
         model_config = AutoConfig.from_pretrained(refiner_path)
         arch = model_config.architectures[0].lower()
-    except:
+        print(arch)
+    except Exception as e:
+        print("Warning", e)
         model_config, arch = "", ""
 
     if "recomp" in refiner_name or "bert" in arch:
