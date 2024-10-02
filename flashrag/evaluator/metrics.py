@@ -238,8 +238,8 @@ class Retrieval_Recall(BaseMetric):
                     if normalize_answer(golden_answer) in normalize_answer(doc):
                         hit_list.append(True)
                         break
-                else:
-                    hit_list.append(False)
+                    else:
+                        hit_list.append(False)
             score = 1 if any(hit_list) else 0
             recall_score_list.append(score)
         recall_score = sum(recall_score_list) / len(recall_score_list)
