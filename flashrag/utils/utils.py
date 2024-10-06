@@ -86,8 +86,11 @@ def get_refiner(config, retriever=None, generator=None):
     # 预定义默认路径字典
     DEFAULT_PATH_DICT = {
         "recomp_abstractive_nq": "fangyuan/nq_abstractive_compressor",
-        "recomp:abstractive_tqa": "fangyuan/tqa_abstractive_compressor",
-        "recomp:abstractive_hotpotqa": "fangyuan/hotpotqa_abstractive",
+        "recomp_abstractive_tqa": "fangyuan/tqa_abstractive_compressor",
+        "recomp_abstractive_hotpotqa": "fangyuan/hotpotqa_abstractive",
+        "recomp_extractive_nq": "fangyuan/nq_extractive_compressor",
+        "recomp_extractive_tqa": "fangyuan/tqa_extractive_compressor",
+        "recomp_extractive_hotpotqa": "fangyuan/hotpotqa_extractive_compressor",
     }
     REFINER_MODULE = importlib.import_module("flashrag.refiner")
 
@@ -97,7 +100,8 @@ def get_refiner(config, retriever=None, generator=None):
         if config["refiner_model_path"] is not None
         else DEFAULT_PATH_DICT.get(refiner_name, None)
     )
-
+    if not config['refiner_model_path']:
+        config['refiner_model_path'] = refiner_path
     try:
         model_config = AutoConfig.from_pretrained(refiner_path)
         arch = model_config.architectures[0].lower()
