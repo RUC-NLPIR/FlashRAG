@@ -26,7 +26,7 @@ class PromptTemplate:
         else:
             self.is_chat = True
             self.enable_chat = True
-            self.tokenizer = tiktoken.encoding_for_mode("gpt-4o")
+            self.tokenizer = tiktoken.encoding_for_model("gpt-4o")
 
         if len(system_prompt) == 0 and len(user_prompt) == 0:
             system_prompt = self.base_system_prompt
