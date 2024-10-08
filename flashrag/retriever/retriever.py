@@ -194,10 +194,10 @@ class BM25Retriever(BaseRetriever):
             import Stemmer
             import bm25s
 
-            stemmer = Stemmer.Stemmer('english')
+            self.stemmer = Stemmer.Stemmer('english')
             self.searcher = bm25s.BM25.load(self.index_path, mmap=True, load_corpus=True)
             self.searcher.backend = 'numba'
-            self.tokenizer = bm25s.tokenization.Tokenizer(stemmer=stemmer)
+            
         else:
             assert False, 'Invalid bm25 backend!'
 
@@ -235,7 +235,8 @@ class BM25Retriever(BaseRetriever):
             else:
                 results = load_docs(self.corpus, [hit.docid for hit in hits])
         elif self.backend == 'bm25s':
-            query_tokens = self.tokenizer.tokenize([query])
+            import bm25s 
+            query_tokens = bm25s.tokenize([query], stemmer=self.stemmer)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
             results = results[0]
             scores = scores[0]
@@ -257,7 +258,8 @@ class BM25Retriever(BaseRetriever):
                 results.append(item_result)
                 scores.append(item_score)
         elif self.backend == 'bm25s':
-            query_tokens = self.tokenizer.tokenize(query_list)
+            import bm25s
+            query_tokens = bm25s.tokenize(query_list, stemmer=self.stemmer)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
         else:
             assert False, 'Invalid bm25 backend!'
