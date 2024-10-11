@@ -308,8 +308,8 @@ class HFCausalLMGenerator(BaseGenerator):
         )
         if "qwen" not in self.model_name:
             tokenizer.pad_token = tokenizer.eos_token
-        if "Llama-3" in self.model_name:
             tokenizer.pad_token_id = tokenizer.eos_token_id
+        
         tokenizer.padding_side = "left"
 
         return model, tokenizer
