@@ -59,6 +59,8 @@ FlashRAG is still under development and there are many issues and room for impro
 
 
 ## :page_with_curl: Changelog
+[24/10/13] A new in-domain dataset and corpus - [DomainRAG](https://arxiv.org/pdf/2406.05654) have been added to the dataset. The dataset is based on the internal enrollment data of Renmin University of China, covering seven types of tasks, which can be used for conducting domain-specific RAG testing.
+
 [24/09/24] We have released a version based on the MindSpore framework that supports Chinese hardware platforms. Please refer to [FlashRAG MindSpore](https://github.com/RUC-NLPIR/FlashRAG-MindSpore) for details.
 
 [24/09/18] Due to the complexity and limitations of installing Pyserini in certain environments, we have introduced a lightweight `BM25s` package as an alternative (faster and easier to use). The retriever based on Pyserini will be deprecated in future versions. To use retriever with `bm25s`, just set `bm25_backend` to `bm25s` in config.
@@ -496,6 +498,7 @@ Below is the list of datasets along with the corresponding sample sizes:
 | Entity Linking            | WNED            | Wiki             | /         | 8,995   | /      |
 | Slot Filling              | T-REx           | DBPedia          | 2,284,168 | 5,000   | /      |
 | Slot Filling              | Zero-shot RE    | wiki             | 147,909   | 3,724   | /      |
+| In-domain QA| DomainRAG | Web pages of RUC| / | / | 485|
 
 ### Document Corpus
 
