@@ -475,6 +475,7 @@ def trace(args):
         "dataset_name": args.dataset_name,
         "refiner_name": "kg-trace",
         "trace_config": trace_config,
+        "framework": "hf" # Trance only supports using Huggingface Transformers since it needs logits of outputs
     }
 
     # preparation
