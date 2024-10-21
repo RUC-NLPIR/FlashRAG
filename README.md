@@ -50,7 +50,6 @@ With FlashRAG and provided resources, you can effortlessly reproduce existing SO
 FlashRAG is still under development and there are many issues and room for improvement. We will continue to update. And we also sincerely welcome contributions on this open-source toolkit.
 
 - [x] Support OpenAI models
-- [ ] Support Claude and Gemini models
 - [x] Provdide instructions for each component
 - [x] Integrate sentence Transformers
 - [ ] Inlcude more RAG approaches
@@ -59,6 +58,8 @@ FlashRAG is still under development and there are many issues and room for impro
 
 
 ## :page_with_curl: Changelog
+[24/10/21] We have released a version based on the Paddle framework that supports Chinese hardware platforms. Please refer to [FlashRAG Paddle]([https://github.com/RUC-NLPIR/FlashRAG-MindSpore](https://github.com/RUC-NLPIR/FlashRAG-Paddle) for details.
+
 [24/10/13] A new in-domain dataset and corpus - [DomainRAG](https://arxiv.org/pdf/2406.05654) have been added to the dataset. The dataset is based on the internal enrollment data of Renmin University of China, covering seven types of tasks, which can be used for conducting domain-specific RAG testing.
 
 [24/09/24] We have released a version based on the MindSpore framework that supports Chinese hardware platforms. Please refer to [FlashRAG MindSpore](https://github.com/RUC-NLPIR/FlashRAG-MindSpore) for details.
