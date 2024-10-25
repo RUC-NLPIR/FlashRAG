@@ -24,7 +24,7 @@ class BaseGenerator:
         self.batch_size = config["generator_batch_size"]
         self.device = config["device"]
         self.gpu_num = torch.cuda.device_count()
-
+        self.config = config
         self.generation_params = config["generation_params"]
 
     def generate(self, input_list: list) -> List[str]:
@@ -217,8 +217,10 @@ class VLLMGenerator(BaseGenerator):
         generation_params = deepcopy(self.generation_params)
         generation_params.update(params)
         if "do_sample" in generation_params:
-            generation_params.pop("do_sample")
-
+            do_sample_flag = generation_params.pop("do_sample")
+            if not do_sample_flag:
+                generation_params['temperature'] = 0
+        generation_params['seed'] = self.config['seed']
         max_tokens = params.pop("max_tokens", None) or params.pop(
             "max_new_tokens", None
         )
