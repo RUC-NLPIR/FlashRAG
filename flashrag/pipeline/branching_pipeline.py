@@ -34,7 +34,7 @@ class REPLUGPipeline(BasicPipeline):
         from flashrag.pipeline.replug_utils import REPLUGLogitsProcessor
 
         input_query = dataset.question
-
+        input_query = [f"{self.retriever.query_instruction} {q}" for q in input_query]
         retrieval_results, doc_scores = self.retriever.batch_search(input_query, return_score=True)
         dataset.update_output("retrieval_result", retrieval_results)
         dataset.update_output("doc_scores", doc_scores)

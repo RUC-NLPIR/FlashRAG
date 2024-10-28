@@ -301,6 +301,7 @@ class DenseRetriever(BaseRetriever):
             )
         self.topk = config["retrieval_topk"]
         self.batch_size = self.config["retrieval_batch_size"]
+        self.query_instruction = config["query_instruction"]
 
     def _search(self, query: str, num: int = None, return_score=False):
         if num is None:
