@@ -1,44 +1,43 @@
-name-template: 'v$NEXT_PATCH_VERSION 🌈'
-tag-template: 'v$NEXT_PATCH_VERSION'
-version-template: $MAJOR.$MINOR.$PATCH
-# Emoji reference: https://gitmoji.carloscuesta.me/
-categories:
-  - title: '🚀 Features'
-    labels:
-      - 'feature'
-      - 'enhancement'
-      - 'kind/feature'
-  - title: '🐛 Bug Fixes'
-    labels:
-      - 'fix'
-      - 'bugfix'
-      - 'bug'
-      - 'regression'
-      - 'kind/bug'
-  - title: 📝 Documentation updates
-    labels:
-      - documentation
-      - 'kind/doc'
-  - title: 👻 Maintenance
-    labels:
-      - chore
-      - dependencies
-      - 'kind/chore'
-      - 'kind/dep'
-  - title: 🚦 Tests
-    labels:
-      - test
-      - tests
-exclude-labels:
-  - reverted
-  - no-changelog
-  - skip-changelog
-  - invalid
-change-template: '* $TITLE (#$NUMBER) @$AUTHOR'
-template: |
-  ## What’s Changed
-  $CHANGES
-Terms
-Privacy
-Security
+name: Create Release with Full Commit History
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Get all commit messages since last release
+      id: get_commits
+      run: |
+        TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+        if [ -z "$TAG" ]; then
+          echo "No previous tag found, listing all commits"
+          COMMITS=$(git log --pretty=format:"%h %s")
+        else
+          echo "Previous tag: $TAG"
+          COMMITS=$(git log $TAG..HEAD --pretty=format:"%h %s")
+        fi
+        echo "${COMMITS}"
+        echo "::set-output name=commits::${COMMITS}"
+
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## Changes in this Release
+          ${{ steps.get_commits.outputs.commits }}
+        draft: false
+        prerelease: false
+
 
