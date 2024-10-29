@@ -10,7 +10,7 @@ import argparse
 import datasets
 import torch
 from tqdm import tqdm
-from flashrag.retriever.utils import load_model, load_corpus, pooling
+from flashrag.retriever.utils import load_model, load_corpus, pooling, set_default_instruction
 
 
 class Index_Builder:
@@ -25,7 +25,8 @@ class Index_Builder:
         max_length,
         batch_size,
         use_fp16,
-        pooling_method,
+        pooling_method=None,
+        instruction=None,
         faiss_type=None,
         embedding_path=None,
         save_embedding=False,
@@ -41,13 +42,50 @@ class Index_Builder:
         self.max_length = max_length
         self.batch_size = batch_size
         self.use_fp16 = use_fp16
-        self.pooling_method = pooling_method
+        self.instruction = instruction
         self.faiss_type = faiss_type if faiss_type is not None else "Flat"
         self.embedding_path = embedding_path
         self.save_embedding = save_embedding
         self.faiss_gpu = faiss_gpu
         self.use_sentence_transformer = use_sentence_transformer
         self.bm25_backend = bm25_backend
+
+        # set instruction for encode
+        if self.instruction is not None:
+            self.instruction = self.instruction.strip() + " "
+            print("Set instruction for encoding:", self.instruction)
+        else:
+            self.instruction = set_default_instruction(self.retrieval_method, is_query=False)
+            if self.instruction == "":
+                raise Warning("Instruction is not set!")
+            else:
+                raise Warning("Instruction is set to default:", self.instruction)
+
+        #. config pooling method
+        if pooling_method is None:
+            try:
+                # read pooling method from 1_Pooling/config.json
+                pooling_config = json.load(open(os.path.join(self.model_path, "1_Pooling/config.json")))
+                for k, v in pooling_config.items():
+                    if k.startswith("pooling_mode") and v == True:
+                        pooling_method = k.split("pooling_mode_")[-1]
+                        if pooling_method == 'mean_tokens':
+                            pooling_method = 'mean'
+                        elif pooling_method == 'cls_token':
+                            pooling_method = 'cls'
+                        else:
+                            # raise warning: not implemented pooling method
+                            warnings.warn(f"Pooling method {pooling_method} is not implemented.", UserWarning)
+                            pooling_method = 'mean'
+                        break
+            except:
+                print(f"Pooling method not found in {self.model_path}, use default pooling method (mean).")
+                # use default pooling method
+                pooling_method = 'mean'
+        else:
+            if pooling_method not in ['mean', 'cls', 'pooler']:
+                raise ValueError(f"Invalid pooling method {pooling_method}.")
+        self.pooling_method = pooling_method
 
         self.gpu_num = torch.cuda.device_count()
         # prepare save dir
@@ -162,8 +200,7 @@ class Index_Builder:
             self.batch_size = self.batch_size * self.gpu_num
 
         sentence_list = [item["contents"] for item in self.corpus]
-        if self.retrieval_method == "e5":
-            sentence_list = [f"passage: {doc}" for doc in sentence_list]
+        sentence_list = [f"{self.instruction}{doc}" for doc in sentence_list]
         all_embeddings = self.encoder.encode(sentence_list, batch_size=self.batch_size)
 
         return all_embeddings
@@ -175,12 +212,9 @@ class Index_Builder:
             self.batch_size = self.batch_size * self.gpu_num
 
         all_embeddings = []
-
         for start_idx in tqdm(range(0, len(self.corpus), self.batch_size), desc="Inference Embeddings:"):
             batch_data = self.corpus[start_idx : start_idx + self.batch_size]["contents"]
-
-            if self.retrieval_method == "e5":
-                batch_data = [f"passage: {doc}" for doc in batch_data]
+            batch_data = [f"{self.instruction}{doc}" for doc in batch_data]
 
             inputs = self.tokenizer(
                 batch_data,
@@ -273,9 +307,6 @@ class Index_Builder:
         print("Finish!")
 
 
-MODEL2POOLING = {"e5": "mean", "bge": "cls", "contriever": "mean", "jina": "mean"}
-
-
 def main():
     parser = argparse.ArgumentParser(description="Creating index.")
 
@@ -290,6 +321,7 @@ def main():
     parser.add_argument("--batch_size", type=int, default=512)
     parser.add_argument("--use_fp16", default=False, action="store_true")
     parser.add_argument("--pooling_method", type=str, default=None)
+    parser.add_argument("--instruction", type=str, default=None)
     parser.add_argument("--faiss_type", default=None, type=str)
     parser.add_argument("--embedding_path", default=None, type=str)
     parser.add_argument("--save_embedding", action="store_true", default=False)
@@ -299,18 +331,6 @@ def main():
 
     args = parser.parse_args()
 
-    if args.pooling_method is None:
-        pooling_method = "mean"
-        for k, v in MODEL2POOLING.items():
-            if k in args.retrieval_method.lower():
-                pooling_method = v
-                break
-    else:
-        if args.pooling_method not in ["mean", "cls", "pooler"]:
-            raise NotImplementedError
-        else:
-            pooling_method = args.pooling_method
-
     index_builder = Index_Builder(
         retrieval_method=args.retrieval_method,
         model_path=args.model_path,
@@ -319,7 +339,8 @@ def main():
         max_length=args.max_length,
         batch_size=args.batch_size,
         use_fp16=args.use_fp16,
-        pooling_method=pooling_method,
+        pooling_method=args.pooling_method,
+        instruction=args.instruction,
         faiss_type=args.faiss_type,
         embedding_path=args.embedding_path,
         save_embedding=args.save_embedding,

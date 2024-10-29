@@ -51,7 +51,7 @@ index_path: ~ # set automatically if not provided.
 faiss_gpu: False # whether use gpu to hold index
 corpus_path: ~  # path to corpus in '.jsonl' format that store the documents
 
-use_sentence_transformer: False
+instruction: ~ # instruction for the retrieval model
 retrieval_topk: 5 # number of retrieved documents
 retrieval_batch_size: 256  # batch size for retrieval
 retrieval_use_fp16: True  # whether to use fp16 for retrieval model
@@ -61,6 +61,7 @@ use_retrieval_cache: False # whether to use the retrieval cache
 retrieval_cache_path: ~ # path to the retrieval cache
 retrieval_pooling_method: ~ # set automatically if not provided
 bm25_backend: bm25s # pyserini, bm25s
+use_sentence_transformer: False
 
 use_reranker: False # whether to use reranker
 rerank_model_name: ~ # same as retrieval_method
