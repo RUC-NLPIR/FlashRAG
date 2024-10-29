@@ -51,6 +51,7 @@ index_path: ~ # set automatically if not provided.
 faiss_gpu: False # whether use gpu to hold index
 corpus_path: ~  # path to corpus in '.jsonl' format that store the documents
 
+instruction: ~ # instruction for retrieval model
 retrieval_topk: 5 # number of retrieved documents
 retrieval_batch_size: 256  # batch size for retrieval
 retrieval_use_fp16: True  # whether to use fp16 for retrieval model

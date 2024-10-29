@@ -39,8 +39,9 @@ python -m flashrag.retriever.index_builder \
     --faiss_type Flat 
 ```
 
-* ```--pooling_method```: If this is not specified, we will automatically select based on the model name. However, due to the different pooling methods used by different embedding models, **we may not have fully implemented them**. To ensure accuracy, you can **specify the pooling method corresponding to the retrieval model** you are using (`mean`, `pooler` or `cls`).
+* ```--pooling_method```: If this is not specified, we will automatically select based on the model name and model file. However, due to the different pooling methods used by different embedding models, **we may not have fully implemented them**. To ensure accuracy, you can **specify the pooling method corresponding to the retrieval model** you are using (`mean`, `pooler` or `cls`).
 
+* ```---instruction```: Some embedding models require additional instructions to concatenate the query before encoding, which can be specified here. At present, we will automatically fill in the instructions for **E5** and **BGE** models, while other models need to be manually supplemented.
 
 If the retrieval model support `sentence transformers` library, you can use following code to build index (**no need to consider pooling method**).
 
