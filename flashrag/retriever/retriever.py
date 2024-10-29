@@ -283,6 +283,9 @@ class DenseRetriever(BaseRetriever):
             self.index = faiss.index_cpu_to_all_gpus(self.index, co=co)
 
         self.corpus = load_corpus(self.corpus_path)
+        self.topk = config["retrieval_topk"]
+        self.batch_size = config["retrieval_batch_size"]
+        self.instruction = config["instruction"]
 
         if config["use_sentence_transformer"]:
             self.encoder = STEncoder(
@@ -290,6 +293,7 @@ class DenseRetriever(BaseRetriever):
                 model_path=config["retrieval_model_path"],
                 max_length=config["retrieval_query_max_length"],
                 use_fp16=config["retrieval_use_fp16"],
+                instruction=self.instruction,
             )
         else:
             self.encoder = Encoder(
@@ -298,10 +302,9 @@ class DenseRetriever(BaseRetriever):
                 pooling_method=config["retrieval_pooling_method"],
                 max_length=config["retrieval_query_max_length"],
                 use_fp16=config["retrieval_use_fp16"],
+                instruction=self.instruction,
             )
-        self.topk = config["retrieval_topk"]
-        self.batch_size = self.config["retrieval_batch_size"]
-        self.query_instruction = config["query_instruction"]
+        
 
     def _search(self, query: str, num: int = None, return_score=False):
         if num is None:

@@ -18,7 +18,6 @@ class IterativePipeline(BasicPipeline):
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         questions = dataset.question
-        questions = [f"{self.retriever.query_instruction} {q}" for q in questions]
         # run in batch
         past_generation_result = []  # list of N items
         for iter_idx in range(self.iter_num):

@@ -26,6 +26,55 @@ def pooling(pooler_output, last_hidden_state, attention_mask=None, pooling_metho
     else:
         raise NotImplementedError("Pooling method not implemented!")
 
+def set_default_instruction(model_name, is_query=True, is_zh=False):
+    instruction = ""
+    if "e5" in model_name.lower():
+        if is_query:
+            instruction = "query: "
+        else:
+            instruction = "passage: "
+
+    if "bge" in model_name.lower():
+        if is_query:
+            if 'zh' in model_name.lower() or is_zh:
+                instruction = "为这个句子生成表示以用于检索相关文章："
+            else:
+                instruction = "Represent this sentence for searching relevant passages: "
+
+    return instruction
+
+
+def parse_query(model_name, query_list, instruction):
+    """
+    processing query for different encoders
+    """
+
+    def is_zh(str):
+        import unicodedata
+
+        zh_char = 0
+        for c in str:
+            try:
+                if "CJK" in unicodedata.name(c):
+                    zh_char += 1
+            except:
+                continue
+        if zh_char / len(str) > 0.2:
+            return True
+        else:
+            return False
+
+    if isinstance(query_list, str):
+        query_list = [query_list]
+        
+    if instruction is not None:
+        instruction = instruction.strip() + " "
+    else:
+        instruction = set_default_instruction(model_name, is_query=True, is_zh=is_zh(query_list[0]))
+
+    query_list = [instruction + query for query in query_list]
+
+    return query_list
 
 def load_corpus(corpus_path: str):
     corpus = datasets.load_dataset("json", data_files=corpus_path, split="train")

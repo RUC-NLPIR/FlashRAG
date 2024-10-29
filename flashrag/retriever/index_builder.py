@@ -10,7 +10,7 @@ import argparse
 import datasets
 import torch
 from tqdm import tqdm
-from flashrag.retriever.utils import load_model, load_corpus, pooling
+from flashrag.retriever.utils import load_model, load_corpus, pooling, set_default_instruction
 
 
 class Index_Builder:
@@ -25,12 +25,13 @@ class Index_Builder:
         max_length,
         batch_size,
         use_fp16,
+        pooling_method=None,
+        instruction=None,
         faiss_type=None,
         embedding_path=None,
         save_embedding=False,
         faiss_gpu=False,
         use_sentence_transformer=False,
-        use_flag_embedding=False,
         bm25_backend='bm25s'
     ):
 
@@ -41,28 +42,49 @@ class Index_Builder:
         self.max_length = max_length
         self.batch_size = batch_size
         self.use_fp16 = use_fp16
-
+        self.instruction = instruction
         self.faiss_type = faiss_type if faiss_type is not None else "Flat"
         self.embedding_path = embedding_path
         self.save_embedding = save_embedding
         self.faiss_gpu = faiss_gpu
         self.use_sentence_transformer = use_sentence_transformer
-        self.use_flag_embedding = use_flag_embedding
         self.bm25_backend = bm25_backend
 
-        #. config pooling method
-        pooling_method = None
-        try:
-            #  read pooling method from 1_Pooling/config.json
-            pooling_config = json.load(open(os.path.join(self.model_path, "1_Pooling/config.json")))
-            for k, v in pooling_config.items():
-                if k.startswith("pooling_mode") and v == True:
-                    pooling_method = k.split("pooling_mode_")[-1]
-                    break
-        except:
-            print(f"Pooling method not found in {self.model_path}")
-            pooling_method = None
+        # set instruction for encode
+        if self.instruction is not None:
+            self.instruction = self.instruction.strip() + " "
+            print("Set instruction for encoding:", self.instruction)
+        else:
+            self.instruction = set_default_instruction(self.retrieval_method, is_query=False)
+            if self.instruction == "":
+                raise Warning("Instruction is not set!")
+            else:
+                raise Warning("Instruction is set to default:", self.instruction)
 
+        #. config pooling method
+        if pooling_method is None:
+            try:
+                # read pooling method from 1_Pooling/config.json
+                pooling_config = json.load(open(os.path.join(self.model_path, "1_Pooling/config.json")))
+                for k, v in pooling_config.items():
+                    if k.startswith("pooling_mode") and v == True:
+                        pooling_method = k.split("pooling_mode_")[-1]
+                        if pooling_method == 'mean_tokens':
+                            pooling_method = 'mean'
+                        elif pooling_method == 'cls_token':
+                            pooling_method = 'cls'
+                        else:
+                            # raise warning: not implemented pooling method
+                            warnings.warn(f"Pooling method {pooling_method} is not implemented.", UserWarning)
+                            pooling_method = 'mean'
+                        break
+            except:
+                print(f"Pooling method not found in {self.model_path}, use default pooling method (mean).")
+                # use default pooling method
+                pooling_method = 'mean'
+        else:
+            if pooling_method not in ['mean', 'cls', 'pooler']:
+                raise ValueError(f"Invalid pooling method {pooling_method}.")
         self.pooling_method = pooling_method
 
         self.gpu_num = torch.cuda.device_count()
@@ -178,8 +200,7 @@ class Index_Builder:
             self.batch_size = self.batch_size * self.gpu_num
 
         sentence_list = [item["contents"] for item in self.corpus]
-        if self.retrieval_method == "e5":
-            sentence_list = [f"passage: {doc}" for doc in sentence_list]
+        sentence_list = [f"{self.instruction}{doc}" for doc in sentence_list]
         all_embeddings = self.encoder.encode(sentence_list, batch_size=self.batch_size)
 
         return all_embeddings
@@ -191,52 +212,36 @@ class Index_Builder:
             self.batch_size = self.batch_size * self.gpu_num
 
         all_embeddings = []
-        if self.use_flag_embedding:
-            if "bge-m3" in self.retrieval_method:
-                all_embeddings = self.encoder.encode(
-                            self.corpus[:]["contents"],
-                            batch_size=self.batch_size,
-                            max_length=self.max_length,
-                        )['dense_vecs']
+        for start_idx in tqdm(range(0, len(self.corpus), self.batch_size), desc="Inference Embeddings:"):
+            batch_data = self.corpus[start_idx : start_idx + self.batch_size]["contents"]
+            batch_data = [f"{self.instruction}{doc}" for doc in batch_data]
+
+            inputs = self.tokenizer(
+                batch_data,
+                padding=True,
+                truncation=True,
+                return_tensors="pt",
+                max_length=self.max_length,
+            ).to("cuda")
+
+            inputs = {k: v.cuda() for k, v in inputs.items()}
+
+            # TODO: support encoder-only T5 model
+            if "T5" in type(self.encoder).__name__ or (self.gpu_num > 1 and "T5" in type(self.encoder.module).__name__):
+                # T5-based retrieval model
+                decoder_input_ids = torch.zeros((inputs["input_ids"].shape[0], 1), dtype=torch.long).to(
+                    inputs["input_ids"].device
+                )
+                output = self.encoder(**inputs, decoder_input_ids=decoder_input_ids, return_dict=True)
+                embeddings = output.last_hidden_state[:, 0, :]
+
             else:
-                all_embeddings = self.encoder.encode(
-                            self.corpus[:]["contents"],
-                            batch_size=self.batch_size,
-                        )
-
-        else:
-            for start_idx in tqdm(range(0, len(self.corpus), self.batch_size), desc="Inference Embeddings:"):
-                batch_data = self.corpus[start_idx : start_idx + self.batch_size]["contents"]
-
-                if self.retrieval_method == "e5":
-                    batch_data = [f"passage: {doc}" for doc in batch_data]
-
-                inputs = self.tokenizer(
-                    batch_data,
-                    padding=True,
-                    truncation=True,
-                    return_tensors="pt",
-                    max_length=self.max_length,
-                ).to("cuda")
-
-                inputs = {k: v.cuda() for k, v in inputs.items()}
-
-                # TODO: support encoder-only T5 model
-                if "T5" in type(self.encoder).__name__ or (self.gpu_num > 1 and "T5" in type(self.encoder.module).__name__):
-                    # T5-based retrieval model
-                    decoder_input_ids = torch.zeros((inputs["input_ids"].shape[0], 1), dtype=torch.long).to(
-                        inputs["input_ids"].device
-                    )
-                    output = self.encoder(**inputs, decoder_input_ids=decoder_input_ids, return_dict=True)
-                    embeddings = output.last_hidden_state[:, 0, :]
-
-                else:
-                    output = self.encoder(**inputs, return_dict=True)
-                    embeddings = pooling(
-                        output.pooler_output, output.last_hidden_state, inputs["attention_mask"], self.pooling_method
-                    )
-                    if "dpr" not in self.retrieval_method:
-                        embeddings = torch.nn.functional.normalize(embeddings, dim=-1)
+                output = self.encoder(**inputs, return_dict=True)
+                embeddings = pooling(
+                    output.pooler_output, output.last_hidden_state, inputs["attention_mask"], self.pooling_method
+                )
+                if "dpr" not in self.retrieval_method:
+                    embeddings = torch.nn.functional.normalize(embeddings, dim=-1)
 
             embeddings = cast(torch.Tensor, embeddings)
             embeddings = embeddings.detach().cpu().numpy()
@@ -266,16 +271,6 @@ class Index_Builder:
                 use_fp16=self.use_fp16,
             )
             hidden_size = self.encoder.model.get_sentence_embedding_dimension()
-        elif self.use_flag_embedding:
-            if "m3" in self.retrieval_method:
-                from FlagEmbedding import BGEM3FlagModel
-                self.encoder = BGEM3FlagModel(self.model_path, use_fp16=self.use_fp16) # Setting
-            else:
-                from FlagEmbedding import FlagModel
-                self.encoder = FlagModel(self.model_path, use_fp16=self.use_fp16)
-            pooling_config = json.load(open(os.path.join(self.model_path, "1_Pooling/config.json")))
-            hidden_size = pooling_config["word_embedding_dimension"]
-            self.tokenizer = None
         else:
             self.encoder, self.tokenizer = load_model(model_path=self.model_path, use_fp16=self.use_fp16)
             hidden_size = self.encoder.config.hidden_size
@@ -312,9 +307,6 @@ class Index_Builder:
         print("Finish!")
 
 
-MODEL2POOLING = {"e5": "mean", "bge": "cls", "contriever": "mean", "jina": "mean"}
-
-
 def main():
     parser = argparse.ArgumentParser(description="Creating index.")
 
@@ -329,6 +321,7 @@ def main():
     parser.add_argument("--batch_size", type=int, default=512)
     parser.add_argument("--use_fp16", default=False, action="store_true")
     parser.add_argument("--pooling_method", type=str, default=None)
+    parser.add_argument("--instruction", type=str, default=None)
     parser.add_argument("--faiss_type", default=None, type=str)
     parser.add_argument("--embedding_path", default=None, type=str)
     parser.add_argument("--save_embedding", action="store_true", default=False)
@@ -346,6 +339,8 @@ def main():
         max_length=args.max_length,
         batch_size=args.batch_size,
         use_fp16=args.use_fp16,
+        pooling_method=args.pooling_method,
+        instruction=args.instruction,
         faiss_type=args.faiss_type,
         embedding_path=args.embedding_path,
         save_embedding=args.save_embedding,
