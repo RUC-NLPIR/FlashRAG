@@ -44,7 +44,7 @@ def set_default_instruction(model_name, is_query=True, is_zh=False):
     return instruction
 
 
-def parse_query(model_name, query_list, instruction):
+def parse_query(model_name, query_list, instruction=None):
     """
     processing query for different encoders
     """
