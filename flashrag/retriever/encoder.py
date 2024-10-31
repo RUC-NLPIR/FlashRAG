@@ -61,7 +61,7 @@ class STEncoder:
     def encode(self, query_list: List[str], batch_size=64, is_query=True) -> np.ndarray:
         query_list = parse_query(self.model_name, query_list, self.instruction)
         query_emb = self.model.encode(
-            query_list, batch_size=batch_size, convert_to_numpy=True, normalize_embeddings=True
+            query_list, batch_size=batch_size, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=True
         )
         query_emb = query_emb.astype(np.float32, order="C")
 
@@ -72,7 +72,7 @@ class STEncoder:
         query_list = parse_query(self.model_name, query_list, self.instruction)
         pool = self.model.start_multi_process_pool()
         query_emb = self.model.encode_multi_process(
-            query_list, pool, convert_to_numpy=True, normalize_embeddings=True, batch_size=batch_size
+            query_list, pool, convert_to_numpy=True, normalize_embeddings=True, batch_size=batch_size,show_progress_bar=True
         )
         self.model.stop_multi_process_pool(pool)
         query_emb.astype(np.float32, order="C")
