@@ -275,6 +275,8 @@ class DenseRetriever(BaseRetriever):
 
     def __init__(self, config: dict):
         super().__init__(config)
+        if not os.path.exists(self.index_path):
+            raise Warning(f"Index file {self.index_path} does not exist!")
         self.index = faiss.read_index(self.index_path)
         if config["faiss_gpu"]:
             co = faiss.GpuMultipleClonerOptions()
