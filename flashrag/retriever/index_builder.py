@@ -57,9 +57,9 @@ class Index_Builder:
         else:
             self.instruction = set_default_instruction(self.retrieval_method, is_query=False)
             if self.instruction == "":
-                raise Warning("Instruction is not set!")
+                warnings.warn("Instruction is not set!")
             else:
-                raise Warning("Instruction is set to default:", self.instruction)
+                warnings.warn("Instruction is set to default:", self.instruction)
 
         #. config pooling method
         if pooling_method is None:
