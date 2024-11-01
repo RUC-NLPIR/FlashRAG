@@ -4,6 +4,9 @@ with open("requirements.txt",encoding='utf-8') as fp:
     requirements = fp.read().splitlines()
 with open("README.md", "r",encoding='utf-8') as fh:
     long_description = fh.read()
+version = {}
+with open("flashrag/version.py", encoding="utf8") as fp:
+    exec(fp.read(), version)
 
 extras_require = {
     'core': requirements,
@@ -14,7 +17,7 @@ extras_require['full'] = sum(extras_require.values(), [])
 
 setup(
     name="flashrag-dev",
-    version="0.1.2",
+    version=version['__version'],
     packages=find_packages(),
     url="https://github.com/RUC-NLPIR/FlashRAG",
     license="MIT License",
