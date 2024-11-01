@@ -26,7 +26,7 @@ def main():
         help="The path to the package's version file.",
     )
     args = parser.parse_args()
-    with open("version.py","r") as f:
+    with open("flashrag/version.py","r") as f:
         version = f.read().strip()
     version = version.split("=",1)[1].strip().replace("\"","")
     new_version = re.sub(r'dev\d+', f'dev{args.version}', version)
