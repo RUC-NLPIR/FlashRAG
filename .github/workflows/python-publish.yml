@@ -56,7 +56,7 @@ jobs:
     - name: Update version.py
       if: steps.check_updates.outputs.has_updates == 'true'
       run: |
-        python .github/scripts/python/update_version.py --version $(date +'%Y.%m.%d') --path "flashrag/version.py"
+        python .github/scripts/python/update_version.py --version $(date +'%Y%m%d') --path "flashrag/version.py"
     
     - name: Install dependencies
       if: steps.check_updates.outputs.has_updates == 'true'
