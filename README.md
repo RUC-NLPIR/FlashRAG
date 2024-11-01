@@ -21,7 +21,7 @@
 </p>
 
 </h4>
-FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 32 pre-processed benchmark RAG datasets and 15 state-of-the-art RAG algorithms. 
+FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 33 pre-processed benchmark RAG datasets and 15 state-of-the-art RAG algorithms. 
 
 <p align="center">
 <img src="asset/framework.jpg">
@@ -37,7 +37,7 @@ With FlashRAG and provided resources, you can effortlessly reproduce existing SO
 
 - **Extensive and Customizable Framework**: Includes essential components for RAG scenarios such as retrievers, rerankers, generators, and compressors, allowing for flexible assembly of complex pipelines.
 
-- **Comprehensive Benchmark Datasets**: A collection of 32 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
+- **Comprehensive Benchmark Datasets**: A collection of 33 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
 
 - **Pre-implemented Advanced RAG Algorithms**: Features 15 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
 
@@ -485,6 +485,7 @@ Below is the list of datasets along with the corresponding sample sizes:
 | multi-hop QA              | 2WikiMultiHopQA | wiki             | 15,000    | 12,576  | /      |
 | multi-hop QA              | Musique         | wiki             | 19,938    | 2,417   | /      |
 | multi-hop QA              | Bamboogle       | wiki             | /         | /       | 125    |
+| multi-hop QA              | StrategyQA      | wiki             | 2290      | /       | /
 | Long-form QA              | ASQA            | wiki             | 4,353     | 948     | /      |
 | Long-form QA              | ELI5            | Reddit           | 272,634   | 1,507   | /      |
 | Open-Domain Summarization | WikiASP         | wiki             | 300,636   | 37,046  | 37,368 |
