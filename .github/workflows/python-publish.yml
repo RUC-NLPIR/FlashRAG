@@ -1,0 +1,76 @@
+# This workflow will upload a Python Package using Twine when a release is created
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Publish Python Package
+
+on:
+  push:
+    branches:
+      - main  # 监控主分支更新
+  schedule:
+    - cron: '0 21 * * *'  # 每天晚上9点执行
+
+jobs:
+  check-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    
+    environment:
+      name: pypi
+      url: https://pypi.org/p/flashrag-dev
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 2  # 获取最近两次提交用于比较
+    
+    - name: Check for updates
+      id: check_updates
+      run: |
+        # 检查最近一次提交是否在过去24小时内
+        LAST_COMMIT_TIME=$(git log -1 --format=%ct)
+        CURRENT_TIME=$(date +%s)
+        TIME_DIFF=$((CURRENT_TIME - LAST_COMMIT_TIME))
+        
+        if [ $TIME_DIFF -le 86400 ]; then  # 86400 秒 = 24 小时
+          echo "Recent updates detected"
+          echo "has_updates=true" >> $GITHUB_OUTPUT
+        else
+          echo "No recent updates"
+          echo "has_updates=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Set up Python
+      if: steps.check_updates.outputs.has_updates == 'true'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Update version.py
+      if: steps.check_updates.outputs.has_updates == 'true'
+      run: |
+        python .github/scripts/python/update_version.py --version $(date +'%Y.%m.%d') --path "flashrag/version.py"
+    
+    - name: Install dependencies
+      if: steps.check_updates.outputs.has_updates == 'true'
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel twine
+    
+    - name: Build package
+      if: steps.check_updates.outputs.has_updates == 'true'
+      run: |
+        python setup.py sdist bdist_wheel
+    
+    - name: Publish package to PyPI
+      if: steps.check_updates.outputs.has_updates == 'true'
+      uses: pypa/gh-action-pypi-publish@release/v1
+
+
