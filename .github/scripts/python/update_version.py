@@ -8,6 +8,7 @@ and the path to the package's __init__.py file.
 
 import argparse
 from pathlib import Path
+import re
 
 def main():
     parser = argparse.ArgumentParser(
@@ -25,9 +26,12 @@ def main():
         help="The path to the package's version file.",
     )
     args = parser.parse_args()
-
+    with open("version.py","r") as f:
+        version = f.read().strip()
+    version = version.split("=",1)[1].strip().replace("\"","")
+    new_version = re.sub(r'dev\d+', f'dev{args.version}', version)
     with open(args.path, "w") as f:
-        f.write(f"__version__ = \"{args.version}\"")
+        f.write(f"__version__ = \"{new_version}\"")
         
 
 if __name__ == "__main__":
