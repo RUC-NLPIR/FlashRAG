@@ -104,7 +104,7 @@ Or you can clone it from Github and install (requires Python 3.9+):
 ```bash
 git clone https://github.com/RUC-NLPIR/FlashRAG.git
 cd FlashRAG
-pip install -e .[core] 
+pip install -e .
 ```
 
 If you want to use vllm, sentence-transformers or pyserini, you can install the optional dependencies:
