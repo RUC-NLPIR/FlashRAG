@@ -96,7 +96,7 @@ FlashRAG is still under development and there are many issues and room for impro
 
 To get started with FlashRAG, you can simply install it with pip:
 ```base
-pip install flashrag-dev[core]
+pip install flashrag-dev --pre
 ```
 
 Or you can clone it from Github and install (requires Python 3.9+): 
