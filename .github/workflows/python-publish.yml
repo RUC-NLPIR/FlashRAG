@@ -9,6 +9,7 @@
 name: Publish Python Package
 
 on:
+  workflow_dispatch: 
   schedule:
     - cron: '0 21 * * *'  # 每天晚上9点执行
 
