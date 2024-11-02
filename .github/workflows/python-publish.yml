@@ -9,9 +9,6 @@
 name: Publish Python Package
 
 on:
-  push:
-    branches:
-      - main  # 监控主分支更新
   schedule:
     - cron: '0 21 * * *'  # 每天晚上9点执行
 
@@ -29,17 +26,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        fetch-depth: 2  # 获取最近两次提交用于比较
+        fetch-depth: 1  # 只获取最近一次提交
     
     - name: Check for updates
       id: check_updates
       run: |
-        # 检查最近一次提交是否在过去24小时内
-        LAST_COMMIT_TIME=$(git log -1 --format=%ct)
-        CURRENT_TIME=$(date +%s)
-        TIME_DIFF=$((CURRENT_TIME - LAST_COMMIT_TIME))
+        # 检查当天的提交
+        TODAY=$(date +'%Y-%m-%d')
+        COMMIT_COUNT=$(git rev-list --count --since="$TODAY 00:00" HEAD)
         
-        if [ $TIME_DIFF -le 86400 ]; then  # 86400 秒 = 24 小时
+        if [ $COMMIT_COUNT -gt 0 ]; then
           echo "Recent updates detected"
           echo "has_updates=true" >> $GITHUB_OUTPUT
         else
@@ -72,5 +68,6 @@ jobs:
     - name: Publish package to PyPI
       if: steps.check_updates.outputs.has_updates == 'true'
       uses: pypa/gh-action-pypi-publish@release/v1
+
 
 
