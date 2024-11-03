@@ -124,11 +124,7 @@ class PromptTemplate:
                 input.append({"role": "system", "content": system_prompt})
             if user_prompt != "":
                 input.append({"role": "user", "content": user_prompt})
-            if self.is_openai:
-                for item in input:
-                    if item["role"] == "system":
-                        item["role"] = "assistant"
-            else:
+            if not self.is_openai:
                 input = self.tokenizer.apply_chat_template(input, tokenize=False, add_generation_prompt=True)
         else:
             input = "\n\n".join([prompt for prompt in [system_prompt, user_prompt] if prompt != ""])
