@@ -27,8 +27,12 @@ class OpenaiGenerator:
             self.client = AsyncAzureOpenAI(**self.openai_setting)
         else:
             self.client = AsyncOpenAI(**self.openai_setting)
-
-        self.tokenizer = tiktoken.encoding_for_model(self.model_name)
+        try:
+            self.tokenizer = tiktoken.encoding_for_model(self.model_name)
+        except Exception as e:
+            print("Error: ", e)
+            warnings.warn("This model is not supported by tiktoken. Use gpt-3.5-turbo instead.")
+            self.tokenizer = tiktoken.encoding_for_model('gpt-3.5-turbo')
 
     async def get_response(self, input: List, **params):
         response = await self.client.chat.completions.create(model=self.model_name, messages=input, **params)
@@ -46,7 +50,7 @@ class OpenaiGenerator:
 
     def generate(self, input_list: List[List], batch_size=None, return_scores=False, **params) -> List[str]:
         # deal with single input
-        if len(input_list) == 1:
+        if len(input_list) == 1 and isinstance(input_list[0], dict):
             input_list = [input_list]
         if batch_size is None:
             batch_size = self.batch_size
