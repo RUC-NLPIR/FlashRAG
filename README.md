@@ -478,7 +478,7 @@ Below is the list of datasets along with the corresponding sample sizes:
 | QA                        | WebQuestions    | Google Freebase  | 3,778     | /       | 2,032  |
 | QA                        | AmbigQA         | wiki             | 10,036    | 2,002   | /      |
 | QA                        | SIQA            | -                | 33,410    | 1,954   | /      |
-| QA                        | CommenseQA      | -                | 9,741     | 1,221   | /      |
+| QA                        | CommonSenseQA      | -                | 9,741     | 1,221   | /      |
 | QA                        | BoolQ           | wiki             | 9,427     | 3,270   | /      |
 | QA                        | PIQA            | -                | 16,113    | 1,838   | /      |
 | QA                        | Fermi           | wiki             | 8,000     | 1,000   | 1,000  |
