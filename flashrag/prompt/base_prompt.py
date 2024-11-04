@@ -1,5 +1,6 @@
 from transformers import AutoTokenizer, AutoConfig
 import tiktoken
+import warnings
 
 class PromptTemplate:
     placeholders = ["reference", "question"]
@@ -26,7 +27,12 @@ class PromptTemplate:
         else:
             self.is_chat = True
             self.enable_chat = True
-            self.tokenizer = tiktoken.encoding_for_model("gpt-4o")
+            try:
+                self.tokenizer = tiktoken.encoding_for_model(config['generator_model'])
+            except Exception as e:
+                print("Error: ", e)
+                warnings.warn("This model is not supported by tiktoken. Use gpt-3.5-turbo instead.")
+                self.tokenizer = tiktoken.encoding_for_model('gpt-3.5-turbo')
 
         if len(system_prompt) == 0 and len(user_prompt) == 0:
             system_prompt = self.base_system_prompt
