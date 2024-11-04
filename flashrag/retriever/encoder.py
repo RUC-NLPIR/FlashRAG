@@ -37,7 +37,7 @@ class Encoder:
             query_emb = pooling(
                 output.pooler_output, output.last_hidden_state, inputs["attention_mask"], self.pooling_method
             )
-
+        query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
         query_emb = query_emb.detach().cpu().numpy()
         query_emb = query_emb.astype(np.float32, order="C")
         return query_emb
