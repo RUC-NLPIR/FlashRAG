@@ -91,9 +91,6 @@ class PromptTemplate:
                 return self.truncate_prompt(messages)
             if self.is_chat and self.enable_chat:
                 if self.is_openai:
-                    for item in input:
-                        if item["role"] == "system":
-                            item["role"] = "assistant"
                     self.truncate_prompt(messages)
                 else:
                     prompt = self.tokenizer.apply_chat_template(
