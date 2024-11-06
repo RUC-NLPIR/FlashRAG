@@ -899,6 +899,86 @@ class SelfAskPipeline(BasicPipeline):
         return dataset
 
 
+# class IRCOTPipeline(BasicPipeline):
+#     IRCOT_INSTRUCTION = 'You serve as an intelligent assistant, adept at facilitating users through complex, multi-hop reasoning across multiple documents. This task is illustrated through demonstrations, each consisting of a document set paired with a relevant question and its multi-hop reasoning thoughts. Your task is to generate one thought for current step, DON\'T generate the whole thoughts at once! If you reach what you believe to be the final step, start with "So the answer is:".'
+#     IRCOT_EXAMPLE = "Wikipedia Title: Kurram Garhi\nKurram Garhi is a small village located near the city of Bannu, which is the part of Khyber Pakhtunkhwa province of Pakistan. Its population is approximately 35000. Barren hills are near this village. This village is on the border of Kurram Agency. Other nearby villages are Peppal, Surwangi and Amandi Kala.\n\nWikipedia Title: 2001–02 UEFA Champions League second group stage\nEight winners and eight runners- up from the first group stage were drawn into four groups of four teams, each containing two group winners and two runners- up. Teams from the same country or from the same first round group could not be drawn together. The top two teams in each group advanced to the quarter- finals.\n\nWikipedia Title: Satellite tournament\nA satellite tournament is either a minor tournament or event on a competitive sporting tour or one of a group of such tournaments that form a series played in the same country or region.\n\nWikipedia Title: Trojkrsti\nTrojkrsti is a village in Municipality of Prilep, Republic of Macedonia.\n\nWikipedia Title: Telephone numbers in Ascension Island\nCountry Code:+ 247< br> International Call Prefix: 00 Ascension Island does not share the same country code( +290) with the rest of St Helena.\n\nQuestion: Are both Kurram Garhi and Trojkrsti located in the same country?\nThought: Kurram Garhi is located in the country of Pakistan. Trojkrsti is located in the country of Republic of Macedonia. Thus, they are not in the same country. So the answer is: no.\n\n"
+
+#     def __init__(self, config, prompt_template=None, retriever=None, generator=None, max_iter=2):
+#         # if not provide prompt template, use default template provided by IRCOT
+#         if prompt_template is None:
+#             prompt_template = PromptTemplate(
+#                 config=config,
+#                 system_prompt=f"{self.IRCOT_INSTRUCTION}\n\n{self.IRCOT_EXAMPLE}",
+#                 user_prompt="{reference}Question: {question}\nThought:",
+#                 reference_template="Wikipedia Title: {title}\n{text}\n\n",
+#                 enable_chat=False,
+#             )
+
+#         super().__init__(config, prompt_template)
+#         self.generator = get_generator(config) if generator is None else generator
+#         self.retriever = get_retriever(config) if retriever is None else retriever
+
+#         self.max_iter = max_iter
+
+#     def run_item(self, item):
+#         question = item.question
+#         retrieval_result, scores = self.retriever.search(question, return_score=True)
+#         doc2score = {doc_item["id"]: score for doc_item, score in zip(retrieval_result, scores)}
+#         id2doc = {doc_item["id"]: doc_item for doc_item in retrieval_result}
+
+#         thoughts = []
+#         iter_num = 0
+#         while iter_num < self.max_iter:
+#             input_prompt = self.prompt_template.get_string(
+#                 question=question, retrieval_result=retrieval_result, previous_gen=" ".join(thoughts)
+#             )
+#             new_thought = self.generator.generate(input_prompt,stop=['.', '\n'])[0]
+#             thoughts.append(new_thought)
+#             iter_num += 1
+#             if "So the answer is:" in new_thought:
+#                 item.update_output(
+#                     f"intermediate_output_iter{iter_num}",
+#                     {
+#                         "input_prompt": input_prompt,
+#                         "new_thought": new_thought,
+#                     },
+#                 )
+#                 break
+
+#             # retrieve new docs and merge
+#             new_retrieval_result, new_scores = self.retriever.search(new_thought, return_score=True)
+#             for doc_item, score in zip(new_retrieval_result, new_scores):
+#                 id2doc[doc_item["id"]] = doc_item
+#                 doc_id = doc_item["id"]
+#                 if doc_id in doc2score:
+#                     doc2score[doc_id] = max(doc2score[doc_id], score)
+#                 else:
+#                     doc2score[doc_id] = score
+#             sorted_doc_score = sorted(doc2score.items(), key=lambda x: x[1], reverse=False)
+#             sorted_doc_id = [t[0] for t in sorted_doc_score]
+#             retrieval_result = [id2doc[id] for id in sorted_doc_id]
+
+#             item.update_output(
+#                 f"intermediate_output_iter{iter_num}",
+#                 {
+#                     "input_prompt": input_prompt,
+#                     "new_thought": new_thought,
+#                     "new_retreival_result": new_retrieval_result,
+#                 },
+#             )
+
+#         item.update_output("retrieval_result", retrieval_result)
+#         item.update_output("pred", " ".join(thoughts))
+#         return item
+
+#     def run(self, dataset, do_eval=True, pred_process_fun=ircot_pred_parse):
+#         for item in tqdm(dataset, desc="Inference: "):
+#             self.run_item(item)
+
+#         dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
+#         return dataset
+
+    
 class IRCOTPipeline(BasicPipeline):
     IRCOT_INSTRUCTION = 'You serve as an intelligent assistant, adept at facilitating users through complex, multi-hop reasoning across multiple documents. This task is illustrated through demonstrations, each consisting of a document set paired with a relevant question and its multi-hop reasoning thoughts. Your task is to generate one thought for current step, DON\'T generate the whole thoughts at once! If you reach what you believe to be the final step, start with "So the answer is:".'
     IRCOT_EXAMPLE = "Wikipedia Title: Kurram Garhi\nKurram Garhi is a small village located near the city of Bannu, which is the part of Khyber Pakhtunkhwa province of Pakistan. Its population is approximately 35000. Barren hills are near this village. This village is on the border of Kurram Agency. Other nearby villages are Peppal, Surwangi and Amandi Kala.\n\nWikipedia Title: 2001–02 UEFA Champions League second group stage\nEight winners and eight runners- up from the first group stage were drawn into four groups of four teams, each containing two group winners and two runners- up. Teams from the same country or from the same first round group could not be drawn together. The top two teams in each group advanced to the quarter- finals.\n\nWikipedia Title: Satellite tournament\nA satellite tournament is either a minor tournament or event on a competitive sporting tour or one of a group of such tournaments that form a series played in the same country or region.\n\nWikipedia Title: Trojkrsti\nTrojkrsti is a village in Municipality of Prilep, Republic of Macedonia.\n\nWikipedia Title: Telephone numbers in Ascension Island\nCountry Code:+ 247< br> International Call Prefix: 00 Ascension Island does not share the same country code( +290) with the rest of St Helena.\n\nQuestion: Are both Kurram Garhi and Trojkrsti located in the same country?\nThought: Kurram Garhi is located in the country of Pakistan. Trojkrsti is located in the country of Republic of Macedonia. Thus, they are not in the same country. So the answer is: no.\n\n"
@@ -920,60 +1000,97 @@ class IRCOTPipeline(BasicPipeline):
 
         self.max_iter = max_iter
 
-    def run_item(self, item):
-        question = item.question
-        retrieval_result, scores = self.retriever.search(question, return_score=True)
-        doc2score = {doc_item["id"]: score for doc_item, score in zip(retrieval_result, scores)}
-        id2doc = {doc_item["id"]: doc_item for doc_item in retrieval_result}
-
-        thoughts = []
+    def run_batch(self, items):
+        # Initialize the necessary data structures
+        batch_thoughts = {item_id: [] for item_id in range(len(items))}
         iter_num = 0
+        batch_retrieval_results = []
+        doc2score_batch = []
+        id2doc_batch = []
+
+        # Initial retrieval for all items in the batch
+        questions = [item.question for item in items]
+        retrieval_results, scoress = self.retriever.batch_search(questions, return_score=True)
+        for retrieval_result, scores in zip(retrieval_results,scoress):   
+            
+            doc2score = {doc_item['id']: score for doc_item, score in zip(retrieval_result, scores)}
+            id2doc = {doc_item['id']: doc_item for doc_item in retrieval_result}
+            batch_retrieval_results.append(retrieval_result)
+            doc2score_batch.append(doc2score)
+            id2doc_batch.append(id2doc)
+
+        # Start the iterative process
+        active_item_ids = list(range(len(items)))  # Track items that need more iterations
         while iter_num < self.max_iter:
-            input_prompt = self.prompt_template.get_string(
-                question=question, retrieval_result=retrieval_result, previous_gen=" ".join(thoughts)
-            )
-            new_thought = self.generator.generate(input_prompt,stop=['.', '\n'])[0]
-            thoughts.append(new_thought)
-            iter_num += 1
-            if "So the answer is:" in new_thought:
-                item.update_output(
-                    f"intermediate_output_iter{iter_num}",
-                    {
-                        "input_prompt": input_prompt,
-                        "new_thought": new_thought,
-                    },
+            # Generate prompts and new thoughts for the active items
+            input_prompts = [
+                self.prompt_template.get_string(
+                    question=items[item_id].question,
+                    retrieval_result=batch_retrieval_results[item_id],
+                    previous_gen=' '.join(batch_thoughts[item_id])
                 )
-                break
+                for item_id in active_item_ids
+            ]
 
-            # retrieve new docs and merge
-            new_retrieval_result, new_scores = self.retriever.search(new_thought, return_score=True)
-            for doc_item, score in zip(new_retrieval_result, new_scores):
-                id2doc[doc_item["id"]] = doc_item
-                doc_id = doc_item["id"]
-                if doc_id in doc2score:
-                    doc2score[doc_id] = max(doc2score[doc_id], score)
+            # Batch generation for active items
+            new_thoughts_batch = self.generator.generate(input_prompts, stop=['.', '\n'])
+            
+            # Update thoughts and determine next active items
+            new_active_item_ids = []
+            for idx, item_id in enumerate(active_item_ids):
+                new_thought = new_thoughts_batch[idx]
+                batch_thoughts[item_id].append(new_thought)
+                
+                # Check for termination condition
+                # Store intermediate outputs
+                if "So the answer is:" in new_thought:
+                    items[item_id].update_output(
+                        f'intermediate_output_iter{iter_num}', 
+                        {
+                            'input_prompt': input_prompts[idx],
+                            'new_thought': new_thought,
+                        },
+                    )
                 else:
-                    doc2score[doc_id] = score
-            sorted_doc_score = sorted(doc2score.items(), key=lambda x: x[1], reverse=False)
-            sorted_doc_id = [t[0] for t in sorted_doc_score]
-            retrieval_result = [id2doc[id] for id in sorted_doc_id]
+                    new_active_item_ids.append(item_id)
 
-            item.update_output(
-                f"intermediate_output_iter{iter_num}",
-                {
-                    "input_prompt": input_prompt,
-                    "new_thought": new_thought,
-                    "new_retreival_result": new_retrieval_result,
-                },
-            )
+            # Update active item IDs for the next iteration
+            active_item_ids = new_active_item_ids
 
-        item.update_output("retrieval_result", retrieval_result)
-        item.update_output("pred", " ".join(thoughts))
-        return item
+            # Perform batch retrieval for new thoughts of active items
+            if active_item_ids:
+                print(len(active_item_ids))
+                print(active_item_ids)
+                new_thoughts_for_retrieval = [batch_thoughts[item_id][-1] for item_id in active_item_ids]
+                new_retrieval_results, new_scoress = self.retriever.batch_search(new_thoughts_for_retrieval, return_score=True)
+
+                for i, item_id in enumerate(active_item_ids):
+                    new_retrieval_result, new_scores = new_retrieval_results[i],new_scoress[i]
+                    
+                    # Update doc2score and id2doc for the current item
+                    for doc_item, score in zip(new_retrieval_result, new_scores):
+                        doc_id = doc_item['id']
+                        id2doc_batch[item_id][doc_id] = doc_item
+                        if doc_id in doc2score_batch[item_id]:
+                            doc2score_batch[item_id][doc_id] = max(doc2score_batch[item_id][doc_id], score)
+                        else:
+                            doc2score_batch[item_id][doc_id] = score
+
+                    # Sort and update retrieval results
+                    sorted_doc_score = sorted(doc2score_batch[item_id].items(), key=lambda x: x[1], reverse=False)
+                    sorted_doc_id = [t[0] for t in sorted_doc_score]
+                    batch_retrieval_results[item_id] = [id2doc_batch[item_id][id] for id in sorted_doc_id]
+
+            iter_num += 1
+
+        # Final update for each item in the batch
+        for item_id, item in enumerate(items):
+            item.update_output('retrieval_result', batch_retrieval_results[item_id])
+            item.update_output('pred', ' '.join(batch_thoughts[item_id]))
 
     def run(self, dataset, do_eval=True, pred_process_fun=ircot_pred_parse):
-        for item in tqdm(dataset, desc="Inference: "):
-            self.run_item(item)
+
+        self.run_batch(dataset)
 
         dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
         return dataset
