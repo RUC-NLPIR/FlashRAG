@@ -932,7 +932,7 @@ class IRCOTPipeline(BasicPipeline):
             input_prompt = self.prompt_template.get_string(
                 question=question, retrieval_result=retrieval_result, previous_gen=" ".join(thoughts)
             )
-            new_thought = self.generator.generate(input_prompt)[0]
+            new_thought = self.generator.generate(input_prompt,stop=['.', '\n'])[0]
             thoughts.append(new_thought)
             iter_num += 1
             if "So the answer is:" in new_thought:

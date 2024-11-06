@@ -235,6 +235,7 @@ class VLLMGenerator(BaseGenerator):
         # fix for llama3
         if "stop" in generation_params:
             generation_params["stop"].append("<|eot_id|>")
+            generation_params['include_stop_str_in_output'] = True
         else:
             generation_params["stop"] = ["<|eot_id|>"]
 
