@@ -495,6 +495,7 @@ Below is the list of datasets along with the corresponding sample sizes:
 | multiple-choice           | HellaSWAG       | ActivityNet      | 39,905    | 10,042  | /      |
 | multiple-choice           | ARC             | -                | 3,370     | 869     | 3,548  |
 | multiple-choice           | OpenBookQA      | -                | 4,957     | 500     | 500    |
+| multiple-choice           | QuaRTz      | -                | 2696     | 384     | 784    |
 | Fact Verification         | FEVER           | wiki             | 104,966   | 10,444  | /      |
 | Dialog Generation         | WOW             | wiki             | 63,734    | 3,054   | /      |
 | Entity Linking            | AIDA CoNll-yago | Freebase & wiki  | 18,395    | 4,784   | /      |
