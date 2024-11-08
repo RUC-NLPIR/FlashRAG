@@ -1,4 +1,5 @@
 import json
+import warnings
 import datasets
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
@@ -71,6 +72,7 @@ def parse_query(model_name, query_list, instruction=None):
         instruction = instruction.strip() + " "
     else:
         instruction = set_default_instruction(model_name, is_query=True, is_zh=is_zh(query_list[0]))
+    print(f"Use `{instruction}` as retreival instruction")
 
     query_list = [instruction + query for query in query_list]
 

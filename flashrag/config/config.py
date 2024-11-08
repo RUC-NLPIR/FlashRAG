@@ -158,8 +158,8 @@ class Config:
             refiner_model = self.final_config["refiner_name"]
             if "refiner_model_path" not in self.final_config or self.final_config["refiner_model_path"] is None:
                 self.final_config["refiner_model_path"] = model2path.get(refiner_model, None)
-        if 'instruction' not in self.final_config or self.final_config['instruction'] is None:
-            self.final_config['instruction'] = ""
+        if 'instruction' not in self.final_config:
+            self.final_config['instruction'] = None
 
         # set model path in metric setting
         metric_setting = self.final_config["metric_setting"]
