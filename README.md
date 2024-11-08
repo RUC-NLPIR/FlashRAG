@@ -22,7 +22,7 @@
 </p>
 
 </h4>
-FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 33 pre-processed benchmark RAG datasets and 15 state-of-the-art RAG algorithms. 
+FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 36 pre-processed benchmark RAG datasets and 15 state-of-the-art RAG algorithms. 
 
 <p align="center">
 <img src="asset/framework.jpg">
@@ -38,7 +38,7 @@ With FlashRAG and provided resources, you can effortlessly reproduce existing SO
 
 - **Extensive and Customizable Framework**: Includes essential components for RAG scenarios such as retrievers, rerankers, generators, and compressors, allowing for flexible assembly of complex pipelines.
 
-- **Comprehensive Benchmark Datasets**: A collection of 33 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
+- **Comprehensive Benchmark Datasets**: A collection of 36 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
 
 - **Pre-implemented Advanced RAG Algorithms**: Features 15 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
 
@@ -451,7 +451,7 @@ It’s important to note that, to ensure consistency, we have utilized a uniform
 
 ### Datasets
 
-We have collected and processed 35 datasets widely used in RAG research, pre-processing them to ensure a consistent format for ease of use. For certain datasets (such as Wiki-asp), we have adapted them to fit the requirements of RAG tasks according to the methods commonly used within the community. All datasets are available at [<u>Huggingface datasets</u>](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets). 
+We have collected and processed 36 datasets widely used in RAG research, pre-processing them to ensure a consistent format for ease of use. For certain datasets (such as Wiki-asp), we have adapted them to fit the requirements of RAG tasks according to the methods commonly used within the community. All datasets are available at [<u>Huggingface datasets</u>](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets). 
 
 For each dataset, we save each split as a `jsonl` file, and each line is a dict as follows:
 ```python
@@ -489,12 +489,14 @@ Below is the list of datasets along with the corresponding sample sizes:
 | multi-hop QA              | StrategyQA      | wiki             | 2290      | /       | /
 | Long-form QA              | ASQA            | wiki             | 4,353     | 948     | /      |
 | Long-form QA              | ELI5            | Reddit           | 272,634   | 1,507   | /      |
+| Long-form QA              | WikiPassageQA            | wiki             | 3,332     | 417    |  416      |
 | Open-Domain Summarization | WikiASP         | wiki             | 300,636   | 37,046  | 37,368 |
 | multiple-choice           | MMLU            | -                | 99,842    | 1,531   | 14,042 |
 | multiple-choice           | TruthfulQA      | wiki             | /         | 817     | /      |
 | multiple-choice           | HellaSWAG       | ActivityNet      | 39,905    | 10,042  | /      |
 | multiple-choice           | ARC             | -                | 3,370     | 869     | 3,548  |
 | multiple-choice           | OpenBookQA      | -                | 4,957     | 500     | 500    |
+| multiple-choice           | QuaRTz      | -                | 2696     | 384     | 784    |
 | Fact Verification         | FEVER           | wiki             | 104,966   | 10,444  | /      |
 | Dialog Generation         | WOW             | wiki             | 63,734    | 3,054   | /      |
 | Entity Linking            | AIDA CoNll-yago | Freebase & wiki  | 18,395    | 4,784   | /      |
