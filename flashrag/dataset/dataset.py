@@ -66,6 +66,10 @@ class Item:
 
         return output
 
+    def __str__(self) -> str:
+        """Return a string representation of the item with its main attributes."""
+        return json.dumps(self.to_dict(), indent=4)
+
 
 class Dataset:
     """A container class used to store the whole dataset. Inside the class, each data sample will be stored
@@ -174,3 +178,7 @@ class Dataset:
 
         with open(save_path, "w", encoding="utf-8") as f:
             json.dump(save_data, f, indent=4)
+
+    def __str__(self) -> str:
+        """Return a string representation of the dataset with a summary of items."""
+        return f"Dataset '{self.dataset_name}' with {len(self)} items"
