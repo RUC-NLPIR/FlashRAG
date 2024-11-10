@@ -4,7 +4,7 @@ import random
 import warnings
 from typing import List, Dict, Any, Optional, Generator
 import numpy as np
-from utils import convert_numpy
+from flashrag.dataset.utils import convert_numpy
 
 
 class Item:

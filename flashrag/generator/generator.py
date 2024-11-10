@@ -12,7 +12,7 @@ from transformers import (
     BartForConditionalGeneration,
     AutoConfig,
 )
-from utils import resolve_max_tokens
+from flashrag.generator.utils import resolve_max_tokens
 
 
 class BaseGenerator:
