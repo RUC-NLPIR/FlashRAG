@@ -20,6 +20,7 @@ class Encoder:
         encode(query_list: List[str], is_query=True) -> np.ndarray:
             Encodes a list of queries into embeddings.
     """
+
     def __init__(self, model_name, model_path, pooling_method, max_length, use_fp16, instruction):
         self.model_name = model_name
         self.model_path = model_path
@@ -75,6 +76,7 @@ class STEncoder:
         multi_gpu_encode(query_list: List[str], is_query=True, batch_size=None) -> np.ndarray:
             Encodes a list of queries into embeddings using multiple GPUs.
     """
+
     def __init__(self, model_name, model_path, max_length, use_fp16, instruction):
         import torch
         from sentence_transformers import SentenceTransformer
@@ -85,7 +87,7 @@ class STEncoder:
         self.use_fp16 = use_fp16
         self.instruction = instruction
         self.model = SentenceTransformer(
-            model_path, model_kwargs={"torch_dtype": torch.float16 if use_fp16 else torch.float}
+            model_path, trust_remote_code=True, model_kwargs={"torch_dtype": torch.float16 if use_fp16 else torch.float}
         )
 
     @torch.inference_mode()
@@ -103,7 +105,12 @@ class STEncoder:
         query_list = parse_query(self.model_name, query_list, self.instruction)
         pool = self.model.start_multi_process_pool()
         query_emb = self.model.encode_multi_process(
-            query_list, pool, convert_to_numpy=True, normalize_embeddings=True, batch_size=batch_size,show_progress_bar=True
+            query_list,
+            pool,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+            batch_size=batch_size,
+            show_progress_bar=True,
         )
         self.model.stop_multi_process_pool(pool)
         query_emb = query_emb.astype(np.float32, order="C")
