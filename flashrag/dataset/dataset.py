@@ -4,6 +4,7 @@ import random
 import warnings
 from typing import List, Dict, Any, Optional, Generator
 import numpy as np
+from utils import convert_numpy
 
 
 class Item:
@@ -52,14 +53,12 @@ class Item:
         """Convert all information within the data sample into a dict. Information generated
         during the inference will be saved into output field.
         """
-        for k, v in self.output.items():
-            if isinstance(v, np.ndarray):
-                self.output[k] = v.tolist()
+
         output = {
             "id": self.id,
             "question": self.question,
             "golden_answers": self.golden_answers,
-            "output": self.output,
+            "output": convert_numpy(self.output),
         }
         if self.metadata:
             output["metadata"] = self.metadata
@@ -171,10 +170,7 @@ class Dataset:
     def save(self, save_path: str) -> None:
         """Save the dataset into the original format."""
 
-        def convert_to_float(d: Dict[str, Any]) -> Dict[str, Any]:
-            return {k: (v.item() if isinstance(v, np.generic) else v) for k, v in d.items()}
-
-        save_data = [convert_to_float(item.to_dict()) for item in self.data]
+        save_data = [item.to_dict() for item in self.data]
 
         with open(save_path, "w", encoding="utf-8") as f:
             json.dump(save_data, f, indent=4)
