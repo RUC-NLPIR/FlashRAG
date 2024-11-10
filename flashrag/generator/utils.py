@@ -59,8 +59,9 @@ def resolve_max_tokens(params: dict, generation_params: dict, prioritize_new_tok
 
     generation_params.pop("max_new_tokens", None)
     generation_params.pop("max_tokens", None)
-    if prioritize_new_tokens:
-        generation_params["max_new_tokens"] = final_max_tokens
-    else:
-        generation_params["max_tokens"] = final_max_tokens
+    if final_max_tokens is not None:
+        if prioritize_new_tokens:
+            generation_params["max_new_tokens"] = final_max_tokens
+        else:
+            generation_params["max_tokens"] = final_max_tokens
     return generation_params
