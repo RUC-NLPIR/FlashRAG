@@ -5,3 +5,4 @@ build/
 .idea/
 dist/*
 upload_pypi.sh
+tests/*
