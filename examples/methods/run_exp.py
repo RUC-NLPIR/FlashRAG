@@ -353,7 +353,7 @@ def selfrag(args):
         "save_note": "self-rag",
         "gpu_id": args.gpu_id,
         "generation_params": {
-            "max_new_tokens": 100,
+            "max_tokens": 100,
             "temperature": 0.0,
             "top_p": 1.0,
             "skip_special_tokens": False,
@@ -475,7 +475,7 @@ def trace(args):
         "dataset_name": args.dataset_name,
         "refiner_name": "kg-trace",
         "trace_config": trace_config,
-        "framework": "hf" # Trance only supports using Huggingface Transformers since it needs logits of outputs
+        "framework": "hf",  # Trance only supports using Huggingface Transformers since it needs logits of outputs
     }
 
     # preparation
@@ -527,10 +527,9 @@ def spring(args):
     generator = get_generator(config)
     generator.add_new_tokens(token_embedding_path, token_name_func=lambda idx: f"[ref{idx+1}]")
 
-    pipeline = SequentialPipeline(
-        config=config, prompt_template=prompt_template, generator=generator
-    )
+    pipeline = SequentialPipeline(config=config, prompt_template=prompt_template, generator=generator)
     result = pipeline.run(test_data)
+
 
 def adaptive(args):
     judger_name = "adaptive-rag"
@@ -578,7 +577,7 @@ if __name__ == "__main__":
         "iterretgen": iterretgen,
         "ircot": ircot,
         "trace": trace,
-        'adaptive': adaptive, 
+        "adaptive": adaptive,
     }
 
     args = parser.parse_args()
