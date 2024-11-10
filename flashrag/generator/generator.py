@@ -1,5 +1,6 @@
 from typing import List
 from copy import deepcopy
+import warnings
 from tqdm import tqdm
 from tqdm.auto import trange
 import numpy as np
@@ -11,6 +12,7 @@ from transformers import (
     BartForConditionalGeneration,
     AutoConfig,
 )
+from utils import resolve_max_tokens
 
 
 class BaseGenerator:
@@ -53,15 +55,11 @@ class EncoderDecoderGenerator(BaseGenerator):
 
                 self.model = FiDT5.from_pretrained(self.model_path)
             else:
-                self.model = T5ForConditionalGeneration.from_pretrained(
-                    self.model_path
-                )
+                self.model = T5ForConditionalGeneration.from_pretrained(self.model_path)
         else:
             if self.fid:
                 assert False, "FiD only support T5"
-            self.model = BartForConditionalGeneration.from_pretrained(
-                self.model_path
-            )
+            self.model = BartForConditionalGeneration.from_pretrained(self.model_path)
         self.model.cuda()
         self.model.eval()
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
@@ -108,27 +106,14 @@ class EncoderDecoderGenerator(BaseGenerator):
             ]
             generation_params["stopping_criteria"] = stopping_criteria
 
-        max_tokens = params.pop("max_tokens", None) or params.pop(
-            "max_new_tokens", None
-        )
-        if max_tokens is not None:
-            generation_params["max_new_tokens"] = max_tokens
-        else:
-            generation_params["max_new_tokens"] = generation_params.get(
-                "max_new_tokens", generation_params.pop("max_tokens", None)
-            )
-        generation_params.pop("max_tokens", None)
+        generation_params = resolve_max_tokens(params, generation_params, prioritize_new_tokens=True)
 
         responses = []
-        for idx in trange(
-            0, len(input_list), batch_size, desc="Generation process: "
-        ):
+        for idx in trange(0, len(input_list), batch_size, desc="Generation process: "):
             batched_prompts = input_list[idx : idx + batch_size]
             if self.fid:
                 # assume each input in input_list is a list, contains K string
-                input_ids, attention_mask = self.encode_passages(
-                    batched_prompts
-                )
+                input_ids, attention_mask = self.encode_passages(batched_prompts)
                 inputs = {
                     "input_ids": input_ids.to(self.device),
                     "attention_mask": attention_mask.to(self.device),
@@ -173,11 +158,7 @@ class VLLMGenerator(BaseGenerator):
         else:
             tensor_parallel_size = self.gpu_num
 
-        self.lora_path = (
-            None
-            if "generator_lora_path" not in config
-            else config["generator_lora_path"]
-        )
+        self.lora_path = None if "generator_lora_path" not in config else config["generator_lora_path"]
         self.use_lora = False
         if self.lora_path is not None:
             self.use_lora = True
@@ -197,9 +178,7 @@ class VLLMGenerator(BaseGenerator):
                 gpu_memory_utilization=gpu_memory_utilization,
                 max_logprobs=32016,
             )
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            self.model_path, trust_remote_code=True
-        )
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
 
     @torch.inference_mode(mode=True)
     def generate(
@@ -219,23 +198,16 @@ class VLLMGenerator(BaseGenerator):
         if "do_sample" in generation_params:
             do_sample_flag = generation_params.pop("do_sample")
             if not do_sample_flag:
-                generation_params['temperature'] = 0
-        generation_params['seed'] = self.config['seed']
-        max_tokens = params.pop("max_tokens", None) or params.pop(
-            "max_new_tokens", None
-        )
-        if max_tokens is not None:
-            generation_params["max_tokens"] = max_tokens
-        else:
-            generation_params["max_tokens"] = generation_params.get(
-                "max_tokens", generation_params.pop("max_new_tokens", None)
-            )
-        generation_params.pop("max_new_tokens", None)
+                generation_params["temperature"] = 0
+        generation_params["seed"] = self.config["seed"]
+
+        # handle param conflict
+        generation_params = resolve_max_tokens(params, generation_params, prioritize_new_tokens=False)
 
         # fix for llama3
         if "stop" in generation_params:
             generation_params["stop"].append("<|eot_id|>")
-            generation_params['include_stop_str_in_output'] = True
+            generation_params["include_stop_str_in_output"] = True
         else:
             generation_params["stop"] = ["<|eot_id|>"]
 
@@ -265,12 +237,7 @@ class VLLMGenerator(BaseGenerator):
             scores = []
             for output in outputs:
                 logprobs = output.outputs[0].logprobs
-                scores.append(
-                    [
-                        np.exp(list(score_dict.values())[0].logprob)
-                        for score_dict in logprobs
-                    ]
-                )
+                scores.append([np.exp(list(score_dict.values())[0].logprob) for score_dict in logprobs])
             return base_output, scores
         else:
             return base_output
@@ -282,11 +249,7 @@ class HFCausalLMGenerator(BaseGenerator):
     def __init__(self, config, model=None):
         super().__init__(config)
         self.config = config
-        lora_path = (
-            None
-            if "generator_lora_path" not in config
-            else config["generator_lora_path"]
-        )
+        lora_path = None if "generator_lora_path" not in config else config["generator_lora_path"]
         self.model, self.tokenizer = self._load_model(model=model)
         self.use_lora = False
         if lora_path is not None:
@@ -305,28 +268,24 @@ class HFCausalLMGenerator(BaseGenerator):
         else:
             model.cuda()
         model.eval()
-        tokenizer = AutoTokenizer.from_pretrained(
-            self.model_path, trust_remote_code=True
-        )
+        tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
         if "qwen" not in self.model_name:
             tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "left"
 
         return model, tokenizer
 
-    def add_new_tokens(
-        self, token_embedding_path, token_name_func=lambda idx: f"[ref{idx+1}]"
-    ):
+    def add_new_tokens(self, token_embedding_path, token_name_func=lambda idx: f"[ref{idx+1}]"):
         del self.model
         self.model = AutoModelForCausalLM.from_pretrained(
-                self.model_path,
-                trust_remote_code=True,
+            self.model_path,
+            trust_remote_code=True,
         )
         # get original embedding weight matrix
         embedding_layer = self.model.get_input_embeddings()
         embedding_weights = embedding_layer.weight
         original_vocab_size, embedding_dim = embedding_weights.shape
-    
+
         new_tokens_weights = torch.load(token_embedding_path)
         new_tokens_length = new_tokens_weights.shape[0]
 
@@ -386,16 +345,7 @@ class HFCausalLMGenerator(BaseGenerator):
             ]
             generation_params["stopping_criteria"] = stopping_criteria
 
-        max_tokens = params.pop("max_tokens", None) or params.pop(
-            "max_new_tokens", None
-        )
-        if max_tokens is not None:
-            generation_params["max_new_tokens"] = max_tokens
-        else:
-            generation_params["max_new_tokens"] = generation_params.get(
-                "max_new_tokens", generation_params.pop("max_tokens", None)
-            )
-        generation_params.pop("max_tokens", None)
+        generation_params = resolve_max_tokens(params, generation_params, prioritize_new_tokens=True)
 
         # set eos token for llama
         if "llama" in self.model_name.lower():
@@ -413,9 +363,7 @@ class HFCausalLMGenerator(BaseGenerator):
         generated_token_ids = []
         generated_token_logits = []
 
-        for idx in trange(
-            0, len(input_list), batch_size, desc="Generation process: "
-        ):
+        for idx in trange(0, len(input_list), batch_size, desc="Generation process: "):
             torch.cuda.empty_cache()
             batched_prompts = input_list[idx : idx + batch_size]
             inputs = self.tokenizer(
@@ -435,12 +383,7 @@ class HFCausalLMGenerator(BaseGenerator):
             generated_ids = outputs.sequences
             logits = torch.stack(outputs.scores, dim=1).softmax(-1)
             generated_ids = generated_ids[:, inputs["input_ids"].shape[-1] :]
-            gen_score = (
-                torch.gather(logits, 2, generated_ids[:, :, None])
-                .squeeze(-1)
-                .cpu()
-                .tolist()
-            )
+            gen_score = torch.gather(logits, 2, generated_ids[:, :, None]).squeeze(-1).cpu().tolist()
             scores.extend(gen_score)
 
             # get additinoal info
@@ -448,26 +391,15 @@ class HFCausalLMGenerator(BaseGenerator):
                 batch_generated_token_ids = generated_ids.detach().cpu()
                 batch_generated_token_logits = (
                     torch.cat(
-                        [
-                            token_scores.unsqueeze(1)
-                            for token_scores in outputs.scores
-                        ],
+                        [token_scores.unsqueeze(1) for token_scores in outputs.scores],
                         dim=1,
                     )
                     .detach()
                     .cpu()
                 )
-                if (
-                    batch_generated_token_ids.shape[1]
-                    < generation_params["max_new_tokens"]
-                ):
-                    real_batch_size, num_generated_tokens = (
-                        batch_generated_token_ids.shape
-                    )
-                    padding_length = (
-                        generation_params["max_new_tokens"]
-                        - num_generated_tokens
-                    )
+                if batch_generated_token_ids.shape[1] < generation_params["max_new_tokens"]:
+                    real_batch_size, num_generated_tokens = batch_generated_token_ids.shape
+                    padding_length = generation_params["max_new_tokens"] - num_generated_tokens
                     padding_token_ids = torch.zeros(
                         (real_batch_size, padding_length),
                         dtype=batch_generated_token_ids.dtype,
@@ -480,9 +412,7 @@ class HFCausalLMGenerator(BaseGenerator):
                         ),
                         dtype=batch_generated_token_logits.dtype,
                     )
-                    batch_generated_token_ids = torch.cat(
-                        [batch_generated_token_ids, padding_token_ids], dim=1
-                    )
+                    batch_generated_token_ids = torch.cat([batch_generated_token_ids, padding_token_ids], dim=1)
                     batch_generated_token_logits = torch.cat(
                         [batch_generated_token_logits, padding_token_logits],
                         dim=1,
@@ -569,11 +499,7 @@ class FastChatGenerator(HFCausalLMGenerator):
         def get_gpu_memory(max_gpus=None):
             """Get available memory for each GPU."""
             gpu_memory = []
-            num_gpus = (
-                torch.cuda.device_count()
-                if max_gpus is None
-                else min(max_gpus, torch.cuda.device_count())
-            )
+            num_gpus = torch.cuda.device_count() if max_gpus is None else min(max_gpus, torch.cuda.device_count())
             for gpu_id in range(num_gpus):
                 with torch.cuda.device(gpu_id):
                     device = torch.cuda.current_device()
@@ -594,10 +520,7 @@ class FastChatGenerator(HFCausalLMGenerator):
             max_gpu_memory = None
             if self.gpu_num != 1:
                 available_gpu_memory = get_gpu_memory(self.gpu_num)
-                max_gpu_memory = (
-                    str(int(min(available_gpu_memory) * gpu_memory_utilization))
-                    + "GiB"
-                )
+                max_gpu_memory = str(int(min(available_gpu_memory) * gpu_memory_utilization)) + "GiB"
 
             model, tokenizer = load_model(
                 self.model_path,
@@ -611,14 +534,10 @@ class FastChatGenerator(HFCausalLMGenerator):
 
         else:
             model.cuda()
-            tokenizer = AutoTokenizer.from_pretrained(
-                self.model_path, trust_remote_code=True
-            )
+            tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
         model.eval()
 
-        tokenizer = AutoTokenizer.from_pretrained(
-            self.model_path, trust_remote_code=True
-        )
+        tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
         if "qwen" not in self.model_name:
             tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "left"
