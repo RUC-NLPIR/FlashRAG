@@ -22,70 +22,70 @@ def load_retriever(_config):
 def load_generator(_config):
     return get_generator(_config)
 
-
-custom_theme = {
-    "primaryColor": "#ff6347",
-    "backgroundColor": "#f0f0f0",
-    "secondaryBackgroundColor": "#d3d3d3",
-    "textColor": "#121212",
-    "font": "sans serif",
-}
-st.set_page_config(page_title="FlashRAG Demo", page_icon="⚡")
-
-
-st.sidebar.title("Configuration")
-temperature = st.sidebar.slider("Temperature:", 0.01, 1.0, 0.5)
-topk = st.sidebar.slider("Number of retrieved documents:", 1, 10, 5)
-max_new_tokens = st.sidebar.slider("Max generation tokens:", 1, 2048, 256)
+if __name__ == '__main__':
+    custom_theme = {
+        "primaryColor": "#ff6347",
+        "backgroundColor": "#f0f0f0",
+        "secondaryBackgroundColor": "#d3d3d3",
+        "textColor": "#121212",
+        "font": "sans serif",
+    }
+    st.set_page_config(page_title="FlashRAG Demo", page_icon="⚡")
 
 
-st.title("⚡FlashRAG Demo")
-st.write("This demo retrieves documents and generates responses based on user input.")
+    st.sidebar.title("Configuration")
+    temperature = st.sidebar.slider("Temperature:", 0.01, 1.0, 0.5)
+    topk = st.sidebar.slider("Number of retrieved documents:", 1, 10, 5)
+    max_new_tokens = st.sidebar.slider("Max generation tokens:", 1, 2048, 256)
 
 
-query = st.text_area("Enter your prompt:")
-
-config = Config("my_config.yaml", config_dict=config_dict)
-generator = load_generator(config)
-retriever = load_retriever(config)
-
-system_prompt_rag = (
-    "你是一个友好的人工智能助手。"
-    "请对用户的输出做出高质量的响应，生成类似于人类的内容，并尽量遵循输入中的指令。"
-    "\n下面是一些可供参考的文档，你可以使用它们来回答问题。\n\n{reference}"
-)
-system_prompt_no_rag = (
-    "你是一个友好的人工智能助手。" "请对用户的输出做出高质量的响应，生成类似于人类的内容，并尽量遵循输入中的指令。\n"
-)
-base_user_prompt = "{question}"
-
-prompt_template_rag = PromptTemplate(config, system_prompt=system_prompt_rag, user_prompt=base_user_prompt)
-prompt_template_no_rag = PromptTemplate(config, system_prompt=system_prompt_no_rag, user_prompt=base_user_prompt)
+    st.title("⚡FlashRAG Demo")
+    st.write("This demo retrieves documents and generates responses based on user input.")
 
 
-if st.button("Generate Responses"):
-    with st.spinner("Retrieving and Generating..."):
-        retrieved_docs = retriever.search(query, num=topk)
+    query = st.text_area("Enter your prompt:")
 
-        st.subheader("References", divider="gray")
-        for i, doc in enumerate(retrieved_docs):
-            doc_title = doc.get("title", "No Title")
-            doc_text = "\n".join(doc["contents"].split("\n")[1:])
-            expander = st.expander(f"**[{i+1}]: {doc_title}**", expanded=False)
-            with expander:
-                st.markdown(doc_text, unsafe_allow_html=True)
+    config = Config("my_config.yaml", config_dict=config_dict)
+    generator = load_generator(config)
+    retriever = load_retriever(config)
 
-        st.subheader("Generated Responses:", divider="gray")
+    system_prompt_rag = (
+        "你是一个友好的人工智能助手。"
+        "请对用户的输出做出高质量的响应，生成类似于人类的内容，并尽量遵循输入中的指令。"
+        "\n下面是一些可供参考的文档，你可以使用它们来回答问题。\n\n{reference}"
+    )
+    system_prompt_no_rag = (
+        "你是一个友好的人工智能助手。" "请对用户的输出做出高质量的响应，生成类似于人类的内容，并尽量遵循输入中的指令。\n"
+    )
+    base_user_prompt = "{question}"
 
-        input_prompt_with_rag = prompt_template_rag.get_string(question=query, retrieval_result=retrieved_docs)
-        response_with_rag = generator.generate(
-            input_prompt_with_rag, temperature=temperature, max_new_tokens=max_new_tokens
-        )[0]
-        st.subheader("Response with RAG:")
-        st.write(response_with_rag)
-        input_prompt_without_rag = prompt_template_no_rag.get_string(question=query)
-        response_without_rag = generator.generate(
-            input_prompt_without_rag, temperature=temperature, max_new_tokens=max_new_tokens
-        )[0]
-        st.subheader("Response without RAG:")
-        st.markdown(response_without_rag)
+    prompt_template_rag = PromptTemplate(config, system_prompt=system_prompt_rag, user_prompt=base_user_prompt)
+    prompt_template_no_rag = PromptTemplate(config, system_prompt=system_prompt_no_rag, user_prompt=base_user_prompt)
+
+
+    if st.button("Generate Responses"):
+        with st.spinner("Retrieving and Generating..."):
+            retrieved_docs = retriever.search(query, num=topk)
+
+            st.subheader("References", divider="gray")
+            for i, doc in enumerate(retrieved_docs):
+                doc_title = doc.get("title", "No Title")
+                doc_text = "\n".join(doc["contents"].split("\n")[1:])
+                expander = st.expander(f"**[{i+1}]: {doc_title}**", expanded=False)
+                with expander:
+                    st.markdown(doc_text, unsafe_allow_html=True)
+
+            st.subheader("Generated Responses:", divider="gray")
+
+            input_prompt_with_rag = prompt_template_rag.get_string(question=query, retrieval_result=retrieved_docs)
+            response_with_rag = generator.generate(
+                input_prompt_with_rag, temperature=temperature, max_new_tokens=max_new_tokens
+            )[0]
+            st.subheader("Response with RAG:")
+            st.write(response_with_rag)
+            input_prompt_without_rag = prompt_template_no_rag.get_string(question=query)
+            response_without_rag = generator.generate(
+                input_prompt_without_rag, temperature=temperature, max_new_tokens=max_new_tokens
+            )[0]
+            st.subheader("Response without RAG:")
+            st.markdown(response_without_rag)
