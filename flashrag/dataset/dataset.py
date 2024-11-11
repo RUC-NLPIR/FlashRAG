@@ -85,7 +85,7 @@ class Dataset:
     ) -> None:
         if config is not None:
             self.config = config
-            dataset_name = config.get("dataset_name", "default_dataset")
+            dataset_name = config['dataset_name'] if 'dataset_name' in config else 'defalut_dataset'
         else:
             self.config = None
             warnings.warn("dataset_name is not in config, set it as default.")
