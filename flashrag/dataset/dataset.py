@@ -4,7 +4,6 @@ import random
 import warnings
 from typing import List, Dict, Any, Optional, Generator
 import numpy as np
-from flashrag.dataset.utils import convert_numpy
 
 
 class Item:
@@ -53,6 +52,7 @@ class Item:
         """Convert all information within the data sample into a dict. Information generated
         during the inference will be saved into output field.
         """
+        from flashrag.dataset.utils import convert_numpy
 
         output = {
             "id": self.id,
