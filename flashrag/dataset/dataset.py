@@ -100,8 +100,11 @@ class Dataset:
             self.data = self._load_data(self.dataset_name, self.dataset_path)
         else:
             print("Load data from provided data")
-            assert isinstance(data[0], dict)
-            self.data = [Item(item_dict) for item_dict in data]
+            if isinstance(data[0], dict):
+                self.data = [Item(item_dict) for item_dict in data]
+            else:
+                assert isinstance(data[0], Item)
+                self.data = data
 
     def _load_data(self, dataset_name: str, dataset_path: str) -> List[Item]:
         """Load data from the provided dataset_path or directly download the file(TODO)."""
