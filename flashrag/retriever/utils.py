@@ -27,6 +27,7 @@ def pooling(pooler_output, last_hidden_state, attention_mask=None, pooling_metho
     else:
         raise NotImplementedError("Pooling method not implemented!")
 
+
 def set_default_instruction(model_name, is_query=True, is_zh=False):
     instruction = ""
     if "e5" in model_name.lower():
@@ -37,7 +38,7 @@ def set_default_instruction(model_name, is_query=True, is_zh=False):
 
     if "bge" in model_name.lower():
         if is_query:
-            if 'zh' in model_name.lower() or is_zh:
+            if "zh" in model_name.lower() or is_zh:
                 instruction = "为这个句子生成表示以用于检索相关文章："
             else:
                 instruction = "Represent this sentence for searching relevant passages: "
@@ -60,6 +61,8 @@ def parse_query(model_name, query_list, instruction=None):
                     zh_char += 1
             except:
                 continue
+        if len(str) == 0:
+            return False
         if zh_char / len(str) > 0.2:
             return True
         else:
@@ -67,7 +70,7 @@ def parse_query(model_name, query_list, instruction=None):
 
     if isinstance(query_list, str):
         query_list = [query_list]
-        
+
     if instruction is not None:
         instruction = instruction.strip() + " "
     else:
@@ -77,6 +80,7 @@ def parse_query(model_name, query_list, instruction=None):
     query_list = [instruction + query for query in query_list]
 
     return query_list
+
 
 def load_corpus(corpus_path: str):
     corpus = datasets.load_dataset("json", data_files=corpus_path, split="train")
@@ -98,3 +102,16 @@ def load_docs(corpus, doc_idxs):
     results = [corpus[int(idx)] for idx in doc_idxs]
 
     return results
+
+
+def parse_image(image):
+    from PIL import Image
+
+    if isinstance(image, str):
+        if image.startswith("http"):
+            import requests
+
+            image = Image.open(requests.get(image, stream=True).raw)
+        else:
+            image = Image.open(image)
+    return image
