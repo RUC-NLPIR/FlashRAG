@@ -446,7 +446,7 @@ def ircot(args):
     all_split = get_dataset(config)
     test_data = all_split[args.split]
     print(config["generator_model_path"])
-    pipeline = IRCOTPipeline(config)
+    pipeline = IRCOTPipeline(config, max_iter=5)
 
     result = pipeline.run(test_data)
 
