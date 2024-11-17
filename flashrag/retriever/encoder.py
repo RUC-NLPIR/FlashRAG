@@ -1,7 +1,9 @@
-from typing import List
+from typing import List, Union
+import os
+import json
 import torch
 import numpy as np
-from flashrag.retriever.utils import load_model, pooling, parse_query
+from flashrag.retriever.utils import load_model, pooling, parse_query, parse_image
 
 
 class Encoder:
@@ -116,3 +118,91 @@ class STEncoder:
         query_emb = query_emb.astype(np.float32, order="C")
 
         return query_emb
+
+
+class ClipEncoder:
+    """ClipEncoder class for encoding queries using CLIP.
+    Three type:
+        1. openai-series clip: 需要对图片进行processor
+        2. jina clip: 不需要对图片进行processor，直接使用encode-text等接口
+        3. openclip series: 还未探索使用方法
+
+    """
+
+    def __init__(self, model_name, model_path, max_length):
+
+        self.model_name = model_name
+        self.model_path = model_path
+        self.max_length = max_length
+
+        self.load_clip_model()
+
+    def load_clip_model(self):
+        from transformers import AutoModel, AutoProcessor
+
+        with open(os.path.join(self.model_path, "config.json")) as f:
+            config = json.load(f)
+        model_type = config.get("architectures", [None])[0]
+        self.model_type = model_type
+
+        if model_type == "CLIPModel":
+            self.model = AutoModel.from_pretrained(self.model_path, trust_remote_code=True)
+            self.processor = AutoProcessor.from_pretrained(self.model_path, trust_remote_code=True)
+        elif model_type.endswith("CLIPModel"):
+            self.model = AutoModel.from_pretrained(self.model_path, trust_remote_code=True)
+        else:
+            raise NotImplementedError(f"Unsupported model type: {model_type}")
+
+        self.model.eval()
+        self.model.cuda()
+
+    @torch.inference_mode()
+    def encode(self, query_list: List[str], modal="image") -> np.ndarray:
+        encode_func_dict = {
+            "text": self.encode_text,
+            "image": self.encode_image,
+        }
+        return encode_func_dict[modal](query_list)
+
+    @torch.inference_mode()
+    def encode_image(self, image_list: List) -> np.ndarray:
+        # Each item in image_list: PIL Image, local path, or URL
+        if self.model_type == "CLIPModel":
+            # need handle image
+            image_list = [parse_image(image) for image in image_list]
+            inputs = self.processor(images=image_list, return_tensors="pt")
+            inputs = {k: v.cuda() for k, v in inputs.items()}
+            image_emb = self.model.get_image_features(**inputs)
+            image_emb = image_emb / image_emb.norm(p=2, dim=-1, keepdim=True)
+            image_emb = image_emb.detach().cpu().numpy().astype(np.float32)
+        elif self.model_type.endswith("CLIPModel"):
+            image_emb = self.model.encode_image(image_list)
+        else:
+            raise NotImplementedError(f"Unsupported model type: {self.model_type}")
+        return image_emb
+
+    @torch.inference_mode()
+    def encode_text(self, text_list: List[str]) -> np.ndarray:
+        # Each item in image_list: PIL Image, local path, or URL
+        if self.model_type == "CLIPModel":
+            inputs = self.processor(
+                text=text_list,
+                max_length=self.max_length,
+                padding=True,
+                truncation=True,
+                return_tensors="pt",
+            )
+            inputs = {k: v.cuda() for k, v in inputs.items()}
+            text_emb = self.model.get_text_features(**inputs)
+            text_emb = text_emb / text_emb.norm(p=2, dim=-1, keepdim=True)
+            text_emb = text_emb.detach().cpu().numpy().astype(np.float32)
+        elif self.model_type.endswith("CLIPModel"):
+            text_emb = self.model.encode_text(
+                text_list,
+                max_length=self.max_length,
+                padding=True,
+                truncation=True,
+            )
+        else:
+            raise NotImplementedError(f"Unsupported model type: {self.model_type}")
+        return text_emb
