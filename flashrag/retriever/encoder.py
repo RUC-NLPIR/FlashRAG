@@ -174,14 +174,29 @@ class ClipEncoder:
         self.model.cuda()
 
     @torch.inference_mode()
-    def encode(self, query_list: Union[List[str], str], modal="image") -> np.ndarray:
-        if not isinstance(query_list, list):
-            query_list = [query_list]
+    def single_batch_encode(self, query_list: Union[List[str], str], modal="image") -> np.ndarray:
         encode_func_dict = {
             "text": self.encode_text,
             "image": self.encode_image,
         }
         return encode_func_dict[modal](query_list)
+
+    @torch.inference_mode()
+    def encode(self, query_list: List[str], batch_size=64, modal="image") -> np.ndarray:
+        if not isinstance(query_list, list):
+            query_list = [query_list]
+        query_emb = []
+        for i in tqdm(range(0, len(query_list), batch_size), desc="Encoding process: "):
+            query_emb.append(self.single_batch_encode(query_list[i : i + batch_size], modal))
+        query_emb = np.concatenate(query_emb, axis=0)
+        return query_emb
+
+    @torch.inference_mode()
+    def multi_gpu_encode(self, query_list: Union[List[str], str], batch_size=64, is_query=True) -> np.ndarray:
+        if self.gpu_num > 1:
+            self.model = torch.nn.DataParallel(self.model)
+        query_emb = self.encode(query_list, batch_size, is_query)
+        return query_emb
 
     @torch.inference_mode()
     def encode_image(self, image_list: List) -> np.ndarray:
