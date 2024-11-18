@@ -9,7 +9,7 @@ from tqdm import tqdm
 import faiss
 
 from flashrag.utils import get_reranker
-from flashrag.retriever.utils import load_corpus, load_docs, load_mm_docs, load_mm_corpus
+from flashrag.retriever.utils import load_corpus, load_docs
 from flashrag.retriever.encoder import Encoder, STEncoder, ClipEncoder
 
 
