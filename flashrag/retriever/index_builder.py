@@ -32,7 +32,7 @@ class Index_Builder:
         save_embedding=False,
         faiss_gpu=False,
         use_sentence_transformer=False,
-        bm25_backend='bm25s'
+        bm25_backend="bm25s",
     ):
 
         self.retrieval_method = retrieval_method.lower()
@@ -50,18 +50,7 @@ class Index_Builder:
         self.use_sentence_transformer = use_sentence_transformer
         self.bm25_backend = bm25_backend
 
-        # set instruction for encode
-        if self.instruction is not None:
-            self.instruction = self.instruction.strip() + " "
-            print("Set instruction for encoding:", self.instruction)
-        else:
-            self.instruction = set_default_instruction(self.retrieval_method, is_query=False)
-            if self.instruction == "":
-                warnings.warn("Instruction is not set!")
-            else:
-                warnings.warn(f"Instruction is set to default: {self.instruction}")
-
-        #. config pooling method
+        # config pooling method
         if pooling_method is None:
             try:
                 # read pooling method from 1_Pooling/config.json
@@ -69,21 +58,21 @@ class Index_Builder:
                 for k, v in pooling_config.items():
                     if k.startswith("pooling_mode") and v == True:
                         pooling_method = k.split("pooling_mode_")[-1]
-                        if pooling_method == 'mean_tokens':
-                            pooling_method = 'mean'
-                        elif pooling_method == 'cls_token':
-                            pooling_method = 'cls'
+                        if pooling_method == "mean_tokens":
+                            pooling_method = "mean"
+                        elif pooling_method == "cls_token":
+                            pooling_method = "cls"
                         else:
                             # raise warning: not implemented pooling method
                             warnings.warn(f"Pooling method {pooling_method} is not implemented.", UserWarning)
-                            pooling_method = 'mean'
+                            pooling_method = "mean"
                         break
             except:
                 print(f"Pooling method not found in {self.model_path}, use default pooling method (mean).")
                 # use default pooling method
-                pooling_method = 'mean'
+                pooling_method = "mean"
         else:
-            if pooling_method not in ['mean', 'cls', 'pooler']:
+            if pooling_method not in ["mean", "cls", "pooler"]:
                 raise ValueError(f"Invalid pooling method {pooling_method}.")
         self.pooling_method = pooling_method
 
@@ -118,9 +107,9 @@ class Index_Builder:
     def build_index(self):
         r"""Constructing different indexes based on selective retrieval method."""
         if self.retrieval_method == "bm25":
-            if self.bm25_backend == 'pyserini':
+            if self.bm25_backend == "pyserini":
                 self.build_bm25_index_pyserini()
-            elif self.bm25_backend == 'bm25s':
+            elif self.bm25_backend == "bm25s":
                 self.build_bm25_index_bm25s()
             else:
                 assert False, "Invalid bm25 backend!"
@@ -165,18 +154,17 @@ class Index_Builder:
         """Building BM25 index based on bm25s library."""
 
         import bm25s
-        
-        self.save_dir = os.path.join(self.save_dir, 'bm25')
+
+        self.save_dir = os.path.join(self.save_dir, "bm25")
         os.makedirs(self.save_dir, exist_ok=True)
 
         corpus = datasets.load_dataset("json", data_files=self.corpus_path, split="train")
-        corpus_text = corpus['contents']
-        retriever = bm25s.BM25(corpus=corpus, backend='numba')
+        corpus_text = corpus["contents"]
+        retriever = bm25s.BM25(corpus=corpus, backend="numba")
         retriever.index(corpus_text)
-        retriever.save(self.save_dir,corpus=corpus)
+        retriever.save(self.save_dir, corpus=corpus)
 
         print("Finish!")
-
 
     def _load_embedding(self, embedding_path, corpus_size, hidden_size):
         all_embeddings = np.memmap(embedding_path, mode="r", dtype=np.float32).reshape(corpus_size, hidden_size)
@@ -194,61 +182,14 @@ class Index_Builder:
         else:
             memmap[:] = all_embeddings
 
-    def st_encode_all(self):
-        if self.gpu_num > 1:
-            print("Use multi gpu!")
-            self.batch_size = self.batch_size * self.gpu_num
-
-        sentence_list = [item["contents"] for item in self.corpus]
-        sentence_list = [f"{self.instruction}{doc}" for doc in sentence_list]
-        all_embeddings = self.encoder.encode(sentence_list, batch_size=self.batch_size)
-
-        return all_embeddings
-
     def encode_all(self):
+        encode_data = [item["contents"] for item in self.corpus]
         if self.gpu_num > 1:
             print("Use multi gpu!")
-            self.encoder = torch.nn.DataParallel(self.encoder)
             self.batch_size = self.batch_size * self.gpu_num
-
-        all_embeddings = []
-        for start_idx in tqdm(range(0, len(self.corpus), self.batch_size), desc="Inference Embeddings:"):
-            batch_data = self.corpus[start_idx : start_idx + self.batch_size]["contents"]
-            batch_data = [f"{self.instruction}{doc}" for doc in batch_data]
-
-            inputs = self.tokenizer(
-                batch_data,
-                padding=True,
-                truncation=True,
-                return_tensors="pt",
-                max_length=self.max_length,
-            ).to("cuda")
-
-            inputs = {k: v.cuda() for k, v in inputs.items()}
-
-            # TODO: support encoder-only T5 model
-            if "T5" in type(self.encoder).__name__ or (self.gpu_num > 1 and "T5" in type(self.encoder.module).__name__):
-                # T5-based retrieval model
-                decoder_input_ids = torch.zeros((inputs["input_ids"].shape[0], 1), dtype=torch.long).to(
-                    inputs["input_ids"].device
-                )
-                output = self.encoder(**inputs, decoder_input_ids=decoder_input_ids, return_dict=True)
-                embeddings = output.last_hidden_state[:, 0, :]
-
-            else:
-                output = self.encoder(**inputs, return_dict=True)
-                embeddings = pooling(
-                    output.pooler_output, output.last_hidden_state, inputs["attention_mask"], self.pooling_method
-                )
-                if "dpr" not in self.retrieval_method:
-                    embeddings = torch.nn.functional.normalize(embeddings, dim=-1)
-
-            embeddings = cast(torch.Tensor, embeddings)
-            embeddings = embeddings.detach().cpu().numpy()
-            all_embeddings.append(embeddings)
-
-        all_embeddings = np.concatenate(all_embeddings, axis=0)
-        all_embeddings = all_embeddings.astype(np.float32)
+            all_embeddings = self.encoder.multi_gpu_encode(encode_data, batch_size=self.batch_size, is_query=False)
+        else:
+            all_embeddings = self.encoder.encode(encode_data, batch_size=self.batch_size, is_query=False)
 
         return all_embeddings
 
@@ -269,17 +210,27 @@ class Index_Builder:
                 model_path=self.model_path,
                 max_length=self.max_length,
                 use_fp16=self.use_fp16,
+                instruction=self.instruction,
             )
             hidden_size = self.encoder.model.get_sentence_embedding_dimension()
         else:
-            self.encoder, self.tokenizer = load_model(model_path=self.model_path, use_fp16=self.use_fp16)
-            hidden_size = self.encoder.config.hidden_size
+            from flashrag.retriever.encoder import Encoder
+
+            self.encoder = Encoder(
+                model_name=self.retrieval_method,
+                model_path=self.model_path,
+                pooling_method=self.pooling_method,
+                max_length=self.max_length,
+                use_fp16=self.use_fp16,
+                instruction=self.instruction,
+            )
+            hidden_size = self.encoder.model.config.hidden_size
 
         if self.embedding_path is not None:
             corpus_size = len(self.corpus)
             all_embeddings = self._load_embedding(self.embedding_path, corpus_size, hidden_size)
         else:
-            all_embeddings = self.st_encode_all() if self.use_sentence_transformer else self.encode_all()
+            all_embeddings = self.encode_all()
             if self.save_embedding:
                 self._save_embedding(all_embeddings)
             del self.corpus
@@ -327,7 +278,7 @@ def main():
     parser.add_argument("--save_embedding", action="store_true", default=False)
     parser.add_argument("--faiss_gpu", default=False, action="store_true")
     parser.add_argument("--sentence_transformer", action="store_true", default=False)
-    parser.add_argument("--bm25_backend", default='bm25s', choices=['bm25s','pyserini'])
+    parser.add_argument("--bm25_backend", default="bm25s", choices=["bm25s", "pyserini"])
 
     args = parser.parse_args()
 
@@ -346,7 +297,7 @@ def main():
         save_embedding=args.save_embedding,
         faiss_gpu=args.faiss_gpu,
         use_sentence_transformer=args.sentence_transformer,
-        bm25_backend=args.bm25_backend
+        bm25_backend=args.bm25_backend,
     )
     index_builder.build_index()
 

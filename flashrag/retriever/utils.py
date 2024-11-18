@@ -48,7 +48,7 @@ def set_default_instruction(model_name, is_query=True, is_zh=False):
     return instruction
 
 
-def parse_query(model_name, query_list, instruction=None):
+def parse_query(model_name, query_list, instruction=None, is_query=True):
     """
     processing query for different encoders
     """
@@ -74,8 +74,10 @@ def parse_query(model_name, query_list, instruction=None):
     if instruction is not None:
         instruction = instruction.strip() + " "
     else:
-        instruction = set_default_instruction(model_name, is_query=True, is_zh=is_zh(query_list[0]))
+        instruction = set_default_instruction(model_name, is_query=is_query, is_zh=is_zh(query_list[0]))
     print(f"Use `{instruction}` as retreival instruction")
+    if instruction == "":
+        warnings.warn('Instruction is not set')
 
     query_list = [instruction + query for query in query_list]
 

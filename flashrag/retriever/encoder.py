@@ -3,6 +3,7 @@ import os
 import json
 import torch
 import numpy as np
+from tqdm import tqdm
 from flashrag.retriever.utils import load_model, pooling, parse_query, parse_image
 
 
@@ -30,19 +31,19 @@ class Encoder:
         self.max_length = max_length
         self.use_fp16 = use_fp16
         self.instruction = instruction
-
+        self.gpu_num = torch.cuda.device_count()
         self.model, self.tokenizer = load_model(model_path=model_path, use_fp16=use_fp16)
 
     @torch.inference_mode()
-    def encode(self, query_list: Union[List[str], str]) -> np.ndarray:
-        query_list = parse_query(self.model_name, query_list, self.instruction)
+    def single_batch_encode(self, query_list: Union[List[str], str], is_query=True) -> np.ndarray:
+        query_list = parse_query(self.model_name, query_list, self.instruction, is_query)
 
         inputs = self.tokenizer(
             query_list, max_length=self.max_length, padding=True, truncation=True, return_tensors="pt"
         )
         inputs = {k: v.cuda() for k, v in inputs.items()}
 
-        if "T5" in type(self.model).__name__:
+        if "T5" in type(self.encoder).__name__ or (self.gpu_num > 1 and "T5" in type(self.encoder.module).__name__):
             # T5-based retrieval model
             decoder_input_ids = torch.zeros((inputs["input_ids"].shape[0], 1), dtype=torch.long).to(
                 inputs["input_ids"].device
@@ -55,9 +56,25 @@ class Encoder:
             query_emb = pooling(
                 output.pooler_output, output.last_hidden_state, inputs["attention_mask"], self.pooling_method
             )
-        query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
+        if "dpr" not in self.model_name:
+            query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
         query_emb = query_emb.detach().cpu().numpy()
         query_emb = query_emb.astype(np.float32, order="C")
+        return query_emb
+
+    @torch.inference_mode()
+    def encode(self, query_list: List[str], batch_size=64, is_query=True) -> np.ndarray:
+        query_emb = []
+        for i in tqdm(range(0, len(query_list), batch_size), desc="Encoding process: "):
+            query_emb.append(self.single_batch_encode(query_list[i : i + batch_size], is_query))
+        query_emb = np.concatenate(query_emb, axis=0)
+        return query_emb
+
+    @torch.inference_mode()
+    def multi_gpu_encode(self, query_list: Union[List[str], str], batch_size=64, is_query=True) -> np.ndarray:
+        if self.gpu_num > 1:
+            self.model = torch.nn.DataParallel(self.model)
+        query_emb = self.encode(query_list, batch_size, is_query)
         return query_emb
 
 
@@ -94,7 +111,7 @@ class STEncoder:
 
     @torch.inference_mode()
     def encode(self, query_list: Union[List[str], str], batch_size=64, is_query=True) -> np.ndarray:
-        query_list = parse_query(self.model_name, query_list, self.instruction)
+        query_list = parse_query(self.model_name, query_list, self.instruction, is_query)
         query_emb = self.model.encode(
             query_list, batch_size=batch_size, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=True
         )
@@ -103,8 +120,8 @@ class STEncoder:
         return query_emb
 
     @torch.inference_mode()
-    def multi_gpu_encode(self, query_list: Union[List[str], str], is_query=True, batch_size=None) -> np.ndarray:
-        query_list = parse_query(self.model_name, query_list, self.instruction)
+    def multi_gpu_encode(self, query_list: Union[List[str], str], batch_size=None, is_query=True) -> np.ndarray:
+        query_list = parse_query(self.model_name, query_list, self.instruction, is_query)
         pool = self.model.start_multi_process_pool()
         query_emb = self.model.encode_multi_process(
             query_list,

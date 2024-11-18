@@ -337,30 +337,27 @@ class DenseRetriever(BaseTextRetriever):
         else:
             return results
 
-    def _batch_search(self, query_list: List[str], num: int = None, return_score=False):
+    def _batch_search(self, query_list: List[str], num: int = None, return_score=False, batch_size=None):
         if isinstance(query_list, str):
             query_list = [query_list]
         if num is None:
             num = self.topk
-
-        batch_size = self.batch_size
+        if batch_size is None:
+            batch_size = self.batch_size
 
         results = []
         scores = []
 
-        for start_idx in tqdm(range(0, len(query_list), batch_size), desc="Retrieval process: "):
-            query_batch = query_list[start_idx : start_idx + batch_size]
-            batch_emb = self.encoder.encode(query_batch)
-            batch_scores, batch_idxs = self.index.search(batch_emb, k=num)
-            batch_scores = batch_scores.tolist()
-            batch_idxs = batch_idxs.tolist()
+        emb = self.encoder.encode(query_list, batch_size=batch_size, is_query=True)
+        print("Begin faiss searching...")
+        scores, idxs = self.index.search(emb, k=num)
+        print("End faiss searching")
+        scores = scores.tolist()
+        idxs = idxs.tolist()
 
-            flat_idxs = sum(batch_idxs, [])
-            batch_results = load_docs(self.corpus, flat_idxs)
-            batch_results = [batch_results[i * num : (i + 1) * num] for i in range(len(batch_idxs))]
-
-            scores.extend(batch_scores)
-            results.extend(batch_results)
+        flat_idxs = sum(idxs, [])
+        results = load_docs(self.corpus, flat_idxs)
+        results = [results[i * num : (i + 1) * num] for i in range(len(idxs))]
 
         if return_score:
             return results, scores
