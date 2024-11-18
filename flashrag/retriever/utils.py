@@ -1,6 +1,8 @@
 import json
 import warnings
+from typing import List, Dict
 import datasets
+from datasets import 
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 
@@ -27,6 +29,7 @@ def pooling(pooler_output, last_hidden_state, attention_mask=None, pooling_metho
     else:
         raise NotImplementedError("Pooling method not implemented!")
 
+
 def set_default_instruction(model_name, is_query=True, is_zh=False):
     instruction = ""
     if "e5" in model_name.lower():
@@ -37,7 +40,7 @@ def set_default_instruction(model_name, is_query=True, is_zh=False):
 
     if "bge" in model_name.lower():
         if is_query:
-            if 'zh' in model_name.lower() or is_zh:
+            if "zh" in model_name.lower() or is_zh:
                 instruction = "为这个句子生成表示以用于检索相关文章："
             else:
                 instruction = "Represent this sentence for searching relevant passages: "
@@ -67,7 +70,7 @@ def parse_query(model_name, query_list, instruction=None):
 
     if isinstance(query_list, str):
         query_list = [query_list]
-        
+
     if instruction is not None:
         instruction = instruction.strip() + " "
     else:
@@ -78,10 +81,16 @@ def parse_query(model_name, query_list, instruction=None):
 
     return query_list
 
-def load_corpus(corpus_path: str):
-    corpus = datasets.load_dataset("json", data_files=corpus_path, split="train")
-    return corpus
 
+def load_corpus(corpus_path: str):
+    if corpus_path.endswith(".jsonl"):
+        read_type = 'json'
+    elif corpus_path.endswith(".parquet"):
+        read_type = 'parquet'
+    else:
+        raise NotImplementedError("Corpus format not supported!")
+    corpus = datasets.load_dataset(read_type, data_files=corpus_path, split="train")
+    return corpus
 
 def read_jsonl(file_path):
     with open(file_path, "r") as f:
@@ -94,7 +103,7 @@ def read_jsonl(file_path):
             yield new_item
 
 
-def load_docs(corpus, doc_idxs):
+def load_docs(corpus, doc_idxs: List[int]):
     results = [corpus[int(idx)] for idx in doc_idxs]
 
     return results

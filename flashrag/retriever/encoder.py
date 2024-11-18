@@ -34,7 +34,7 @@ class Encoder:
         self.model, self.tokenizer = load_model(model_path=model_path, use_fp16=use_fp16)
 
     @torch.inference_mode()
-    def encode(self, query_list: List[str], is_query=True) -> np.ndarray:
+    def encode(self, query_list: Union[List[str], str]) -> np.ndarray:
         query_list = parse_query(self.model_name, query_list, self.instruction)
 
         inputs = self.tokenizer(
@@ -93,7 +93,7 @@ class STEncoder:
         )
 
     @torch.inference_mode()
-    def encode(self, query_list: List[str], batch_size=64, is_query=True) -> np.ndarray:
+    def encode(self, query_list: Union[List[str], str], batch_size=64, is_query=True) -> np.ndarray:
         query_list = parse_query(self.model_name, query_list, self.instruction)
         query_emb = self.model.encode(
             query_list, batch_size=batch_size, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=True
@@ -103,7 +103,7 @@ class STEncoder:
         return query_emb
 
     @torch.inference_mode()
-    def multi_gpu_encode(self, query_list: List[str], is_query=True, batch_size=None) -> np.ndarray:
+    def multi_gpu_encode(self, query_list: Union[List[str], str], is_query=True, batch_size=None) -> np.ndarray:
         query_list = parse_query(self.model_name, query_list, self.instruction)
         pool = self.model.start_multi_process_pool()
         query_emb = self.model.encode_multi_process(
@@ -157,7 +157,9 @@ class ClipEncoder:
         self.model.cuda()
 
     @torch.inference_mode()
-    def encode(self, query_list: List[str], modal="image") -> np.ndarray:
+    def encode(self, query_list: Union[List[str], str], modal="image") -> np.ndarray:
+        if not isinstance(query_list, list):
+            query_list = [query_list]
         encode_func_dict = {
             "text": self.encode_text,
             "image": self.encode_image,

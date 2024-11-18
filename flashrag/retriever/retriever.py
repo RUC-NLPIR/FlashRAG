@@ -9,8 +9,8 @@ from tqdm import tqdm
 import faiss
 
 from flashrag.utils import get_reranker
-from flashrag.retriever.utils import load_corpus, load_docs
-from flashrag.retriever.encoder import Encoder, STEncoder
+from flashrag.retriever.utils import load_corpus, load_docs, load_mm_docs, load_mm_corpus
+from flashrag.retriever.encoder import Encoder, STEncoder, ClipEncoder
 
 
 def cache_manager(func):
@@ -155,6 +155,19 @@ class BaseRetriever:
     def _batch_search(self, query_list, num, return_score):
         pass
 
+    def search(self, *args, **kwargs):
+        return self._search(*args, **kwargs)
+
+    def batch_search(self, *args, **kwargs):
+        return self._batch_search(*args, **kwargs)
+
+
+class BaseTextRetriever(BaseRetriever):
+    """Base text retriever."""
+
+    def __init__(self, config):
+        super().__init__(config)
+
     @cache_manager
     @rerank_manager
     def search(self, *args, **kwargs):
@@ -174,14 +187,14 @@ class BaseRetriever:
         return self._search(*args, **kwargs)
 
 
-class BM25Retriever(BaseRetriever):
+class BM25Retriever(BaseTextRetriever):
     r"""BM25 retriever based on pre-built pyserini index."""
 
     def __init__(self, config):
         super().__init__(config)
-        self.backend = config['bm25_backend']
+        self.backend = config["bm25_backend"]
 
-        if self.backend == 'pyserini':
+        if self.backend == "pyserini":
             # Warning: the method based on pyserini will be deprecated
             from pyserini.search.lucene import LuceneSearcher
 
@@ -190,16 +203,16 @@ class BM25Retriever(BaseRetriever):
             if not self.contain_doc:
                 self.corpus = load_corpus(self.corpus_path)
             self.max_process_num = 8
-        elif self.backend == 'bm25s':
+        elif self.backend == "bm25s":
             import Stemmer
             import bm25s
 
-            self.stemmer = Stemmer.Stemmer('english')
+            self.stemmer = Stemmer.Stemmer("english")
             self.searcher = bm25s.BM25.load(self.index_path, mmap=True, load_corpus=True)
-            self.searcher.backend = 'numba'
-            
+            self.searcher.backend = "numba"
+
         else:
-            assert False, 'Invalid bm25 backend!'
+            assert False, "Invalid bm25 backend!"
 
     def _check_contain_doc(self):
         r"""Check if the index contains document content"""
@@ -208,7 +221,7 @@ class BM25Retriever(BaseRetriever):
     def _search(self, query: str, num: int = None, return_score=False) -> List[Dict[str, str]]:
         if num is None:
             num = self.topk
-        if self.backend == 'pyserini': 
+        if self.backend == "pyserini":
             hits = self.searcher.search(query, num)
             if len(hits) < 1:
                 if return_score:
@@ -234,14 +247,15 @@ class BM25Retriever(BaseRetriever):
                 ]
             else:
                 results = load_docs(self.corpus, [hit.docid for hit in hits])
-        elif self.backend == 'bm25s':
-            import bm25s 
+        elif self.backend == "bm25s":
+            import bm25s
+
             query_tokens = bm25s.tokenize([query], stemmer=self.stemmer)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
             results = results[0]
             scores = scores[0]
         else:
-            assert False, 'Invalid bm25 backend!'
+            assert False, "Invalid bm25 backend!"
 
         if return_score:
             return results, scores
@@ -249,7 +263,7 @@ class BM25Retriever(BaseRetriever):
             return results
 
     def _batch_search(self, query_list, num: int = None, return_score=False):
-        if self.backend == 'pyserini': 
+        if self.backend == "pyserini":
             # TODO: modify batch method
             results = []
             scores = []
@@ -257,12 +271,13 @@ class BM25Retriever(BaseRetriever):
                 item_result, item_score = self._search(query, num, True)
                 results.append(item_result)
                 scores.append(item_score)
-        elif self.backend == 'bm25s':
+        elif self.backend == "bm25s":
             import bm25s
+
             query_tokens = bm25s.tokenize(query_list, stemmer=self.stemmer)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
         else:
-            assert False, 'Invalid bm25 backend!'
+            assert False, "Invalid bm25 backend!"
 
         if return_score:
             return results, scores
@@ -270,7 +285,7 @@ class BM25Retriever(BaseRetriever):
             return results
 
 
-class DenseRetriever(BaseRetriever):
+class DenseRetriever(BaseTextRetriever):
     r"""Dense retriever based on pre-built faiss index."""
 
     def __init__(self, config: dict):
@@ -306,7 +321,6 @@ class DenseRetriever(BaseRetriever):
                 use_fp16=config["retrieval_use_fp16"],
                 instruction=self.instruction,
             )
-        
 
     def _search(self, query: str, num: int = None, return_score=False):
         if num is None:
@@ -338,6 +352,96 @@ class DenseRetriever(BaseRetriever):
             query_batch = query_list[start_idx : start_idx + batch_size]
             batch_emb = self.encoder.encode(query_batch)
             batch_scores, batch_idxs = self.index.search(batch_emb, k=num)
+            batch_scores = batch_scores.tolist()
+            batch_idxs = batch_idxs.tolist()
+
+            flat_idxs = sum(batch_idxs, [])
+            batch_results = load_docs(self.corpus, flat_idxs)
+            batch_results = [batch_results[i * num : (i + 1) * num] for i in range(len(batch_idxs))]
+
+            scores.extend(batch_scores)
+            results.extend(batch_results)
+
+        if return_score:
+            return results, scores
+        else:
+            return results
+
+
+class MultiModalRetriever(BaseRetriever):
+    r"""Multi-modal retriever based on pre-built faiss index."""
+
+    def __init__(self, config: dict):
+        super().__init__(config)
+        if not os.path.exists(self.index_path):
+            raise Warning(f"Index file {self.index_path} does not exist!")
+        self.mm_index_dict = config[
+            "multimodal_index_path_dict"
+        ]  # {"text": "path/to/text_index", "image": "path/to/image_index"}
+        self.index_dict = {"text": None, "image": None}
+        for modal in ["text", "image"]:
+            idx_path = self.mm_index_dict[modal]
+            if idx_path is not None:
+                self.index_dict[modal] = faiss.read_index(idx_path)
+                co = faiss.GpuMultipleClonerOptions()
+                co.useFloat16 = True
+                co.shard = True
+                self.index_dict[modal] = faiss.index_cpu_to_all_gpus(self.index, co=co)
+
+        self.corpus = load_corpus(self.corpus_path)
+        self.topk = config["retrieval_topk"]
+        self.batch_size = config["retrieval_batch_size"]
+
+        self.encoder = ClipEncoder(
+            model_name=self.retrieval_method,
+            model_path=config["retrieval_model_path"],
+            max_length=config["retrieval_query_max_length"],
+        )
+
+    def _search(
+        self, query, query_modal: str = "image", target_modal: str = "text", num: int = None, return_score=False
+    ):
+        if num is None:
+            num = self.topk
+        assert query_modal in ["image", "text"]
+        assert target_modal in ["image", "text"]
+
+        query_emb = self.encoder.encode(query, modal=query_modal)
+
+        scores, idxs = self.index_dict[target_modal].search(query_emb, k=num)
+        scores = scores.tolist()
+        idxs = idxs[0]
+        scores = scores[0]
+
+        results = load_docs(self.corpus, idxs)
+        if return_score:
+            return results, scores
+        else:
+            return results
+
+    def _batch_search(
+        self,
+        query_list: List[str],
+        query_modal: str = "image",
+        target_modal: str = "text",
+        num: int = None,
+        return_score=False,
+    ):
+        if isinstance(query_list, str):
+            query_list = [query_list]
+        if num is None:
+            num = self.topk
+        assert query_modal in ["image", "text"]
+        assert target_modal in ["image", "text"]
+        batch_size = self.batch_size
+
+        results = []
+        scores = []
+
+        for start_idx in tqdm(range(0, len(query_list), batch_size), desc="Retrieval process: "):
+            query_batch = query_list[start_idx : start_idx + batch_size]
+            batch_emb = self.encoder.encode(query_batch, modal=query_modal)
+            batch_scores, batch_idxs = self.index_dict[target_modal].search(batch_emb, k=num)
             batch_scores = batch_scores.tolist()
             batch_idxs = batch_idxs.tolist()
 
