@@ -7,7 +7,7 @@ from typing import List, Dict
 import functools
 from tqdm import tqdm
 import faiss
-
+import numpy as np
 from flashrag.utils import get_reranker
 from flashrag.retriever.utils import load_corpus, load_docs, convert_numpy
 from flashrag.retriever.encoder import Encoder, STEncoder
