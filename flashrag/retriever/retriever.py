@@ -370,8 +370,6 @@ class MultiModalRetriever(BaseRetriever):
 
     def __init__(self, config: dict):
         super().__init__(config)
-        if not os.path.exists(self.index_path):
-            raise Warning(f"Index file {self.index_path} does not exist!")
         self.mm_index_dict = config[
             "multimodal_index_path_dict"
         ]  # {"text": "path/to/text_index", "image": "path/to/image_index"}
@@ -380,10 +378,11 @@ class MultiModalRetriever(BaseRetriever):
             idx_path = self.mm_index_dict[modal]
             if idx_path is not None:
                 self.index_dict[modal] = faiss.read_index(idx_path)
+            if config['faiss_gpu']:
                 co = faiss.GpuMultipleClonerOptions()
                 co.useFloat16 = True
                 co.shard = True
-                self.index_dict[modal] = faiss.index_cpu_to_all_gpus(self.index, co=co)
+                self.index_dict[modal] = faiss.index_cpu_to_all_gpus(self.index_dict[modal], co=co)
 
         self.corpus = load_corpus(self.corpus_path)
         self.topk = config["retrieval_topk"]
@@ -394,13 +393,27 @@ class MultiModalRetriever(BaseRetriever):
             model_path=config["retrieval_model_path"],
         )
 
+    def _judge_input_modal(self, query):
+        if not isinstance(query, str):
+            return 'image'
+        else:
+            if query.startswith('http') or query.endswith('.jpg') or query.endswith('.png'):
+                return 'image'
+            else:
+                return 'text'
+
     def _search(
-        self, query, query_modal: str = "image", target_modal: str = "text", num: int = None, return_score=False
+        self, query, target_modal: str = "text", num: int = None, return_score=False
     ):
         if num is None:
             num = self.topk
-        assert query_modal in ["image", "text"]
         assert target_modal in ["image", "text"]
+
+        query_modal = self._judge_input_modal(query) if not isinstance(query, list) else self._judge_input_modal(query[0])
+        if query_modal == 'image' and isinstance(query, str):
+            from PIL import Image
+            import requests
+            query = Image.open(requests.get(query, stream=True).raw)
 
         query_emb = self.encoder.encode(query, modal=query_modal)
 
@@ -418,7 +431,6 @@ class MultiModalRetriever(BaseRetriever):
     def _batch_search(
         self,
         query_list: List[str],
-        query_modal: str = "image",
         target_modal: str = "text",
         num: int = None,
         return_score=False,
@@ -427,8 +439,14 @@ class MultiModalRetriever(BaseRetriever):
             query_list = [query_list]
         if num is None:
             num = self.topk
-        assert query_modal in ["image", "text"]
         assert target_modal in ["image", "text"]
+
+        query_modal = self._judge_input_modal(query_list[0])
+        if query_modal == 'image' and isinstance(query_list[0], str):
+            from PIL import Image
+            import requests
+            query_list = [Image.open(requests.get(query, stream=True).raw) for query in query_list]
+
         batch_size = self.batch_size
 
         results = []

@@ -129,7 +129,7 @@ class Config:
                 self.final_config["index_path"] = method2index[retrieval_method]
             except:
                 print("Index is empty!!")
-                assert False
+            
 
         if self.final_config.get("retrieval_model_path") is None:
             self.final_config["retrieval_model_path"] = model2path.get(retrieval_method, retrieval_method)
