@@ -13,6 +13,8 @@ def convert_numpy(obj: Union[Dict, list, np.ndarray, np.generic]) -> Any:
         return obj.tolist()  # Convert numpy arrays to lists
     elif isinstance(obj, (np.integer, np.floating)):
         return obj.item()  # Convert numpy scalars to native Python scalars
+    elif isinstance(obj, np.float32):
+        return float(obj)
     else:
         return obj  # Return the object as-is if it's neither a dict, list, nor numpy type
 
