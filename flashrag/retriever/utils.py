@@ -87,12 +87,13 @@ def parse_query(model_name, query_list, instruction=None, is_query=True):
 
 def load_corpus(corpus_path: str):
     if corpus_path.endswith(".jsonl"):
-        read_type = 'json'
+        corpus = datasets.load_dataset('json', data_files=corpus_path, split="train")
     elif corpus_path.endswith(".parquet"):
-        read_type = 'parquet'
+        corpus = datasets.load_dataset('parquet', data_files=corpus_path, split="train")
+        corpus = corpus.cast_column('image', datasets.Image())
     else:
         raise NotImplementedError("Corpus format not supported!")
-    corpus = datasets.load_dataset(read_type, data_files=corpus_path, split="train")
+
     return corpus
 
 def read_jsonl(file_path):

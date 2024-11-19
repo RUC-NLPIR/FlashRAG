@@ -392,7 +392,6 @@ class MultiModalRetriever(BaseRetriever):
         self.encoder = ClipEncoder(
             model_name=self.retrieval_method,
             model_path=config["retrieval_model_path"],
-            max_length=config["retrieval_query_max_length"],
         )
 
     def _search(

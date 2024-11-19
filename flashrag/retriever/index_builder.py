@@ -236,7 +236,6 @@ class Index_Builder:
             self.encoder = ClipEncoder(
                 model_name=self.retrieval_method,
                 model_path=self.model_path,
-                max_length=self.max_length,
             )
             hidden_size = self.encoder.model.projection_dim
 

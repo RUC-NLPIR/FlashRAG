@@ -146,12 +146,10 @@ class ClipEncoder:
 
     """
 
-    def __init__(self, model_name, model_path, max_length):
+    def __init__(self, model_name, model_path):
 
         self.model_name = model_name
         self.model_path = model_path
-        self.max_length = max_length
-
         self.load_clip_model()
 
     def load_clip_model(self):
@@ -162,16 +160,27 @@ class ClipEncoder:
         model_type = config.get("architectures", [None])[0]
         self.model_type = model_type
 
-        if model_type == "CLIPModel":
+        if model_type == "CLIPModel" or model_type == "ChineseCLIPModel":
             self.model = AutoModel.from_pretrained(self.model_path, trust_remote_code=True)
             self.processor = AutoProcessor.from_pretrained(self.model_path, trust_remote_code=True)
+            # set model max length for chineseclipmodel
         elif model_type.endswith("CLIPModel"):
             self.model = AutoModel.from_pretrained(self.model_path, trust_remote_code=True)
+            self.processor = None
         else:
             raise NotImplementedError(f"Unsupported model type: {model_type}")
 
         self.model.eval()
         self.model.cuda()
+
+        # set model max length for model that not specified in config.json
+        if self.processor is not None and self.processor.tokenizer.model_max_length > 100000:
+            try:
+                model_max_length = config['text_config']['max_position_embeddings']
+            except:
+                model_max_length = 512
+            self.processor.tokenizer.model_max_length = model_max_length    
+
 
     @torch.inference_mode()
     def single_batch_encode(self, query_list: Union[List[str], str], modal="image") -> np.ndarray:
@@ -201,7 +210,7 @@ class ClipEncoder:
     @torch.inference_mode()
     def encode_image(self, image_list: List) -> np.ndarray:
         # Each item in image_list: PIL Image, local path, or URL
-        if self.model_type == "CLIPModel":
+        if self.model_type == "CLIPModel" or self.model_type == 'ChineseCLIPModel':
             # need handle image
             image_list = [parse_image(image) for image in image_list]
             inputs = self.processor(images=image_list, return_tensors="pt")
@@ -218,10 +227,9 @@ class ClipEncoder:
     @torch.inference_mode()
     def encode_text(self, text_list: List[str]) -> np.ndarray:
         # Each item in image_list: PIL Image, local path, or URL
-        if self.model_type == "CLIPModel":
+        if self.model_type == "CLIPModel" or self.model_type == 'ChineseCLIPModel':
             inputs = self.processor(
                 text=text_list,
-                max_length=self.max_length,
                 padding=True,
                 truncation=True,
                 return_tensors="pt",
@@ -233,7 +241,6 @@ class ClipEncoder:
         elif self.model_type.endswith("CLIPModel"):
             text_emb = self.model.encode_text(
                 text_list,
-                max_length=self.max_length,
                 padding=True,
                 truncation=True,
             )
