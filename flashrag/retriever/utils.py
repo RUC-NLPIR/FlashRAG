@@ -63,6 +63,8 @@ def parse_query(model_name, query_list, instruction=None, is_query=True):
                     zh_char += 1
             except:
                 continue
+        if len(str) == 0:
+            return False
         if zh_char / len(str) > 0.2:
             return True
         else:
@@ -109,3 +111,16 @@ def load_docs(corpus, doc_idxs: List[int]):
     results = [corpus[int(idx)] for idx in doc_idxs]
 
     return results
+
+
+def parse_image(image):
+    from PIL import Image
+
+    if isinstance(image, str):
+        if image.startswith("http"):
+            import requests
+
+            image = Image.open(requests.get(image, stream=True).raw)
+        else:
+            image = Image.open(image)
+    return image

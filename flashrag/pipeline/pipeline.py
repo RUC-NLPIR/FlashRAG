@@ -216,10 +216,7 @@ class AdaptivePipeline(BasicPipeline):
         )
 
         self.multi_hop_pipeline = IRCOTPipeline(
-            config,
-            prompt_template=multi_hop_prompt_template,
-            retriever=retriever,
-            generator=generator,
+            config, prompt_template=multi_hop_prompt_template, retriever=retriever, generator=generator, max_iter=5
         )
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):

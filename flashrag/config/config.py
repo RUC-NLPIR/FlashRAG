@@ -131,7 +131,8 @@ class Config:
                 print("Index is empty!!")
                 assert False
 
-        self.final_config["retrieval_model_path"] = model2path.get(retrieval_method, retrieval_method)
+        if self.final_config.get("retrieval_model_path") is None:
+            self.final_config["retrieval_model_path"] = model2path.get(retrieval_method, retrieval_method)
         # TODO: not support when `retrieval_model` is path
 
         def set_pooling_method(method, model2pooling):
