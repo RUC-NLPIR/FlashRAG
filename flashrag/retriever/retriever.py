@@ -7,9 +7,9 @@ from typing import List, Dict
 import functools
 from tqdm import tqdm
 import faiss
-
+import numpy as np
 from flashrag.utils import get_reranker
-from flashrag.retriever.utils import load_corpus, load_docs
+from flashrag.retriever.utils import load_corpus, load_docs, convert_numpy
 from flashrag.retriever.encoder import Encoder, STEncoder, ClipEncoder
 
 
@@ -136,8 +136,13 @@ class BaseRetriever:
                 self.cache = json.load(f)
 
     def _save_cache(self):
+        self.cache = convert_numpy(self.cache)
+        def custom_serializer(obj):
+            if isinstance(obj, np.float32):  
+                return float(obj)           
+            raise TypeError(f"Type {type(obj)} not serializable")
         with open(self.cache_save_path, "w") as f:
-            json.dump(self.cache, f, indent=4)
+            json.dump(self.cache, f, indent=4, default=custom_serializer)
 
     def _search(self, query: str, num: int, return_score: bool) -> List[Dict[str, str]]:
         r"""Retrieve topk relevant documents in corpus.

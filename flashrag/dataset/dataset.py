@@ -174,9 +174,12 @@ class Dataset:
         """Save the dataset into the original format."""
 
         save_data = [item.to_dict() for item in self.data]
-
+        def custom_serializer(obj):
+            if isinstance(obj, np.float32):  
+                return float(obj)           
+            raise TypeError(f"Type {type(obj)} not serializable")
         with open(save_path, "w", encoding="utf-8") as f:
-            json.dump(save_data, f, indent=4)
+            json.dump(save_data, f, indent=4, default=custom_serializer)
 
     def __str__(self) -> str:
         """Return a string representation of the dataset with a summary of items."""
