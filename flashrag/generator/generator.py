@@ -49,10 +49,9 @@ class EncoderDecoderGenerator(BaseGenerator):
         self.fid = config["use_fid"]
         model_config = AutoConfig.from_pretrained(self.model_path)
         arch = model_config.architectures[0].lower()
-        if "t5" in arch:
+        if "t5" in arch or 'fusionindecoder' in arch:
             if self.fid:
                 from flashrag.generator.fid import FiDT5
-
                 self.model = FiDT5.from_pretrained(self.model_path)
             else:
                 self.model = T5ForConditionalGeneration.from_pretrained(self.model_path)
@@ -65,17 +64,18 @@ class EncoderDecoderGenerator(BaseGenerator):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
 
     def encode_passages(self, batch_text_passages: List[List[str]]):
+        # need size: [batch_size, passage_num, passage_len]
         passage_ids, passage_masks = [], []
-        for k, text_passages in enumerate(batch_text_passages):
-            p = self.tokenizer.batch_encode_plus(
+        for text_passages in batch_text_passages:
+            p = self.tokenizer(
                 text_passages,
                 max_length=self.max_input_len,
-                pad_to_max_length=True,
-                return_tensors="pt",
+                padding='max_length',
                 truncation=True,
+                return_tensors='pt'
             )
-            passage_ids.append(p["input_ids"][None])
-            passage_masks.append(p["attention_mask"][None])
+            passage_ids.append(p['input_ids'][None])
+            passage_masks.append(p['attention_mask'][None])
 
         passage_ids = torch.cat(passage_ids, dim=0)
         passage_masks = torch.cat(passage_masks, dim=0)
@@ -128,8 +128,15 @@ class EncoderDecoderGenerator(BaseGenerator):
                 ).to(self.device)
 
             # TODO: multi-gpu inference
-            outputs = self.model.generate(**inputs, **generation_params)
-
+            if self.fid:
+                if 'max_new_tokens' in generation_params:
+                    max_new_tokens = generation_params.pop('max_new_tokens')
+                else:
+                    max_new_tokens = 32
+            
+                outputs = self.model.generate(**inputs, max_new_tokens=max_new_tokens, pad_token_id=self.tokenizer.pad_token_id, decoder_start_token_id=self.tokenizer.pad_token_id)
+            else:
+                outputs = self.model.generate(**inputs, **generation_params)
             outputs = self.tokenizer.batch_decode(
                 outputs,
                 skip_special_tokens=True,
