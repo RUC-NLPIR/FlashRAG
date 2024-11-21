@@ -7,11 +7,11 @@ peft
 PyYAML
 rank_bm25
 rouge
-spacy>=3.6.1
+spacy==3.6.1
 tiktoken
 torch
 tqdm
 transformers>=4.40.0
-bm25s[full]
+bm25s[core]==0.2.0
 fschat
 streamlit

@@ -176,14 +176,14 @@ class VLLMGenerator(BaseGenerator):
                 gpu_memory_utilization=gpu_memory_utilization,
                 enable_lora=True,
                 max_lora_rank=64,
-                max_logprobs=32016,
+                max_logprobs=130000,
             )
         else:
             self.model = LLM(
                 self.model_path,
                 tensor_parallel_size=tensor_parallel_size,
                 gpu_memory_utilization=gpu_memory_utilization,
-                max_logprobs=32016,
+                max_logprobs=130000,
             )
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
 

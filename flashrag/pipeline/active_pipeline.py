@@ -137,6 +137,7 @@ class SelfRAGPipeline(BasicPipeline):
         self.ret_tokens, self.rel_tokens, self.grd_tokens, self.ut_tokens = self.load_special_tokens(
             tokenizer, use_grounding=use_grounding, use_utility=use_utility
         )
+        self.vocab_size = tokenizer.vocab_size + len(tokenizer.added_tokens_decoder)
 
     def load_special_tokens(self, tokenizer, use_grounding, use_utility):
         ret_tokens = {token: tokenizer.convert_tokens_to_ids(token) for token in self.retrieval_tokens_names}
@@ -162,12 +163,18 @@ class SelfRAGPipeline(BasicPipeline):
         """Calculate whether a retrieve is required based on the output probability of
         the special token in the model"""
 
-        if self.mode != "always_retrieve":
+        if self.mode == "always_retrieve":
+            retrieval_flags = [True] * len(input_prompts)
+
+        elif self.mode == "no_retrieval":
+            retrieval_flags = [False] * len(input_prompts)
+
+        else:
             # result for total batch
             all_pred_token_ids = []
             all_pred_text = []
             all_pred_log_probs = []
-            preds = self.generator.generate(input_prompts, return_raw_output=True, logprobs=32000)
+            preds = self.generator.generate(input_prompts, return_raw_output=True, logprobs=self.vocab_size, max_tokens=1, skip_special_tokens=False)
             for single_pred in preds:
                 pred_token_ids = single_pred.outputs[0].token_ids
                 pred_text = single_pred.outputs[0].text
@@ -176,13 +183,6 @@ class SelfRAGPipeline(BasicPipeline):
                 all_pred_text.append(pred_text)
                 all_pred_log_probs.append(pred_log_probs)
 
-        if self.mode == "always_retrieve":
-            retrieval_flags = [True] * len(input_prompts)
-
-        elif self.mode == "no_retrieval":
-            retrieval_flags = [False] * len(input_prompts)
-
-        else:
             retrieval_flags = []
             for idx, single_pred in enumerate(preds):
                 if self.threshold is not None:
@@ -191,7 +191,7 @@ class SelfRAGPipeline(BasicPipeline):
                         if tok_id not in all_pred_log_probs[idx][0]:
                             score_dict[tok] = -100
                         prob = all_pred_log_probs[idx][0][tok_id].logprob
-                        score_dict[tok] = float(prob)
+                        score_dict[tok] = np.exp(prob)
                     do_retrieve = (
                         score_dict["[Retrieval]"] / (score_dict["[Retrieval]"] + score_dict["[No Retrieval]"])
                         > self.threshold
@@ -602,7 +602,7 @@ class SelfRAGPipeline(BasicPipeline):
 
         return dataset
 
-    def run(self, dataset, do_eval=True, pred_process_fun=None, batch_size=256, long_form=False):
+    def run(self, dataset, do_eval=True, pred_process_fun=None, batch_size=50, long_form=False):
         all_dataset_list = []
         run_func = self.run_batch_pred_long_form if long_form else self.run_batch_pred
         # to avoid oom
@@ -645,7 +645,7 @@ class SelfRAGPipeline(BasicPipeline):
             item.update_output("prompt", prompt_list)
             all_input_list += prompt_list
 
-        batch_pred = self.generator.generate(all_input_list, return_raw_output=True, logprobs=32016)
+        batch_pred = self.generator.generate(all_input_list, return_raw_output=True, logprobs=self.vocab_size)
 
         # parse output based on retrieval flag
         pred_idx = 0
