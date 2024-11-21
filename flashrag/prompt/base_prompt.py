@@ -17,7 +17,7 @@ class PromptTemplate:
         self.is_openai = config["framework"] == "openai"
         self.max_input_len = config['generator_max_input_len']
         if not self.is_openai:
-            self.generator_path = config["generator_model_path"]
+            self.generator_path = config["generator_model"]
             model_config = AutoConfig.from_pretrained(self.generator_path, trust_remote_code=True)
             model_name = model_config._name_or_path.lower()
             self.is_chat = False
