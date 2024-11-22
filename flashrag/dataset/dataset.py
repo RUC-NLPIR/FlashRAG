@@ -176,7 +176,9 @@ class Dataset:
         save_data = [item.to_dict() for item in self.data]
         def custom_serializer(obj):
             if isinstance(obj, np.float32):  
-                return float(obj)           
+                return float(obj)      
+            if isinstance(obj, np.bool_):
+                return str(obj)     
             raise TypeError(f"Type {type(obj)} not serializable")
         with open(save_path, "w", encoding="utf-8") as f:
             json.dump(save_data, f, indent=4, default=custom_serializer)
