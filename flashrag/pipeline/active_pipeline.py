@@ -417,7 +417,7 @@ class SelfRAGPipeline(BasicPipeline):
                         else:
                             aug_prompts = [prompt + prev_generation]
 
-                        item_pred = self.generator.generate(aug_prompts, return_raw_output=True)
+                        item_pred = self.generator.generate(aug_prompts, return_raw_output=True, logprobs=5)
                         _, preds, scores, overall_score_dict = self.critic_preds(item_pred)
 
                         for i, (pred, p_score) in enumerate(zip(preds, scores)):
