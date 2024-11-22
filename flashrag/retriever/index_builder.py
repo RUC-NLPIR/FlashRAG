@@ -165,14 +165,19 @@ class Index_Builder:
         """Building BM25 index based on bm25s library."""
 
         import bm25s
+        import Stemmer
         
         self.save_dir = os.path.join(self.save_dir, 'bm25')
         os.makedirs(self.save_dir, exist_ok=True)
 
         corpus = datasets.load_dataset("json", data_files=self.corpus_path, split="train")
         corpus_text = corpus['contents']
+        stemmer = Stemmer.Stemmer('english')
+        tokenizer = bm25s.tokenization.Tokenizer(stemmer=stemmer)
+        corpus_tokens = tokenizer.tokenize(corpus_text, return_as='tuple')
+
         retriever = bm25s.BM25(corpus=corpus, backend='numba')
-        retriever.index(corpus_text)
+        retriever.index(corpus_tokens)
         retriever.save(self.save_dir,corpus=corpus)
 
         print("Finish!")
