@@ -171,15 +171,14 @@ class SelfRAGPipeline(BasicPipeline):
 
         else:
             # result for total batch
-            all_pred_token_ids = []
             all_pred_text = []
             all_pred_log_probs = []
-            preds = self.generator.generate(input_prompts, return_raw_output=True, logprobs=self.vocab_size, max_tokens=1, skip_special_tokens=False)
+            # For vllm, requesting too many logprobes can seriously affect speed
+            # 20 probs is enough for calculate
+            preds = self.generator.generate(input_prompts, return_raw_output=True, logprobs=20, max_tokens=1, skip_special_tokens=False)
             for single_pred in preds:
-                pred_token_ids = single_pred.outputs[0].token_ids
                 pred_text = single_pred.outputs[0].text
                 pred_log_probs = single_pred.outputs[0].logprobs
-                all_pred_token_ids.append(pred_token_ids)
                 all_pred_text.append(pred_text)
                 all_pred_log_probs.append(pred_log_probs)
 
@@ -190,8 +189,9 @@ class SelfRAGPipeline(BasicPipeline):
                     for tok, tok_id in self.ret_tokens.items():
                         if tok_id not in all_pred_log_probs[idx][0]:
                             score_dict[tok] = -100
-                        prob = all_pred_log_probs[idx][0][tok_id].logprob
-                        score_dict[tok] = np.exp(prob)
+                        else:
+                            prob = all_pred_log_probs[idx][0][tok_id].logprob
+                            score_dict[tok] = np.exp(prob)
                     do_retrieve = (
                         score_dict["[Retrieval]"] / (score_dict["[Retrieval]"] + score_dict["[No Retrieval]"])
                         > self.threshold
@@ -602,15 +602,17 @@ class SelfRAGPipeline(BasicPipeline):
 
         return dataset
 
-    def run(self, dataset, do_eval=True, pred_process_fun=None, batch_size=50, long_form=False):
-        all_dataset_list = []
+    def run(self, dataset, do_eval=True, pred_process_fun=None, long_form=False):
         run_func = self.run_batch_pred_long_form if long_form else self.run_batch_pred
-        # to avoid oom
-        for batch_dataset in tqdm(get_batch_dataset(dataset, batch_size=batch_size), desc="Batch dataset: "):
-            batch_dataset = run_func(batch_dataset)
-            all_dataset_list.append(batch_dataset)
-        dataset = merge_batch_dataset(all_dataset_list)
+        
+        # # to avoid oom, split the total dataset into small batches
+        # all_dataset_list = []
+        # for batch_dataset in tqdm(get_batch_dataset(dataset, batch_size=batch_size), desc="Batch dataset: "):
+        #     batch_dataset = run_func(batch_dataset)
+        #     all_dataset_list.append(batch_dataset)
+        # dataset = merge_batch_dataset(all_dataset_list)
 
+        dataset = run_func(dataset)
         dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
         return dataset
 
@@ -645,7 +647,7 @@ class SelfRAGPipeline(BasicPipeline):
             item.update_output("prompt", prompt_list)
             all_input_list += prompt_list
 
-        batch_pred = self.generator.generate(all_input_list, return_raw_output=True, logprobs=self.vocab_size)
+        batch_pred = self.generator.generate(all_input_list, return_raw_output=True, logprobs=5)
 
         # parse output based on retrieval flag
         pred_idx = 0

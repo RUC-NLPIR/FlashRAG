@@ -381,7 +381,7 @@ def selfrag(args):
         ignore_cont=True,
         mode="adaptive_retrieval",
     )
-    result = pipeline.run(test_data, batch_size=256)
+    result = pipeline.run(test_data, long_form=False)
 
 
 def flare(args):
