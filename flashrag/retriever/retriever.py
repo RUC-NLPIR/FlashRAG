@@ -446,13 +446,7 @@ class MultiModalRetriever(BaseRetriever):
         else:
             return results
 
-    def _batch_search(
-        self,
-        query: List[str],
-        target_modal: str = "text",
-        num: int = None,
-        return_score=False
-    ):
+    def _batch_search(self, query: List[str], target_modal: str = "text", num: int = None, return_score=False):
         if isinstance(query, str):
             query = [query]
         if num is None:
@@ -466,7 +460,6 @@ class MultiModalRetriever(BaseRetriever):
             import requests
 
             query = [Image.open(requests.get(query, stream=True).raw) for query in query]
-
 
         results = []
         scores = []
@@ -493,8 +486,8 @@ class MultiModalRetriever(BaseRetriever):
 
 class MultiRetrieverRouter:
     def __init__(self, config):
-        self.merge_method = config["multi_retriever_setting"].get("merge_method", 'concat')  # concat/rrf
-        self.final_topk = config['multi_retriever_setting'].get('rrf_topk', 5)
+        self.merge_method = config["multi_retriever_setting"].get("merge_method", "concat")  # concat/rrf
+        self.final_topk = config["multi_retriever_setting"].get("rrf_topk", 5)
         self.retriever_list = self.load_all_retriever(config)
         self.config = config
 
@@ -549,26 +542,26 @@ class MultiRetrieverRouter:
         for item in result:
             if isinstance(item, list):
                 for _item in item:
-                    _item['source'] = retrieval_method
-                    _item['corpus_path'] = corpus_path
+                    _item["source"] = retrieval_method
+                    _item["corpus_path"] = corpus_path
             else:
-                item['source'] = retrieval_method
-                item['corpus_path'] = corpus_path
+                item["source"] = retrieval_method
+                item["corpus_path"] = corpus_path
         return result
 
     def _search_or_batch_search(self, query: Union[str, list], target_modal, num, return_score, method):
         if num is None:
             num = self.final_topk
-        
+
         result_list = []
         score_list = []
         for retriever in self.retriever_list:
             is_multimodal = isinstance(retriever, MultiModalRetriever)
-            params = {'query': query, 'return_score': return_score}
+            params = {"query": query, "return_score": return_score}
             if is_multimodal:
-                params['target_modal'] = target_modal
+                params["target_modal"] = target_modal
 
-            if method == 'search':
+            if method == "search":
                 output = retriever.search(**params)
             else:
                 output = retriever.batch_search(**params)
@@ -578,7 +571,7 @@ class MultiRetrieverRouter:
             else:
                 result = output
                 score = None
-                
+
             result = self.add_source(result, retriever.retrieval_method, retriever.corpus_path)
             result_list.extend(result)
             if score is not None:
@@ -589,9 +582,9 @@ class MultiRetrieverRouter:
             return result_list, score_list
         else:
             return result_list
-        
+
     def reorder(self, result_list, score_list):
-        # batch_search: 
+        # batch_search:
         # original result like: [[bm25-q1-d1, bm25-q1-d2],[bm25-q2-d1, bm25-q2-d2], [e5-q1-d1, e5-q1-d2], [e5-q2-d1, e5-q2-d2]]
         # reorder to: [[bm25-q1-d1, bm25-q1-d2, e5-q1-d1, e5-q1-d2], [bm25-q2-d1,bm25-q2-d2, e5-q2-d1, e5-q2-d2]]
 
@@ -607,7 +600,7 @@ class MultiRetrieverRouter:
         final_result = []
         final_score = []
         for r_idx in range(retriever_num):
-            
+
             final_result.append(sum([result_list[r_idx + q_idx * retriever_num] for q_idx in range(query_num)], []))
             if score_list != []:
                 final_score.append(sum([score_list[r_idx + q_idx * retriever_num] for q_idx in range(query_num)], []))
@@ -615,13 +608,13 @@ class MultiRetrieverRouter:
 
     def post_process_result(self, result_list, score_list, num):
         # based on self.merge_method
-        if self.merge_method == 'concat':
+        if self.merge_method == "concat":
             # remove duplicate doc
             if isinstance(result_list[0], dict):
                 exist_id = set()
-                for idx,doc in enumerate(result_list):
-                    if doc['id'] not in exist_id:
-                        exist_id.add(doc['id'])
+                for idx, doc in enumerate(result_list):
+                    if doc["id"] not in exist_id:
+                        exist_id.add(doc["id"])
                     else:
                         result_list.remove(doc)
                         if score_list != []:
@@ -637,7 +630,13 @@ class MultiRetrieverRouter:
                             if score_list != []:
                                 score_list[query_idx].remove(doc_idx)
             return result_list, score_list
-        elif self.merge_method == 'rrf':
+        elif self.merge_method == "rrf":
+            if (isinstance(result_list[0], dict) and len(set([doc["corpus_path"] for doc in result_list])) > 1) or (
+                isinstance(result_list[0], list) and len(set([doc["corpus_path"] for doc in result_list[0]])) > 1
+            ):
+                warnings.warn(
+                    "Using multiple corpus may lead to conflicts in DOC IDs, which may result in incorrect rrf results!"
+                )
             if isinstance(result_list[0], dict):
                 result_list, score_list = self.rrf_merge([result_list], num, k=60)
                 result_list = result_list[0]
@@ -651,7 +650,7 @@ class MultiRetrieverRouter:
     def rrf_merge(self, results, topk=10, k=60):
         """
         Perform Reciprocal Rank Fusion (RRF) on retrieval results.
-        
+
         Args:
             results (list of list of dict): Retrieval results for multiple queries.
             topk (int): Number of top results to return per query.
@@ -668,11 +667,11 @@ class MultiRetrieverRouter:
             retriever_result_dict = {}
             id2item = {}
             for item in query_results:
-                source = item['source']
+                source = item["source"]
                 if source not in retriever_result_dict:
                     retriever_result_dict[source] = []
-                retriever_result_dict[source].append(item['id'])
-                id2item[item['id']] = item
+                retriever_result_dict[source].append(item["id"])
+                id2item[item["id"]] = item
 
             # Calculate RRF scores for each document
             for retriever, retriever_result in retriever_result_dict.items():
@@ -681,10 +680,10 @@ class MultiRetrieverRouter:
                         score_dict[doc_id] = 0
                     # Add RRF score for the document
                     score_dict[doc_id] += 1 / (k + rank)
-            
+
             # Sort by accumulated RRF score
             sorted_results = sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
-            
+
             # Keep only the topk results
             top_ids = [i[0] for i in sorted_results[:topk]]
             top_scores = [i[1] for i in sorted_results[:topk]]
@@ -692,11 +691,10 @@ class MultiRetrieverRouter:
             fused_results.append([id2item[id] for id in top_ids])
             fused_scores.append(top_scores)
 
-        
         return fused_results, fused_scores
 
     def search(self, query, target_modal="text", num: Union[list, int, None] = None, return_score=False):
-        return self._search_or_batch_search(query, target_modal, num, return_score, method='search')
+        return self._search_or_batch_search(query, target_modal, num, return_score, method="search")
 
     def batch_search(self, query, target_modal="text", num: Union[list, int, None] = None, return_score=False):
-        return self._search_or_batch_search(query, target_modal, num, return_score, method='batch_search')
+        return self._search_or_batch_search(query, target_modal, num, return_score, method="batch_search")
