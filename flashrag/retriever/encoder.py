@@ -43,7 +43,7 @@ class Encoder:
         )
         inputs = {k: v.cuda() for k, v in inputs.items()}
 
-        if "T5" in type(self.encoder).__name__ or (self.gpu_num > 1 and "T5" in type(self.encoder.module).__name__):
+        if "T5" in type(self.model).__name__ or (isinstance(self.model, torch.nn.DataParallel) and "T5" in type(self.model.module).__name__):
             # T5-based retrieval model
             decoder_input_ids = torch.zeros((inputs["input_ids"].shape[0], 1), dtype=torch.long).to(
                 inputs["input_ids"].device
