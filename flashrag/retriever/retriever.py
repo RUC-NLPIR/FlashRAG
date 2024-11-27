@@ -21,20 +21,20 @@ def cache_manager(func):
     """
 
     @functools.wraps(func)
-    def wrapper(self, query_list, num=None, return_score=False):
+    def wrapper(self, query=None, num=None, return_score=False):
         if num is None:
             num = self.topk
         if self.use_cache:
-            if isinstance(query_list, str):
-                new_query_list = [query_list]
+            if isinstance(query, str):
+                new_query_list = [query]
             else:
-                new_query_list = query_list
+                new_query_list = query
 
             no_cache_query = []
             cache_results = []
-            for query in new_query_list:
-                if query in self.cache:
-                    cache_res = self.cache[query]
+            for new_query in new_query_list:
+                if new_query in self.cache:
+                    cache_res = self.cache[new_query]
                     if len(cache_res) < num:
                         warnings.warn(f"The number of cached retrieval results is less than topk ({num})")
                     cache_res = cache_res[:num]
@@ -43,7 +43,7 @@ def cache_manager(func):
                     cache_results.append((cache_res, doc_scores))
                 else:
                     cache_results.append(None)
-                    no_cache_query.append(query)
+                    no_cache_query.append(new_query)
 
             if no_cache_query != []:
                 # use batch search without decorator
@@ -64,21 +64,21 @@ def cache_manager(func):
             )
 
         else:
-            results, scores = func(self, query_list, num, True)
+            results, scores = func(self, query=query, num=num, return_score=True)
 
         if self.save_cache:
             # merge result and score
             save_results = results.copy()
             save_scores = scores.copy()
-            if isinstance(query_list, str):
-                query_list = [query_list]
+            if isinstance(query, str):
+                query = [query]
                 if "batch" not in func.__name__:
                     save_results = [save_results]
                     save_scores = [save_scores]
-            for query, doc_items, doc_scores in zip(query_list, save_results, save_scores):
+            for new_query, doc_items, doc_scores in zip(query, save_results, save_scores):
                 for item, score in zip(doc_items, doc_scores):
                     item["score"] = score
-                self.cache[query] = doc_items
+                self.cache[new_query] = doc_items
 
         if return_score:
             return results, scores
@@ -94,10 +94,10 @@ def rerank_manager(func):
     """
 
     @functools.wraps(func)
-    def wrapper(self, query_list, num=None, return_score=False):
-        results, scores = func(self, query_list, num, True)
+    def wrapper(self, query, num=None, return_score=False):
+        results, scores = func(self, query=query, num=num, return_score=True)
         if self.use_reranker:
-            results, scores = self.reranker.rerank(query_list, results)
+            results, scores = self.reranker.rerank(query, results)
             if "batch" not in func.__name__:
                 results = results[0]
                 scores = scores[0]
@@ -160,7 +160,7 @@ class BaseRetriever:
 
         pass
 
-    def _batch_search(self, query_list, num, return_score):
+    def _batch_search(self, query, num, return_score):
         pass
 
     def search(self, *args, **kwargs):
@@ -219,7 +219,9 @@ class BM25Retriever(BaseTextRetriever):
             import bm25s
 
             self.stemmer = Stemmer.Stemmer("english")
-            self.searcher = bm25s.BM25.load(self.index_path, mmap=True, load_corpus=True)
+            self.searcher = bm25s.BM25.load(self.index_path, mmap=True, load_corpus=False)
+            self.corpus = load_corpus(self.corpus_path)
+            self.searcher.corpus = self.corpus
             self.searcher.backend = "numba"
 
         else:
@@ -263,8 +265,8 @@ class BM25Retriever(BaseTextRetriever):
 
             query_tokens = bm25s.tokenize([query], stemmer=self.stemmer)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
-            results = results[0]
-            scores = scores[0]
+            results = list(results[0])
+            scores = list(scores[0])
         else:
             assert False, "Invalid bm25 backend!"
 
@@ -273,19 +275,19 @@ class BM25Retriever(BaseTextRetriever):
         else:
             return results
 
-    def _batch_search(self, query_list, num: int = None, return_score=False, batch_size=None):
+    def _batch_search(self, query, num: int = None, return_score=False):
         if self.backend == "pyserini":
             # TODO: modify batch method
             results = []
             scores = []
-            for query in query_list:
-                item_result, item_score = self._search(query, num, True)
+            for _query in query:
+                item_result, item_score = self._search(_query, num, True)
                 results.append(item_result)
                 scores.append(item_score)
         elif self.backend == "bm25s":
             import bm25s
 
-            query_tokens = bm25s.tokenize(query_list, stemmer=self.stemmer)
+            query_tokens = bm25s.tokenize(query, stemmer=self.stemmer)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
         else:
             assert False, "Invalid bm25 backend!"
@@ -351,18 +353,17 @@ class DenseRetriever(BaseTextRetriever):
         else:
             return results
 
-    def _batch_search(self, query_list: List[str], num: int = None, return_score=False, batch_size=None):
-        if isinstance(query_list, str):
-            query_list = [query_list]
+    def _batch_search(self, query: List[str], num: int = None, return_score=False):
+        if isinstance(query, str):
+            query = [query]
         if num is None:
             num = self.topk
-        if batch_size is None:
-            batch_size = self.batch_size
+        batch_size = self.batch_size
 
         results = []
         scores = []
 
-        emb = self.encoder.encode(query_list, batch_size=batch_size, is_query=True)
+        emb = self.encoder.encode(query, batch_size=batch_size, is_query=True)
         print("Begin faiss searching...")
         scores, idxs = self.index.search(emb, k=num)
         print("End faiss searching")
@@ -447,33 +448,31 @@ class MultiModalRetriever(BaseRetriever):
 
     def _batch_search(
         self,
-        query_list: List[str],
+        query: List[str],
         target_modal: str = "text",
         num: int = None,
-        return_score=False,
-        batch_size=None
+        return_score=False
     ):
-        if isinstance(query_list, str):
-            query_list = [query_list]
+        if isinstance(query, str):
+            query = [query]
         if num is None:
             num = self.topk
-        if batch_size is None:
-            batch_size = self.batch_size
+        batch_size = self.batch_size
         assert target_modal in ["image", "text"]
 
-        query_modal = self._judge_input_modal(query_list[0])
-        if query_modal == "image" and isinstance(query_list[0], str):
+        query_modal = self._judge_input_modal(query[0])
+        if query_modal == "image" and isinstance(query[0], str):
             from PIL import Image
             import requests
 
-            query_list = [Image.open(requests.get(query, stream=True).raw) for query in query_list]
+            query = [Image.open(requests.get(query, stream=True).raw) for query in query]
 
 
         results = []
         scores = []
 
-        for start_idx in tqdm(range(0, len(query_list), batch_size), desc="Retrieval process: "):
-            query_batch = query_list[start_idx : start_idx + batch_size]
+        for start_idx in tqdm(range(0, len(query), batch_size), desc="Retrieval process: "):
+            query_batch = query[start_idx : start_idx + batch_size]
             batch_emb = self.encoder.encode(query_batch, modal=query_modal)
             batch_scores, batch_idxs = self.index_dict[target_modal].search(batch_emb, k=num)
             batch_scores = batch_scores.tolist()
@@ -494,8 +493,8 @@ class MultiModalRetriever(BaseRetriever):
 
 class MultiRetrieverRouter:
     def __init__(self, config):
-        self.merge_method = config["multi_retriever_setting"]["merge_method"]  # concat
-
+        self.merge_method = config["multi_retriever_setting"].get("merge_method", 'concat')  # concat/rrf
+        self.final_topk = config['multi_retriever_setting'].get('rrf_topk', 5)
         self.retriever_list = self.load_all_retriever(config)
         self.config = config
 
@@ -506,6 +505,7 @@ class MultiRetrieverRouter:
         retriever_list = []
         for retriever_config in retriever_config_list:
             retrieval_method = retriever_config["retrieval_method"]
+            print(f"Loading {retrieval_method} retriever...")
             retrieval_model_path = retriever_config["retrieval_model_path"]
             corpus_path = retriever_config["corpus_path"]
 
@@ -543,60 +543,160 @@ class MultiRetrieverRouter:
 
         return retriever_list
 
-    def add_source(self, output_list: Union[list, tuple], retrieval_method):
-        if isinstance(output_list, tuple):
-            result, score = output_list[0], output_list[1]
-            assert len(result) == len(score)
-            for item in result:
+    def add_source(self, result: Union[list, tuple], retrieval_method, corpus_path):
+        # for naive search, result is a list of dict, each repr a doc
+        # for batch search, result is a list of list, each repr a doc list(per query)
+        for item in result:
+            if isinstance(item, list):
+                for _item in item:
+                    _item['source'] = retrieval_method
+                    _item['corpus_path'] = corpus_path
+            else:
                 item['source'] = retrieval_method
-            return result, score
-        else:
-            result = output_list
-            for item in result:
-                item['source'] = retrieval_method
-            return result
+                item['corpus_path'] = corpus_path
+        return result
 
-    def _search_or_batch_search(self, query, target_modal, num, return_score, method, batch_size=None):
+    def _search_or_batch_search(self, query: Union[str, list], target_modal, num, return_score, method):
         if num is None:
-            num_list = [retriever.topk for retriever in self.retriever_list]
-        elif isinstance(num, int):
-            num_list = [num] * len(self.retriever_list)
+            num = self.final_topk
+        
+        result_list = []
+        score_list = []
+        for retriever in self.retriever_list:
+            is_multimodal = isinstance(retriever, MultiModalRetriever)
+            params = {'query': query, 'return_score': return_score}
+            if is_multimodal:
+                params['target_modal'] = target_modal
+
+            if method == 'search':
+                output = retriever.search(**params)
+            else:
+                output = retriever.batch_search(**params)
+
+            if return_score:
+                result, score = output
+            else:
+                result = output
+                score = None
+                
+            result = self.add_source(result, retriever.retrieval_method, retriever.corpus_path)
+            result_list.extend(result)
+            if score is not None:
+                score_list.extend(score)
+        result_list, score_list = self.reorder(result_list, score_list)
+        result_list, score_list = self.post_process_result(result_list, score_list, num)
+        if return_score:
+            return result_list, score_list
         else:
-            assert len(num) == len(self.retriever_list)
-            num_list = num
-        if self.merge_method == "concat":
-            output_list = []
-            for num, retriever in zip(num_list, self.retriever_list):
-                is_multimodal = isinstance(retriever, MultiModalRetriever)
-                if method == 'search':
-                    output = retriever.search(
-                        query, 
-                        target_modal=target_modal if is_multimodal else None, 
-                        num=num, 
-                        return_score=return_score
-                    )
-                else:
-                    output = retriever.batch_search(
-                        query, 
-                        target_modal=target_modal if is_multimodal else None, 
-                        num=num, 
-                        return_score=return_score, 
-                        batch_size=batch_size
-                    )
-                output = self.add_source(output, retriever.retrieval_method)
-                output_list.append(output)
+            return result_list
+        
+    def reorder(self, result_list, score_list):
+        # batch_search: 
+        # original result like: [[bm25-q1-d1, bm25-q1-d2],[bm25-q2-d1, bm25-q2-d2], [e5-q1-d1, e5-q1-d2], [e5-q2-d1, e5-q2-d2]]
+        # reorder to: [[bm25-q1-d1, bm25-q1-d2, e5-q1-d1, e5-q1-d2], [bm25-q2-d1,bm25-q2-d2, e5-q2-d1, e5-q2-d2]]
+
+        # navie search:
+        # original result like: [bm25-d1, bm25-d2, e5-d1, e5-d2]
+        retriever_num = len(self.retriever_list)
+        query_num = len(result_list) // retriever_num
+        assert query_num * retriever_num == len(result_list)
+
+        if isinstance(result_list[0], dict):
+            return result_list, score_list
+
+        final_result = []
+        final_score = []
+        for r_idx in range(retriever_num):
+            
+            final_result.append(sum([result_list[r_idx + q_idx * retriever_num] for q_idx in range(query_num)], []))
+            if score_list != []:
+                final_score.append(sum([score_list[r_idx + q_idx * retriever_num] for q_idx in range(query_num)], []))
+        return final_result, final_score
+
+    def post_process_result(self, result_list, score_list, num):
+        # based on self.merge_method
+        if self.merge_method == 'concat':
+            # remove duplicate doc
+            if isinstance(result_list[0], dict):
+                exist_id = set()
+                for idx,doc in enumerate(result_list):
+                    if doc['id'] not in exist_id:
+                        exist_id.add(doc['id'])
+                    else:
+                        result_list.remove(doc)
+                        if score_list != []:
+                            score_list.remove(idx)
+            else:
+                for query_idx, query_doc_list in enumerate(result_list):
+                    exist_id = set()
+                    for doc_idx, doc in enumerate(query_doc_list):
+                        if doc not in exist_id:
+                            exist_id.add(doc)
+                        else:
+                            query_doc_list.remove(doc)
+                            if score_list != []:
+                                score_list[query_idx].remove(doc_idx)
+            return result_list, score_list
+        elif self.merge_method == 'rrf':
+            if isinstance(result_list[0], dict):
+                result_list, score_list = self.rrf_merge([result_list], num, k=60)
+                result_list = result_list[0]
+                score_list = score_list[0]
+            else:
+                result_list, score_list = self.rrf_merge(result_list, num, k=60)
+            return result_list, score_list
         else:
             raise NotImplementedError
 
-        if return_score:
-            result = sum([item[0] for item in output_list], [])
-            score = sum([item[1] for item in output_list], [])
-            return result, score
-        else:
-            return sum(output_list, [])
+    def rrf_merge(self, results, topk=10, k=60):
+        """
+        Perform Reciprocal Rank Fusion (RRF) on retrieval results.
+        
+        Args:
+            results (list of list of dict): Retrieval results for multiple queries.
+            topk (int): Number of top results to return per query.
+            k (int): RRF hyperparameter to adjust rank contribution.
+
+        Returns:
+            list of list of dict: Fused results with topk highest scores per query.
+        """
+        fused_results = []
+        fused_scores = []
+        for query_results in results:
+            # Initialize a score dictionary to accumulate RRF scores
+            score_dict = {}
+            retriever_result_dict = {}
+            id2item = {}
+            for item in query_results:
+                source = item['source']
+                if source not in retriever_result_dict:
+                    retriever_result_dict[source] = []
+                retriever_result_dict[source].append(item['id'])
+                id2item[item['id']] = item
+
+            # Calculate RRF scores for each document
+            for retriever, retriever_result in retriever_result_dict.items():
+                for rank, doc_id in enumerate(retriever_result, start=1):
+                    if doc_id not in score_dict:
+                        score_dict[doc_id] = 0
+                    # Add RRF score for the document
+                    score_dict[doc_id] += 1 / (k + rank)
+            
+            # Sort by accumulated RRF score
+            sorted_results = sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
+            
+            # Keep only the topk results
+            top_ids = [i[0] for i in sorted_results[:topk]]
+            top_scores = [i[1] for i in sorted_results[:topk]]
+
+            fused_results.append([id2item[id] for id in top_ids])
+            fused_scores.append(top_scores)
+
+        
+        return fused_results, fused_scores
 
     def search(self, query, target_modal="text", num: Union[list, int, None] = None, return_score=False):
         return self._search_or_batch_search(query, target_modal, num, return_score, method='search')
 
-    def batch_search(self, query, target_modal="text", num: Union[list, int, None] = None, return_score=False, batch_size=None):
-        return self._search_or_batch_search(query, target_modal, num, return_score, method='search', batch_size=batch_size)
+    def batch_search(self, query, target_modal="text", num: Union[list, int, None] = None, return_score=False):
+        return self._search_or_batch_search(query, target_modal, num, return_score, method='batch_search')

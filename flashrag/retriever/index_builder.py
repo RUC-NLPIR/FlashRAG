@@ -175,7 +175,7 @@ class Index_Builder:
         corpus_text = corpus["contents"]
         retriever = bm25s.BM25(corpus=corpus, backend="numba")
         retriever.index(corpus_text)
-        retriever.save(self.save_dir, corpus=corpus)
+        retriever.save(self.save_dir, corpus=None)
 
         print("Finish!")
 

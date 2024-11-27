@@ -165,6 +165,8 @@ class Config:
                     retriever_config["index_path"] = None
                 if "corpus_path" not in retriever_config:
                     retriever_config["corpus_path"] = None
+                if "use_sentence_transformer" not in retriever_config:
+                    retriever_config["use_sentence_transformer"] = False
                 retriever_config = set_retrieval_keys(model2path, model2pooling, method2index, retriever_config)
                 # set other necessary keys as base setting
                 keys = [
