@@ -55,10 +55,22 @@ def get_retriever(config):
     Returns:
         Retriever: retriever instance
     """
+    if config["use_multi_retriever"]:
+        # must load special class for manage multi retriever
+        return getattr(importlib.import_module("flashrag.retriever"), "MultiRetrieverRouter")(config)
+
     if config["retrieval_method"] == "bm25":
         return getattr(importlib.import_module("flashrag.retriever"), "BM25Retriever")(config)
     else:
-        return getattr(importlib.import_module("flashrag.retriever"), "DenseRetriever")(config)
+        try:
+            model_config = AutoConfig.from_pretrained(config["retrieval_model_path"])
+            arch = model_config.architectures[0]
+            if "clip" in arch.lower():
+                return getattr(importlib.import_module("flashrag.retriever"), "MultiModalRetriever")(config)
+            else:
+                return getattr(importlib.import_module("flashrag.retriever"), "DenseRetriever")(config)
+        except:
+            return getattr(importlib.import_module("flashrag.retriever"), "DenseRetriever")(config)
 
 
 def get_reranker(config):
