@@ -1,6 +1,6 @@
 import json
 import os
-
+import time
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import warnings
 from typing import List, Dict, Union
@@ -9,6 +9,7 @@ from tqdm import tqdm
 import faiss
 import copy
 import numpy as np
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from flashrag.utils import get_reranker
 from flashrag.retriever.utils import load_corpus, load_docs, convert_numpy
 from flashrag.retriever.encoder import Encoder, STEncoder, ClipEncoder
@@ -555,7 +556,8 @@ class MultiRetrieverRouter:
 
         result_list = []
         score_list = []
-        for retriever in self.retriever_list:
+
+        def process_retriever(retriever):
             is_multimodal = isinstance(retriever, MultiModalRetriever)
             params = {"query": query, "return_score": return_score}
             if is_multimodal:
@@ -573,15 +575,26 @@ class MultiRetrieverRouter:
                 score = None
 
             result = self.add_source(result, retriever.retrieval_method, retriever.corpus_path)
-            result_list.extend(result)
-            if score is not None:
-                score_list.extend(score)
+            return result, score
+
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            future_to_retriever = {executor.submit(process_retriever, retriever): retriever for retriever in self.retriever_list}
+            for future in as_completed(future_to_retriever):
+                try:
+                    result, score = future.result()
+                    result_list.extend(result)
+                    if score is not None:
+                        score_list.extend(score)
+                except Exception as e:
+                    print(f"Error processing retriever {future_to_retriever[future]}: {e}")
+
         result_list, score_list = self.reorder(result_list, score_list)
         result_list, score_list = self.post_process_result(result_list, score_list, num)
         if return_score:
             return result_list, score_list
         else:
             return result_list
+
 
     def reorder(self, result_list, score_list):
         # batch_search:
