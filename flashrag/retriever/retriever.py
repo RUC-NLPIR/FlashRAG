@@ -597,12 +597,16 @@ class MultiRetrieverRouter:
 
 
     def reorder(self, result_list, score_list):
-        # batch_search:
-        # original result like: [[bm25-q1-d1, bm25-q1-d2],[bm25-q2-d1, bm25-q2-d2], [e5-q1-d1, e5-q1-d2], [e5-q2-d1, e5-q2-d2]]
-        # reorder to: [[bm25-q1-d1, bm25-q1-d2, e5-q1-d1, e5-q1-d2], [bm25-q2-d1,bm25-q2-d2, e5-q2-d1, e5-q2-d2]]
+        """
+        batch_search:
+        original result like: [[bm25-q1-d1, bm25-q1-d2],[bm25-q2-d1, bm25-q2-d2], [e5-q1-d1, e5-q1-d2], [e5-q2-d1, e5-q2-d2]]
+        reorder to: [[bm25-q1-d1, bm25-q1-d2, e5-q1-d1, e5-q1-d2], [bm25-q2-d1,bm25-q2-d2, e5-q2-d1, e5-q2-d2]]
 
-        # navie search:
-        # original result like: [bm25-d1, bm25-d2, e5-d1, e5-d2]
+        navie search:
+        original result like: [bm25-d1, bm25-d2, e5-d1, e5-d2]
+        
+        """
+
         retriever_num = len(self.retriever_list)
         query_num = len(result_list) // retriever_num
         assert query_num * retriever_num == len(result_list)
