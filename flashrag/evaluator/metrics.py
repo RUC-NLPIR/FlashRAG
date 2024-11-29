@@ -52,7 +52,7 @@ class F1_Score(BaseMetric):
     def __init__(self, config):
         super().__init__(config)
 
-    def token_level_scores(self, prediction: str, ground_truths: str):
+    def token_level_scores(self, prediction: str, ground_truths: list):
         final_metric = {"f1": 0, "precision": 0, "recall": 0}
         if isinstance(ground_truths, str):
             ground_truths = [ground_truths]
