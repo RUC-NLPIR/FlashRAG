@@ -127,7 +127,6 @@ class Config:
 
             if config.get("retrieval_model_path") is None:
                 config["retrieval_model_path"] = model2path.get(retrieval_method, retrieval_method)
-            # TODO: not support when `retrieval_model` is path
 
             if config.get("retrieval_pooling_method") is None:
                 config["retrieval_pooling_method"] = set_pooling_method(retrieval_method, model2pooling)
@@ -153,8 +152,26 @@ class Config:
         self.final_config = set_retrieval_keys(model2path, model2pooling, method2index, self.final_config)
         # set keys for multi retriever
         if "multi_retriever_setting" in self.final_config:
-            multi_retriever_config = self.final_config["multi_retriever_setting"].get("retriever_list", [])
-            for retriever_config in multi_retriever_config:
+            multi_retriever_config = self.final_config["multi_retriever_setting"]
+            retriever_config_list = multi_retriever_config.get("retriever_list", [])
+            # set for reranker merge method
+            assert multi_retriever_config['merge_method'] in ['concat', 'rrf', 'rerank', None]
+            if multi_retriever_config['merge_method'] == 'rerank':
+                rerank_model_name = multi_retriever_config.get("rerank_model_name", None)
+                assert rerank_model_name is not None
+                multi_retriever_config['rerank_max_length'] = multi_retriever_config.get("rerank_max_length", 512)
+                multi_retriever_config['rerank_batch_size'] = multi_retriever_config.get("rerank_batch_size", 256)
+                multi_retriever_config['rerank_use_fp16'] = multi_retriever_config.get("rerank_use_fp16", True)
+                
+                if multi_retriever_config.get("rerank_model_path", None) is None:
+                    if rerank_model_name is not None:
+                        multi_retriever_config["rerank_model_path"] = model2path.get(rerank_model_name, rerank_model_name)
+                if multi_retriever_config.get("rerank_pooling_method", None) is None:
+                    if rerank_model_name is not None:
+                        multi_retriever_config["rerank_pooling_method"] = set_pooling_method(rerank_model_name, model2pooling)
+            
+            # set config for each retriever
+            for retriever_config in retriever_config_list:
                 if "instruction" not in retriever_config:
                     retriever_config["instruction"] = None
                 if "bm25_backend" not in retriever_config:
@@ -168,6 +185,7 @@ class Config:
                 if "use_sentence_transformer" not in retriever_config:
                     retriever_config["use_sentence_transformer"] = False
                 retriever_config = set_retrieval_keys(model2path, model2pooling, method2index, retriever_config)
+                
                 # set other necessary keys as base setting
                 keys = [
                     "retrieval_use_fp16",
@@ -185,6 +203,7 @@ class Config:
                         retriever_config[key] = self.final_config.get(key, None)
                 retriever_config["save_retrieval_cache"] = False
                 retriever_config["use_retrieval_cache"] = False
+        
         # set model path
         generator_model = self.final_config["generator_model"]
 

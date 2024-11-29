@@ -487,10 +487,15 @@ class MultiModalRetriever(BaseRetriever):
 
 class MultiRetrieverRouter:
     def __init__(self, config):
-        self.merge_method = config["multi_retriever_setting"].get("merge_method", "concat")  # concat/rrf
-        self.final_topk = config["multi_retriever_setting"].get("rrf_topk", 5)
+        self.merge_method = config["multi_retriever_setting"].get("merge_method", "concat")  # concat/rrf/rerank
+        self.final_topk = config["multi_retriever_setting"].get("topk", 5)
         self.retriever_list = self.load_all_retriever(config)
         self.config = config
+
+        if self.merge_method == 'rerank':
+            config['multi_retriever_setting']['rerank_topk'] = self.final_topk
+            config['multi_retriever_setting']['device'] = config['device']
+            self.reranker = get_reranker(config['multi_retriever_setting'])
 
     def load_all_retriever(self, config):
         retriever_config_list = config["multi_retriever_setting"]["retriever_list"]
@@ -537,7 +542,10 @@ class MultiRetrieverRouter:
 
         return retriever_list
 
-    def add_source(self, result: Union[list, tuple], retrieval_method, corpus_path):
+    def add_source(self, result: Union[list, tuple], retriever):
+        retrieval_method = retriever.retrieval_method
+        corpus_path = retriever.corpus_path
+        is_multimodal = isinstance(retriever, MultiModalRetriever)
         # for naive search, result is a list of dict, each repr a doc
         # for batch search, result is a list of list, each repr a doc list(per query)
         for item in result:
@@ -545,9 +553,11 @@ class MultiRetrieverRouter:
                 for _item in item:
                     _item["source"] = retrieval_method
                     _item["corpus_path"] = corpus_path
+                    _item['is_multimodal'] = is_multimodal
             else:
                 item["source"] = retrieval_method
                 item["corpus_path"] = corpus_path
+                item['is_multimodal'] = is_multimodal
         return result
 
     def _search_or_batch_search(self, query: Union[str, list], target_modal, num, return_score, method):
@@ -574,7 +584,7 @@ class MultiRetrieverRouter:
                 result = output
                 score = None
 
-            result = self.add_source(result, retriever.retrieval_method, retriever.corpus_path)
+            result = self.add_source(result, retriever)
             return result, score
 
         with ThreadPoolExecutor(max_workers=4) as executor:
@@ -589,7 +599,7 @@ class MultiRetrieverRouter:
                     print(f"Error processing retriever {future_to_retriever[future]}: {e}")
 
         result_list, score_list = self.reorder(result_list, score_list)
-        result_list, score_list = self.post_process_result(result_list, score_list, num)
+        result_list, score_list = self.post_process_result(query, result_list, score_list, num)
         if return_score:
             return result_list, score_list
         else:
@@ -616,14 +626,13 @@ class MultiRetrieverRouter:
 
         final_result = []
         final_score = []
-        for r_idx in range(retriever_num):
-
-            final_result.append(sum([result_list[r_idx + q_idx * retriever_num] for q_idx in range(query_num)], []))
+        for q_idx in range(query_num):
+            final_result.append(sum([result_list[q_idx + r_idx * query_num] for r_idx in range(retriever_num)], []))
             if score_list != []:
-                final_score.append(sum([score_list[r_idx + q_idx * retriever_num] for q_idx in range(query_num)], []))
+                final_score.append(sum([score_list[q_idx + r_idx * query_num] for r_idx in range(retriever_num)], []))
         return final_result, final_score
 
-    def post_process_result(self, result_list, score_list, num):
+    def post_process_result(self, query: Union[str, list], result_list, score_list, num):
         # based on self.merge_method
         if self.merge_method == "concat":
             # remove duplicate doc
@@ -660,6 +669,19 @@ class MultiRetrieverRouter:
                 score_list = score_list[0]
             else:
                 result_list, score_list = self.rrf_merge(result_list, num, k=60)
+            return result_list, score_list
+        elif self.merge_method == 'rerank':
+            if isinstance(result_list[0], dict):
+                query, result_list, score_list = [query], [result_list], [score_list]
+            # parse the result of multimodal corpus
+            for item_result in result_list:
+                for item in item_result:
+                    if item['is_multimodal']:
+                        item['contents'] = item['text']
+            # rerank all docs
+            result_list, score_list = self.reranker.rerank(query, result_list, topk=num)
+            if isinstance(query, str):
+                result_list, score_list = result_list[0], score_list[0]
             return result_list, score_list
         else:
             raise NotImplementedError

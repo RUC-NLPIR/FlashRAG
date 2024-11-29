@@ -79,8 +79,10 @@ rerank_use_fp16: True
 # If you want to use multi retrievers, you can set the following parameters
 use_multi_retriever: False # whether to use multi retrievers
 multi_retriever_setting:
-  merge_method: "concat" # only support 'concat'
-  rrf_topk: 5 # final remain documents, only used in 'rrf' merge
+  merge_method: "concat" # support 'concat', 'rrf', 'rerank'
+  topk: 5 # final remain documents, only used in 'rrf' merge
+  rerank_model_name: ~
+  rerank_model_path: ~
   retriever_list:
     - retrieval_method: "e5"
       retrieval_topk: 5
