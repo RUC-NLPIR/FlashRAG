@@ -1,4 +1,5 @@
 import os
+import json
 import importlib
 from transformers import AutoConfig
 from flashrag.dataset.dataset import Dataset
@@ -29,21 +30,33 @@ def get_dataset(config):
 
 def get_generator(config, **params):
     """Automatically select generator class based on config."""
-    if config["framework"] == "vllm":
-        return getattr(importlib.import_module("flashrag.generator"), "VLLMGenerator")(config, **params)
-    elif config["framework"] == "fschat":
-        return getattr(importlib.import_module("flashrag.generator"), "FastChatGenerator")(config, **params)
-    elif config["framework"] == "hf":
-        model_config = AutoConfig.from_pretrained(config["generator_model_path"])
-        arch = model_config.architectures[0]
-        if "t5" in arch.lower() or "bart" in arch.lower():
-            return getattr(importlib.import_module("flashrag.generator"), "EncoderDecoderGenerator")(config, **params)
-        else:
-            return getattr(importlib.import_module("flashrag.generator"), "HFCausalLMGenerator")(config, **params)
-    elif config["framework"] == "openai":
+    
+    if config['framework'] == 'openai':
         return getattr(importlib.import_module("flashrag.generator"), "OpenaiGenerator")(config, **params)
+    
+    # judge multimodal model
+    with open(os.path.join(config["generator_model_path"], "config.json"), "r") as f:
+        config = json.load(f)
+    arch = config['architectures'][0]
+    if all(["vision" not in key for key in config.keys()]):
+        is_mm = False
     else:
-        raise NotImplementedError
+        is_mm = True
+    
+    if is_mm:
+        return getattr(importlib.import_module("flashrag.generator"), "HFMultiModalGenerator")(config, **params)
+    else:
+        if config["framework"] == "vllm":
+            return getattr(importlib.import_module("flashrag.generator"), "VLLMGenerator")(config, **params)
+        elif config["framework"] == "fschat":
+            return getattr(importlib.import_module("flashrag.generator"), "FastChatGenerator")(config, **params)
+        elif config["framework"] == "hf":
+            if "t5" in arch.lower() or "bart" in arch.lower():
+                return getattr(importlib.import_module("flashrag.generator"), "EncoderDecoderGenerator")(config, **params)
+            else:
+                return getattr(importlib.import_module("flashrag.generator"), "HFCausalLMGenerator")(config, **params)
+        else:
+            raise NotImplementedError
 
 
 def get_retriever(config):

@@ -394,7 +394,6 @@ class HFMultiModalGenerator(BaseMultiModalGenerator):
 
         # preprocess input list
         from PIL import Image
-        import requests
         for messages in input_list:
             for message in messages:
                 if isinstance(message['content'], list):
