@@ -266,7 +266,7 @@ class HFCausalLMGenerator(BaseGenerator):
                 trust_remote_code=True,
             )
         else:
-            model.cuda()
+            model.to(self.device)
         model.eval()
         tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
         if "qwen" not in self.model_name:

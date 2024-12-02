@@ -430,9 +430,11 @@ class MultiModalRetriever(BaseRetriever):
         )
         if query_modal == "image" and isinstance(query, str):
             from PIL import Image
-            import requests
-
-            query = Image.open(requests.get(query, stream=True).raw)
+            if os.path.exists(query):
+                query = Image.open(query)
+            else:
+                import requests
+                query = Image.open(requests.get(query, stream=True).raw)
 
         query_emb = self.encoder.encode(query, modal=query_modal)
 
@@ -459,8 +461,10 @@ class MultiModalRetriever(BaseRetriever):
         if query_modal == "image" and isinstance(query[0], str):
             from PIL import Image
             import requests
-
-            query = [Image.open(requests.get(query, stream=True).raw) for query in query]
+            if os.path.exists(query[0]):
+                query = [Image.open(q) for q in query]
+            else:
+                query = [Image.open(requests.get(q, stream=True).raw) for q in query]
 
         results = []
         scores = []
