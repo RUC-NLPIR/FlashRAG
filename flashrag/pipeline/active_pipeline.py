@@ -981,8 +981,6 @@ class IRCOTPipeline(BasicPipeline):
 
             # Perform batch retrieval for new thoughts of active items
             if active_item_ids:
-                print(len(active_item_ids))
-                print(active_item_ids)
                 new_thoughts_for_retrieval = [batch_thoughts[item_id][-1] for item_id in active_item_ids]
                 new_retrieval_results, new_scoress = self.retriever.batch_search(new_thoughts_for_retrieval, return_score=True)
 
