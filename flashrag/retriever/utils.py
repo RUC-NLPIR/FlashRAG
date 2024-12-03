@@ -1,4 +1,5 @@
 import json
+import os
 import warnings
 from typing import Dict, Any, Union, List, Dict
 import numpy as np
@@ -139,3 +140,18 @@ def parse_image(image):
         else:
             image = Image.open(image)
     return image
+
+
+def judge_image(x):
+    from PIL import Image
+    if isinstance(x, str):
+        if x.startswith("http"):
+            return True
+        if os.path.exists(x):
+            return True
+    elif isinstance(x, Image.Image):
+        return True
+    else:
+        warnings.warn('image type not supported')
+    return False
+    

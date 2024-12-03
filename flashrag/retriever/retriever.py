@@ -11,7 +11,7 @@ import copy
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from flashrag.utils import get_reranker
-from flashrag.retriever.utils import load_corpus, load_docs, convert_numpy
+from flashrag.retriever.utils import load_corpus, load_docs, convert_numpy, judge_image
 from flashrag.retriever.encoder import Encoder, STEncoder, ClipEncoder
 
 
@@ -564,7 +564,7 @@ class MultiRetrieverRouter:
                 item['is_multimodal'] = is_multimodal
         return result
 
-    def _search_or_batch_search(self, query: Union[str, list], target_modal, num, return_score, method):
+    def _search_or_batch_search(self, query: Union[str, list], target_modal, num, return_score, method, retriever_list):
         if num is None:
             num = self.final_topk
 
@@ -574,6 +574,7 @@ class MultiRetrieverRouter:
         def process_retriever(retriever):
             is_multimodal = isinstance(retriever, MultiModalRetriever)
             params = {"query": query, "return_score": return_score}
+            
             if is_multimodal:
                 params["target_modal"] = target_modal
 
@@ -592,7 +593,7 @@ class MultiRetrieverRouter:
             return result, score
 
         with ThreadPoolExecutor(max_workers=4) as executor:
-            future_to_retriever = {executor.submit(process_retriever, retriever): retriever for retriever in self.retriever_list}
+            future_to_retriever = {executor.submit(process_retriever, retriever): retriever for retriever in retriever_list}
             for future in as_completed(future_to_retriever):
                 try:
                     result, score = future.result()
@@ -602,7 +603,7 @@ class MultiRetrieverRouter:
                 except Exception as e:
                     print(f"Error processing retriever {future_to_retriever[future]}: {e}")
 
-        result_list, score_list = self.reorder(result_list, score_list)
+        result_list, score_list = self.reorder(result_list, score_list, retriever_list)
         result_list, score_list = self.post_process_result(query, result_list, score_list, num)
         if return_score:
             return result_list, score_list
@@ -610,7 +611,7 @@ class MultiRetrieverRouter:
             return result_list
 
 
-    def reorder(self, result_list, score_list):
+    def reorder(self, result_list, score_list, retriever_list):
         """
         batch_search:
         original result like: [[bm25-q1-d1, bm25-q1-d2],[bm25-q2-d1, bm25-q2-d2], [e5-q1-d1, e5-q1-d2], [e5-q2-d1, e5-q2-d2]]
@@ -621,7 +622,7 @@ class MultiRetrieverRouter:
         
         """
 
-        retriever_num = len(self.retriever_list)
+        retriever_num = len(retriever_list)
         query_num = len(result_list) // retriever_num
         assert query_num * retriever_num == len(result_list)
 
@@ -737,7 +738,65 @@ class MultiRetrieverRouter:
         return fused_results, fused_scores
 
     def search(self, query, target_modal="text", num: Union[list, int, None] = None, return_score=False):
-        return self._search_or_batch_search(query, target_modal, num, return_score, method="search")
+        # query: str or PIL.Image
+        # judge query type: text or image
+        if judge_image(query):
+            retriever_list = [retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)]
+        else:
+            retriever_list = self.retriever_list
+
+        return self._search_or_batch_search(query, target_modal, num, return_score, method="search", retriever_list=retriever_list)
 
     def batch_search(self, query, target_modal="text", num: Union[list, int, None] = None, return_score=False):
-        return self._search_or_batch_search(query, target_modal, num, return_score, method="batch_search")
+        # judge query type: text or image
+        if not isinstance(query, list):
+            query = [query]
+        query_type_list = [judge_image(q) for q in query]
+        if all(query_type_list):
+            # all query is image
+            retriever_list = [retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)]
+            return self._search_or_batch_search(query, target_modal, num, return_score, method="batch_search", retriever_list=retriever_list)
+        elif all([not t for t in query_type_list]):
+            # all query is text
+            return self._search_or_batch_search(query, target_modal, num, return_score, method="batch_search", retriever_list=self.retriever_list)
+        else:
+            # mix of image and text
+            image_query_idx = [i for i, t in enumerate(query_type_list) if t]
+            image_query_list = [query[i] for i in image_query_idx]
+            text_query_list = [q for q in query if q not in image_query_list]
+
+            text_output = self._search_or_batch_search(text_query_list, target_modal, num, return_score, method="batch_search", retriever_list=self.retriever_list)
+            retriever_list = [retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)]
+            image_output = self._search_or_batch_search(text_query_list, target_modal, num, return_score, method="batch_search", retriever_list=retriever_list)
+
+            # merge text output and image output
+            if return_score:
+                text_result, text_score = text_output
+                image_result, image_score = image_output
+                final_result = []
+                final_score = []
+                text_idx = 0
+                image_idx = 0
+                for idx in range(len(query)):
+                    if idx not in image_query_idx:
+                        final_result.append(text_result[text_idx])
+                        final_score.append(text_score[text_idx])
+                        text_idx += 1
+                    else:
+                        final_result.append(image_result[image_idx])
+                        final_score.append(image_score[image_idx])
+                        image_idx += 1 
+                return final_result, final_score
+            else:
+                final_result = []
+                text_idx = 0
+                image_idx = 0
+                for idx in range(len(query)):
+                    if idx not in image_query_idx:
+                        final_result.append(text_result[text_idx])
+                        text_idx += 1
+                    else:
+                        final_result.append(image_result[image_idx])
+                        image_idx += 1 
+                return final_result
+
