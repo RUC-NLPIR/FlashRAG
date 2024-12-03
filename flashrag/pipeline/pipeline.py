@@ -141,8 +141,8 @@ class ConditionalPipeline(BasicPipeline):
         """
 
         super().__init__(config, prompt_template)
-        self.judger = get_judger(config)
         self.generator = get_generator(config)
+        self.judger = get_judger(config)
         self.retriever = get_retriever(config)
 
         self.sequential_pipeline = SequentialPipeline(
