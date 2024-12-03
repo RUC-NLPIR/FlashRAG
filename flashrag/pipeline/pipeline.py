@@ -187,10 +187,9 @@ class AdaptivePipeline(BasicPipeline):
     ):
         super().__init__(config)
         # load adaptive classifier as judger
-        self.judger = get_judger(config)
-
         generator = get_generator(config)
         retriever = get_retriever(config)
+        self.judger = get_judger(config)
         self.generator = generator
         self.retriever = retriever
 
