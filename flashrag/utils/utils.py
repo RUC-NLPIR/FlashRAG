@@ -36,9 +36,9 @@ def get_generator(config, **params):
     
     # judge multimodal model
     with open(os.path.join(config["generator_model_path"], "config.json"), "r") as f:
-        config = json.load(f)
-    arch = config['architectures'][0]
-    if all(["vision" not in key for key in config.keys()]):
+        model_config = json.load(f)
+    arch = model_config['architectures'][0]
+    if all(["vision" not in key for key in model_config.keys()]):
         is_mm = False
     else:
         is_mm = True
