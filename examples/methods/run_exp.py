@@ -14,7 +14,6 @@ def naive(args):
     all_split = get_dataset(config)
     test_data = all_split[args.split]
 
-    pred_process_fun = lambda x: x.split("\n")[0]
     pipeline = SequentialPipeline(config)
 
     result = pipeline.run(test_data)
@@ -37,7 +36,6 @@ def zero_shot(args):
         system_prompt="Answer the question based on your own knowledge. Only give me the answer and do not output any other words.",
         user_prompt="Question: {question}",
     )
-    pred_process_fun = lambda x: x.split("\n")[0]
     pipeline = SequentialPipeline(config, templete)
     result = pipeline.naive_run(test_data)
 
@@ -78,7 +76,6 @@ def aar(args):
 
     from flashrag.pipeline import SequentialPipeline
 
-    pred_process_fun = lambda x: x.split("\n")[0]
     pipeline = SequentialPipeline(config)
     # result = pipeline.run(test_data, pred_process_fun=pred_process_fun)
     result = pipeline.run(test_data)
