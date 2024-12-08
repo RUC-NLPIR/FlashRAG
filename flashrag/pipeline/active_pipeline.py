@@ -1,5 +1,6 @@
 import re
 from tqdm import tqdm
+import math
 import numpy as np
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 from flashrag.utils import get_retriever, get_generator, selfask_pred_parse, ircot_pred_parse
@@ -1015,7 +1016,6 @@ class IRCOTPipeline(BasicPipeline):
         dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
         return dataset
 
-import math
 class RQRAGPipeline(BasicPipeline):
     expand_on_tokens = [
         "[S_Rewritten_Query]",
@@ -1063,18 +1063,14 @@ class RQRAGPipeline(BasicPipeline):
         batch_size = 32
     ):
         super().__init__(config, prompt_template)
-        from flashrag.generator import VLLMGenerator
-        from flashrag.retriever import BaseRetriever
-        
-        self.tokenizer = AutoTokenizer.from_pretrained(config["generator_model_path"], padding_side = "left")
+
+
         self.generator = generator if generator is not None else get_generator(config)
+        self.tokenizer = AutoTokenizer.from_pretrained(config["generator_model_path"], padding_side = "left")
         self.retriever = retriever if retriever is not None else get_retriever(config)
         
         self.max_depth = max_depth
         self.batch_size = batch_size
-        
-        self.generator: VLLMGenerator
-        self.retriever: BaseRetriever
         
         # Due to the low effiency of original method, it only supports vllm now.
     
