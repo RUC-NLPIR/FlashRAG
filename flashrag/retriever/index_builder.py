@@ -1,4 +1,5 @@
 import os
+import re
 import faiss
 import json
 import warnings
@@ -10,7 +11,7 @@ import argparse
 import datasets
 import torch
 from tqdm import tqdm
-from flashrag.retriever.utils import load_model, load_corpus, pooling, set_default_instruction
+from flashrag.retriever.utils import load_model, load_corpus, pooling, set_default_instruction, judge_zh
 
 
 class Index_Builder:
@@ -53,7 +54,7 @@ class Index_Builder:
         self.index_modal = index_modal
 
         # judge if the retrieval model is clip
-        self.is_clip = ("clip" in self.retrieval_method) or ("clip" in self.model_path)
+        self.is_clip = ("clip" in self.retrieval_method) or (self.model_path is not None and "clip" in self.model_path)
         if not self.is_clip:
             try:
                 with open(os.path.join(self.model_path, "config.json")) as f:
@@ -140,8 +141,26 @@ class Index_Builder:
         os.makedirs(self.save_dir, exist_ok=True)
         temp_dir = self.save_dir + "/temp"
         temp_file_path = temp_dir + "/temp.jsonl"
-        os.makedirs(temp_dir)
-        shutil.copyfile(self.corpus_path, temp_file_path)
+        os.makedirs(temp_dir, exist_ok=True)
+
+        if self.corpus_path.endswith(".jsonl"):
+            shutil.copyfile(self.corpus_path, temp_file_path)
+            # check if the language is chinese
+            with open(self.corpus_path, 'r', encoding='utf-8') as file:
+                first_item = json.loads(file.readline()) 
+                contents = first_item.get("contents", "")  # 获取 contents 字段
+                zh_flag = judge_zh(contents)
+        elif self.corpus_path.endswith(".parquet"):
+            corpus = datasets.load_dataset('parquet', data_files=self.corpus_path, split="train")
+            new_corpus = [{'id': idx, 'contents': text} for idx, text in enumerate(corpus['text'])]
+            contents = new_corpus[0]['contents']
+            zh_flag = judge_zh(contents)
+            with open(temp_file_path, 'w', encoding='utf-8') as f:
+                for item in new_corpus:
+                    json.dump(item, f, ensure_ascii=False)
+                    f.write('\n')
+        else:
+            raise NotImplementedError
 
         print("Start building bm25 index...")
         pyserini_args = [
@@ -157,6 +176,11 @@ class Index_Builder:
             "1",
         ]
 
+        if zh_flag:
+            print("Use chinese bm25 mode")
+            pyserini_args.append("--language")
+            pyserini_args.append("zh")
+
         subprocess.run(["python", "-m", "pyserini.index.lucene"] + pyserini_args)
 
         shutil.rmtree(temp_dir)
@@ -167,14 +191,24 @@ class Index_Builder:
         """Building BM25 index based on bm25s library."""
 
         import bm25s
+        import Stemmer
 
         self.save_dir = os.path.join(self.save_dir, "bm25")
         os.makedirs(self.save_dir, exist_ok=True)
 
-        corpus = datasets.load_dataset("json", data_files=self.corpus_path, split="train")
+        corpus = load_corpus(self.corpus_path)
+        # TODO: BM25s not support chinese well
+        is_zh = judge_zh(corpus[0]['contents'])
+        if is_zh:
+            tokenizer = bm25s.tokenization.Tokenizer(stopwords='zh')
+        else:
+            stemmer = Stemmer.Stemmer("english")
+            tokenizer = bm25s.tokenization.Tokenizer(stopwords='en', stemmer=stemmer)
+            
         corpus_text = corpus["contents"]
+        corpus_tokens = tokenizer.tokenize(corpus_text, return_as='tuple')
         retriever = bm25s.BM25(corpus=corpus, backend="numba")
-        retriever.index(corpus_text)
+        retriever.index(corpus_tokens)
         retriever.save(self.save_dir, corpus=None)
 
         print("Finish!")
@@ -347,7 +381,7 @@ def main():
     parser.add_argument("--save_embedding", action="store_true", default=False)
     parser.add_argument("--faiss_gpu", default=False, action="store_true")
     parser.add_argument("--sentence_transformer", action="store_true", default=False)
-    parser.add_argument("--bm25_backend", default="bm25s", choices=["bm25s", "pyserini"])
+    parser.add_argument("--bm25_backend", default="pyserini", choices=["bm25s", "pyserini"])
 
     # Parameters for build multi-modal retriever index
     parser.add_argument("--index_modal", type=str, default="all", choices=["text", "image", "all"])

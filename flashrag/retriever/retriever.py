@@ -11,7 +11,7 @@ import copy
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from flashrag.utils import get_reranker
-from flashrag.retriever.utils import load_corpus, load_docs, convert_numpy, judge_image
+from flashrag.retriever.utils import load_corpus, load_docs, convert_numpy, judge_image, judge_zh
 from flashrag.retriever.encoder import Encoder, STEncoder, ClipEncoder
 
 
@@ -215,13 +215,26 @@ class BM25Retriever(BaseTextRetriever):
                 else:
                     self.corpus = corpus
             self.max_process_num = 8
+
+            is_zh = judge_zh(self.corpus[0]['contents'])
+            if is_zh:
+                self.searcher.set_language('zh')
         elif self.backend == "bm25s":
             import Stemmer
             import bm25s
 
-            self.stemmer = Stemmer.Stemmer("english")
-            self.searcher = bm25s.BM25.load(self.index_path, mmap=True, load_corpus=False)
             self.corpus = load_corpus(self.corpus_path)
+            is_zh = judge_zh(self.corpus[0]['contents'])
+
+            self.searcher = bm25s.BM25.load(self.index_path, mmap=True, load_corpus=False)
+            if is_zh:
+                self.tokenizer = bm25s.tokenization.Tokenizer(stopwords='zh')
+                self.tokenizer.load_stopwords(self.index_path)
+                self.tokenizer.load_vocab(self.index_path)
+            else:
+                stemmer = Stemmer.Stemmer("english")
+                self.tokenizer = bm25s.tokenization.Tokenizer(stopwords='en', stemmer=stemmer)
+
             self.searcher.corpus = self.corpus
             self.searcher.backend = "numba"
 
@@ -262,9 +275,7 @@ class BM25Retriever(BaseTextRetriever):
             else:
                 results = load_docs(self.corpus, [hit.docid for hit in hits])
         elif self.backend == "bm25s":
-            import bm25s
-
-            query_tokens = bm25s.tokenize([query], stemmer=self.stemmer)
+            query_tokens = self.tokenizer.tokenize([query], return_as='tuple', update_vocab=False)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
             results = list(results[0])
             scores = list(scores[0])
@@ -286,9 +297,7 @@ class BM25Retriever(BaseTextRetriever):
                 results.append(item_result)
                 scores.append(item_score)
         elif self.backend == "bm25s":
-            import bm25s
-
-            query_tokens = bm25s.tokenize(query, stemmer=self.stemmer)
+            query_tokens = self.tokenizer.tokenize(query, return_as='tuple', update_vocab=False)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
         else:
             assert False, "Invalid bm25 backend!"
@@ -602,7 +611,6 @@ class MultiRetrieverRouter:
                         score_list.extend(score)
                 except Exception as e:
                     print(f"Error processing retriever {future_to_retriever[future]}: {e}")
-
         result_list, score_list = self.reorder(result_list, score_list, retriever_list)
         result_list, score_list = self.post_process_result(query, result_list, score_list, num)
         if return_score:
@@ -654,8 +662,8 @@ class MultiRetrieverRouter:
                 for query_idx, query_doc_list in enumerate(result_list):
                     exist_id = set()
                     for doc_idx, doc in enumerate(query_doc_list):
-                        if doc not in exist_id:
-                            exist_id.add(doc)
+                        if doc['id'] not in exist_id:
+                            exist_id.add(doc['id'])
                         else:
                             query_doc_list.remove(doc)
                             if score_list != []:
@@ -684,6 +692,7 @@ class MultiRetrieverRouter:
                     if item['is_multimodal']:
                         item['contents'] = item['text']
             # rerank all docs
+            print(result_list)
             result_list, score_list = self.reranker.rerank(query, result_list, topk=num)
             if isinstance(query, str):
                 result_list, score_list = result_list[0], score_list[0]
@@ -744,6 +753,9 @@ class MultiRetrieverRouter:
             retriever_list = [retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)]
         else:
             retriever_list = self.retriever_list
+        if target_modal == 'image':
+            # remove text retriever
+            retriever_list = [retriever for retriever in retriever_list if isinstance(retriever, MultiModalRetriever)]
 
         return self._search_or_batch_search(query, target_modal, num, return_score, method="search", retriever_list=retriever_list)
 
@@ -751,22 +763,36 @@ class MultiRetrieverRouter:
         # judge query type: text or image
         if not isinstance(query, list):
             query = [query]
+        if target_modal == 'image':
+            self._retriever_list = [retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)]
+        else:
+            self._retriever_list = self.retriever_list
         query_type_list = [judge_image(q) for q in query]
         if all(query_type_list):
             # all query is image
-            retriever_list = [retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)]
+            if self.merge_method == 'rerank':
+                warnings.warn('merge_method is rerank, but all query is image, use default method `concat` instead')
+                self.merge_method = 'concat'
+            retriever_list = [retriever for retriever in self._retriever_list if isinstance(retriever, MultiModalRetriever)]
+
             return self._search_or_batch_search(query, target_modal, num, return_score, method="batch_search", retriever_list=retriever_list)
         elif all([not t for t in query_type_list]):
             # all query is text
-            return self._search_or_batch_search(query, target_modal, num, return_score, method="batch_search", retriever_list=self.retriever_list)
+            # if exist text retriever, don't use mm retriever for text-text search
+            if any([isinstance(retriever, BaseTextRetriever) for retriever in self._retriever_list]):
+                self._retriever_list = [retriever for retriever in self._retriever_list if not isinstance(retriever, MultiModalRetriever)]
+            return self._search_or_batch_search(query, target_modal, num, return_score, method="batch_search", retriever_list=self._retriever_list)
         else:
-            # mix of image and text
+            # query list is the mix of image and text
+            if self.merge_method == 'rerank':
+                warnings.warn('merge_method is rerank, but some query is image, use default method `concat` instead')
+                self.merge_method = 'concat'
             image_query_idx = [i for i, t in enumerate(query_type_list) if t]
             image_query_list = [query[i] for i in image_query_idx]
             text_query_list = [q for q in query if q not in image_query_list]
 
-            text_output = self._search_or_batch_search(text_query_list, target_modal, num, return_score, method="batch_search", retriever_list=self.retriever_list)
-            retriever_list = [retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)]
+            text_output = self._search_or_batch_search(text_query_list, target_modal, num, return_score, method="batch_search", retriever_list=self._retriever_list)
+            retriever_list = [retriever for retriever in self._retriever_list if isinstance(retriever, MultiModalRetriever)]
             image_output = self._search_or_batch_search(text_query_list, target_modal, num, return_score, method="batch_search", retriever_list=retriever_list)
 
             # merge text output and image output

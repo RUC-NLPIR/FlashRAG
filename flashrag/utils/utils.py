@@ -7,6 +7,7 @@ from flashrag.dataset.dataset import Dataset
 
 def get_dataset(config):
     """Load dataset from config."""
+    SUPPORT_FILES = ["jsonl", "json", "parquet"]
 
     dataset_path = config["dataset_path"]
     all_split = config["split"]
@@ -14,10 +15,18 @@ def get_dataset(config):
     split_dict = {split: None for split in all_split}
 
     for split in all_split:
-        split_path = os.path.join(dataset_path, f"{split}.jsonl")
-        if not os.path.exists(split_path):
-            print(f"{split} file not exists!")
+        exist_flag = 0
+        for file_postfix in SUPPORT_FILES:
+            split_path = os.path.join(dataset_path, f"{split}.{file_postfix}")
+            if not os.path.exists(split_path):
+                continue
+            else:
+                exist_flag = 1
+                break
+        if exist_flag == 0:
             continue
+        else:
+            print(f"Loading {split} dataset from: {split_path}...")
         if split in ["test", "val", "dev"]:
             split_dict[split] = Dataset(
                 config, split_path, sample_num=config["test_sample_num"], random_sample=config["random_sample"]
