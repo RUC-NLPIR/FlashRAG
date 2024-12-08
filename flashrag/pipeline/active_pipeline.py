@@ -4,7 +4,7 @@ import numpy as np
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 from flashrag.utils import get_retriever, get_generator, selfask_pred_parse, ircot_pred_parse
 from flashrag.pipeline import BasicPipeline
-from flashrag.dataset import get_batch_dataset, merge_batch_dataset
+from flashrag.dataset.utils import get_batch_dataset, merge_batch_dataset
 from flashrag.prompt import PromptTemplate
 
 

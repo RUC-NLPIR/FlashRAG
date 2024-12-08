@@ -4,8 +4,14 @@ import warnings
 from typing import Dict, Any, Union, List, Dict
 import numpy as np
 import datasets
+import re
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
+
+def judge_zh(input_str):
+    if len(input_str) == 0:
+        return False
+    return bool(re.search(r'[\u4e00-\u9fff]', input_str))
 def convert_numpy(obj: Union[Dict, list, np.ndarray, np.generic]) -> Any:
     """Recursively convert numpy objects in nested dictionaries or lists to native Python types."""
     if isinstance(obj, dict):
@@ -68,30 +74,13 @@ def parse_query(model_name, query_list, instruction=None, is_query=True):
     processing query for different encoders
     """
 
-    def is_zh(str):
-        import unicodedata
-
-        zh_char = 0
-        for c in str:
-            try:
-                if "CJK" in unicodedata.name(c):
-                    zh_char += 1
-            except:
-                continue
-        if len(str) == 0:
-            return False
-        if zh_char / len(str) > 0.2:
-            return True
-        else:
-            return False
-
     if isinstance(query_list, str):
         query_list = [query_list]
 
     if instruction is not None:
         instruction = instruction.strip() + " "
     else:
-        instruction = set_default_instruction(model_name, is_query=is_query, is_zh=is_zh(query_list[0]))
+        instruction = set_default_instruction(model_name, is_query=is_query, is_zh=judge_zh(query_list[0]))
     print(f"Use `{instruction}` as retreival instruction")
     if instruction == "":
         warnings.warn('Instruction is not set')
@@ -109,7 +98,12 @@ def load_corpus(corpus_path: str):
         corpus = corpus.cast_column('image', datasets.Image())
     else:
         raise NotImplementedError("Corpus format not supported!")
-
+    if 'contents' not in corpus.features:
+        try:
+            print("No `contents` field found in corpus, using `text` instead.")
+            corpus = corpus.map(lambda x: {"contents": x["text"]})
+        except:
+            warnings.warn("No `contents` & `text` field found in corpus.")
     return corpus
 
 def read_jsonl(file_path):

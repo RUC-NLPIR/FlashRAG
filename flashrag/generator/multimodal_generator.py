@@ -4,6 +4,7 @@ import json
 import importlib
 from copy import deepcopy
 import warnings
+import math
 from tqdm import tqdm
 from tqdm.auto import trange
 import numpy as np
@@ -56,12 +57,13 @@ class BaseMultiModalGenerator:
         pass
 
 class BaseInferenceEngine:
-    def __init__(self, model_path, device='cpu', **kwargs):
+    def __init__(self, model_path, device='cpu', max_input_len=4096):
         self.model_path = model_path
         self.device = device
         self.model = None
         self.processor = None
         self.tokenizer = None
+        self.max_input_len = max_input_len
         self._load_model()
 
     @abstractmethod
@@ -85,8 +87,8 @@ class Qwen2VLInferenceEngine(BaseInferenceEngine):
         min_pixels = 3136
         max_pixels = 12845056
         self.processor = AutoProcessor.from_pretrained(self.model_path, trust_remote_code=True, min_pixels=min_pixels, max_pixels=max_pixels)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
-
+        self.processor.tokenizer.model_max_length = self.max_input_len
+        self.tokenizer = self.processor.tokenizer
     @torch.inference_mode(mode=True)
     def generate(self, input_list, **params):
         # convert image to base64
@@ -113,16 +115,46 @@ class Qwen2VLInferenceEngine(BaseInferenceEngine):
 
 class InternVL2InferenceEngine(BaseInferenceEngine):
     def _load_model(self):
+        import torch
+        gpu_num = torch.cuda.device_count()
         self.model = AutoModel.from_pretrained(
             self.model_path,
             torch_dtype=torch.bfloat16,
             low_cpu_mem_usage=True,
-            device_map='auto',
+            device_map='auto' if gpu_num <= 1 else self.split_model(),
             trust_remote_code=True
         ).eval()
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
+        self.tokenizer.model_max_length = self.max_input_len
         self.model.generation_config.pad_token_id = self.tokenizer.pad_token_id 
 
+
+    def split_model(self):
+        # get model name
+        with open(os.path.join(self.model_path, 'config.json')) as f:
+            config = json.load(f)
+        num_layers = config['llm_config']['num_hidden_layers']
+        device_map = {}
+        world_size = torch.cuda.device_count()
+        # Since the first GPU will be used for ViT, treat it as half a GPU.
+        num_layers_per_gpu = math.ceil(num_layers / (world_size - 0.5))
+        num_layers_per_gpu = [num_layers_per_gpu] * world_size
+        num_layers_per_gpu[0] = math.ceil(num_layers_per_gpu[0] * 0.5)
+        layer_cnt = 0
+        for i, num_layer in enumerate(num_layers_per_gpu):
+            for j in range(num_layer):
+                device_map[f'language_model.model.layers.{layer_cnt}'] = i
+                layer_cnt += 1
+        device_map['vision_model'] = 0
+        device_map['mlp1'] = 0
+        device_map['language_model.model.tok_embeddings'] = 0
+        device_map['language_model.model.embed_tokens'] = 0
+        device_map['language_model.output'] = 0
+        device_map['language_model.model.norm'] = 0
+        device_map['language_model.lm_head'] = 0
+        device_map[f'language_model.model.layers.{num_layers - 1}'] = 0
+
+        return device_map
 
     def build_transform(self, input_size):
         import torchvision.transforms as T
@@ -200,6 +232,7 @@ class InternVL2InferenceEngine(BaseInferenceEngine):
     
     @torch.inference_mode(mode=True)
     def generate(self, input_list, **params):
+        import torch
         # TODO: Currently only support single image batch or multi-image without batch 
         # convert input format to internvl2
         final_prompt_list = [] # each is a str
@@ -228,6 +261,7 @@ class InternVL2InferenceEngine(BaseInferenceEngine):
         final_image_list = [[self.load_image(img, max_num=12).to(self.model.dtype).to(self.model.device) for img in image_list] for image_list in final_image_list]
 
         if all([len(image_list) ==1 for image_list in final_image_list]):
+            torch.cuda.empty_cache()
             # batch inference with single image
             final_image_list = [image_list[0] for image_list in final_image_list]
             pixel_values = torch.cat(final_image_list, dim=0)
@@ -246,7 +280,8 @@ class InternVL2InferenceEngine(BaseInferenceEngine):
         else:
             # do single item inference with multi image 
             outputs = []
-            for image_list, prompt in tqdm(zip(final_image_list, final_prompt_list), desc="Inference with multi-image"):
+            for image_list, prompt in zip(final_image_list, final_prompt_list):
+                torch.cuda.empty_cache()
                 pixel_values = torch.cat(image_list, dim=0)
                 num_patches_list = [img.size(0) for img in image_list]
                 prompt_prefix = ""
@@ -309,7 +344,7 @@ class LlavaInferenceEngine(BaseInferenceEngine):
             new_input_list.append(new_messages)
         visual_list = sum(visual_list, [])
         texts = self.tokenizer.apply_chat_template(new_input_list, tokenize=False, add_generation_prompt=True)
-        inputs = self.processor(text=texts, images=visual_list, return_tensors='pt').to(self.model.device)
+        inputs = self.processor(text=texts, images=visual_list, padding=True, truncation=True, max_length=self.max_input_len, return_tensors='pt').to(self.model.device)
         
         outputs = self.model.generate(
             **inputs,
@@ -352,7 +387,8 @@ class HFMultiModalGenerator(BaseMultiModalGenerator):
         
         self.inference_engine = HFModelInferenceEngineFactory.get_engine(
             model_path=self.model_path,
-            device=self.device
+            device=self.device,
+            max_input_len=self.max_input_len
         )
 
     @torch.inference_mode(mode=True)

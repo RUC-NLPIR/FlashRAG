@@ -27,10 +27,7 @@ class BasicPipeline:
         """The evaluation process after finishing overall generation"""
 
         if pred_process_fun is not None:
-            raw_pred = dataset.pred
-            processed_pred = [pred_process_fun(pred) for pred in raw_pred]
-            dataset.update_output("raw_pred", raw_pred)
-            dataset.update_output("pred", processed_pred)
+            dataset = pred_process_fun(dataset)
 
         if do_eval:
             # evaluate & save result
