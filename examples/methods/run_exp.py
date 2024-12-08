@@ -565,8 +565,8 @@ def rqrag(args):
         "gpu_id": args.gpu_id,
         "dataset_name": args.dataset_name,
         "split": args.split,
-        "retrieval_topk": args.retrieval_topk,
-        "max_depth": args.max_depth
+        "retrieval_topk": 5,
+        "max_depth": 3
     }
 
     config = Config("my_config.yaml", config_dict)
@@ -584,8 +584,7 @@ if __name__ == "__main__":
     parser.add_argument("--split", type=str)
     parser.add_argument("--dataset_name", type=str)
     parser.add_argument("--gpu_id", type=str)
-    parser.add_argument("--retrieval_topk", type = int)
-    parser.add_argument("--max_depth", type=int)
+
     
     func_dict = {
         "AAR-contriever": aar,
