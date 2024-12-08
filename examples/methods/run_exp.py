@@ -563,6 +563,7 @@ def rqrag(args):
     config_dict = {
         "save_note": save_note,
         "gpu_id": args.gpu_id,
+        'framework': 'vllm',
         "dataset_name": args.dataset_name,
         "split": args.split,
         "retrieval_topk": 5,
