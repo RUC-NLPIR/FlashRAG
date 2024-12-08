@@ -552,6 +552,32 @@ def adaptive(args):
     pipeline = AdaptivePipeline(config)
     result = pipeline.run(test_data)
 
+def rqrag(args):
+    """
+    Function to run the RQRAGPipeline.
+    """
+    from flashrag.pipeline.active_pipeline import RQRAGPipeline
+    
+    save_note = "rqrag"
+    
+    config_dict = {
+        "save_note": save_note,
+        "gpu_id": args.gpu_id,
+        'framework': 'vllm',
+        "dataset_name": args.dataset_name,
+        "split": args.split,
+        "retrieval_topk": 5,
+        "max_depth": 3
+    }
+
+    config = Config("my_config.yaml", config_dict)
+    
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+    
+    pipeline = RQRAGPipeline(config, max_depth = args.max_depth)
+    result = pipeline.run(test_data)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Running exp")
@@ -560,6 +586,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset_name", type=str)
     parser.add_argument("--gpu_id", type=str)
 
+    
     func_dict = {
         "AAR-contriever": aar,
         "AAR-ANCE": aar,
@@ -578,6 +605,7 @@ if __name__ == "__main__":
         "ircot": ircot,
         "trace": trace,
         "adaptive": adaptive,
+        "rqrag": rqrag,
     }
 
     args = parser.parse_args()
