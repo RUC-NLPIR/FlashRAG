@@ -23,7 +23,7 @@ class PromptTemplate:
             self.is_chat = False
             if "chat" in model_name or "instruct" in model_name:
                 self.is_chat = True
-            self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path, trust_remote_code=True)
+            self.tokenizer = None
         else:
             self.is_chat = True
             self.enable_chat = True
@@ -79,6 +79,8 @@ class PromptTemplate:
             return truncated_messages
 
         else:
+            if self.tokenizer is None:
+                self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path, trust_remote_code=True)
             assert isinstance(prompt, str)
             tokenized_prompt = self.tokenizer(prompt, truncation=False, return_tensors="pt").input_ids[0]
 

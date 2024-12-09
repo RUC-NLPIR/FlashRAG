@@ -4,7 +4,6 @@ import warnings
 from tqdm import tqdm
 from tqdm.auto import trange
 import numpy as np
-import torch
 from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
@@ -25,7 +24,7 @@ class BaseGenerator:
         self.max_input_len = config["generator_max_input_len"]
         self.batch_size = config["generator_batch_size"]
         self.device = config["device"]
-        self.gpu_num = torch.cuda.device_count()
+        self.gpu_num = config['gpu_num']
         self.config = config
         self.generation_params = config["generation_params"]
 
@@ -64,6 +63,7 @@ class EncoderDecoderGenerator(BaseGenerator):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
 
     def encode_passages(self, batch_text_passages: List[List[str]]):
+        import torch
         # need size: [batch_size, passage_num, passage_len]
         passage_ids, passage_masks = [], []
         for text_passages in batch_text_passages:
@@ -81,7 +81,6 @@ class EncoderDecoderGenerator(BaseGenerator):
         passage_masks = torch.cat(passage_masks, dim=0)
         return passage_ids, passage_masks.bool()
 
-    @torch.inference_mode(mode=True)
     def generate(self, input_list: List, batch_size=None, **params):
         if isinstance(input_list, str):
             input_list = [input_list]
@@ -128,15 +127,17 @@ class EncoderDecoderGenerator(BaseGenerator):
                 ).to(self.device)
 
             # TODO: multi-gpu inference
-            if self.fid:
-                if 'max_new_tokens' in generation_params:
-                    max_new_tokens = generation_params.pop('max_new_tokens')
+            import torch
+            with torch.inference_mode():
+                if self.fid:
+                    if 'max_new_tokens' in generation_params:
+                        max_new_tokens = generation_params.pop('max_new_tokens')
+                    else:
+                        max_new_tokens = 32
+
+                    outputs = self.model.generate(**inputs, max_new_tokens=max_new_tokens, pad_token_id=self.tokenizer.pad_token_id, decoder_start_token_id=self.tokenizer.pad_token_id)
                 else:
-                    max_new_tokens = 32
-            
-                outputs = self.model.generate(**inputs, max_new_tokens=max_new_tokens, pad_token_id=self.tokenizer.pad_token_id, decoder_start_token_id=self.tokenizer.pad_token_id)
-            else:
-                outputs = self.model.generate(**inputs, **generation_params)
+                    outputs = self.model.generate(**inputs, **generation_params)
             outputs = self.tokenizer.batch_decode(
                 outputs,
                 skip_special_tokens=True,
@@ -153,9 +154,8 @@ class VLLMGenerator(BaseGenerator):
 
     def __init__(self, config):
         super().__init__(config)
-
+        
         from vllm import LLM
-
         if "gpu_memory_utilization" not in config:
             gpu_memory_utilization = 0.85
         else:
@@ -187,7 +187,6 @@ class VLLMGenerator(BaseGenerator):
             )
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
 
-    @torch.inference_mode(mode=True)
     def generate(
         self,
         input_list: List[str],
@@ -283,6 +282,7 @@ class HFCausalLMGenerator(BaseGenerator):
         return model, tokenizer
 
     def add_new_tokens(self, token_embedding_path, token_name_func=lambda idx: f"[ref{idx+1}]"):
+        import torch
         del self.model
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_path,
@@ -318,7 +318,6 @@ class HFCausalLMGenerator(BaseGenerator):
         self.model.eval()
         self.model.cuda()
 
-    @torch.inference_mode(mode=True)
     def generate(
         self,
         input_list: List[str],
@@ -370,28 +369,30 @@ class HFCausalLMGenerator(BaseGenerator):
         generated_token_ids = []
         generated_token_logits = []
 
+        import torch
         for idx in trange(0, len(input_list), batch_size, desc="Generation process: "):
-            torch.cuda.empty_cache()
-            batched_prompts = input_list[idx : idx + batch_size]
-            inputs = self.tokenizer(
-                batched_prompts,
-                return_tensors="pt",
-                padding=True,
-                truncation=True,
-                max_length=self.max_input_len,
-            ).to(self.model.device)
-            outputs = self.model.generate(
-                **inputs,
-                output_scores=True,
-                return_dict_in_generate=True,
-                **generation_params,
-            )
+            with torch.inference_mode():
+                torch.cuda.empty_cache()
+                batched_prompts = input_list[idx : idx + batch_size]
+                inputs = self.tokenizer(
+                    batched_prompts,
+                    return_tensors="pt",
+                    padding=True,
+                    truncation=True,
+                    max_length=self.max_input_len,
+                ).to(self.model.device)
+                outputs = self.model.generate(
+                    **inputs,
+                    output_scores=True,
+                    return_dict_in_generate=True,
+                    **generation_params,
+                )
 
-            generated_ids = outputs.sequences
-            logits = torch.stack(outputs.scores, dim=1).softmax(-1)
-            generated_ids = generated_ids[:, inputs["input_ids"].shape[-1] :]
-            gen_score = torch.gather(logits, 2, generated_ids[:, :, None]).squeeze(-1).cpu().tolist()
-            scores.extend(gen_score)
+                generated_ids = outputs.sequences
+                logits = torch.stack(outputs.scores, dim=1).softmax(-1)
+                generated_ids = generated_ids[:, inputs["input_ids"].shape[-1] :]
+                gen_score = torch.gather(logits, 2, generated_ids[:, :, None]).squeeze(-1).cpu().tolist()
+                scores.extend(gen_score)
 
             # get additinoal info
             if return_dict:
@@ -477,13 +478,14 @@ class HFCausalLMGenerator(BaseGenerator):
         else:
             return responses
 
-    @torch.inference_mode(mode=True)
+
     def cal_gen_probs(self, prev, next):
+        import torch
         input_ids = self.tokenizer.encode(prev, add_special_tokens=False)
         target_ids = self.tokenizer.encode(next, add_special_tokens=False)
         context_ids = input_ids + target_ids
         context_tensor = torch.tensor([context_ids]).to(self.device)
-        with torch.no_grad():
+        with torch.inference_mode():
             outputs = self.model(context_tensor)
             logits = outputs.logits
             logits = logits[0, len(input_ids) - 1 : len(context_ids) - 1, :]
@@ -505,6 +507,7 @@ class FastChatGenerator(HFCausalLMGenerator):
 
         def get_gpu_memory(max_gpus=None):
             """Get available memory for each GPU."""
+            import torch
             gpu_memory = []
             num_gpus = torch.cuda.device_count() if max_gpus is None else min(max_gpus, torch.cuda.device_count())
             for gpu_id in range(num_gpus):
@@ -525,6 +528,8 @@ class FastChatGenerator(HFCausalLMGenerator):
             else:
                 gpu_memory_utilization = self.config["gpu_memory_utilization"]
             max_gpu_memory = None
+            import torch
+            self.gpu_num = torch.cuda.device_count()
             if self.gpu_num != 1:
                 available_gpu_memory = get_gpu_memory(self.gpu_num)
                 max_gpu_memory = str(int(min(available_gpu_memory) * gpu_memory_utilization)) + "GiB"
