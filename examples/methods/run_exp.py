@@ -556,18 +556,17 @@ def rqrag(args):
     """
     Function to run the RQRAGPipeline.
     """
-    from flashrag.pipeline.active_pipeline import RQRAGPipeline
+    from flashrag.pipeline import RQRAGPipeline
     
     save_note = "rqrag"
-    
+    max_depth = 3
     config_dict = {
         "save_note": save_note,
         "gpu_id": args.gpu_id,
         'framework': 'vllm',
         "dataset_name": args.dataset_name,
         "split": args.split,
-        "retrieval_topk": 5,
-        "max_depth": 3
+        "max_depth": max_depth
     }
 
     config = Config("my_config.yaml", config_dict)
@@ -575,7 +574,7 @@ def rqrag(args):
     all_split = get_dataset(config)
     test_data = all_split[args.split]
     
-    pipeline = RQRAGPipeline(config, max_depth = args.max_depth)
+    pipeline = RQRAGPipeline(config, max_depth = max_depth)
     result = pipeline.run(test_data)
 
 

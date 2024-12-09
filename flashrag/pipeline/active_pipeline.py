@@ -1,5 +1,6 @@
 import re
 from tqdm import tqdm
+from typing import List, Tuple
 import math
 import numpy as np
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
@@ -1049,10 +1050,7 @@ class RQRAGPipeline(BasicPipeline):
         "spaces_between_special_tokens": False,
         "max_tokens": 4096
     }
-    
-    from flashrag.dataset import Dataset, Item
-    from typing import List, Tuple
-    
+
     def __init__(
         self,
         config: dict,
@@ -1074,7 +1072,7 @@ class RQRAGPipeline(BasicPipeline):
         
         # Due to the low effiency of original method, it only supports vllm now.
     
-    def preprocess_eval_data(self, items: List[Item]) -> List[str]:
+    def preprocess_eval_data(self, items: List) -> List[str]:
         eval_examples = []
 
         for item in items:
@@ -1214,7 +1212,7 @@ class RQRAGPipeline(BasicPipeline):
 
         return pred, best_path
 
-    def run(self, dataset: Dataset, do_eval = True):
+    def run(self, dataset, do_eval = True):
         preds = []
         meta_results = []
 
