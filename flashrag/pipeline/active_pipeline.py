@@ -1216,8 +1216,7 @@ class RQRAGPipeline(BasicPipeline):
         preds = []
         meta_results = []
 
-        from tqdm import tqdm
-        for i in tqdm(range(0, len(dataset), self.batch_size)):
+        for i in tqdm(range(0, len(dataset), self.batch_size), position=0, desc='RQRAG Process'):
             batch_items = dataset[i : i + self.batch_size]
             eval_datas = self.preprocess_eval_data(batch_items)
             paths_batch = self.generate_tree_of_thoughts_batch(initial_prompts_batch = eval_datas)

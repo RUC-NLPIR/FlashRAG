@@ -339,7 +339,7 @@ class DenseRetriever(BaseRetriever):
         results = []
         scores = []
 
-        for start_idx in tqdm(range(0, len(query_list), batch_size), desc="Retrieval process: "):
+        for start_idx in range(0, len(query_list), batch_size):
             query_batch = query_list[start_idx : start_idx + batch_size]
             batch_emb = self.encoder.encode(query_batch)
             batch_scores, batch_idxs = self.index.search(batch_emb, k=num)

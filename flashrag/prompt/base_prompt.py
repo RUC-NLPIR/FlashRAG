@@ -23,7 +23,7 @@ class PromptTemplate:
             self.is_chat = False
             if "chat" in model_name or "instruct" in model_name:
                 self.is_chat = True
-            self.tokenizer = None
+            self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path, trust_remote_code=True)
         else:
             self.is_chat = True
             self.enable_chat = True
