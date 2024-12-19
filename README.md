@@ -537,6 +537,7 @@ The index was created using the e5-base-v2 retriever on our uploaded wiki18_100w
 
 FlashRAG is licensed under the [<u>MIT License</u>](./LICENSE).
 
+
 ## :star2: Citation
 Please kindly cite our paper if helps your research:
 ```BibTex
