@@ -393,8 +393,8 @@ class BLEU(BaseMetric):
             pred = [pred]
             golden_answers = [golden_answers]
             score = compute_bleu(
-                reference_corpus=golden_answers_list,
-                translation_corpus=pred_list,
+                reference_corpus=golden_answers,
+                translation_corpus=pred,
                 max_order=self.max_order,
                 smooth=self.smooth,
             )
