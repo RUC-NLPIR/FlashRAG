@@ -16,7 +16,7 @@ extras_require = {
 extras_require['full'] = sum(extras_require.values(), [])
 
 setup(
-    name="flashrag-dev",
+    name="flashrag_dev",
     version=version['__version__'],
     packages=find_packages(),
     url="https://github.com/RUC-NLPIR/FlashRAG",
