@@ -281,7 +281,8 @@ class Retrieval_Precision(BaseMetric):
 
 class Rouge_Score(BaseMetric):
     metric_name = "rouge_score"
-
+    cached_scores = {}
+    
     def __init__(self, config):
         super().__init__(config)
         from rouge import Rouge
@@ -289,6 +290,8 @@ class Rouge_Score(BaseMetric):
         self.scorer = Rouge()
 
     def calculate_rouge(self, pred, golden_answers):
+        if (pred, tuple(golden_answers)) in self.cached_scores:
+            return self.cached_scores[(pred, tuple(golden_answers))]
         output = {}
         for answer in golden_answers:
             scores = self.scorer.get_scores(pred, answer)
@@ -299,6 +302,7 @@ class Rouge_Score(BaseMetric):
         for k, v in output.items():
             output[k] = max(v)
 
+        self.cached_scores[(pred, tuple(golden_answers))] = output
         return output
 
 
@@ -393,8 +397,8 @@ class BLEU(BaseMetric):
             pred = [pred]
             golden_answers = [golden_answers]
             score = compute_bleu(
-                reference_corpus=golden_answers_list,
-                translation_corpus=pred_list,
+                reference_corpus=golden_answers,
+                translation_corpus=pred,
                 max_order=self.max_order,
                 smooth=self.smooth,
             )
