@@ -1062,7 +1062,6 @@ class RQRAGPipeline(BasicPipeline):
     ):
         super().__init__(config, prompt_template)
 
-
         self.generator = generator if generator is not None else get_generator(config)
         self.tokenizer = AutoTokenizer.from_pretrained(config["generator_model_path"], padding_side = "left")
         self.retriever = retriever if retriever is not None else get_retriever(config)
@@ -1164,7 +1163,7 @@ class RQRAGPipeline(BasicPipeline):
                         
                         new_path = {
                             "prompt": input_texts[i] + decoded_output,
-                            "depth": current_path["depth"] + 1,
+                            "depth": current_path["depth"],
                             "done": True,
                             "final_answer": result,
                             "confidence": confidence
