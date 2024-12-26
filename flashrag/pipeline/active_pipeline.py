@@ -190,7 +190,7 @@ class SelfRAGPipeline(BasicPipeline):
                     score_dict = {}
                     for tok, tok_id in self.ret_tokens.items():
                         if tok_id not in all_pred_log_probs[idx][0]:
-                            score_dict[tok] = -100
+                            score_dict[tok] = np.exp(-100)
                         else:
                             prob = all_pred_log_probs[idx][0][tok_id].logprob
                             score_dict[tok] = np.exp(prob)
