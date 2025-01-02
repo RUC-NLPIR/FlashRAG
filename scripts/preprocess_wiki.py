@@ -207,7 +207,7 @@ if __name__ == "__main__":
     elif args.chunk_by == "sentence":
         chunker = chonkie.SentenceChunker(chunk_size=args.chunk_size)
     elif args.chunk_by == "recursive":
-        chunker = chonkie.RecursiveChunker(chunk_size=args.chunk_size)
+        chunker = chonkie.RecursiveChunker(chunk_size=args.chunk_size, min_characters_per_chunk=1)
     elif args.chunk_by == "word":
         chunker = chonkie.WordChunker(chunk_size=args.chunk_size)
     else:
