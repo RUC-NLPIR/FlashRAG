@@ -15,4 +15,3 @@ transformers>=4.40.0
 bm25s[core]==0.2.0
 fschat
 streamlit
-chonkie
