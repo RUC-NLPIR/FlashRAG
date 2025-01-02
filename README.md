@@ -14,10 +14,10 @@
 <p>
 <a href="#wrench-installation">Installation</a> |
 <a href="#sparkles-features">Features</a> |
-<a href="#running-quick-start">Quick-Start</a> |
+<a href="#rocket-quick-start">Quick-Start</a> |
 <a href="#gear-components"> Components</a> |
 <a href="#robot-supporting-methods"> Supporting Methods</a> |
-<a href="#notebook-supporting-datasets"> Supporting Datasets</a> |
+<a href="#notebook-supporting-datasets--document-corpus"> Supporting Datasets</a> |
 <a href="#raised_hands-additional-faqs"> FAQs</a>
 </p>
 
