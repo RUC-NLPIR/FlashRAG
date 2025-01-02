@@ -53,7 +53,7 @@ def cache_manager(func):
                         assert new_query_list[idx] == no_cache_query[no_cache_idx]
                         cache_results = (
                             no_cache_results[no_cache_idx],
-                            no_cache_scores[no_cache_scores],
+                            no_cache_scores[no_cache_idx],
                         )
                         no_cache_idx += 1
 
