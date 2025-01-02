@@ -1,8 +1,12 @@
+"""Chunk documents from a Document Corpus JSONL file.
+
+This script is used to chunk documents from a Document Corpus JSONL file,
+via Chonkie.
+"""
 import argparse
 import json
 from tqdm import tqdm
 import chonkie
-
 
 def load_jsonl(file_path):
     documents = []
