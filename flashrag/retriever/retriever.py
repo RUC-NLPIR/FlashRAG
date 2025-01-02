@@ -266,6 +266,7 @@ class BM25Retriever(BaseRetriever):
             import bm25s
             query_tokens = bm25s.tokenize(query_list, stemmer=self.stemmer)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
+            results, scores = results.tolist(), scores.tolist()
         else:
             assert False, 'Invalid bm25 backend!'
 
