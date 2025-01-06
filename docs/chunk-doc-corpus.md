@@ -7,7 +7,7 @@ Given a JSONL file with the following format:
 ```json
 {
     "id": "doc_id",
-    "content": "document_content"
+    "contents": "document_content"
 }
 ```
 
