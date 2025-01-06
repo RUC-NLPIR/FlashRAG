@@ -26,7 +26,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Chunk documents from a JSONL file.")
     parser.add_argument("--input_path", type=str, required=True, help="Path to input JSONL file")
     parser.add_argument("--output_path", type=str, required=True, help="Path to output JSONL file")
-    parser.add_argument("--chunk_by", default="token", choices=["token", "word", "sentence", "recursive"], 
+    parser.add_argument("--chunk_by", default="token", choices=["token", "word", "sentence", "recursive"],
                         help="Chunking method to use")
     parser.add_argument("--chunk_size", default=512, type=int, help="Size of chunks")
     args = parser.parse_args()
@@ -50,14 +50,17 @@ if __name__ == "__main__":
     # Process and chunk documents
     print("Chunking documents...")
     chunked_documents = []
+    current_chunk_id = 0
     for doc in tqdm(documents):
-        chunks = chunker.chunk(doc['content'])
+        chunks = chunker.chunk(doc['contents'])
         for chunk in chunks:
             chunked_doc = {
-                'id': doc['id'],
-                'content': chunk.text
+                'id': current_chunk_id,
+                'doc_id': doc['id'],
+                'contents': chunk.text
             }
             chunked_documents.append(chunked_doc)
+            current_chunk_id += 1
 
     # Save chunked documents
     print("Saving chunked documents...")
