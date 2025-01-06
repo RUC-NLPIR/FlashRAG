@@ -24,9 +24,9 @@ python chunk_doc_corpus.py --input_path input.jsonl \
 You will get a JSONL file with the following format:
 
 ```jsonl
-{ "id": 0, "doc_id": 0, "contents": ... }
-{ "id": 1, "doc_id": 0, "contents": ... }
-{ "id": 2, "doc_id": 0, "contents": ... }
+{ "id": 0, "doc_id": 0, "title": ..., "contents": ... }
+{ "id": 1, "doc_id": 0, "title": ..., "contents": ... }
+{ "id": 2, "doc_id": 0, "title": ..., "contents": ... }
 ...
 ```
 

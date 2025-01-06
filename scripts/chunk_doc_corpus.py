@@ -52,12 +52,14 @@ if __name__ == "__main__":
     chunked_documents = []
     current_chunk_id = 0
     for doc in tqdm(documents):
-        chunks = chunker.chunk(doc['contents'])
+        title, text = doc['contents'].split('\n', 1)
+        chunks = chunker.chunk(text)
         for chunk in chunks:
             chunked_doc = {
                 'id': current_chunk_id,
                 'doc_id': doc['id'],
-                'contents': chunk.text
+                'contents': chunk.text,
+                'title': title
             }
             chunked_documents.append(chunked_doc)
             current_chunk_id += 1
