@@ -30,7 +30,7 @@ You will get a JSONL file with the following format:
 ...
 ```
 
-**NOTE:** That `doc_id` will be the same as the original document id, and `content` will be the chunked document content in the new JSONL output.
+**NOTE:** That `doc_id` will be the same as the original document id, and `contents` will be the chunked document content in the new JSONL output.
 
 ## Parameters
 
