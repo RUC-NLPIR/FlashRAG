@@ -50,8 +50,10 @@ class Encoder:
 
         else:
             output = self.model(**inputs, return_dict=True)
+            pooler_output = output.get('pooler_output', None)
+            last_hidden_state = output.get('last_hidden_state', None)
             query_emb = pooling(
-                output.pooler_output, output.last_hidden_state, inputs["attention_mask"], self.pooling_method
+                pooler_output, last_hidden_state, inputs["attention_mask"], self.pooling_method
             )
         query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
         query_emb = query_emb.detach().cpu().numpy()
