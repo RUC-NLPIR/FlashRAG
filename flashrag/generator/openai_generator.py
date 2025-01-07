@@ -14,14 +14,10 @@ class OpenaiGenerator:
     """Class for api-based openai models"""
 
     def __init__(self, config):
-        self.model_name = config["generator_model"]
-        self.batch_size = config["generator_batch_size"]
-        self.generation_params = config["generation_params"]
-
-        self.openai_setting = config["openai_setting"]
-        if self.openai_setting["api_key"] is None:
-            self.openai_setting["api_key"] = os.getenv("OPENAI_API_KEY")
-
+        self._config = config
+        self.update_config()
+        
+        # load openai client
         if "api_type" in self.openai_setting and self.openai_setting["api_type"] == "azure":
             del self.openai_setting["api_type"]
             self.client = AsyncAzureOpenAI(**self.openai_setting)
@@ -33,7 +29,31 @@ class OpenaiGenerator:
             print("Error: ", e)
             warnings.warn("This model is not supported by tiktoken. Use gpt-3.5-turbo instead.")
             self.tokenizer = tiktoken.encoding_for_model('gpt-3.5-turbo')
+    @property
+    def config(self):
+        return self._config
 
+    @config.setter
+    def config(self, config_data):
+        self._config = config_data
+        self.update_config()
+    
+    def update_config(self):
+        self.update_base_setting()
+        self.update_additional_setting()
+
+    def update_base_setting(self):
+        self.model_name = self._config["generator_model"]
+        self.batch_size = self._config["generator_batch_size"]
+        self.generation_params = self._config["generation_params"]
+
+        self.openai_setting = self._config["openai_setting"]
+        if self.openai_setting["api_key"] is None:
+            self.openai_setting["api_key"] = os.getenv("OPENAI_API_KEY")
+
+    def update_additional_setting(self):
+        pass
+    
     async def get_response(self, input: List, **params):
         response = await self.client.chat.completions.create(model=self.model_name, messages=input, **params)
         return response.choices[0]

@@ -129,7 +129,7 @@ class SequentialPipeline(BasicPipeline):
 
 
 class ConditionalPipeline(BasicPipeline):
-    def __init__(self, config, prompt_template=None):
+    def __init__(self, config, prompt_template=None, retriever=None, generator=None):
         """
         inference stage:
             query -> judger -> sequential pipeline or naive generate
@@ -137,8 +137,12 @@ class ConditionalPipeline(BasicPipeline):
 
         super().__init__(config, prompt_template)
         self.judger = get_judger(config)
-        self.generator = get_generator(config)
-        self.retriever = get_retriever(config)
+        if generator is None:
+            self.generator = get_generator(config)
+        if retriever is None:
+            self.retriever = get_retriever(config)
+        self.generator = generator
+        self.retriever = retriever
 
         self.sequential_pipeline = SequentialPipeline(
             config, prompt_template, retriever=self.retriever, generator=self.generator
@@ -179,13 +183,17 @@ class AdaptivePipeline(BasicPipeline):
         norag_template=None,
         single_hop_prompt_template=None,
         multi_hop_prompt_template=None,
+        retriever = None,
+        generator = None
     ):
         super().__init__(config)
         # load adaptive classifier as judger
         self.judger = get_judger(config)
 
-        generator = get_generator(config)
-        retriever = get_retriever(config)
+        if generator is None:
+            generator = get_generator(config)
+        if retriever is None:
+            retriever = get_retriever(config)
         self.generator = generator
         self.retriever = retriever
 

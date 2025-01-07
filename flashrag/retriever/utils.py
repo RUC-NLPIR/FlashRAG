@@ -8,7 +8,8 @@ import re
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 
-def judge_zh(input_str):
+def judge_zh(input_str: str):
+    assert isinstance(input_str, str), input_str
     if len(input_str) == 0:
         return False
     return bool(re.search(r'[\u4e00-\u9fff]', input_str))

@@ -9,7 +9,11 @@ class MMPromptTemplate:
     def get_string(self, item):
         question = item.question if item.question is not None else item.text
         question_image = item.image
-        retrieval_result = item.retrieval_result
+        # retrieval_result = item.retrieval_result
+        try:
+            retrieval_result = item.retrieval_result
+        except:
+            retrieval_result = []
 
         messages = []
         if self.system_prompt is not None:

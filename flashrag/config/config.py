@@ -23,7 +23,8 @@ class Config:
 
         self._init_device()
         self._set_seed()
-        self._prepare_dir()
+        if not self.final_config.get('disable_save', False):
+            self._prepare_dir()
 
     def _build_yaml_loader(self):
         loader = yaml.FullLoader
@@ -238,7 +239,7 @@ class Config:
         # save config parameters
         config_save_path = os.path.join(self.final_config["save_dir"], "config.yaml")
         with open(config_save_path, "w") as f:
-            yaml.dump(self.final_config, f)
+            yaml.dump(self.final_config, f, indent=4, sort_keys=False)
 
     def _set_seed(self):
         import torch

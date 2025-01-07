@@ -19,15 +19,33 @@ class BaseGenerator:
     """`BaseGenerator` is a base object of Generator model."""
 
     def __init__(self, config):
-        self.model_name = config["generator_model"]
-        self.model_path = config["generator_model_path"]
+        self._config = config
+        self.update_config()
 
-        self.max_input_len = config["generator_max_input_len"]
-        self.batch_size = config["generator_batch_size"]
-        self.device = config["device"]
+    @property
+    def config(self):
+        return self._config
+
+    @config.setter
+    def config(self, config_data):
+        self._config = config_data
+        self.update_config()
+    
+    def update_config(self):
+        self.update_base_setting()
+        self.update_additional_setting()
+    def update_base_setting(self):
+        self.model_name = self._config["generator_model"]
+        self.model_path = self._config["generator_model_path"]
+
+        self.max_input_len = self._config["generator_max_input_len"]
+        self.batch_size = self._config["generator_batch_size"]
+        self.device = self._config["device"]
         self.gpu_num = torch.cuda.device_count()
-        self.config = config
-        self.generation_params = config["generation_params"]
+        self.generation_params = self._config["generation_params"]
+    
+    def update_additional_setting(self):
+        pass
 
     def generate(self, input_list: list) -> List[str]:
         """Get responses from the generater.
@@ -46,7 +64,6 @@ class EncoderDecoderGenerator(BaseGenerator):
 
     def __init__(self, config):
         super().__init__(config)
-        self.fid = config["use_fid"]
         model_config = AutoConfig.from_pretrained(self.model_path)
         arch = model_config.architectures[0].lower()
         if "t5" in arch:
@@ -63,6 +80,8 @@ class EncoderDecoderGenerator(BaseGenerator):
         self.model.cuda()
         self.model.eval()
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+    def update_additional_setting(self):
+        self.fid = self._config["use_fid"]
 
     def encode_passages(self, batch_text_passages: List[List[str]]):
         passage_ids, passage_masks = [], []
@@ -148,37 +167,40 @@ class VLLMGenerator(BaseGenerator):
         super().__init__(config)
 
         from vllm import LLM
-
-        if "gpu_memory_utilization" not in config:
-            gpu_memory_utilization = 0.85
-        else:
-            gpu_memory_utilization = config["gpu_memory_utilization"]
-        if self.gpu_num != 1 and self.gpu_num % 2 != 0:
-            tensor_parallel_size = self.gpu_num - 1
-        else:
-            tensor_parallel_size = self.gpu_num
-
-        self.lora_path = None if "generator_lora_path" not in config else config["generator_lora_path"]
-        self.use_lora = False
-        if self.lora_path is not None:
-            self.use_lora = True
         if self.use_lora:
             self.model = LLM(
                 self.model_path,
-                tensor_parallel_size=tensor_parallel_size,
-                gpu_memory_utilization=gpu_memory_utilization,
-                enable_lora=True,
-                max_lora_rank=64,
-                max_logprobs=32016,
+                tensor_parallel_size = self.tensor_parallel_size,
+                gpu_memory_utilization = self.gpu_memory_utilization,
+                enable_lora = True,
+                max_lora_rank = 64,
+                max_logprobs = 32016,
+                max_model_len = self.max_model_len
             )
         else:
             self.model = LLM(
                 self.model_path,
-                tensor_parallel_size=tensor_parallel_size,
-                gpu_memory_utilization=gpu_memory_utilization,
-                max_logprobs=32016,
+                tensor_parallel_size = self.tensor_parallel_size,
+                gpu_memory_utilization = self.gpu_memory_utilization,
+                max_logprobs = 32016,
+                max_model_len = self.max_model_len
             )
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
+    def update_additional_setting(self):
+        if "gpu_memory_utilization" not in self._config:
+            self.gpu_memory_utilization = 0.85
+        else:
+            self.gpu_memory_utilization = self._config["gpu_memory_utilization"]
+        if self.gpu_num != 1 and self.gpu_num % 2 != 0:
+            self.tensor_parallel_size = self.gpu_num - 1
+        else:
+            self.tensor_parallel_size = self.gpu_num
+
+        self.lora_path = None if "generator_lora_path" not in self._config else self._config["generator_lora_path"]
+        self.use_lora = False
+        if self.lora_path is not None:
+            self.use_lora = True
+        self.max_model_len = self._config['generator_max_input_len']
 
     @torch.inference_mode(mode=True)
     def generate(
@@ -199,7 +221,7 @@ class VLLMGenerator(BaseGenerator):
             do_sample_flag = generation_params.pop("do_sample")
             if not do_sample_flag:
                 generation_params["temperature"] = 0
-        generation_params["seed"] = self.config["seed"]
+        generation_params["seed"] = self._config["seed"]
 
         # handle param conflict
         generation_params = resolve_max_tokens(params, generation_params, prioritize_new_tokens=False)
@@ -248,13 +270,14 @@ class HFCausalLMGenerator(BaseGenerator):
 
     def __init__(self, config, model=None):
         super().__init__(config)
-        self.config = config
-        lora_path = None if "generator_lora_path" not in config else config["generator_lora_path"]
         self.model, self.tokenizer = self._load_model(model=model)
-        self.use_lora = False
-        if lora_path is not None:
+        if self.lora_path is not None:
             self.use_lora = True
-            self.model.load_adapter(lora_path)
+            self.model.load_adapter(self.lora_path)
+
+    def update_additional_setting(self):
+        self.lora_path = None if "generator_lora_path" not in self._config else self._config["generator_lora_path"]
+        self.use_lora = False
 
     def _load_model(self, model=None):
         r"""Load model and tokenizer for generator."""
@@ -496,11 +519,10 @@ class FastChatGenerator(HFCausalLMGenerator):
     def _load_model(self, model=None):
         r"""Load model and tokenizer for generator."""
 
-        def get_gpu_memory(max_gpus=None):
+        def get_gpu_memory():
             """Get available memory for each GPU."""
             gpu_memory = []
-            num_gpus = torch.cuda.device_count() if max_gpus is None else min(max_gpus, torch.cuda.device_count())
-            for gpu_id in range(num_gpus):
+            for gpu_id in range(self.gpu_num):
                 with torch.cuda.device(gpu_id):
                     device = torch.cuda.current_device()
                     gpu_properties = torch.cuda.get_device_properties(device)
@@ -513,13 +535,13 @@ class FastChatGenerator(HFCausalLMGenerator):
         if model is None:
             from fastchat.model import load_model
 
-            if "gpu_memory_utilization" not in self.config:
+            if "gpu_memory_utilization" not in self._config:
                 gpu_memory_utilization = 0.85
             else:
-                gpu_memory_utilization = self.config["gpu_memory_utilization"]
+                gpu_memory_utilization = self._config["gpu_memory_utilization"]
             max_gpu_memory = None
             if self.gpu_num != 1:
-                available_gpu_memory = get_gpu_memory(self.gpu_num)
+                available_gpu_memory = get_gpu_memory()
                 max_gpu_memory = str(int(min(available_gpu_memory) * gpu_memory_utilization)) + "GiB"
 
             model, tokenizer = load_model(

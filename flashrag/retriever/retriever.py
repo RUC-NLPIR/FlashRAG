@@ -114,29 +114,48 @@ class BaseRetriever:
     """Base object for all retrievers."""
 
     def __init__(self, config):
-        self.config = config
-        self.retrieval_method = config["retrieval_method"]
-        self.topk = config["retrieval_topk"]
+        self._config = config
+        self.update_config()
+    
+    @property
+    def config(self):
+        return self._config
 
-        self.index_path = config["index_path"]
-        self.corpus_path = config["corpus_path"]
+    @config.setter
+    def config(self, config_data):
+        self._config = config_data
+        self.update_config()
+    
+    def update_config(self):
+        self.update_base_setting()
+        self.update_additional_setting()
+    
+    def update_base_setting(self):
+        self.retrieval_method = self._config["retrieval_method"]
+        self.topk = self._config["retrieval_topk"]
 
-        self.save_cache = config["save_retrieval_cache"]
-        self.use_cache = config["use_retrieval_cache"]
-        self.cache_path = config["retrieval_cache_path"]
+        self.index_path = self._config["index_path"]
+        self.corpus_path = self._config["corpus_path"]
 
-        self.use_reranker = config["use_reranker"]
+        self.save_cache = self._config["save_retrieval_cache"]
+        self.use_cache = self._config["use_retrieval_cache"]
+        self.cache_path = self._config["retrieval_cache_path"]
+
+        self.use_reranker = self._config["use_reranker"]
         if self.use_reranker:
-            self.reranker = get_reranker(config)
+            self.reranker = get_reranker(self._config)
+        else:
+            self.reranker = None
 
         if self.save_cache:
-            self.cache_save_path = os.path.join(config["save_dir"], "retrieval_cache.json")
+            self.cache_save_path = os.path.join(self._config["save_dir"], "retrieval_cache.json")
             self.cache = {}
         if self.use_cache:
             assert self.cache_path is not None
             with open(self.cache_path, "r") as f:
                 self.cache = json.load(f)
-
+    def update_additional_setting(self):
+        pass
     def _save_cache(self):
         self.cache = convert_numpy(self.cache)
 
@@ -201,8 +220,11 @@ class BM25Retriever(BaseTextRetriever):
 
     def __init__(self, config, corpus=None):
         super().__init__(config)
-        self.backend = config["bm25_backend"]
-
+        self.load_model_corpus(corpus)
+    def update_additional_setting(self):
+        self.backend = self._config["bm25_backend"]
+    
+    def load_model_corpus(self, corpus):
         if self.backend == "pyserini":
             # Warning: the method based on pyserini will be deprecated
             from pyserini.search.lucene import LuceneSearcher
@@ -313,39 +335,56 @@ class DenseRetriever(BaseTextRetriever):
 
     def __init__(self, config: dict, corpus=None):
         super().__init__(config)
+        
+        self.load_corpus(corpus)
+        self.load_index()
+        self.load_model()
+    
+    def load_corpus(self, corpus):
+        if corpus is None:
+            self.corpus = load_corpus(self.corpus_path)
+        else:
+            self.corpus = corpus
+    
+    def load_index(self):
         if self.index_path is None or not os.path.exists(self.index_path):
             raise Warning(f"Index file {self.index_path} does not exist!")
         self.index = faiss.read_index(self.index_path)
-        if config["faiss_gpu"]:
+        if self.use_faiss_gpu:
             co = faiss.GpuMultipleClonerOptions()
             co.useFloat16 = True
             co.shard = True
             self.index = faiss.index_cpu_to_all_gpus(self.index, co=co)
 
-        if corpus is None:
-            self.corpus = load_corpus(self.corpus_path)
-        else:
-            self.corpus = corpus
-        self.topk = config["retrieval_topk"]
-        self.batch_size = config["retrieval_batch_size"]
-        self.instruction = config["instruction"]
+    
+    def update_additional_setting(self):
+        self.query_max_length = self._config["retrieval_query_max_length"]
+        self.pooling_method = self._config['retrieval_pooling_method']
+        self.use_fp16 = self._config['retrieval_use_fp16']
+        self.batch_size = self._config["retrieval_batch_size"]
+        self.instruction = self._config["instruction"]
 
-        if config["use_sentence_transformer"]:
+        self.retreival_model_path = self._config['retrieval_model_path']
+        self.use_st = self._config["use_sentence_transformer"]
+        self.use_faiss_gpu = self._config['faiss_gpu']
+
+    def load_model(self):
+        if self.use_st:
             self.encoder = STEncoder(
-                model_name=self.retrieval_method,
-                model_path=config["retrieval_model_path"],
-                max_length=config["retrieval_query_max_length"],
-                use_fp16=config["retrieval_use_fp16"],
-                instruction=self.instruction,
+                model_name = self.retrieval_method,
+                model_path = self._config["retrieval_model_path"],
+                max_length = self.query_max_length,
+                use_fp16 = self.use_fp16,
+                instruction = self.instruction,
             )
         else:
             self.encoder = Encoder(
-                model_name=self.retrieval_method,
-                model_path=config["retrieval_model_path"],
-                pooling_method=config["retrieval_pooling_method"],
-                max_length=config["retrieval_query_max_length"],
-                use_fp16=config["retrieval_use_fp16"],
-                instruction=self.instruction,
+                model_name = self.retrieval_method,
+                model_path = self.retreival_model_path,
+                pooling_method = self.pooling_method,
+                max_length = self.query_max_length,
+                use_fp16 = self.use_fp16,
+                instruction = self.instruction,
             )
 
     def _search(self, query: str, num: int = None, return_score=False):
@@ -544,6 +583,7 @@ class MultiRetrieverRouter:
                 try:
                     model_config = AutoConfig.from_pretrained(retrieval_model_path)
                     arch = model_config.architectures[0]
+                    print("arch: ",arch)
                     if "clip" in arch.lower():
                         retriever = MultiModalRetriever(retriever_config, corpus)
                     else:

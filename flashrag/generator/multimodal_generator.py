@@ -101,8 +101,10 @@ class Qwen2VLInferenceEngine(BaseInferenceEngine):
 
         from qwen_vl_utils import process_vision_info
         texts = [self.processor.apply_chat_template(messages, add_generation_prompt=True, tokenize=False) for messages in input_list]
-        image_inputs, video_inputs = process_vision_info(input_list)
+        image_inputs, video_inputs = process_vision_info(input_list)    
         inputs = self.processor(text=texts, images=image_inputs, videos=video_inputs, padding=True, return_tensors="pt").to(self.model.device)
+        # print(inputs)
+        # print(inputs['input_ids'].shape,inputs['attention_mask'].shape,inputs['pixel_values'].shape,inputs['image_grid_thw'].shape)
         outputs = self.model.generate(
             **inputs,
             eos_token_id=self.tokenizer.eos_token_id,
