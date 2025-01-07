@@ -41,6 +41,9 @@ def load_model(model_path: str, use_fp16: bool = False):
 
 
 def pooling(pooler_output, last_hidden_state, attention_mask=None, pooling_method="mean"):
+    if last_hidden_state is None and pooling_method in ['mean', 'cls']:
+        warnings.warn('last_hidden_state is None, using pooler_output instead.')
+        pooling_method = 'pooler'
     if pooling_method == "mean":
         last_hidden = last_hidden_state.masked_fill(~attention_mask[..., None].bool(), 0.0)
         return last_hidden.sum(dim=1) / attention_mask.sum(dim=1)[..., None]
