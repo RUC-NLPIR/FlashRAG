@@ -7,6 +7,21 @@ import datasets
 import re
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
+def convert_numpy(obj: Union[Dict, list, np.ndarray, np.generic]) -> Any:
+    """Recursively convert numpy objects in nested dictionaries or lists to native Python types."""
+    if isinstance(obj, dict):
+        return {k: convert_numpy(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy(i) for i in obj]
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()  # Convert numpy arrays to lists
+    elif isinstance(obj, (np.integer, np.floating)):
+        return obj.item()  # Convert numpy scalars to native Python scalars
+    elif isinstance(obj, np.float32):
+        return float(obj)
+    else:
+        return obj  # Return the object as-is if it's neither a dict, list, nor numpy type
+
 
 def judge_zh(input_str: str):
     assert isinstance(input_str, str), input_str
@@ -44,6 +59,7 @@ def pooling(pooler_output, last_hidden_state, attention_mask=None, pooling_metho
     if last_hidden_state is None and pooling_method in ['mean', 'cls']:
         warnings.warn('last_hidden_state is None, using pooler_output instead.')
         pooling_method = 'pooler'
+
     if pooling_method == "mean":
         last_hidden = last_hidden_state.masked_fill(~attention_mask[..., None].bool(), 0.0)
         return last_hidden.sum(dim=1) / attention_mask.sum(dim=1)[..., None]

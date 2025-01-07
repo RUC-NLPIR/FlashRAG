@@ -15,7 +15,7 @@ model2pooling:
   bge: "cls"
   contriever: "mean"
   jina: "mean"
-  dpr: cls
+  dpr: "pooler"
 
 # Indexes path for retrieval models
 method2index:

@@ -186,9 +186,9 @@ class Dataset:
         """Save the dataset into the original format."""
 
         save_data = [item.to_dict() for item in self.data]
-
         with open(save_path, "w", encoding="utf-8") as f:
             json.dump(save_data, f, indent=4, ensure_ascii=False)
+
 
     def __str__(self) -> str:
         """Return a string representation of the dataset with a summary of items."""

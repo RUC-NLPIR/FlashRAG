@@ -22,7 +22,7 @@ jobs:
     
     environment:
       name: pypi
-      url: https://pypi.org/p/flashrag-dev
+      url: https://pypi.org/p/flashrag_dev
     
     steps:
     - uses: actions/checkout@v3

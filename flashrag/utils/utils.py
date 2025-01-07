@@ -39,7 +39,7 @@ def get_dataset(config):
 
 def get_generator(config, **params):
     """Automatically select generator class based on config."""
-    
+
     if config['framework'] == 'openai':
         return getattr(importlib.import_module("flashrag.generator"), "OpenaiGenerator")(config, **params)
     

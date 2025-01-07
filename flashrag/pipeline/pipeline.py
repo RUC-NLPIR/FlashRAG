@@ -104,11 +104,11 @@ class SequentialPipeline(BasicPipeline):
                 ]
 
         else:
-            input_prompts = [
-                self.prompt_template.get_string(question=q, retrieval_result=r)
-                for q, r in zip(dataset.question, dataset.retrieval_result)
-            ]
-        dataset.update_output("prompt", input_prompts)
+            if not self.use_fid:
+                input_prompts = [
+                    self.prompt_template.get_string(question=q, retrieval_result=r)
+                    for q, r in zip(dataset.question, dataset.retrieval_result)
+                ]
 
         if self.use_fid:
             print("Use FiD generation")
@@ -116,7 +116,9 @@ class SequentialPipeline(BasicPipeline):
             for item in dataset:
                 q = item.question
                 docs = item.retrieval_result
-                input_prompts.append([q + " " + doc for doc in docs])
+                input_prompts.append([q + " " + doc['contents'] for doc in docs])
+        dataset.update_output("prompt", input_prompts)
+
         # delete used refiner to release memory
         if self.refiner:
             del self.refiner
@@ -136,6 +138,7 @@ class ConditionalPipeline(BasicPipeline):
         """
 
         super().__init__(config, prompt_template)
+
         self.judger = get_judger(config)
         if generator is None:
             self.generator = get_generator(config)
@@ -194,6 +197,7 @@ class AdaptivePipeline(BasicPipeline):
             generator = get_generator(config)
         if retriever is None:
             retriever = get_retriever(config)
+
         self.generator = generator
         self.retriever = retriever
 

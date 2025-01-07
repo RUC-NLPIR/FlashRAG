@@ -21,7 +21,6 @@ def convert_numpy(data: Any) -> Any:
     else:
         return data
 
-
 def filter_dataset(dataset: Dataset, filter_func=None):
     if filter_func is None:
         return dataset

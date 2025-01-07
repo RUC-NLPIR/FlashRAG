@@ -1,5 +1,6 @@
 import re
 import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import yaml
 import random
 import datetime
@@ -103,13 +104,19 @@ class Config:
         gpu_id = self.final_config["gpu_id"]
         if gpu_id is not None:
             os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
+        try:
+            # import pynvml 
+            # pynvml.nvmlInit()
+            # gpu_num = pynvml.nvmlDeviceGetCount()
             import torch
-
-            self.final_config["device"] = torch.device("cuda")
+            gpu_num = torch.cuda.device_count()
+        except:
+            gpu_num = 0
+        self.final_config['gpu_num'] = gpu_num
+        if gpu_num > 0:
+            self.final_config["device"] = "cuda"
         else:
-            import torch
-
-            self.final_config["device"] = torch.device("cpu")
+            self.final_config['device'] = 'cpu'
 
     def _set_additional_key(self):
         def set_pooling_method(method, model2pooling):

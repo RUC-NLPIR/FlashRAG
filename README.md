@@ -14,10 +14,10 @@
 <p>
 <a href="#wrench-installation">Installation</a> |
 <a href="#sparkles-features">Features</a> |
-<a href="#running-quick-start">Quick-Start</a> |
+<a href="#rocket-quick-start">Quick-Start</a> |
 <a href="#gear-components"> Components</a> |
 <a href="#robot-supporting-methods"> Supporting Methods</a> |
-<a href="#notebook-supporting-datasets"> Supporting Datasets</a> |
+<a href="#notebook-supporting-datasets--document-corpus"> Supporting Datasets</a> |
 <a href="#raised_hands-additional-faqs"> FAQs</a>
 </p>
 
@@ -59,6 +59,9 @@ FlashRAG is still under development and there are many issues and room for impro
 
 
 ## :page_with_curl: Changelog
+
+[25/01/07] We have integrated a very flexible and lightweight corpus chunking library [**Chunkie**](https://github.com/chonkie-ai/chonkie?tab=readme-ov-file#usage), which supports various custom chunking methods (tokens, sentences, semantic, etc.). Use it in [<u>chunking doc corpus</u>](docs/chunk-doc-corpus.md). 
+
 [24/10/21] We have released a version based on the Paddle framework that supports Chinese hardware platforms. Please refer to [FlashRAG Paddle](https://github.com/RUC-NLPIR/FlashRAG-Paddle) for details.
 
 [24/10/13] A new in-domain dataset and corpus - [DomainRAG](https://arxiv.org/pdf/2406.05654) have been added to the dataset. The dataset is based on the internal enrollment data of Renmin University of China, covering seven types of tasks, which can be used for conducting domain-specific RAG testing.
@@ -67,16 +70,18 @@ FlashRAG is still under development and there are many issues and room for impro
 
 [24/09/18] Due to the complexity and limitations of installing Pyserini in certain environments, we have introduced a lightweight `BM25s` package as an alternative (faster and easier to use). The retriever based on Pyserini will be deprecated in future versions. To use retriever with `bm25s`, just set `bm25_backend` to `bm25s` in config.
 
+
 [24/09/09] We add support for a new method [<u>Adaptive-RAG</u>](https://aclanthology.org/2024.naacl-long.389.pdf), which can automatically select the RAG process to execute based on the type of query. See it result in [<u>result table</u>](#robot-supporting-methods).
 
 [24/08/02] We add support for a new method [<u>Spring</u>](https://arxiv.org/abs/2405.19670), significantly improve the performance of LLM by adding only a few token embeddings. See it result in [<u>result table</u>](#robot-supporting-methods).
+
+<details>
+<summary>Show more</summary>
 
 [24/07/17] Due to some unknown issues with HuggingFace, our original dataset link has been invalid. We have updated it. Please check the [new link](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/) if you encounter any problems.
 
 [24/07/06] We add support for a new method: [<u>Trace</u>](https://arxiv.org/abs/2406.11460), which refine text by constructing a knowledge graph. See it [<u>results</u>](#robot-supporting-methods) and [<u>details</u>](./docs/baseline_details.md).
 
-<details>
-<summary>Show more</summary>
 
 [24/06/19] We add support for a new method: [<u>IRCoT</u>](https://arxiv.org/abs/2212.10509), and update the [<u>result table</u>](#robot-supporting-methods).
 
@@ -536,6 +541,7 @@ The index was created using the e5-base-v2 retriever on our uploaded wiki18_100w
 ## :bookmark: License
 
 FlashRAG is licensed under the [<u>MIT License</u>](./LICENSE).
+
 
 ## :star2: Citation
 Please kindly cite our paper if helps your research:

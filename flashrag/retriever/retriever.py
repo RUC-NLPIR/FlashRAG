@@ -163,7 +163,6 @@ class BaseRetriever:
             if isinstance(obj, np.float32):
                 return float(obj)
             raise TypeError(f"Type {type(obj)} not serializable")
-
         with open(self.cache_save_path, "w") as f:
             json.dump(self.cache, f, indent=4, default=custom_serializer)
 
@@ -521,6 +520,7 @@ class MultiModalRetriever(BaseRetriever):
             query_batch = query[start_idx : start_idx + batch_size]
             batch_emb = self.encoder.encode(query_batch, modal=query_modal)
             batch_scores, batch_idxs = self.index_dict[target_modal].search(batch_emb, k=num)
+
             batch_scores = batch_scores.tolist()
             batch_idxs = batch_idxs.tolist()
 
