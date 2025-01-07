@@ -58,8 +58,8 @@ if __name__ == "__main__":
             chunked_doc = {
                 'id': current_chunk_id,
                 'doc_id': doc['id'],
-                'contents': chunk.text,
-                'title': title
+                'title': title,
+                'contents': title + "\n" + chunk.text,
             }
             chunked_documents.append(chunked_doc)
             current_chunk_id += 1
