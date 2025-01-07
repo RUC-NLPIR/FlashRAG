@@ -40,7 +40,7 @@ class BaseGenerator:
         self.max_input_len = self._config["generator_max_input_len"]
         self.batch_size = self._config["generator_batch_size"]
         self.device = self._config["device"]
-        self.gpu_num = config['gpu_num']
+        self.gpu_num = self._config['gpu_num']
         self.generation_params = self._config["generation_params"]
     
     def update_additional_setting(self):
