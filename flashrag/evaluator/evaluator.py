@@ -55,8 +55,7 @@ class Evaluator:
                 for metric_score, item in zip(metric_scores, data):
                     item.update_evaluation_score(metric, metric_score)
             except Exception as e:
-                print(f"Error in {metric}!")
-                print(e)
+                print(f"Error in {metric}: {e}")
                 continue
 
         if self.save_metric_flag:

@@ -1,4 +1,5 @@
 import os
+import re
 import faiss
 import json
 import warnings
@@ -10,7 +11,7 @@ import argparse
 import datasets
 import torch
 from tqdm import tqdm
-from flashrag.retriever.utils import load_model, load_corpus, pooling, set_default_instruction
+from flashrag.retriever.utils import load_model, load_corpus, pooling, set_default_instruction, judge_zh
 
 
 class Index_Builder:
@@ -32,7 +33,8 @@ class Index_Builder:
         save_embedding=False,
         faiss_gpu=False,
         use_sentence_transformer=False,
-        bm25_backend='bm25s'
+        bm25_backend="bm25s",
+        index_modal="all",
     ):
 
         self.retrieval_method = retrieval_method.lower()
@@ -49,19 +51,22 @@ class Index_Builder:
         self.faiss_gpu = faiss_gpu
         self.use_sentence_transformer = use_sentence_transformer
         self.bm25_backend = bm25_backend
+        self.index_modal = index_modal
 
-        # set instruction for encode
-        if self.instruction is not None:
-            self.instruction = self.instruction.strip() + " "
-            print("Set instruction for encoding:", self.instruction)
-        else:
-            self.instruction = set_default_instruction(self.retrieval_method, is_query=False)
-            if self.instruction == "":
-                warnings.warn("Instruction is not set!")
-            else:
-                warnings.warn(f"Instruction is set to default: {self.instruction}")
+        # judge if the retrieval model is clip
+        self.is_clip = ("clip" in self.retrieval_method) or (self.model_path is not None and "clip" in self.model_path)
+        if not self.is_clip:
+            try:
+                with open(os.path.join(self.model_path, "config.json")) as f:
+                    config = json.load(f)
+                model_type = config.get("architectures", [None])[0]
+                self.is_clip = "clip" in model_type.lower()
+            except:
+                pass
+        if self.is_clip:
+            print("Use clip model!")
 
-        #. config pooling method
+        # config pooling method
         if pooling_method is None:
             try:
                 # read pooling method from 1_Pooling/config.json
@@ -69,21 +74,21 @@ class Index_Builder:
                 for k, v in pooling_config.items():
                     if k.startswith("pooling_mode") and v == True:
                         pooling_method = k.split("pooling_mode_")[-1]
-                        if pooling_method == 'mean_tokens':
-                            pooling_method = 'mean'
-                        elif pooling_method == 'cls_token':
-                            pooling_method = 'cls'
+                        if pooling_method == "mean_tokens":
+                            pooling_method = "mean"
+                        elif pooling_method == "cls_token":
+                            pooling_method = "cls"
                         else:
                             # raise warning: not implemented pooling method
                             warnings.warn(f"Pooling method {pooling_method} is not implemented.", UserWarning)
-                            pooling_method = 'mean'
+                            pooling_method = "mean"
                         break
             except:
                 print(f"Pooling method not found in {self.model_path}, use default pooling method (mean).")
                 # use default pooling method
-                pooling_method = 'mean'
+                pooling_method = "mean"
         else:
-            if pooling_method not in ['mean', 'cls', 'pooler']:
+            if pooling_method not in ["mean", "cls", "pooler"]:
                 raise ValueError(f"Invalid pooling method {pooling_method}.")
         self.pooling_method = pooling_method
 
@@ -95,8 +100,6 @@ class Index_Builder:
         else:
             if not self._check_dir(self.save_dir):
                 warnings.warn("Some files already exists in save dir and may be overwritten.", UserWarning)
-
-        self.index_save_path = os.path.join(self.save_dir, f"{self.retrieval_method}_{self.faiss_type}.index")
 
         self.embedding_save_path = os.path.join(self.save_dir, f"emb_{self.retrieval_method}.memmap")
 
@@ -118,9 +121,9 @@ class Index_Builder:
     def build_index(self):
         r"""Constructing different indexes based on selective retrieval method."""
         if self.retrieval_method == "bm25":
-            if self.bm25_backend == 'pyserini':
+            if self.bm25_backend == "pyserini":
                 self.build_bm25_index_pyserini()
-            elif self.bm25_backend == 'bm25s':
+            elif self.bm25_backend == "bm25s":
                 self.build_bm25_index_bm25s()
             else:
                 assert False, "Invalid bm25 backend!"
@@ -138,8 +141,26 @@ class Index_Builder:
         os.makedirs(self.save_dir, exist_ok=True)
         temp_dir = self.save_dir + "/temp"
         temp_file_path = temp_dir + "/temp.jsonl"
-        os.makedirs(temp_dir)
-        shutil.copyfile(self.corpus_path, temp_file_path)
+        os.makedirs(temp_dir, exist_ok=True)
+
+        if self.corpus_path.endswith(".jsonl"):
+            shutil.copyfile(self.corpus_path, temp_file_path)
+            # check if the language is chinese
+            with open(self.corpus_path, 'r', encoding='utf-8') as file:
+                first_item = json.loads(file.readline()) 
+                contents = first_item.get("contents", "")  # 获取 contents 字段
+                zh_flag = judge_zh(contents)
+        elif self.corpus_path.endswith(".parquet"):
+            corpus = datasets.load_dataset('parquet', data_files=self.corpus_path, split="train")
+            new_corpus = [{'id': idx, 'contents': text} for idx, text in enumerate(corpus['text'])]
+            contents = new_corpus[0]['contents']
+            zh_flag = judge_zh(contents)
+            with open(temp_file_path, 'w', encoding='utf-8') as f:
+                for item in new_corpus:
+                    json.dump(item, f, ensure_ascii=False)
+                    f.write('\n')
+        else:
+            raise NotImplementedError
 
         print("Start building bm25 index...")
         pyserini_args = [
@@ -155,6 +176,11 @@ class Index_Builder:
             "1",
         ]
 
+        if zh_flag:
+            print("Use chinese bm25 mode")
+            pyserini_args.append("--language")
+            pyserini_args.append("zh")
+
         subprocess.run(["python", "-m", "pyserini.index.lucene"] + pyserini_args)
 
         shutil.rmtree(temp_dir)
@@ -166,22 +192,26 @@ class Index_Builder:
 
         import bm25s
         import Stemmer
-        
-        self.save_dir = os.path.join(self.save_dir, 'bm25')
+
+        self.save_dir = os.path.join(self.save_dir, "bm25")
         os.makedirs(self.save_dir, exist_ok=True)
 
-        corpus = datasets.load_dataset("json", data_files=self.corpus_path, split="train")
-        corpus_text = corpus['contents']
-        stemmer = Stemmer.Stemmer('english')
-        tokenizer = bm25s.tokenization.Tokenizer(stemmer=stemmer)
+        corpus = load_corpus(self.corpus_path)
+        # TODO: BM25s not support chinese well
+        is_zh = judge_zh(corpus[0]['contents'])
+        if is_zh:
+            tokenizer = bm25s.tokenization.Tokenizer(stopwords='zh')
+        else:
+            stemmer = Stemmer.Stemmer("english")
+            tokenizer = bm25s.tokenization.Tokenizer(stopwords='en', stemmer=stemmer)
+            
+        corpus_text = corpus["contents"]
         corpus_tokens = tokenizer.tokenize(corpus_text, return_as='tuple')
-
-        retriever = bm25s.BM25(corpus=corpus, backend='numba')
+        retriever = bm25s.BM25(corpus=corpus, backend="numba")
         retriever.index(corpus_tokens)
-        retriever.save(self.save_dir,corpus=corpus)
+        retriever.save(self.save_dir, corpus=None)
 
         print("Finish!")
-
 
     def _load_embedding(self, embedding_path, corpus_size, hidden_size):
         all_embeddings = np.memmap(embedding_path, mode="r", dtype=np.float32).reshape(corpus_size, hidden_size)
@@ -199,62 +229,33 @@ class Index_Builder:
         else:
             memmap[:] = all_embeddings
 
-    def st_encode_all(self):
+    def encode_all(self):
+        encode_data = [item["contents"] for item in self.corpus]
         if self.gpu_num > 1:
             print("Use multi gpu!")
             self.batch_size = self.batch_size * self.gpu_num
-
-        sentence_list = [item["contents"] for item in self.corpus]
-        sentence_list = [f"{self.instruction}{doc}" for doc in sentence_list]
-        all_embeddings = self.encoder.encode(sentence_list, batch_size=self.batch_size)
+            all_embeddings = self.encoder.multi_gpu_encode(encode_data, batch_size=self.batch_size, is_query=False)
+        else:
+            all_embeddings = self.encoder.encode(encode_data, batch_size=self.batch_size, is_query=False)
 
         return all_embeddings
 
-    def encode_all(self):
-        if self.gpu_num > 1:
-            print("Use multi gpu!")
-            self.encoder = torch.nn.DataParallel(self.encoder)
-            self.batch_size = self.batch_size * self.gpu_num
-
-        all_embeddings = []
-        for start_idx in tqdm(range(0, len(self.corpus), self.batch_size), desc="Inference Embeddings:"):
-            batch_data = self.corpus[start_idx : start_idx + self.batch_size]["contents"]
-            batch_data = [f"{self.instruction}{doc}" for doc in batch_data]
-
-            inputs = self.tokenizer(
-                batch_data,
-                padding=True,
-                truncation=True,
-                return_tensors="pt",
-                max_length=self.max_length,
-            ).to("cuda")
-
-            inputs = {k: v.cuda() for k, v in inputs.items()}
-
-            # TODO: support encoder-only T5 model
-            if "T5" in type(self.encoder).__name__ or (self.gpu_num > 1 and "T5" in type(self.encoder.module).__name__):
-                # T5-based retrieval model
-                decoder_input_ids = torch.zeros((inputs["input_ids"].shape[0], 1), dtype=torch.long).to(
-                    inputs["input_ids"].device
-                )
-                output = self.encoder(**inputs, decoder_input_ids=decoder_input_ids, return_dict=True)
-                embeddings = output.last_hidden_state[:, 0, :]
-
+    def encode_all_clip(self):
+        if self.index_modal == "all":
+            modal_dict = {"text": None, "image": None}
+        else:
+            modal_dict = {self.index_modal: None}
+        for modal, _ in modal_dict.items():
+            encode_data = [item[modal] for item in self.corpus]
+            if self.gpu_num > 1:
+                print("Use multi gpu!")
+                self.batch_size = self.batch_size * self.gpu_num
+                all_embeddings = self.encoder.multi_gpu_encode(encode_data, batch_size=self.batch_size, modal=modal)
             else:
-                output = self.encoder(**inputs, return_dict=True)
-                embeddings = pooling(
-                    output.pooler_output, output.last_hidden_state, inputs["attention_mask"], self.pooling_method
-                )
-                if "dpr" not in self.retrieval_method:
-                    embeddings = torch.nn.functional.normalize(embeddings, dim=-1)
+                all_embeddings = self.encoder.encode(encode_data, batch_size=self.batch_size, modal=modal)
+            modal_dict[modal] = all_embeddings
 
-            embeddings = cast(torch.Tensor, embeddings)
-            embeddings = embeddings.detach().cpu().numpy()
-            all_embeddings.append(embeddings)
-
-        all_embeddings = np.concatenate(all_embeddings, axis=0)
-        all_embeddings = all_embeddings.astype(np.float32)
-
+        all_embeddings = np.concatenate(list(modal_dict.values()), axis=0)
         return all_embeddings
 
     @torch.no_grad()
@@ -263,10 +264,16 @@ class Index_Builder:
         construct a faiss index.
         """
 
-        if os.path.exists(self.index_save_path):
-            print("The index file already exists and will be overwritten.")
+        if self.is_clip:
+            from flashrag.retriever.encoder import ClipEncoder
 
-        if self.use_sentence_transformer:
+            self.encoder = ClipEncoder(
+                model_name=self.retrieval_method,
+                model_path=self.model_path,
+            )
+            hidden_size = self.encoder.model.projection_dim
+
+        elif self.use_sentence_transformer:
             from flashrag.retriever.encoder import STEncoder
 
             self.encoder = STEncoder(
@@ -274,25 +281,68 @@ class Index_Builder:
                 model_path=self.model_path,
                 max_length=self.max_length,
                 use_fp16=self.use_fp16,
+                instruction=self.instruction,
             )
             hidden_size = self.encoder.model.get_sentence_embedding_dimension()
         else:
-            self.encoder, self.tokenizer = load_model(model_path=self.model_path, use_fp16=self.use_fp16)
-            hidden_size = self.encoder.config.hidden_size
+            from flashrag.retriever.encoder import Encoder
+
+            self.encoder = Encoder(
+                model_name=self.retrieval_method,
+                model_path=self.model_path,
+                pooling_method=self.pooling_method,
+                max_length=self.max_length,
+                use_fp16=self.use_fp16,
+                instruction=self.instruction,
+            )
+            hidden_size = self.encoder.model.config.hidden_size
 
         if self.embedding_path is not None:
             corpus_size = len(self.corpus)
             all_embeddings = self._load_embedding(self.embedding_path, corpus_size, hidden_size)
         else:
-            all_embeddings = self.st_encode_all() if self.use_sentence_transformer else self.encode_all()
+            all_embeddings = self.encode_all_clip() if self.is_clip else self.encode_all()
             if self.save_embedding:
                 self._save_embedding(all_embeddings)
             del self.corpus
 
         # build index
+        if self.is_clip:
+            if self.index_modal == "all":
+                assert all_embeddings.shape[0] % 2 == 0
+                text_embedding = all_embeddings[: len(all_embeddings) // 2, :]
+                image_embedding = all_embeddings[len(all_embeddings) // 2 :, :]
+                text_index_save_path = os.path.join(
+                    self.save_dir, f"{self.retrieval_method}_{self.faiss_type}_text.index"
+                )
+                self.save_faiss_index(text_embedding, self.faiss_type, text_index_save_path)
+
+                image_index_save_path = os.path.join(
+                    self.save_dir, f"{self.retrieval_method}_{self.faiss_type}_image.index"
+                )
+                self.save_faiss_index(image_embedding, self.faiss_type, image_index_save_path)
+            else:
+                self.index_save_path = os.path.join(
+                    self.save_dir, f"{self.retrieval_method}_{self.faiss_type}_{self.index_modal}.index"
+                )
+                self.save_faiss_index(all_embeddings, self.faiss_type, self.index_save_path)
+        else:
+            self.index_save_path = os.path.join(self.save_dir, f"{self.retrieval_method}_{self.faiss_type}.index")
+            if os.path.exists(self.index_save_path):
+                print("The index file already exists and will be overwritten.")
+            self.save_faiss_index(all_embeddings, self.faiss_type, self.index_save_path)
+        print("Finish!")
+
+    def save_faiss_index(
+        self,
+        all_embeddings,
+        faiss_type,
+        index_save_path,
+    ):
+        # build index
         print("Creating index")
         dim = all_embeddings.shape[-1]
-        faiss_index = faiss.index_factory(dim, self.faiss_type, faiss.METRIC_INNER_PRODUCT)
+        faiss_index = faiss.index_factory(dim, faiss_type, faiss.METRIC_INNER_PRODUCT)
 
         if self.faiss_gpu:
             co = faiss.GpuMultipleClonerOptions()
@@ -308,8 +358,7 @@ class Index_Builder:
                 faiss_index.train(all_embeddings)
             faiss_index.add(all_embeddings)
 
-        faiss.write_index(faiss_index, self.index_save_path)
-        print("Finish!")
+        faiss.write_index(faiss_index, index_save_path)
 
 
 def main():
@@ -332,7 +381,10 @@ def main():
     parser.add_argument("--save_embedding", action="store_true", default=False)
     parser.add_argument("--faiss_gpu", default=False, action="store_true")
     parser.add_argument("--sentence_transformer", action="store_true", default=False)
-    parser.add_argument("--bm25_backend", default='bm25s', choices=['bm25s','pyserini'])
+    parser.add_argument("--bm25_backend", default="pyserini", choices=["bm25s", "pyserini"])
+
+    # Parameters for build multi-modal retriever index
+    parser.add_argument("--index_modal", type=str, default="all", choices=["text", "image", "all"])
 
     args = parser.parse_args()
 
@@ -351,7 +403,8 @@ def main():
         save_embedding=args.save_embedding,
         faiss_gpu=args.faiss_gpu,
         use_sentence_transformer=args.sentence_transformer,
-        bm25_backend=args.bm25_backend
+        bm25_backend=args.bm25_backend,
+        index_modal=args.index_modal,
     )
     index_builder.build_index()
 

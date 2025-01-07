@@ -3,21 +3,23 @@ import numpy as np
 from flashrag.dataset import Dataset
 
 
-def convert_numpy(obj: Union[Dict, list, np.ndarray, np.generic]) -> Any:
-    """Recursively convert numpy objects in nested dictionaries or lists to native Python types."""
-    if isinstance(obj, dict):
-        return {k: convert_numpy(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [convert_numpy(i) for i in obj]
-    elif isinstance(obj, np.ndarray):
-        return obj.tolist()  # Convert numpy arrays to lists
-    elif isinstance(obj, (np.integer, np.floating)):
-        return obj.item()  # Convert numpy scalars to native Python scalars
-    elif isinstance(obj, np.float32):
-        return float(obj)
+def convert_numpy(data: Any) -> Any:
+    if isinstance(data, dict):
+        return {key: convert_numpy(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [convert_numpy(element) for element in data]
+    elif isinstance(data, np.ndarray):
+        return data.tolist()
+    elif isinstance(data, (np.integer,)):
+        return int(data)
+    elif isinstance(data, (np.floating,)):
+        return float(data)
+    elif isinstance(data, (np.bool_)):
+        return bool(data)
+    elif isinstance(data, (np.str_)):
+        return str(data)
     else:
-        return obj  # Return the object as-is if it's neither a dict, list, nor numpy type
-
+        return data
 
 def filter_dataset(dataset: Dataset, filter_func=None):
     if filter_func is None:
@@ -68,3 +70,34 @@ def merge_batch_dataset(dataset_list: Dataset):
         total_data.extend(batch_dataset.data)
     dataset = Dataset(config=dataset.config, data=total_data)
     return dataset
+def remove_images(data: Any) -> Any:
+    from PIL import Image
+    from typing import Any
+    if isinstance(data, dict):
+        return {key: remove_images(value) 
+                for key, value in data.items()
+                if not isinstance(value, Image.Image)}
+    elif isinstance(data, list):
+        return [remove_images(element) 
+                for element in data 
+                if not isinstance(element, Image.Image)]
+    elif isinstance(data, tuple):
+        return tuple(remove_images(element) 
+                     for element in data 
+                     if not isinstance(element, Image.Image))
+    elif isinstance(data, set):
+        return {remove_images(element) 
+                for element in data 
+                if not isinstance(element, Image.Image)}
+    else:
+        return data
+
+
+def clean_prompt_image(input):
+    try:
+        for message in input:
+            if isinstance(message.get("content"), list):
+                message["content"] = [item for item in message["content"] if item.get("type") != "image"]
+        return input
+    except:
+        return input

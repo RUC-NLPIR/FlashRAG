@@ -22,6 +22,9 @@ method2index:
   e5: ~
   bm25: ~
   contriever: ~
+  clip:
+    "text": "path/to/text_index"
+    "image": "path/to/image_index"
 
 # ------------------------------------------------Environment Settings------------------------------------------------#
 # Directory paths for data and outputs
@@ -48,6 +51,7 @@ save_note: "experiment"
 retrieval_method: "e5" # name or path of the retrieval model.
 retrieval_model_path: ~ # path to the retrieval model
 index_path: ~ # set automatically if not provided.
+multimodal_index_path_dict: ~ # use for multimodal retreiver, example format: {'text': 'path/to/text_index' or None, 'image': 'path/to/image_index' or None}
 faiss_gpu: False # whether use gpu to hold index
 corpus_path: ~ # path to corpus in '.jsonl' format that store the documents
 
@@ -71,6 +75,23 @@ rerank_topk: 5 # number of remain documents after reranking
 rerank_max_length: 512
 rerank_batch_size: 256 # batch size for reranker
 rerank_use_fp16: True
+
+# If you want to use multi retrievers, you can set the following parameters
+use_multi_retriever: False # whether to use multi retrievers
+multi_retriever_setting:
+  merge_method: "concat" # support 'concat', 'rrf', 'rerank'
+  topk: 5 # final remain documents, only used in 'rrf' and 'rerank' merge
+  rerank_model_name: ~
+  rerank_model_path: ~
+  retriever_list:
+    - retrieval_method: "e5"
+      retrieval_topk: 5
+      index_path: ~
+      retrieval_model_path: ~
+    - retrieval_method: "bm25"
+      retrieval_topk: 5
+      index_path: ~
+      retrieval_model_path: ~
 
 # -------------------------------------------------Generator Settings------------------------------------------------#
 framework: fschat # inference frame work of LLM, supporting: 'hf','vllm','fschat', 'openai'

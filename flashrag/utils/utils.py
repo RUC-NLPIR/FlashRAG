@@ -1,4 +1,5 @@
 import os
+import json
 import importlib
 from transformers import AutoConfig
 from flashrag.dataset.dataset import Dataset
@@ -6,6 +7,7 @@ from flashrag.dataset.dataset import Dataset
 
 def get_dataset(config):
     """Load dataset from config."""
+    SUPPORT_FILES = ["jsonl", "json", "parquet"]
 
     dataset_path = config["dataset_path"]
     all_split = config["split"]
@@ -13,10 +15,18 @@ def get_dataset(config):
     split_dict = {split: None for split in all_split}
 
     for split in all_split:
-        split_path = os.path.join(dataset_path, f"{split}.jsonl")
-        if not os.path.exists(split_path):
-            print(f"{split} file not exists!")
+        exist_flag = 0
+        for file_postfix in SUPPORT_FILES:
+            split_path = os.path.join(dataset_path, f"{split}.{file_postfix}")
+            if not os.path.exists(split_path):
+                continue
+            else:
+                exist_flag = 1
+                break
+        if exist_flag == 0:
             continue
+        else:
+            print(f"Loading {split} dataset from: {split_path}...")
         if split in ["test", "val", "dev"]:
             split_dict[split] = Dataset(
                 config, split_path, sample_num=config["test_sample_num"], random_sample=config["random_sample"]
@@ -29,21 +39,33 @@ def get_dataset(config):
 
 def get_generator(config, **params):
     """Automatically select generator class based on config."""
-    if config["framework"] == "vllm":
-        return getattr(importlib.import_module("flashrag.generator"), "VLLMGenerator")(config, **params)
-    elif config["framework"] == "fschat":
-        return getattr(importlib.import_module("flashrag.generator"), "FastChatGenerator")(config, **params)
-    elif config["framework"] == "hf":
-        model_config = AutoConfig.from_pretrained(config["generator_model_path"])
-        arch = model_config.architectures[0]
-        if "t5" in arch.lower() or "bart" in arch.lower() or 'fusionindecoder' in arch.lower():
-            return getattr(importlib.import_module("flashrag.generator"), "EncoderDecoderGenerator")(config, **params)
-        else:
-            return getattr(importlib.import_module("flashrag.generator"), "HFCausalLMGenerator")(config, **params)
-    elif config["framework"] == "openai":
+
+    if config['framework'] == 'openai':
         return getattr(importlib.import_module("flashrag.generator"), "OpenaiGenerator")(config, **params)
+    
+    # judge multimodal model
+    with open(os.path.join(config["generator_model_path"], "config.json"), "r") as f:
+        model_config = json.load(f)
+    arch = model_config['architectures'][0]
+    if all(["vision" not in key for key in model_config.keys()]):
+        is_mm = False
     else:
-        raise NotImplementedError
+        is_mm = True
+    
+    if is_mm:
+        return getattr(importlib.import_module("flashrag.generator"), "HFMultiModalGenerator")(config, **params)
+    else:
+        if config["framework"] == "vllm":
+            return getattr(importlib.import_module("flashrag.generator"), "VLLMGenerator")(config, **params)
+        elif config["framework"] == "fschat":
+            return getattr(importlib.import_module("flashrag.generator"), "FastChatGenerator")(config, **params)
+        elif config["framework"] == "hf":
+            if "t5" in arch.lower() or "bart" in arch.lower():
+                return getattr(importlib.import_module("flashrag.generator"), "EncoderDecoderGenerator")(config, **params)
+            else:
+                return getattr(importlib.import_module("flashrag.generator"), "HFCausalLMGenerator")(config, **params)
+        else:
+            raise NotImplementedError
 
 
 def get_retriever(config):
@@ -55,10 +77,22 @@ def get_retriever(config):
     Returns:
         Retriever: retriever instance
     """
+    if config["use_multi_retriever"]:
+        # must load special class for manage multi retriever
+        return getattr(importlib.import_module("flashrag.retriever"), "MultiRetrieverRouter")(config)
+
     if config["retrieval_method"] == "bm25":
         return getattr(importlib.import_module("flashrag.retriever"), "BM25Retriever")(config)
     else:
-        return getattr(importlib.import_module("flashrag.retriever"), "DenseRetriever")(config)
+        try:
+            model_config = AutoConfig.from_pretrained(config["retrieval_model_path"])
+            arch = model_config.architectures[0]
+            if "clip" in arch.lower():
+                return getattr(importlib.import_module("flashrag.retriever"), "MultiModalRetriever")(config)
+            else:
+                return getattr(importlib.import_module("flashrag.retriever"), "DenseRetriever")(config)
+        except:
+            return getattr(importlib.import_module("flashrag.retriever"), "DenseRetriever")(config)
 
 
 def get_reranker(config):

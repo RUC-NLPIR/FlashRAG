@@ -1,4 +1,5 @@
 import re
+import numpy as np
 import warnings
 from collections import Counter
 from flashrag.evaluator.utils import normalize_answer
@@ -510,3 +511,39 @@ class CountToken(BaseMetric):
         avg_tokens = sum(token_counts) / len(token_counts)
 
         return {"avg_input_tokens": avg_tokens}, token_counts
+
+class GAOKAOMM_Accuracy(BaseMetric):
+    metric_name = 'gaokao_acc'
+    def __init__(self, config):
+        super().__init__(config)
+    
+    def calculate_metric(self, data):
+        metric_dict = {}
+        acc_list = []
+        for item in data:
+            golden_answers = item.golden_answers
+            golden_answers = [i.lower() for i in golden_answers]
+            golden_answer = "".join(golden_answers)
+            pred = item.pred.lower()
+            subject = item.subject
+
+            question_type = item.question_type
+            if question_type == 'single_choice':
+                acc = 1.0 if pred == golden_answer else 0.0
+            else:
+                if pred == golden_answer:
+                    acc = 1.0
+                elif pred in golden_answer:
+                    acc = 0.5
+                else:
+                    acc = 0.0
+            acc_list.append(acc)
+            if subject not in metric_dict:
+                metric_dict[subject] = []
+            metric_dict[subject].append(acc)
+        for key, value in metric_dict.items():
+            metric_dict[key] = np.mean(value)
+        
+        metric_dict['avg_score'] = np.mean(acc_list)
+        return metric_dict, acc_list 
+                

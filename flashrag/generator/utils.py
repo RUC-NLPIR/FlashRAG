@@ -1,5 +1,5 @@
 import warnings
-
+import os
 
 def resolve_max_tokens(params: dict, generation_params: dict, prioritize_new_tokens: bool = False) -> dict:
     """
@@ -65,3 +65,43 @@ def resolve_max_tokens(params: dict, generation_params: dict, prioritize_new_tok
         else:
             generation_params["max_tokens"] = final_max_tokens
     return generation_params
+
+
+def convert_image_to_base64(image):
+    from PIL import Image
+    from io import BytesIO
+    import base64
+    if isinstance(image, Image.Image):
+        image = image.convert('RGB')
+        buffer = BytesIO()
+        image.save(buffer, format='JPEG')
+        image_bs64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        return f'data:image/jpeg;base64,{image_bs64}'
+    return image
+
+def process_image_pil(image):
+    from PIL import Image
+    if isinstance(image, Image.Image):
+        return image
+    elif isinstance(image, str):
+        return load_image_from_source(image)
+    else:
+        raise ValueError("Image must be a PIL Image or a string path to an image file")
+
+def process_image(content_dict):
+    from PIL import Image
+    image = content_dict.get('image')
+    if isinstance(image, Image.Image):
+        content_dict['image'] = convert_image_to_base64(image)
+    elif isinstance(image, str):
+        content_dict['image'] = convert_image_to_base64(load_image_from_source(image))
+
+def load_image_from_source(image_path):
+    from PIL import Image
+    import requests
+    if os.path.exists(image_path):
+        return Image.open(image_path).convert('RGB')
+    else:
+        response = requests.get(image_path, stream=True)
+        response.raise_for_status()
+        return Image.open(response.raw).convert('RGB')
