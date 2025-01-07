@@ -1,5 +1,5 @@
 # <div align="center">⚡FlashRAG: A Python Toolkit for Efficient RAG Research<div>
-
+\[ English | [中文](README_zh.md) \]
 <div align="center">
 <a href="https://arxiv.org/abs/2405.13576" target="_blank"><img src=https://img.shields.io/badge/arXiv-b5212f.svg?logo=arxiv></a>
 <a href="https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/" target="_blank"><img src=https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace%20Datasets-27b3b4.svg></a>
@@ -33,6 +33,19 @@ With FlashRAG and provided resources, you can effortlessly reproduce existing SO
 <a href="https://trendshift.io/repositories/10454" target="_blank"><img src="https://trendshift.io/api/badge/repositories/10454" alt="RUC-NLPIR%2FFlashRAG | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
 
+## :link: Navigation
+- [Features](#sparkles-features)
+- [Roadmap](#mag_right-roadmap)
+- [Changelog](#page_with_curl-changelog)
+- [Installation](#wrench-installation)
+- [Quick Start](#rocket-quick-start)
+- [Components](#gear-components)
+- [Supporting Methods](#robot-supporting-methods)
+- [Supporting Datasets & Document Corpus](#notebook-supporting-datasets--document-corpus)
+- [Additional FAQs](#raised_hands-additional-faqs)
+- [License](#bookmark-license)
+- [Citation](#star2-citation)
+
 ## :sparkles: Features
 
 - **Extensive and Customizable Framework**: Includes essential components for RAG scenarios such as retrievers, rerankers, generators, and compressors, allowing for flexible assembly of complex pipelines.
@@ -44,6 +57,8 @@ With FlashRAG and provided resources, you can effortlessly reproduce existing SO
 - **Efficient Preprocessing Stage**: Simplifies the RAG workflow preparation by providing various scripts like corpus processing for retrieval, retrieval index building, and pre-retrieval of documents.
 
 - **Optimized Execution**: The library's efficiency is enhanced with tools like vLLM, FastChat for LLM inference acceleration, and Faiss for vector index management.
+
+- **Easy to Use UI** : We have developed a very easy to use UI to easily and quickly configure and experience the RAG baselines we have implemented, as well as run evaluation scripts on a visual interface.
 
 ## :mag_right: Roadmap
 
@@ -103,7 +118,7 @@ To get started with FlashRAG, you can simply install it with pip:
 pip install flashrag-dev --pre
 ```
 
-Or you can clone it from Github and install (requires Python 3.9+):
+Or you can clone it from Github and install (requires Python 3.10+):
 
 ```bash
 git clone https://github.com/RUC-NLPIR/FlashRAG.git
@@ -146,62 +161,102 @@ From the official Faiss repository ([source](https://github.com/facebookresearch
 
 ## :rocket: Quick Start
 
-### Toy Example
+### Corpus Construction
+To build an index, you first need to save your corpus as a `jsonl` file with each line representing a document.
 
-For beginners, we provide a [<u>an introduction to flashrag</u>](./docs/introduction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md) [<u>한국어</u>](./docs/introduction_for_beginners_kr.md)) to help you familiarize yourself with our toolkit. Alternatively, you can directly refer to the code below.
-
-#### Demo
-
-We provide a toy demo to implement a simple RAG process. You can freely change the corpus and model you want to use. The English demo uses [general knowledge](https://huggingface.co/datasets/MuskumPillerum/General-Knowledge) as the corpus, `e5-base-v2` as the retriever, and `Llama3-8B-instruct` as generator. The Chinese demo uses data crawled from the official website of Remin University of China as the corpus, `bge-large-zh-v1.5` as the retriever, and qwen1.5-14B as the generator. Please fill in the corresponding path in the file.
-
-<div style="display: flex; justify-content: space-around;">
-  <div style="text-align: center;">
-    <img src="./asset/demo_en.gif" style="width: 100%;">
-  </div>
-</div>
-
-To run the demo:
-
-```bash
-cd examples/quick_start
-
-# copy the config file here, otherwise, streamlit will complain that file s
-cp ../methods/my_config.yaml .
-
-# run english demo
-streamlit run demo_en.py
-
-# run chinese demo
-streamlit run demo_zh.py
+```jsonl
+{"id": "0", "contents": "content"}
+{"id": "1", "contents": "content"}
+...
 ```
 
-#### Pipeline
+If you want to use Wikipedia as your corpus, you can refer to our documentation [Processing Wikipedia](./docs/process-wiki.md) to convert it into an indexable format.
 
-We also provide an example to use our framework for pipeline execution.
-Run the following code to implement a naive RAG pipeline using provided toy datasets.
-The default retriever is `e5-base-v2` and default generator is `Llama3-8B-instruct`. You need to fill in the corresponding model path in the following command. If you wish to use other models, please refer to the detailed instructions below.
+### Index Construction
+
+You can use the following code to build your own index.
+
+* For **dense retrieval methods**, especially popular embedding models, we use `faiss` to build the index.
+
+* For **sparse retrieval methods (BM25)**, we use `Pyserini` or `bm25s` to build the corpus into a Lucene inverted index. The built index contains the original documents.
+
+#### For Dense Retrieval Methods
+
+Modify the parameters in the following code to your own.
 
 ```bash
-cd examples/quick_start
-python simple_pipeline.py \
-    --model_path <Llama-3-8B-instruct-PATH> \
-    --retriever_path <E5-PATH>
+python -m flashrag.retriever.index_builder \
+  --retrieval_method e5 \
+  --model_path /model/e5-base-v2/ \
+  --corpus_path indexes/sample_corpus.jsonl \
+  --save_dir indexes/ \
+  --use_fp16 \
+  --max_length 512 \
+  --batch_size 256 \
+  --pooling_method mean \
+  --faiss_type Flat 
 ```
 
-After the code is completed, you can view the intermediate results of the run and the final evaluation score in the output folder under the corresponding path.
+* ```--pooling_method```: If this parameter is not specified, we will automatically select it based on the model name and model file. However, since different embedding models use different pooling methods, **we may not have fully implemented them**. To ensure accuracy, you can **specify the pooling method corresponding to the retrieval model you are using** (`mean`, `pooler`, or `cls`).
+
+* ```---instruction```: Some embedding models require additional instructions to be concatenated to the query before encoding, which can be specified here. Currently, we will automatically fill in the instructions for **E5** and **BGE** models, while other models need to be supplemented manually.
+
+If the retrieval model supports the `sentence transformers` library, you can use the following code to build the index (**without considering the pooling method**).
+
+```bash
+python -m flashrag.retriever.index_builder \
+  --retrieval_method e5 \
+  --model_path /model/e5-base-v2/ \
+  --corpus_path indexes/sample_corpus.jsonl \
+  --save_dir indexes/ \
+  --use_fp16 \
+  --max_length 512 \
+  --batch_size 256 \
+  --pooling_method mean \
+  --sentence_transformer \
+  --faiss_type Flat 
+```
+
+#### For Sparse Retrieval Methods (BM25)
+
+If building a bm25 index, there is no need to specify `model_path`.
+
+##### Building Index with BM25s
+
+```bash
+python -m flashrag.retriever.index_builder \
+  --retrieval_method bm25 \
+  --corpus_path indexes/sample_corpus.jsonl \
+  --bm25_backend bm25s \
+  --save_dir indexes/ 
+```
+
+##### Building Index with Pyserini
+
+```bash
+python -m flashrag.retriever.index_builder \
+  --retrieval_method bm25 \
+  --corpus_path indexes/sample_corpus.jsonl \
+  --bm25_backend pyserini \
+  --save_dir indexes/ 
+```
 
 ### Using the ready-made pipeline
 
 You can use the pipeline class we have already built (as shown in [<u>pipelines</u>](#pipelines)) to implement the RAG process inside. In this case, you just need to configure the config and load the corresponding pipeline.
 
-Firstly, load the entire process's config, which records various hyperparameters required in the RAG process. You can input yaml files as parameters or directly as variables. The priority of variables as input is higher than that of files.
+Firstly, load the entire process's config, which records various hyperparameters required in the RAG process. You can input yaml files as parameters or directly as variables.
+
+Please note that **variables as input take precedence over files**.
 
 ```python
 from flashrag.config import Config
 
+# hybrid load configs
 config_dict = {'data_dir': 'dataset/'}
-my_config = Config(config_file_path = 'my_config.yaml',
-                config_dict = config_dict)
+my_config = Config(
+    config_file_path = 'my_config.yaml',
+    config_dict = config_dict
 ```
 
 We provide comprehensive guidance on how to set configurations, you can see our [<u>configuration guidance</u>](./docs/configuration.md).
@@ -216,8 +271,10 @@ from flashrag.prompt import PromptTemplate
 from flashrag.config import Config
 
 config_dict = {'data_dir': 'dataset/'}
-my_config = Config(config_file_path = 'my_config.yaml',
-                config_dict = config_dict)
+my_config = Config(
+    config_file_path = 'my_config.yaml',
+    config_dict = config_dict
+)
 all_split = get_dataset(my_config)
 test_data = all_split['test']
 
@@ -232,7 +289,10 @@ prompt_templete = PromptTemplate(
     system_prompt = "Answer the question based on the given document. Only give me the answer and do not output any other words.\nThe following are given documents.\n\n{reference}",
     user_prompt = "Question: {question}\nAnswer:"
 )
-pipeline = SequentialPipeline(my_config, prompt_template=prompt_templete)
+pipeline = SequentialPipeline(
+  my_config,
+  prompt_template = prompt_templete
+)
 ```
 
 Finally, execute `pipeline.run` to obtain the final result.
@@ -244,7 +304,7 @@ output_dataset = pipeline.run(test_data, do_eval=True)
 The `output_dataset` contains the intermediate results and metric scores for each item in the input dataset.
 Meanwhile, the dataset with intermediate results and the overall evaluation score will also be saved as a file (if `save_intermediate_data` and `save_metric_score` are specified).
 
-### Build your own pipeline
+### Build your own pipeline!
 
 Sometimes you may need to implement more complex RAG process, and you can build your own pipeline to implement it.
 You just need to inherit `BasicPipeline`, initialize the components you need, and complete the `run` function.
