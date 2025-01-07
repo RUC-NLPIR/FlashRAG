@@ -53,9 +53,9 @@ def cache_manager(func):
                 for idx, res in enumerate(cache_results):
                     if res is None:
                         assert new_query_list[idx] == no_cache_query[no_cache_idx]
-                        cache_results = (
+                        cache_results[idx] = (
                             no_cache_results[no_cache_idx],
-                            no_cache_scores[no_cache_scores],
+                            no_cache_scores[no_cache_idx],
                         )
                         no_cache_idx += 1
 
