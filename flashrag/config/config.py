@@ -237,9 +237,14 @@ class Config:
 
     def _prepare_dir(self):
         save_note = self.final_config["save_note"]
+        save_dir = self.final_config['save_dir']
+        if not save_dir.endswith("/"):
+            save_dir += "/"
+
         current_time = datetime.datetime.now()
+
         self.final_config["save_dir"] = os.path.join(
-            self.final_config["save_dir"],
+            save_dir,
             f"{self.final_config['dataset_name']}_{current_time.strftime('%Y_%m_%d_%H_%M')}_{save_note}",
         )
         os.makedirs(self.final_config["save_dir"], exist_ok=True)
@@ -251,8 +256,12 @@ class Config:
     def _set_seed(self):
         import torch
         import numpy as np
-
-        seed = self.final_config["seed"]
+        seed = self.final_config['seed']
+        try:
+            seed = int(seed)
+        except:
+            seed = 2025
+        self.final_config['seed'] = seed
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
