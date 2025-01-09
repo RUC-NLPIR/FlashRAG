@@ -1,3 +1,4 @@
+# Pages
 # <div align="center">⚡FlashRAG: A Python Toolkit for Efficient RAG Research<div>
 \[ English | [中文](README_zh.md) \]
 <div align="center">
