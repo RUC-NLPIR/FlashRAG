@@ -29,6 +29,8 @@ if __name__ == "__main__":
     parser.add_argument("--chunk_by", default="token", choices=["token", "word", "sentence", "recursive"],
                         help="Chunking method to use")
     parser.add_argument("--chunk_size", default=512, type=int, help="Size of chunks")
+    parser.add_argument("--tokenizer_name_or_path", default='o200k_base', type=str)
+
     args = parser.parse_args()
 
     # Load documents
@@ -37,13 +39,13 @@ if __name__ == "__main__":
 
     # Initialize chunker
     if args.chunk_by == "token":
-        chunker = chonkie.TokenChunker(chunk_size=args.chunk_size)
+        chunker = chonkie.TokenChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
     elif args.chunk_by == "sentence":
-        chunker = chonkie.SentenceChunker(chunk_size=args.chunk_size)
+        chunker = chonkie.SentenceChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
     elif args.chunk_by == "recursive":
-        chunker = chonkie.RecursiveChunker(chunk_size=args.chunk_size, min_characters_per_chunk=1)
+        chunker = chonkie.RecursiveChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size, min_characters_per_chunk=1)
     elif args.chunk_by == "word":
-        chunker = chonkie.WordChunker(chunk_size=args.chunk_size)
+        chunker = chonkie.WordChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
     else:
         raise ValueError(f"Invalid chunking method: {args.chunk_by}")
 

@@ -38,3 +38,4 @@ You will get a JSONL file with the following format:
 - `output_path`: Path to the output JSONL file.
 - `chunk_by`: Chunking method to use. Can be `token`, `word`, `sentence`, or `recursive`.
 - `chunk_size`: Size of chunks.
+- `tokenizer_name_or_path`: Name or path of the tokenizer that used for chunking.
