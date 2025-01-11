@@ -35,6 +35,8 @@ Table of Contents:
 - [SKR](#skr)
 - [Self-RAG](#self-rag)
 - [Spring](#spring)
+- [Adaptive-RAG](#adaptive-rag)
+- [RQRAG](#rqrag)
 
 #### AAR
 
@@ -105,6 +107,13 @@ If the official open-source checkpoint is released in the future, we will update
 
 - Additional Step1: Download classifier model from huggingface repo (**not official**): [illuminoplanet/combined_flan_t5_xl_classifier](https://huggingface.co/illuminoplanet/combined_flan_t5_xl_classifier)
 - Additional Step2: Modify the `model_path` in `adaptive` function.
+
+#### RQRAG
+
+This method requires downloading the RQRAG model.
+
+- Additional Step1: Download RQRAG model from huggingface repo: [zorowin123/rq_rag_llama2_7B](https://huggingface.co/zorowin123/rq_rag_llama2_7B)
+- Additional Step2: Modify the `generator_model_path` in the `rqrag` function.
 
 ### 3. Run methods
 

@@ -33,6 +33,8 @@
 - [SKR](#skr)
 - [Self-RAG](#self-rag)
 - [Spring](#spring)
+- [Adaptive-RAG](#adaptive-rag)
+- [RQRAG](#rqrag)
 
 #### AAR
 
@@ -103,6 +105,13 @@
 
 - 额外步骤1：从 Huggingface 仓库下载分类器模型（**非官方**）：[illuminoplanet/combined_flan_t5_xl_classifier](https://huggingface.co/illuminoplanet/combined_flan_t5_xl_classifier)
 - 额外步骤2：修改 `adaptive` 函数中的 `model_path`。
+
+#### RQRAG
+
+这种方法需要下载 RQRAG 模型。
+
+- 额外步骤1：从 Huggingface 仓库下载 RQRAG 模型：[zorowin123/rq_rag_llama2_7B](https://huggingface.co/zorowin123/rq_rag_llama2_7B)
+- 额外步骤2：在 `rqrag` 函数中修改 `generator_model_path`
 
 
 ### 3. 运行方法
