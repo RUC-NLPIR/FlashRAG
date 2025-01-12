@@ -1,0 +1,4 @@
+from chat_pipelines.sequential_pipeline import SequentialPipeline_Chat, NaivePipeline_Chat
+from chat_pipelines.branching_pipeline import REPLUGPipeline_Chat, SuRePipeline_Chat
+from chat_pipelines.conditional_pipeline import ConditionalPipeline_Chat, AdaptivePipeline_Chat
+from chat_pipelines.active_pipeline import IterativePipeline_Chat, IRCOTPipeline_Chat, SelfAskPipeline_Chat, SelfRAGPipeline_Chat, FLAREPipeline_Chat

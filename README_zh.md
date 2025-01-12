@@ -13,15 +13,17 @@
 <p>
 <a href="#wrench-安装">安装</a> |
 <a href="#sparkles-特性">特性</a> |
-<a href="#rocket-快速使用">快速使用</a> |
+<a href="#rocket-快速开始">快速开始</a> |
 <a href="#gear-组件">组件</a> |
+<a href="#computer-flashrag-ui">FlashRAG-UI</a> |
 <a href="#robot-基线方法">支持的基线方法</a> |
 <a href="#notebook-支持的数据集和文档语料库">支持的数据集</a> |
 <a href="#raised_hands-其他常见问题">常见问题</a>
 </p>
 
 </h4>
-FlashRAG是一个用于复现和开发检索增强生成（RAG）研究的Python工具包。我们的工具包包括36个预处理的基准RAG数据集和15个最先进的RAG算法。
+
+FlashRAG是一个用于复现和开发检索增强生成（RAG）研究的Python工具包。我们的工具包包括36个预处理的基准RAG数据集和16个最先进的RAG算法。
 
 <p align="center">
 <img src="asset/framework.jpg">
@@ -32,6 +34,57 @@ FlashRAG是一个用于复现和开发检索增强生成（RAG）研究的Python
 <a href="https://trendshift.io/repositories/10454" target="_blank"><img src="https://trendshift.io/api/badge/repositories/10454" alt="RUC-NLPIR%2FFlashRAG | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
 
+<h2 align="center">✨ 介绍 FlashRAG-UI ✨</h2>
+<p>通过 <strong>FlashRAG-UI</strong>，您可以通过我们精心设计的可视化界面轻松快捷地配置和体验支持的 RAG 方法，并在基准上评估这些方法，让复杂的科研工作更加高效！</p>
+<h3>🌟 特性</h3>
+<ul>
+    <li>🚀 <strong>一键加载配置</strong>
+        <ul>
+            <li>您可以通过简单的点击、选择、输入等操作，加载各种 RAG 方法的参数和配置文件。</li>
+            <li>🖼️ 支持预览界面，方便直观地查看参数设置。</li>
+            <li>💾 提供保存功能，轻松存储配置以供下次使用。</li>
+        </ul>
+    </li>
+    <li>🔍 <strong>快速体验方法</strong>
+        <ul>
+            <li>⚡ 快速加载语料库和索引文件，探索各种 RAG 方法的特点和应用场景。</li>
+            <li>🔄 支持加载并切换不同的组件、超参数，不同的 RAG Pipeline 无缝衔接，快速体验它们的性能与差异！</li>
+        </ul>
+    </li>
+    <li>📊 <strong>高效复现基准</strong>
+        <ul>
+            <li>🎯 在 FlashRAG-UI 上轻松复现我们工具包内置的基线方法和精心收集的基准。</li>
+            <li>🛠️ 无需复杂设置，即可直接使用最前沿的科研工具，为您的科研工作带来流畅的体验！</li>
+        </ul>
+    </li>
+</ul>
+
+<details>
+<summary>显示更多</summary>
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="./asset/demo_zh1.jpg" alt="Image 1" width="505"/>
+    </td>
+    <td align="center">
+      <img src="./asset/demo_zh2.jpg" alt="Image 2" width="505"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./asset/demo_zh4.png" alt="Image 3" width="500"/>
+    </td>
+    <td align="center">
+      <img src="./asset/demo_zh3.jpg" alt="Image 4" width="500"/>
+    </td>
+  </tr>
+</table>
+</details>
+
+<p>为了体验FlashRAG-UI，请跳转至 <a href="#computer-flashrag-ui">FlashRAG-UI</a>。</p>
+<center><h3>🎨 体验我们精心设计的FlashRAG-UI——不仅好用，更让人赏心悦目</h3></center>
+
+
 ## :link: 导航
 - [特性](#sparkles-特性)
 - [开发路线图](#mag_right-开发路线图)
@@ -39,6 +92,7 @@ FlashRAG是一个用于复现和开发检索增强生成（RAG）研究的Python
 - [安装](#wrench-安装)
 - [快速开始](#rocket-快速开始)
 - [组件](#gear-组件)
+- [FlashRAG-UI](#computer-flashrag-ui)
 - [基线方法](#robot-基线方法)
 - [支持的数据集和文档语料库](#notebook-支持的数据集和文档语料库)
 - [其他常见问题](#raised_hands-其他常见问题)
@@ -51,7 +105,7 @@ FlashRAG是一个用于复现和开发检索增强生成（RAG）研究的Python
 
 - **全面的基准数据集**：收集了36个预处理的RAG基准数据集，用于测试和验证RAG模型的性能。
 
-- **预实现的先进RAG算法**：基于我们的框架，提供15个先进的RAG算法及其报告结果。轻松在不同设置下复现结果。
+- **预实现的先进RAG算法**：基于我们的框架，提供16个先进的RAG算法及其报告结果。轻松在不同设置下复现结果。
 
 - **高效的预处理过程**：通过提供各种脚本，如**语料处理**、**索引构建**和**文档预检索**，简化RAG工作流准备。
 
@@ -71,8 +125,9 @@ FlashRAG仍在开发中，存在许多问题和改进空间。我们将继续更
 - [ ] 增强代码的适应性和可读性
 
 ## :page_with_curl: 更新日志
+[25/01/12] 介绍 <strong>FlashRAG-UI</strong>，一个易于使用的界面。您可以通过它轻松快捷地配置和体验支持的RAG方法，并在基准上评估这些方法。
 
-[25/01/11] 我们添加了对[RQRAG](https://arxiv.org/abs/2404.00610)方法的支持，详见[**复现实验**](docs/reproduce_experiment_zh.md)。
+[25/01/11] 我们添加了对新方法[<u>RQRAG</u>](https://arxiv.org/abs/2404.00610)方法的支持，详见[**复现实验**](docs/reproduce_experiment_zh.md)。
 
 [25/01/07] 我们目前支持多个检索器的聚合，详见[**多检索器使用**](https://github.com/RUC-NLPIR/FlashRAG/blob/main/docs/multi_retriever_usage.md)。
 
@@ -84,6 +139,9 @@ FlashRAG仍在开发中，存在许多问题和改进空间。我们将继续更
 
 [24/09/24] 我们发布了一个基于MindSpore框架的版本，支持中国硬件平台。详情请参阅[FlashRAG MindSpore](https://github.com/RUC-NLPIR/FlashRAG-MindSpore)。
 
+<details>
+<summary>显示更多</summary>
+
 [24/09/18] 由于在某些环境中安装Pyserini的复杂性和限制，我们引入了一个轻量级的`BM25s`包作为替代（更快且更易使用）。基于Pyserini的检索器将在未来版本中被弃用。要使用`bm25s`作为检索器，只需在配置中将`bm25_backend`设置为`bm25s`。
 
 [24/09/09] 我们添加了对新方法[<u>Adaptive-RAG</u>](https://aclanthology.org/2024.naacl-long.389.pdf)的支持，该方法可以根据查询类型自动选择执行的RAG流程。请参阅[<u>结果表</u>](#robot-supporting-methods)。
@@ -93,9 +151,6 @@ FlashRAG仍在开发中，存在许多问题和改进空间。我们将继续更
 [24/07/17] 由于HuggingFace的一些未知问题，我们的原始数据集链接已失效。我们已更新链接。如果遇到任何问题，请检查[新链接](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/)。
 
 [24/07/06] 我们添加了对新方法[<u>Trace</u>](https://arxiv.org/abs/2406.11460)的支持，通过构建知识图谱来优化文本。请参阅[<u>结果</u>](#robot-supporting-methods)和[<u>详情</u>](./docs/baseline_details.md)。
-
-<details>
-<summary>显示更多</summary>
 
 [24/06/19] 我们添加了对新方法[<u>IRCoT</u>](https://arxiv.org/abs/2212.10509)的支持，并更新了[<u>结果表</u>](#robot-supporting-methods)。
 
@@ -163,9 +218,8 @@ conda install -c pytorch -c nvidia faiss-gpu=1.8.0
 要构建索引，首先需要将语料库保存为如下格式的`jsonl`文件，每行是一个文档。
 
 ```jsonl
-{"id": "0", "contents": "内容"}
-{"id": "1", "contents": "内容"}
-...
+{"id": "0", "contents": "..."}
+{"id": "1", "contents": "..."}
 ```
 
 如果您想使用维基百科作为语料库，可以参考我们的文档[处理维基百科](./docs/process-wiki.md)将其转换为索引格式。
@@ -471,6 +525,19 @@ class ToyPipeline(BasicPipeline):
         </tr>
     </tbody>
 </table>
+
+## :computer: FlashRAG-UI
+
+要使用FlashRAG-UI，您需要确保您的`Python >= 3.10`并安装以下依赖：
+```bash
+pip install gradio=5.9.1
+```
+
+然后运行以下命令：
+```bash
+cd webui
+python interface.py
+```
 
 ## :robot: 基线方法
 
