@@ -15,13 +15,16 @@
 <a href="#sparkles-features">Features</a> |
 <a href="#rocket-quick-start">Quick-Start</a> |
 <a href="#gear-components"> Components</a> |
+<a href="#computer-flashrag-ui"> FlashRAG-UI</a> |
 <a href="#robot-supporting-methods"> Supporting Methods</a> |
 <a href="#notebook-supporting-datasets--document-corpus"> Supporting Datasets</a> |
 <a href="#raised_hands-additional-faqs"> FAQs</a>
 </p>
 
 </h4>
-FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 36 pre-processed benchmark RAG datasets and 15 state-of-the-art RAG algorithms.
+
+
+FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 36 pre-processed benchmark RAG datasets and 16 state-of-the-art RAG algorithms.
 
 <p align="center">
 <img src="asset/framework.jpg">
@@ -33,6 +36,57 @@ With FlashRAG and provided resources, you can effortlessly reproduce existing SO
 <a href="https://trendshift.io/repositories/10454" target="_blank"><img src="https://trendshift.io/api/badge/repositories/10454" alt="RUC-NLPIR%2FFlashRAG | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
 
+<h2 align="center">✨ Introduce FlashRAG-UI ✨</h2>
+<p>With <strong>FlashRAG-UI</strong>, you can easily and quickly configure and experience the supported RAG methods through our meticulously designed visual interface, and evaluate these methods on benchmarks, making complex research work more efficient!</p>
+<h3>🌟 Features</h3>
+<ul>
+  <li>🚀 <strong>One-Click Configuration Loading</strong>
+    <ul>
+      <li>You can load parameters and configuration files for various RAG methods through simple clicks, selections, and inputs.</li>
+      <li>🖼️ Supports preview interface for intuitive parameter settings.</li>
+      <li>💾 Provides save functionality to easily store configurations for future use.</li>
+    </ul>
+  </li>
+  <li>🔍 <strong>Quick Method Experience</strong>
+    <ul>
+      <li>⚡ Quickly load corpora and index files to explore the characteristics and application scenarios of various RAG methods.</li>
+      <li>🔄 Supports loading and switching different components and hyperparameters, seamlessly connecting different RAG Pipelines to quickly experience their performance and differences!</li>
+    </ul>
+  </li>
+  <li>📊 <strong>Efficient Benchmark Reproduction</strong>
+    <ul>
+      <li>🎯 Easily reproduce the built-in baseline methods and carefully collected benchmarks on FlashRAG-UI.</li>
+      <li>🛠️ Use cutting-edge research tools directly without complex settings, providing a smooth experience for your research work!</li>
+    </ul>
+  </li>
+</ul>
+
+<details>
+<summary>Show more</summary>
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="./asset/demo_en1.jpg" alt="Image 1" width="505"/>
+    </td>
+    <td align="center">
+      <img src="./asset/demo_en2.jpg" alt="Image 2" width="505"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./asset/demo_en4.png" alt="Image 3" width="500"/>
+    </td>
+    <td align="center">
+      <img src="./asset/demo_en3.jpg" alt="Image 4" width="500"/>
+    </td>
+  </tr>
+</table>
+</details>
+
+<p>To experience FlashRAG-UI, please go to <a href="#computer-flashrag-ui">FlashRAG-UI</a>.</p>
+<center><h3>🎨 Experience our meticulously designed FlashRAG-UI—both user-friendly and visually appealing</h3></center>
+
+
 ## :link: Navigation
 - [Features](#sparkles-features)
 - [Roadmap](#mag_right-roadmap)
@@ -40,6 +94,7 @@ With FlashRAG and provided resources, you can effortlessly reproduce existing SO
 - [Installation](#wrench-installation)
 - [Quick Start](#rocket-quick-start)
 - [Components](#gear-components)
+- [FlashRAG-UI](#computer-flashrag-ui)
 - [Supporting Methods](#robot-supporting-methods)
 - [Supporting Datasets & Document Corpus](#notebook-supporting-datasets--document-corpus)
 - [Additional FAQs](#raised_hands-additional-faqs)
@@ -52,7 +107,7 @@ With FlashRAG and provided resources, you can effortlessly reproduce existing SO
 
 - **Comprehensive Benchmark Datasets**: A collection of 36 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
 
-- **Pre-implemented Advanced RAG Algorithms**: Features 15 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
+- **Pre-implemented Advanced RAG Algorithms**: Features 16 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
 
 - **Efficient Preprocessing Stage**: Simplifies the RAG workflow preparation by providing various scripts like corpus processing for retrieval, retrieval index building, and pre-retrieval of documents.
 
@@ -72,8 +127,9 @@ FlashRAG is still under development and there are many issues and room for impro
 - [ ] Enhance code adaptability and readability
 
 ## :page_with_curl: Changelog
+[25/01/12] Introduce <strong>FlashRAG-UI</strong>, an easy to use interface. You can easily and quickly configure and experience the supported RAG methods and evaluate them on the benchmarks.
 
-[25/01/11] We have added support for the [RQRAG](https://arxiv.org/abs/2404.00610) method, see it in [**reproduce_experiment**](docs/reproduce_experiment.md).
+[25/01/11] We have added support for a new method [<u>RQRAG</u>](https://arxiv.org/abs/2404.00610) method, see it in [**reproduce_experiment**](docs/reproduce_experiment.md).
 
 [25/01/07] We have currently support the aggregation of multiple retrievers, see it in [**multi retriever usage**](https://github.com/RUC-NLPIR/FlashRAG/blob/main/docs/multi_retriever_usage.md).
 
@@ -85,14 +141,14 @@ FlashRAG is still under development and there are many issues and room for impro
 
 [24/09/24] We have released a version based on the MindSpore framework that supports Chinese hardware platforms. Please refer to [FlashRAG MindSpore](https://github.com/RUC-NLPIR/FlashRAG-MindSpore) for details.
 
+<details>
+<summary>Show more</summary>
+
 [24/09/18] Due to the complexity and limitations of installing Pyserini in certain environments, we have introduced a lightweight `BM25s` package as an alternative (faster and easier to use). The retriever based on Pyserini will be deprecated in future versions. To use retriever with `bm25s`, just set `bm25_backend` to `bm25s` in config.
 
 [24/09/09] We add support for a new method [<u>Adaptive-RAG</u>](https://aclanthology.org/2024.naacl-long.389.pdf), which can automatically select the RAG process to execute based on the type of query. See it result in [<u>result table</u>](#robot-supporting-methods).
 
 [24/08/02] We add support for a new method [<u>Spring</u>](https://arxiv.org/abs/2405.19670), significantly improve the performance of LLM by adding only a few token embeddings. See it result in [<u>result table</u>](#robot-supporting-methods).
-
-<details>
-<summary>Show more</summary>
 
 [24/07/17] Due to some unknown issues with HuggingFace, our original dataset link has been invalid. We have updated it. Please check the [new link](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/) if you encounter any problems.
 
@@ -167,9 +223,8 @@ From the official Faiss repository ([source](https://github.com/facebookresearch
 To build an index, you first need to save your corpus as a `jsonl` file with each line representing a document.
 
 ```jsonl
-{"id": "0", "contents": "content"}
-{"id": "1", "contents": "content"}
-...
+{"id": "0", "contents": "..."}
+{"id": "1", "contents": "..."}
 ```
 
 If you want to use Wikipedia as your corpus, you can refer to our documentation [Processing Wikipedia](./docs/process-wiki.md) to convert it into an indexable format.
@@ -477,6 +532,17 @@ In each category, we have implemented corresponding common pipelines. Some pipel
     </tbody>
 </table>
 
+## :computer: FlashRAG-UI
+To use FlashRAG-UI, Yo should make sure that your `Python >= 3.10` and
+```bash
+pip install gradio=5.9.1
+```
+Then:
+```bash
+cd webui
+python interface.py
+```
+
 ## :robot: Supporting Methods
 
 We have implemented 15 works with a consistent setting of:
@@ -576,7 +642,7 @@ Below is the list of datasets along with the corresponding sample sizes:
 Our toolkit supports jsonl format for retrieval document collections, with the following structure:
 
 ```jsonl
-{"id":"0", "contents": "...."}
+{"id":"0", "contents": "..."}
 {"id":"1", "contents": "..."}
 ```
 
