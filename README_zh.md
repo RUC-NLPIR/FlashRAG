@@ -36,6 +36,13 @@ FlashRAG是一个用于复现和开发检索增强生成（RAG）研究的Python
 
 <h2 align="center">✨ 介绍 FlashRAG-UI ✨</h2>
 <p>通过 <strong>FlashRAG-UI</strong>，您可以通过我们精心设计的可视化界面轻松快捷地配置和体验支持的 RAG 方法，并在基准上评估这些方法，让复杂的科研工作更加高效！</p>
+
+
+
+https://github.com/user-attachments/assets/835e7eac-a209-4e65-a1c1-31d8dc80a884
+
+
+
 <h3>🌟 特性</h3>
 <ul>
     <li>🚀 <strong>一键加载配置</strong>
