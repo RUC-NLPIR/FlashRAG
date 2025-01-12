@@ -38,6 +38,11 @@ With FlashRAG and provided resources, you can effortlessly reproduce existing SO
 
 <h2 align="center">✨ Introduce FlashRAG-UI ✨</h2>
 <p>With <strong>FlashRAG-UI</strong>, you can easily and quickly configure and experience the supported RAG methods through our meticulously designed visual interface, and evaluate these methods on benchmarks, making complex research work more efficient!</p>
+
+
+https://github.com/user-attachments/assets/8ca00873-5df2-48a7-b853-89e7b18bc6e9
+
+
 <h3>🌟 Features</h3>
 <ul>
   <li>🚀 <strong>One-Click Configuration Loading</strong>
