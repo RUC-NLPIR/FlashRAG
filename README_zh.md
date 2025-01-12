@@ -71,6 +71,9 @@ FlashRAG仍在开发中，存在许多问题和改进空间。我们将继续更
 - [ ] 增强代码的适应性和可读性
 
 ## :page_with_curl: 更新日志
+
+[25/01/11] 我们添加了对[RQRAG](https://arxiv.org/abs/2404.00610)方法的支持，详见[**复现实验**](docs/reproduce_experiment_zh.md)。
+
 [25/01/07] 我们目前支持多个检索器的聚合，详见[**多检索器使用**](https://github.com/RUC-NLPIR/FlashRAG/blob/main/docs/multi_retriever_usage.md)。
 
 [25/01/07] 我们集成了一个非常灵活且轻量级的语料库分块库[**Chunkie**](https://github.com/chonkie-ai/chonkie?tab=readme-ov-file#usage)，支持各种自定义分块方法（tokens、句子、语义等）。在[<u>分块文档语料库</u>](docs/chunk-doc-corpus.md)中使用它。
@@ -501,6 +504,7 @@ class ToyPipeline(BasicPipeline):
 | [FLARE](https://arxiv.org/abs/2305.06983)                | 循环   | 22.5    | 55.8          | 28.0          |33.9| 20.7| 20.2| |
 | [Iter-Retgen](https://arxiv.org/abs/2305.15294),      [ITRG](https://arxiv.org/abs/2310.05149)   | Loop | 36.8    | 60.1          | 38.3          | 21.6| 37.9| 18.2| |
 | [IRCoT](https://aclanthology.org/2023.acl-long.557.pdf) | 循环 | 33.3| 56.9|41.5|32.4 |45.6 |20.7 | |
+| [RQRAG](https://arxiv.org/abs/2404.00610)                                   | Loop        | 32.6    | 52.5          | 33.5          | 35.8       | 46.4       | 26.2      |  使用训练的 rqrag-llama2-7B                                               |
 
 ## :notebook: 支持的数据集和文档语料库
 
