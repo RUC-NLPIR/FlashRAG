@@ -533,11 +533,8 @@ In each category, we have implemented corresponding common pipelines. Some pipel
 </table>
 
 ## :computer: FlashRAG-UI
-To use FlashRAG-UI, Yo should make sure that your `Python >= 3.10` and
-```bash
-pip install gradio=5.9.1
-```
-Then:
+To use FlashRAG-UI, run the following code:
+
 ```bash
 cd webui
 python interface.py
