@@ -16,3 +16,4 @@ bm25s[core]==0.2.0
 fschat
 streamlit
 chonkie>=0.4.0
+gradio==5.9.1
