@@ -73,7 +73,6 @@ class LLMLinguaRefiner(BaseRefiner):
         output = []
         for item in tqdm(dataset, desc="Refining process: "):
             question = item.question
-            retrieval_result = item.retrieval_result
             # TODO: suit more cases
             if self.input_prompt_flag:
                 input_prompt = item.prompt
@@ -88,6 +87,7 @@ class LLMLinguaRefiner(BaseRefiner):
                     **self.compress_config,
                 )
             else:
+                retrieval_result = item.retrieval_result
                 docs = self.format_reference(retrieval_result).split("\n")
                 docs = [i for i in docs if i != ""]
                 item_output = self.refiner.compress_prompt(
