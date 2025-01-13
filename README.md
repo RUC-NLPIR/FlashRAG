@@ -15,7 +15,7 @@
 <a href="#sparkles-features">Features</a> |
 <a href="#rocket-quick-start">Quick-Start</a> |
 <a href="#gear-components"> Components</a> |
-<a href="#computer-flashrag-ui"> FlashRAG-UI</a> |
+<a href="#art-flashrag-ui"> FlashRAG-UI</a> |
 <a href="#robot-supporting-methods"> Supporting Methods</a> |
 <a href="#notebook-supporting-datasets--document-corpus"> Supporting Datasets</a> |
 <a href="#raised_hands-additional-faqs"> FAQs</a>
@@ -30,67 +30,13 @@ FlashRAG is a Python toolkit for the reproduction and development of Retrieval A
 <img src="asset/framework.jpg">
 </p>
 
-With FlashRAG and provided resources, you can effortlessly reproduce existing SOTA works in the RAG domain or implement your custom RAG processes and components.
+With FlashRAG and provided resources, you can effortlessly reproduce existing SOTA works in the RAG domain or implement your custom RAG processes and components. Besides, we provide an easy-to-use UI:
+
+https://github.com/user-attachments/assets/8ca00873-5df2-48a7-b853-89e7b18bc6e9
 
 <p>
 <a href="https://trendshift.io/repositories/10454" target="_blank"><img src="https://trendshift.io/api/badge/repositories/10454" alt="RUC-NLPIR%2FFlashRAG | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
-
-<h2 align="center">✨ Introduce FlashRAG-UI ✨</h2>
-<p>With <strong>FlashRAG-UI</strong>, you can easily and quickly configure and experience the supported RAG methods through our meticulously designed visual interface, and evaluate these methods on benchmarks, making complex research work more efficient!</p>
-
-
-https://github.com/user-attachments/assets/8ca00873-5df2-48a7-b853-89e7b18bc6e9
-
-
-<h3>🌟 Features</h3>
-<ul>
-  <li>🚀 <strong>One-Click Configuration Loading</strong>
-    <ul>
-      <li>You can load parameters and configuration files for various RAG methods through simple clicks, selections, and inputs.</li>
-      <li>🖼️ Supports preview interface for intuitive parameter settings.</li>
-      <li>💾 Provides save functionality to easily store configurations for future use.</li>
-    </ul>
-  </li>
-  <li>🔍 <strong>Quick Method Experience</strong>
-    <ul>
-      <li>⚡ Quickly load corpora and index files to explore the characteristics and application scenarios of various RAG methods.</li>
-      <li>🔄 Supports loading and switching different components and hyperparameters, seamlessly connecting different RAG Pipelines to quickly experience their performance and differences!</li>
-    </ul>
-  </li>
-  <li>📊 <strong>Efficient Benchmark Reproduction</strong>
-    <ul>
-      <li>🎯 Easily reproduce the built-in baseline methods and carefully collected benchmarks on FlashRAG-UI.</li>
-      <li>🛠️ Use cutting-edge research tools directly without complex settings, providing a smooth experience for your research work!</li>
-    </ul>
-  </li>
-</ul>
-
-<details>
-<summary>Show more</summary>
-<table align="center">
-  <tr>
-    <td align="center">
-      <img src="./asset/demo_en1.jpg" alt="Image 1" width="505"/>
-    </td>
-    <td align="center">
-      <img src="./asset/demo_en2.jpg" alt="Image 2" width="505"/>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="./asset/demo_en4.png" alt="Image 3" width="500"/>
-    </td>
-    <td align="center">
-      <img src="./asset/demo_en3.jpg" alt="Image 4" width="500"/>
-    </td>
-  </tr>
-</table>
-</details>
-
-<p>To experience FlashRAG-UI, please go to <a href="#computer-flashrag-ui">FlashRAG-UI</a>.</p>
-<center><h3>🎨 Experience our meticulously designed FlashRAG-UI—both user-friendly and visually appealing</h3></center>
-
 
 ## :link: Navigation
 - [Features](#sparkles-features)
@@ -99,7 +45,7 @@ https://github.com/user-attachments/assets/8ca00873-5df2-48a7-b853-89e7b18bc6e9
 - [Installation](#wrench-installation)
 - [Quick Start](#rocket-quick-start)
 - [Components](#gear-components)
-- [FlashRAG-UI](#computer-flashrag-ui)
+- [FlashRAG-UI](#art-flashrag-ui)
 - [Supporting Methods](#robot-supporting-methods)
 - [Supporting Datasets & Document Corpus](#notebook-supporting-datasets--document-corpus)
 - [Additional FAQs](#raised_hands-additional-faqs)
@@ -537,9 +483,45 @@ In each category, we have implemented corresponding common pipelines. Some pipel
     </tbody>
 </table>
 
-## :computer: FlashRAG-UI
-To use FlashRAG-UI, run the following code:
+## :art: FlashRAG-UI
+<p>With <strong>FlashRAG-UI</strong>, you can easily and quickly configure and experience the supported RAG methods through our meticulously designed visual interface, and evaluate these methods on benchmarks, making complex research work more efficient!</p>
 
+### :star2: Features
+- **One-Click Configuration Loading**
+  - You can load parameters and configuration files for various RAG methods through simple clicks, selections, and inputs.</li>
+  - Supports preview interface for intuitive parameter settings.</li>
+  - Provides save functionality to easily store configurations for future use.</li>
+- **Quick Method Experience**
+  - Quickly load corpora and index files to explore the characteristics and application scenarios of various RAG methods.</li>
+  - Supports loading and switching different components and hyperparameters, seamlessly connecting different RAG Pipelines to quickly experience their performance and differences!</li>
+- **Efficient Benchmark Reproduction**
+  - Easily reproduce the built-in baseline methods and carefully collected benchmarks on FlashRAG-UI.</li>
+  - Use cutting-edge research tools directly without complex settings, providing a smooth experience for your research work!</li>
+  
+<details>
+<summary>Show more</summary>
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="./asset/demo_en1.jpg" alt="Image 1" width="505"/>
+    </td>
+    <td align="center">
+      <img src="./asset/demo_en2.jpg" alt="Image 2" width="505"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./asset/demo_en4.png" alt="Image 3" width="500"/>
+    </td>
+    <td align="center">
+      <img src="./asset/demo_en3.jpg" alt="Image 4" width="500"/>
+    </td>
+  </tr>
+</table>
+</details>
+
+ To experience FlashRAG-UI, please go to <a href="#computer-flashrag-ui">FlashRAG-UI</a>
+#### Experience our meticulously designed FlashRAG-UI—both user-friendly and visually appealing:
 ```bash
 cd webui
 python interface.py
