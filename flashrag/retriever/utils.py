@@ -5,6 +5,7 @@ from typing import Dict, Any, Union, List, Dict
 import numpy as np
 import datasets
 import re
+import langid
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 def convert_numpy(obj: Union[Dict, list, np.ndarray, np.generic]) -> Any:
@@ -27,7 +28,14 @@ def judge_zh(input_str: str):
     assert isinstance(input_str, str), input_str
     if len(input_str) == 0:
         return False
-    return bool(re.search(r'[\u4e00-\u9fff]', input_str))
+    detect_result = langid.classify(input_str)
+    if detect_result[0] == 'zh':
+        return True
+    else:
+        return False
+    #return bool(re.search(r'[\u4e00-\u9fff]', input_str))
+
+
 def convert_numpy(obj: Union[Dict, list, np.ndarray, np.generic]) -> Any:
     """Recursively convert numpy objects in nested dictionaries or lists to native Python types."""
     if isinstance(obj, dict):

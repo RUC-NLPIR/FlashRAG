@@ -2,6 +2,7 @@ datasets
 base58
 nltk
 numpy
+langid
 openai
 peft
 PyYAML
