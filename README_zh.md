@@ -9,18 +9,16 @@
 </div>
 
 <h4 align="center">
-
 <p>
 <a href="#wrench-安装">安装</a> |
 <a href="#sparkles-特性">特性</a> |
 <a href="#rocket-快速开始">快速开始</a> |
 <a href="#gear-组件">组件</a> |
-<a href="#computer-flashrag-ui">FlashRAG-UI</a> |
+<a href="#art-flashrag-ui">FlashRAG-UI</a> |
 <a href="#robot-基线方法">支持的基线方法</a> |
 <a href="#notebook-支持的数据集和文档语料库">支持的数据集</a> |
 <a href="#raised_hands-其他常见问题">常见问题</a>
 </p>
-
 </h4>
 
 FlashRAG是一个用于复现和开发检索增强生成（RAG）研究的Python工具包。我们的工具包包括36个预处理的基准RAG数据集和16个最先进的RAG算法。
@@ -29,66 +27,13 @@ FlashRAG是一个用于复现和开发检索增强生成（RAG）研究的Python
 <img src="asset/framework.jpg">
 </p>
 
-通过FlashRAG和提供的资源，您可以轻松复现现有的SOTA工作，或实现自定义的RAG流程和组件。
-<p>
-<a href="https://trendshift.io/repositories/10454" target="_blank"><img src="https://trendshift.io/api/badge/repositories/10454" alt="RUC-NLPIR%2FFlashRAG | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-</p>
-
-<h2 align="center">✨ 介绍 FlashRAG-UI ✨</h2>
-<p>通过 <strong>FlashRAG-UI</strong>，您可以通过我们精心设计的可视化界面轻松快捷地配置和体验支持的 RAG 方法，并在基准上评估这些方法，让复杂的科研工作更加高效！</p>
-
+通过FlashRAG和提供的资源，您可以轻松复现现有的SOTA工作，或实现自定义的RAG流程和组件。我们也提供了一个简介易用的可视化界面：
 
 https://github.com/user-attachments/assets/e34a90c0-5e0f-4f76-886e-e30de8a6f8d1
 
-
-<h3>🌟 特性</h3>
-<ul>
-    <li>🚀 <strong>一键加载配置</strong>
-        <ul>
-            <li>您可以通过简单的点击、选择、输入等操作，加载各种 RAG 方法的参数和配置文件。</li>
-            <li>🖼️ 支持预览界面，方便直观地查看参数设置。</li>
-            <li>💾 提供保存功能，轻松存储配置以供下次使用。</li>
-        </ul>
-    </li>
-    <li>🔍 <strong>快速体验方法</strong>
-        <ul>
-            <li>⚡ 快速加载语料库和索引文件，探索各种 RAG 方法的特点和应用场景。</li>
-            <li>🔄 支持加载并切换不同的组件、超参数，不同的 RAG Pipeline 无缝衔接，快速体验它们的性能与差异！</li>
-        </ul>
-    </li>
-    <li>📊 <strong>高效复现基准</strong>
-        <ul>
-            <li>🎯 在 FlashRAG-UI 上轻松复现我们工具包内置的基线方法和精心收集的基准。</li>
-            <li>🛠️ 无需复杂设置，即可直接使用最前沿的科研工具，为您的科研工作带来流畅的体验！</li>
-        </ul>
-    </li>
-</ul>
-
-<details>
-<summary>显示更多</summary>
-<table align="center">
-  <tr>
-    <td align="center">
-      <img src="./asset/demo_zh1.jpg" alt="Image 1" width="505"/>
-    </td>
-    <td align="center">
-      <img src="./asset/demo_zh2.jpg" alt="Image 2" width="505"/>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="./asset/demo_zh4.png" alt="Image 3" width="500"/>
-    </td>
-    <td align="center">
-      <img src="./asset/demo_zh3.jpg" alt="Image 4" width="500"/>
-    </td>
-  </tr>
-</table>
-</details>
-
-<p>为了体验FlashRAG-UI，请跳转至 <a href="#computer-flashrag-ui">FlashRAG-UI</a>。</p>
-<center><h3>🎨 体验我们精心设计的FlashRAG-UI——不仅好用，更让人赏心悦目</h3></center>
-
+<p>
+<a href="https://trendshift.io/repositories/10454" target="_blank"><img src="https://trendshift.io/api/badge/repositories/10454" alt="RUC-NLPIR%2FFlashRAG | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+</p>
 
 ## :link: 导航
 - [特性](#sparkles-特性)
@@ -97,7 +42,7 @@ https://github.com/user-attachments/assets/e34a90c0-5e0f-4f76-886e-e30de8a6f8d1
 - [安装](#wrench-安装)
 - [快速开始](#rocket-快速开始)
 - [组件](#gear-组件)
-- [FlashRAG-UI](#computer-flashrag-ui)
+- [FlashRAG-UI](#art-flashrag-ui)
 - [基线方法](#robot-基线方法)
 - [支持的数据集和文档语料库](#notebook-支持的数据集和文档语料库)
 - [其他常见问题](#raised_hands-其他常见问题)
@@ -531,8 +476,44 @@ class ToyPipeline(BasicPipeline):
     </tbody>
 </table>
 
-## :computer: FlashRAG-UI
+## :art: FlashRAG-UI
+通过 <strong>FlashRAG-UI</strong>，您可以通过我们精心设计的可视化界面轻松快捷地配置和体验支持的 RAG 方法，并在基准上评估这些方法，让复杂的科研工作更加高效！
 
+### :star2: 特性
+- **一键加载配置**
+  - 您可以通过简单的点击、选择、输入等操作，加载各种 RAG 方法的参数和配置文件
+  - 支持预览界面，方便直观地查看参数设置
+  - 提供保存功能，轻松存储配置以供下次使用
+- **快速体验方法**
+  - 快速加载语料库和索引文件，探索各种 RAG 方法的特点和应用场景
+  - 支持加载并切换不同的组件、超参数，不同的 RAG Pipeline 无缝衔接，快速体验它们的性能与差异！
+- **高效复现基准**
+  - 在 FlashRAG-UI 上轻松复现我们工具包内置的基线方法和精心收集的基准
+  - 无需复杂设置，即可直接使用最前沿的科研工具，为您的科研工作带来流畅的体验！
+
+<details>
+<summary>显示更多</summary>
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="./asset/demo_zh1.jpg" alt="Image 1" width="505"/>
+    </td>
+    <td align="center">
+      <img src="./asset/demo_zh2.jpg" alt="Image 2" width="505"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./asset/demo_zh4.png" alt="Image 3" width="500"/>
+    </td>
+    <td align="center">
+      <img src="./asset/demo_zh3.jpg" alt="Image 4" width="500"/>
+    </td>
+  </tr>
+</table>
+</details>
+
+#### 体验我们精心设计的FlashRAG-UI——不仅好用，更让人赏心悦目:
 要使用FlashRAG-UI，您需要确保您的`Python >= 3.10`并安装以下依赖：
 ```bash
 pip install gradio=5.9.1
