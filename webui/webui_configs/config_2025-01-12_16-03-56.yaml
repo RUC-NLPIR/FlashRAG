@@ -1,0 +1,53 @@
+method_name: Naive RAG
+gpu_id: 0,1,2,3,4,5,6,7,8
+framework: hf
+generator_model: llama3.1-8B-instruct
+generator_model_path: meta-llama/Llama-3.1-8B-Instruct
+retrieval_method: e5
+retrieval_model_path: intfloat/e5-base-v2
+corpus_path: examples/quick_start/general_knowledge.jsonl
+index_path: examples/quick_start/e5_Flat.index
+instruction: null
+retrieval_topk: 5
+retrieval_batch_size: 256
+retrieval_use_fp16: true
+retrieval_query_max_length: 512
+save_retrieval_cache: false
+use_retrieval_cache: false
+retrieval_cache_path: null
+retrieval_pooling_method: mean
+bm25_backend: pyserini
+use_sentence_transformer: false
+use_reranker: false
+rerank_model_name: bge-reranker-v2-m3
+rerank_model_path: BAAI/bge-reranker-v2-m3
+rerank_pooling_method: mean
+rerank_topk: 10
+rerank_max_length: 512
+rerank_use_fp16: false
+generator_max_input_len: 4096
+generator_batch_size: 1
+gpu_memory_utilization: 0.7
+use_fid: false
+openai_setting: {}
+generation_params:
+    do_sample: true
+    max_tokens: 512
+    temperature: 0.7
+    top_p: 0.9
+    top_k: -1
+dataset_name: null
+data_dir: ''
+dataset_split: null
+save_intermediate_data: true
+save_dir: ''
+save_note: ''
+seed: ''
+test_sample_num: 10
+random_sample: false
+metrics:
+- em
+- f1
+- acc
+- precision
+save_metric_score: true
