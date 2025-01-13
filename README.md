@@ -520,7 +520,6 @@ In each category, we have implemented corresponding common pipelines. Some pipel
 </table>
 </details>
 
- To experience FlashRAG-UI, please go to <a href="#computer-flashrag-ui">FlashRAG-UI</a>
 #### Experience our meticulously designed FlashRAG-UI—both user-friendly and visually appealing:
 ```bash
 cd webui
