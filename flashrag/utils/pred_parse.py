@@ -13,7 +13,7 @@ def selfask_pred_parse(dataset):
                 answer = line.split(FINAL_ANSWER_PREFIX)[1].strip()
                 break
         item.update_output('raw_pred', pred)
-        item.update_output('pred', pred)
+        item.update_output('pred', answer)
 
     return dataset
 
