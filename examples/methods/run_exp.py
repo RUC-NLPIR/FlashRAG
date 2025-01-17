@@ -366,7 +366,7 @@ def selfrag(args):
 
     pipeline = SelfRAGPipeline(
         config,
-        threhsold=0.2,
+        threshold=0.2,
         max_depth=2,
         beam_width=2,
         w_rel=1.0,
