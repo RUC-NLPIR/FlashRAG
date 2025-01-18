@@ -1,31 +1,32 @@
-# Docsify Template
+# Welcome to FlashRAG's documentation!
 
-> A simple [Docsify](https://github.com/docsifyjs/docsify/) template for creating Markdown-based documentation sites, with no build process required.
+<p align="center">
+<img src="../asset/framework.jpg">
+</p>
 
-## Site Setup
 
-### Static Webserver
-Upload these template files to any static web server. The file `.nojekyll` is only required if hosting the site on GitHub Pages and otherwise can be removed.
+FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 36 pre-processed benchmark RAG datasets and 16 state-of-the-art RAG algorithms. Our features are as follows:
 
-### GitHub Pages
+- **Extensive and Customizable Framework**: Includes essential components for RAG scenarios such as retrievers, rerankers, generators, and compressors, allowing for flexible assembly of complex pipelines.
 
-#### Hosting Site
+- **Comprehensive Benchmark Datasets**: A collection of 36 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
 
-To host this template on GitHub Pages do the following:  
+- **Pre-implemented Advanced RAG Algorithms**: Features 16 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
 
-1. Log into GitHub if you have not done so already
-2. Tap the **Use this template** button in the upper-right of this GitHub Repository and choose **Create a new repository**
-3. Enter a name for your new Repository and then tap the **Create repository** button
-4. Once your new Repostitory is created go to **Settings**, then select **Pages** from the left-hand sidebar, and under **Branch** choose **main** and then tap the **Save** button
-5. Wait a minute or two and refresh the same **Pages** page - once your site is ready a message will be displayed at the top of the screen along with a site link and a **Visit site** button
+- **Efficient Preprocessing Stage**: Simplifies the RAG workflow preparation by providing various scripts like corpus processing for retrieval, retrieval index building, and pre-retrieval of documents.
 
-#### Editing Content
+- **Optimized Execution**: The library's efficiency is enhanced with tools like vLLM, FastChat for LLM inference acceleration, and Faiss for vector index management.
 
-How about editing the content of your new Docsify site on GitHub Pages? View the Markdown page you want to edit (for example, **README.md**) and tap the **Pencil Icon**, then save any changes by tapping the green **Commit changes...** button. In just a few moments the Docsify site will be automatically updated to reflect those changes.
+- **Easy to Use UI** : We have developed a very easy to use UI to easily and quickly configure and experience the RAG baselines we have implemented, as well as run evaluation scripts on a visual interface.
 
-### Viewing Locally 
-Run `npx serve .` (Node.js users) or `python -m http.server 8000` (Python users) in the repo folder to serve run locally.
 
-## Docsify Documentation
+# Documentation
 
-To learn more about using Docsify, visit https://docsify.js.org.
+- [Installation](docs/installation.md)
+- [Features](docs/features.md)
+- [Quick-Start](docs/quick-start.md)
+- [Components](docs/components.md)
+- [FlashRAG-UI](docs/flashrag-ui.md)
+- [Supporting Methods](docs/supporting-methods.md)
+- [Supporting Datasets](docs/supporting-datasets.md)
+- [FAQs](docs/faqs.md)
