@@ -9,6 +9,8 @@
   <!-- Replace with your own title and description. -->
   <title>FlashRAG Documentation</title>
   <meta name="description" content="An efficient toolkit for Retrieval Augmented Generation.">
+  <meta name="keywords" content="FlashRAG, Retrieval Augmented Generation, RAG, Toolkit, Documentation">
+  <meta name="author" content="RUC-NLPIR FlashRAG Team">
 
   <!-- Default Theme (see https://docsify.js.org/#/themes) -->
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
@@ -21,6 +23,7 @@
   <script>
     // Docsify Configuration (see https://docsify.js.org/#/configuration)
     window.$docsify = {
+      loadNavbar: true,
       name: 'FlashRAG Documentation',
       repo: 'https://github.com/RUC-NLPIR/FlashRAG',
       // Sidebar Configuration
@@ -30,11 +33,18 @@
       // Set subMaxLevel to 0 to remove automatic display of page table of contents (TOC) in Sidebar
       subMaxLevel: 3,
       fallbackLanguages: ['zh', 'en'],
+      externalLinkTarget: '_blank',
 
       // Search Plugin Configuration
       search: {
-        placeholder: 'Type to search',
-        noData: 'No matches found.',
+        placeholder: {
+          '/zh-cn/': '搜索',
+          '/': 'Type to search'
+        },
+        noData: {
+          '/zh-cn/': '找不到结果',
+          '/': 'No Results'
+        },
         // Headline depth, 1 - 6
         depth: 2,
       }
@@ -47,6 +57,8 @@
   <!-- Recommended -->
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
+  <script src="//vox.cab/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
+  <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
 
 </body>
 
