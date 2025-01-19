@@ -2,7 +2,7 @@
 
 FlashRAG提供了一个WebUI，用户可以通过WebUI界面来体验各类RAG流程以及运行实验，从而免去手动编写代码的繁琐过程。
 
-![](./assets/demo_base.jpg)
+![](#/assets/demo_base.jpg)
 
 在安装完成后，通过下面的命令启动WebUI:
 
