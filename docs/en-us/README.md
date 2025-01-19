@@ -1,6 +1,6 @@
 # Welcome to FlashRAG's documentation!
 
-![](./asset/framework.jpg)
+![](asset/framework.jpg)
 
 # Introduction
 
