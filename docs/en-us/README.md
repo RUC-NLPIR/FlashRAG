@@ -1,7 +1,7 @@
 # Welcome to FlashRAG's documentation!
 
 <p align="center">
-<img src="../asset/framework.jpg">
+<img src="https://github.com/RUC-NLPIR/FlashRAG/blob/main/asset/framework.jpg">
 </p>
 
 
