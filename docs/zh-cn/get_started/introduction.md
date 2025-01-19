@@ -4,7 +4,7 @@
 
 FlashRAG是一个用于复现和开发检索增强生成（RAG）流程的Python工具包。其集成了RAG流程中需要用到的数据集、文档库、组件实现、算法实现、评估指标以及可视化界面，力求实现更简单、更高效的RAG算法开发与研究。
 
-![](./asset/framework.jpg)
+![](../asset/framework.jpg)
 
 ## FlashRAG能做什么?
 
