@@ -1,9 +1,8 @@
 # Welcome to FlashRAG's documentation!
 
-<p align="center">
-<img src="https://github.com/RUC-NLPIR/FlashRAG/blob/main/asset/framework.jpg">
-</p>
+![](./asset/framework.jpg)
 
+# Introduction
 
 FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 36 pre-processed benchmark RAG datasets and 16 state-of-the-art RAG algorithms. Our features are as follows:
 
@@ -30,3 +29,28 @@ FlashRAG is a Python toolkit for the reproduction and development of Retrieval A
 - [Supporting Methods](docs/supporting-methods.md)
 - [Supporting Datasets](docs/supporting-datasets.md)
 - [FAQs](docs/faqs.md)
+
+# :bookmark: License
+
+FlashRAG is licensed under the [<u>MIT License</u>](https://github.com/RUC-NLPIR/FlashRAG/blob/main/LICENSE).
+
+# :star2: Citation
+
+Please kindly cite our paper if helps your research:
+
+```BibTex
+@article{FlashRAG,
+    author={Jiajie Jin and
+            Yutao Zhu and
+            Xinyu Yang and
+            Chenghao Zhang and
+            Zhicheng Dou},
+    title={FlashRAG: A Modular Toolkit for Efficient Retrieval-Augmented Generation Research},
+    journal={CoRR},
+    volume={abs/2405.13576},
+    year={2024},
+    url={https://arxiv.org/abs/2405.13576},
+    eprinttype={arXiv},
+    eprint={2405.13576}
+}
+```
