@@ -1,49 +1,49 @@
 * Get Started
-    * [Introduction](en/introduction.md)
-    * [Installation](en/installation.md)
-    * [Tutorial](en/tutorial.md)
-    * [Webui](en/webui.md)
+    * [Introduction](en-us/introduction.md)
+    * [Installation](en-us/installation.md)
+    * [Tutorial](en-us/tutorial.md)
+    * [Webui](en-us/webui.md)
 
 * Data Preparation
-    * [Evaluation Datasets](en/evaluation-datasets.md)
-    * [Build Corpus (Use Existing Corpus)](en/build-corpus.md)
-    * [Build Index](en/build-index.md)
+    * [Evaluation Datasets](en-us/evaluation-datasets.md)
+    * [Build Corpus (Use Existing Corpus)](en-us/build-corpus.md)
+    * [Build Index](en-us/build-index.md)
 
 * Config Settings
-    * [Overview](en/config-setting.md)
-    * [Basic Settings](en/basic-settings.md)
-    * [Retriever Settings](en/retriever-settings.md)
-    * [Generator Settings](en/generator-settings.md)
+    * [Overview](en-us/config-setting.md)
+    * [Basic Settings](en-us/basic-settings.md)
+    * [Retriever Settings](en-us/retriever-settings.md)
+    * [Generator Settings](en-us/generator-settings.md)
 
 * Components
-    * [Retriever](en/retriever.md)
-    * [Generator](en/generator.md)
-    * [Judger](en/judger.md)
-    * [Refiner](en/refiner.md)
+    * [Retriever](en-us/retriever.md)
+    * [Generator](en-us/generator.md)
+    * [Judger](en-us/judger.md)
+    * [Refiner](en-us/refiner.md)
 
 * Prompt Template
-    * [Overview](en/prompt-template.md)
+    * [Overview](en-us/prompt-template.md)
 
 * Pipelines
-    * [Pipeline](en/pipeline.md)
+    * [Pipeline](en-us/pipeline.md)
 
 * Evaluation
-    * [Overview](en/evaluation.md)
-    * [Evaluation Metrics](en/evaluation-metrics.md)
+    * [Overview](en-us/evaluation.md)
+    * [Evaluation Metrics](en-us/evaluation-metrics.md)
 
 * Reproduce Experiments
-    * [Results](en/results.md)
-    * [Reproduce Process](en/reproduce-process.md)
+    * [Results](en-us/results.md)
+    * [Reproduce Process](en-us/reproduce-process.md)
 
 * Api Reference
-    * [flashrag.config](en/flashrag.config.md)
-    * [flashrag.dataset](en/flashrag.dataset.md)
-    * [flashrag.evaluator](en/flashrag.evaluator.md)
-    * [flashrag.prompt](en/flashrag.prompt.md)
-    * [flashrag.utils](en/flashrag.utils.md)
-    * [flashrag.retriever](en/flashrag.retriever.md)
-    * [flashrag.generator](en/flashrag.generator.md)
-    * [flashrag.judger](en/flashrag.judger.md)
-    * [flashrag.refiner](en/flashrag.refiner.md)
-    * [flashrag.pipeline](en/flashrag.pipeline.md)
+    * [flashrag.config](en-us/flashrag.config.md)
+    * [flashrag.dataset](en-us/flashrag.dataset.md)
+    * [flashrag.evaluator](en-us/flashrag.evaluator.md)
+    * [flashrag.prompt](en-us/flashrag.prompt.md)
+    * [flashrag.utils](en-us/flashrag.utils.md)
+    * [flashrag.retriever](en-us/flashrag.retriever.md)
+    * [flashrag.generator](en-us/flashrag.generator.md)
+    * [flashrag.judger](en-us/flashrag.judger.md)
+    * [flashrag.refiner](en-us/flashrag.refiner.md)
+    * [flashrag.pipeline](en-us/flashrag.pipeline.md)
     
