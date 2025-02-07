@@ -4,9 +4,9 @@
     * [Webui](zh-cn/get_started/webui.md)
 
 * 数据准备
-    * [评估数据集](zh-cn/evaluation-datasets.md)
-    * [构建语料库（或者使用现有语料库）](zh-cn/build-corpus.md)
-    * [构建索引](zh-cn/build-index.md)
+    * [评估数据集](zh-cn/data_preparation/evaluation-datasets.md)
+    * [构建语料库（或者使用现有语料库）](zh-cn/data_preparation/build-corpus.md)
+    * [构建索引](zh-cn/data_preparation/build-index.md)
 
 * 配置设置
     * [概述](zh-cn/config-setting.md)

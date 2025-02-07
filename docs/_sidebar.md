@@ -5,7 +5,7 @@
     * [Webui](en-us/webui.md)
 
 * Data Preparation
-    * [Evaluation Datasets](en-us/evaluation-datasets.md)
+    * [Evaluation Datasets](en-us/data_preparation/evaluation-datasets.md)
     * [Build Corpus (Use Existing Corpus)](en-us/build-corpus.md)
     * [Build Index](en-us/build-index.md)
 
