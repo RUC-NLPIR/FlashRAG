@@ -78,6 +78,9 @@ FlashRAG is still under development and there are many issues and room for impro
 - [ ] Enhance code adaptability and readability
 
 ## :page_with_curl: Changelog
+
+[25/01/21] Our technical paper [FlashRAG: A Python Toolkit for Efficient RAG Research](https://arxiv.org/abs/2405.13576) is honored to have been accepted to the Resource Track of the 2025 **ACM Web Conference (WWW 2025)**. Please Check it out!
+
 [25/01/12] Introduce <strong>FlashRAG-UI</strong>, an easy to use interface. You can easily and quickly configure and experience the supported RAG methods and evaluate them on the benchmarks.
 
 [25/01/11] We have added support for a new method [<u>RQRAG</u>](https://arxiv.org/abs/2404.00610) method, see it in [**reproduce_experiment**](docs/reproduce_experiment.md).
