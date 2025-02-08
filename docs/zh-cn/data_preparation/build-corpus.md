@@ -8,6 +8,8 @@
 
 ## 支持的文档库格式
 
+### 纯文本文档库
+
 FlashRAG支持加载如下格式的`jsonl`文件作为文档库:
 ```python
 {"id":"0", "contents": "..."}
@@ -18,8 +20,57 @@ FlashRAG支持加载如下格式的`jsonl`文件作为文档库:
 > [!TIP]
 > 由于FlashRAG中默认会根据`\n`解析出title和text来构建prompt，我们推荐在没有title的文档库使用`\n{text}`来构建`contents`。
 
+### 图文混合文档库
+
+在多模态检索中，文档库的每一条数据可能同时包含图片和文本(比如图片和其对应的描述)，我们采用`parquet`格式来存储这类数据，其所包含的必要键值如下，可以根据需要添加额外的键值。
+
+```python
+{
+    'id': str,
+    'text': str,
+    'image': str # 图片对应的字节流数据
+}
+```
+
+> [!NOTE]
+> 如果有多张图，可以先拼接成单张图再转换为字节流存放到`image`键下。
+
+可以参考下面的代码将图片转换为字节流，并保存为`parquet`文件。
+
+```python
+import io
+from PIL import Image
+from datasets import Dataset
+
+def image_to_bytes(image):
+    """将Image列的PIL图片转换为字节"""
+    with io.BytesIO() as buffer:
+        image.save(buffer, format="PNG")  # 可根据需要选择格式
+        return buffer.getvalue()
+
+# 加载图片
+image = Image.open(image_path).convert('RGB')
+# 图片转换为字节流保存
+data = [{'id': '0', 'text': 'test sample', 'image': image_to_bytes(image)}]
+# 存入parquet文件
+data = Dataset.from_list(data)
+data.to_parquet('sample_corpus.parquet')
+```
+
+
+加载这类文件可以使用`datasets`库自带的`load_dataset`函数，读取时会自动将图片的字节流转换为PIL格式。可以参考下面的代码:
+
+```python
+from datasets import load_dataset
+data = load_dataset('parquet', data_files='sample_corpus.parquet', split='train')
+data.cast_column('image', datasets.Image())
+print(Data)
+```
 
 ## 如何使用
+
+![TIPS]
+> 以下内容仅针对纯文本模态。对于多模态文档库，直接填入对应路径即可。
 
 ### 使用现成文档库
 
