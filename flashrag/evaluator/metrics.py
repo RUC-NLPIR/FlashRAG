@@ -374,11 +374,11 @@ class ZH_Rouge_Score(BaseMetric):
     def __init__(self, config):
         super().__init__(config)
         from rouge_chinese import Rouge
-        import jieba
 
         self.scorer = Rouge()
 
     def calculate_rouge(self, pred, golden_answers):
+        import jieba
         if (pred, tuple(golden_answers)) in self.cached_scores:
             return self.cached_scores[(pred, tuple(golden_answers))]
         output = {}
@@ -399,11 +399,12 @@ class ZH_Rouge_Score(BaseMetric):
 
 
 
-class ZH_Rouge_1(Rouge_Score):
+class ZH_Rouge_1(ZH_Rouge_Score):
     metric_name = "zh_rouge-1"
 
     def __init__(self, config):
         super().__init__(config)
+        
 
     def calculate_metric(self, data):
         golden_answers_list = self.get_dataset_answer(data)
@@ -418,7 +419,7 @@ class ZH_Rouge_1(Rouge_Score):
         return {"zh_rouge-1": score}, metric_score_list
 
 
-class ZH_Rouge_2(Rouge_Score):
+class ZH_Rouge_2(ZH_Rouge_Score):
     metric_name = "zh_rouge-2"
 
     def __init__(self, config):
@@ -437,7 +438,7 @@ class ZH_Rouge_2(Rouge_Score):
         return {"zh_rouge-2": score}, metric_score_list
 
 
-class ZH_Rouge_L(Rouge_Score):
+class ZH_Rouge_L(ZH_Rouge_Score):
     metric_name = "zh_rouge-l"
 
     def __init__(self, config):

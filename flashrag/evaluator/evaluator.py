@@ -15,7 +15,7 @@ class Evaluator:
 
         self.avaliable_metrics = self._collect_metrics()
 
-        self.metric_class = {}
+        self.metric_class = {}  
         for metric in self.metrics:
             if metric in self.avaliable_metrics:
                 self.metric_class[metric] = self.avaliable_metrics[metric](self.config)
