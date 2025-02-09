@@ -18,3 +18,5 @@ fschat
 streamlit
 chonkie>=0.4.0
 gradio==5.11.0
+rouge-chinese
+jieba
