@@ -307,6 +307,8 @@ class Rouge_Score(BaseMetric):
         return output
 
 
+
+
 class Rouge_1(Rouge_Score):
     metric_name = "rouge-1"
 
@@ -362,6 +364,98 @@ class Rouge_L(Rouge_Score):
         score = sum(metric_score_list) / len(metric_score_list)
 
         return {"rouge-l": score}, metric_score_list
+
+
+
+class ZH_Rouge_Score(BaseMetric):
+    metric_name = "zh_rouge_score"
+    cached_scores = {}
+    
+    def __init__(self, config):
+        super().__init__(config)
+        from rouge_chinese import Rouge
+        import jieba
+
+        self.scorer = Rouge()
+
+    def calculate_rouge(self, pred, golden_answers):
+        if (pred, tuple(golden_answers)) in self.cached_scores:
+            return self.cached_scores[(pred, tuple(golden_answers))]
+        output = {}
+        pred = ' '.join(jieba.cut(pred))
+        for answer in golden_answers:
+            answer = ' '.join(jieba.cut(answer))
+            scores = self.scorer.get_scores(pred, answer)
+            for key in ["rouge-1", "rouge-2", "rouge-l"]:
+                if key not in output:
+                    output[key] = []
+                output[key].append(scores[0][key]["f"])
+        for k, v in output.items():
+            output[k] = max(v)
+
+        self.cached_scores[(pred, tuple(golden_answers))] = output
+        return output
+
+
+
+
+class ZH_Rouge_1(Rouge_Score):
+    metric_name = "zh_rouge-1"
+
+    def __init__(self, config):
+        super().__init__(config)
+
+    def calculate_metric(self, data):
+        golden_answers_list = self.get_dataset_answer(data)
+        pred_list = data.pred
+
+        metric_score_list = [
+            self.calculate_rouge(pred, golden_answers)["rouge-1"]
+            for pred, golden_answers in zip(pred_list, golden_answers_list)
+        ]
+        score = sum(metric_score_list) / len(metric_score_list)
+
+        return {"zh_rouge-1": score}, metric_score_list
+
+
+class ZH_Rouge_2(Rouge_Score):
+    metric_name = "zh_rouge-2"
+
+    def __init__(self, config):
+        super().__init__(config)
+
+    def calculate_metric(self, data):
+        golden_answers_list = self.get_dataset_answer(data)
+        pred_list = data.pred
+
+        metric_score_list = [
+            self.calculate_rouge(pred, golden_answers)["rouge-2"]
+            for pred, golden_answers in zip(pred_list, golden_answers_list)
+        ]
+        score = sum(metric_score_list) / len(metric_score_list)
+
+        return {"zh_rouge-2": score}, metric_score_list
+
+
+class ZH_Rouge_L(Rouge_Score):
+    metric_name = "zh_rouge-l"
+
+    def __init__(self, config):
+        super().__init__(config)
+
+    def calculate_metric(self, data):
+        golden_answers_list = self.get_dataset_answer(data)
+        pred_list = data.pred
+
+        metric_score_list = [
+            self.calculate_rouge(pred, golden_answers)["rouge-l"]
+            for pred, golden_answers in zip(pred_list, golden_answers_list)
+        ]
+        score = sum(metric_score_list) / len(metric_score_list)
+
+        return {"zh_rouge-l": score}, metric_score_list
+
+
 
 
 class BLEU(BaseMetric):
