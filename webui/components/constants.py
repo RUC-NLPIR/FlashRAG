@@ -3,7 +3,7 @@ METHODS = ['Naive RAG', 'Vanila Generation','AAR', 'LongLLMLingua', 'Recomp', 'S
 
 METRICS = [
     'em', 'f1' ,'acc', 'precision', 'recall',
-    'input_tokens', 'bleu', 'rouge-l', 'rouge-1', 'rouge-2'
+    'input_tokens', 'bleu', 'rouge-l', 'rouge-1', 'rouge-2', 'zh_rouge-1', 'zh_rouge-2', 'zh_rouge-l'
 ]
 
 CONPONENTS2ARGKEY = {
