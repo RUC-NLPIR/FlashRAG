@@ -80,6 +80,7 @@ save_metric_score: True
      - `retrieval_recall`: 检索的召回率，衡量检索文档是否包含正确答案。
      - `retrieval_precision`: 检索的精确性
      - `rouge-1`, `rouge-2`, `rouge-l`
+     - `zh_rouge-1`, `zh_rouge-2`, `zh_rouge-l`: 中文版本
      - `bleu`
      - `gaokao_acc`: 评估GAOKAO-MM数据集的各科目Accuracy
      - `llm_judge`: 基于LLM对生成答案进行打分，需要额外配置`llm_judge_setting`。
