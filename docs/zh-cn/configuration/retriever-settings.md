@@ -8,7 +8,7 @@
 
 ### 基本检索模型参数
 
-> [!TIPS] 
+> [!TIP] 
 > 如果已经在前面字典中填充好了`model2path`和`method2index`，仅需修改 `retrieval_method` 和 `corpus_path`即可使用检索功能。
 
 

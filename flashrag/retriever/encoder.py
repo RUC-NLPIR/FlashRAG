@@ -140,13 +140,7 @@ class STEncoder:
 
 
 class ClipEncoder:
-    """ClipEncoder class for encoding queries using CLIP.
-    Three type:
-        1. openai-series clip: 需要对图片进行processor
-        2. jina clip: 不需要对图片进行processor，直接使用encode-text等接口
-        3. openclip series: 还未探索使用方法
-
-    """
+    """ClipEncoder class for encoding queries using CLIP."""
 
     def __init__(self, model_name, model_path):
 

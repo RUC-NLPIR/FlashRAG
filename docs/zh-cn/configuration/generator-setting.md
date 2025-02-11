@@ -16,7 +16,7 @@
   - **api_key**：设置 OpenAI API 密钥，用于身份验证。
   - **base_url**：设置 OpenAI API 的基础 URL，通常为 OpenAI 的默认 API 地址，除非您使用自定义部署。
 
-> [!TIPS]
+> [!TIP]
 > 支持的参数可以参考Openai的Client加载的参数。
 
 - **generator_model_path**  

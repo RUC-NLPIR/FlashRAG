@@ -15,10 +15,10 @@
     * [生成器设置](zh-cn/configuration/generator-settings.md)
 
 * 组件
-    * [检索器](zh-cn/retriever.md)
-    * [生成器](zh-cn/generator.md)
-    * [评估器](zh-cn/judger.md)
-    * [精炼器](zh-cn/refiner.md)
+    * [检索器](zh-cn/component/retriever.md)
+    * [生成器](zh-cn/component/generator.md)
+    * [评估器](zh-cn/component/judger.md)
+    * [精炼器](zh-cn/component/refiner.md)
 
 * 提示模板
     * [概述](zh-cn/prompt-template.md)
