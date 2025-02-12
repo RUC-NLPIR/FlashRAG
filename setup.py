@@ -11,12 +11,13 @@ with open("flashrag/version.py", encoding="utf8") as fp:
 extras_require = {
     'core': requirements,
     'retriever': ['pyserini', 'sentence-transformers>=3.0.1'],
-    'generator': ['vllm==0.5.5']
+    'generator': ['vllm==0.5.5'],
+    'multimodal': ['timm', 'torchvision', 'pillow', 'qwen_vl_utils']
 }
 extras_require['full'] = sum(extras_require.values(), [])
 
 setup(
-    name="flashrag-dev",
+    name="flashrag_dev",
     version=version['__version__'],
     packages=find_packages(),
     url="https://github.com/RUC-NLPIR/FlashRAG",

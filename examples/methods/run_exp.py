@@ -5,7 +5,7 @@ import argparse
 
 def naive(args):
     save_note = "naive"
-    config_dict = {"save_note": save_note, "gpu_id": args.gpu_id, "dataset_name": args.dataset_name}
+    config_dict = {"save_note": save_note, "gpu_id": args.gpu_id, "dataset_name": args.dataset_name, "split": args.split}
 
     from flashrag.pipeline import SequentialPipeline
 
@@ -14,7 +14,6 @@ def naive(args):
     all_split = get_dataset(config)
     test_data = all_split[args.split]
 
-    pred_process_fun = lambda x: x.split("\n")[0]
     pipeline = SequentialPipeline(config)
 
     result = pipeline.run(test_data)
@@ -22,7 +21,7 @@ def naive(args):
 
 def zero_shot(args):
     save_note = "zero-shot"
-    config_dict = {"save_note": save_note, "gpu_id": args.gpu_id, "dataset_name": args.dataset_name}
+    config_dict = {"save_note": save_note, "gpu_id": args.gpu_id, "dataset_name": args.dataset_name, "split": args.split}
 
     # preparation
     config = Config("my_config.yaml", config_dict)
@@ -37,7 +36,6 @@ def zero_shot(args):
         system_prompt="Answer the question based on your own knowledge. Only give me the answer and do not output any other words.",
         user_prompt="Question: {question}",
     )
-    pred_process_fun = lambda x: x.split("\n")[0]
     pipeline = SequentialPipeline(config, templete)
     result = pipeline.naive_run(test_data)
 
@@ -69,6 +67,7 @@ def aar(args):
         "save_note": save_note,
         "gpu_id": args.gpu_id,
         "dataset_name": args.dataset_name,
+        "split": args.split,
     }
 
     # preparation
@@ -78,7 +77,6 @@ def aar(args):
 
     from flashrag.pipeline import SequentialPipeline
 
-    pred_process_fun = lambda x: x.split("\n")[0]
     pipeline = SequentialPipeline(config)
     # result = pipeline.run(test_data, pred_process_fun=pred_process_fun)
     result = pipeline.run(test_data)
@@ -112,6 +110,7 @@ def llmlingua(args):
         "save_note": "longllmlingua",
         "gpu_id": args.gpu_id,
         "dataset_name": args.dataset_name,
+        "split": args.split,
     }
 
     # preparation
@@ -159,6 +158,7 @@ def recomp(args):
         "save_note": refiner_name,
         "gpu_id": args.gpu_id,
         "dataset_name": args.dataset_name,
+        "split": args.split,
     }
 
     # preparation
@@ -198,6 +198,7 @@ def sc(args):
         "save_note": "selective-context",
         "gpu_id": args.gpu_id,
         "dataset_name": args.dataset_name,
+        "split": args.split,
     }
 
     # preparation
@@ -237,6 +238,7 @@ def retrobust(args):
         "gpu_id": args.gpu_id,
         "generator_max_input_len": 4096,
         "dataset_name": args.dataset_name,
+        "split": args.split,
     }
     config = Config("my_config.yaml", config_dict)
     all_split = get_dataset(config)
@@ -257,7 +259,7 @@ def sure(args):
         in ICLR 2024
         Official repo: https://github.com/bbuing9/ICLR24_SuRe
     """
-    config_dict = {"save_note": "SuRe", "gpu_id": args.gpu_id, "dataset_name": args.dataset_name}
+    config_dict = {"save_note": "SuRe", "gpu_id": args.gpu_id, "dataset_name": args.dataset_name, "split": args.split}
     config = Config("my_config.yaml", config_dict)
     all_split = get_dataset(config)
     test_data = all_split[args.split]
@@ -275,7 +277,7 @@ def replug(args):
         Weijia Shi et al. "REPLUG: Retrieval-Augmented Black-Box Language Models".
     """
     save_note = "replug"
-    config_dict = {"save_note": save_note, "gpu_id": args.gpu_id, "dataset_name": args.dataset_name}
+    config_dict = {"save_note": save_note, "gpu_id": args.gpu_id, "dataset_name": args.dataset_name, "split": args.split}
 
     # preparation
     config = Config("my_config.yaml", config_dict)
@@ -326,6 +328,7 @@ def skr(args):
         "save_note": "skr",
         "gpu_id": args.gpu_id,
         "dataset_name": args.dataset_name,
+        "split": args.split,
     }
 
     # preparation
@@ -359,6 +362,7 @@ def selfrag(args):
             "skip_special_tokens": False,
         },
         "dataset_name": args.dataset_name,
+        "split": args.split,
     }
     config = Config("my_config.yaml", config_dict)
 
@@ -369,7 +373,7 @@ def selfrag(args):
 
     pipeline = SelfRAGPipeline(
         config,
-        threhsold=0.2,
+        threshold=0.2,
         max_depth=2,
         beam_width=2,
         w_rel=1.0,
@@ -392,7 +396,7 @@ def flare(args):
         Official repo: https://github.com/bbuing9/ICLR24_SuRe
 
     """
-    config_dict = {"save_note": "flare", "gpu_id": args.gpu_id, "dataset_name": args.dataset_name}
+    config_dict = {"save_note": "flare", "gpu_id": args.gpu_id, "dataset_name": args.dataset_name, "split": args.split}
     config = Config("my_config.yaml", config_dict)
     all_split = get_dataset(config)
     test_data = all_split[args.split]
@@ -418,6 +422,7 @@ def iterretgen(args):
         "save_note": "iter-retgen",
         "gpu_id": args.gpu_id,
         "dataset_name": args.dataset_name,
+        "split": args.split,
     }
     # preparation
     config = Config("my_config.yaml", config_dict)
@@ -437,7 +442,7 @@ def ircot(args):
         in ACL 2023
     """
     save_note = "ircot"
-    config_dict = {"save_note": save_note, "gpu_id": args.gpu_id, "dataset_name": args.dataset_name}
+    config_dict = {"save_note": save_note, "gpu_id": args.gpu_id, "dataset_name": args.dataset_name, "split": args.split}
 
     from flashrag.pipeline import IRCOTPipeline
 
@@ -476,6 +481,7 @@ def trace(args):
         "refiner_name": "kg-trace",
         "trace_config": trace_config,
         "framework": "hf",  # Trance only supports using Huggingface Transformers since it needs logits of outputs
+        "split": args.split,
     }
 
     # preparation
@@ -501,6 +507,7 @@ def spring(args):
         "gpu_id": args.gpu_id,
         "dataset_name": args.dataset_name,
         "framework": "hf",
+        "split": args.split,
     }
     config = Config("my_config.yaml", config_dict)
     all_split = get_dataset(config)
@@ -541,6 +548,7 @@ def adaptive(args):
         "save_note": "adaptive-rag",
         "gpu_id": args.gpu_id,
         "dataset_name": args.dataset_name,
+        "split": args.split,
     }
     # preparation
     config = Config("my_config.yaml", config_dict)
@@ -552,6 +560,33 @@ def adaptive(args):
     pipeline = AdaptivePipeline(config)
     result = pipeline.run(test_data)
 
+def rqrag(args):
+    """
+    Function to run the RQRAGPipeline.
+    """
+    save_note = "rqrag"
+    max_depth = 3
+    config_dict = {
+        "save_note": save_note,
+        "gpu_id": args.gpu_id,
+        'framework': 'vllm',
+        'generator_max_input_len': 4096,
+        'generation_params': {'max_tokens': 512, 'skip_special_tokens': False},
+        'generator_model_path': 'zorowin123/rq_rag_llama2_7B',
+        "dataset_name": args.dataset_name,
+        "split": args.split,
+        "max_depth": max_depth
+    }
+
+    config = Config("my_config.yaml", config_dict)
+    
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+    
+    from flashrag.pipeline import RQRAGPipeline
+    pipeline = RQRAGPipeline(config, max_depth = max_depth)
+    result = pipeline.run(test_data)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Running exp")
@@ -560,6 +595,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset_name", type=str)
     parser.add_argument("--gpu_id", type=str)
 
+    
     func_dict = {
         "AAR-contriever": aar,
         "AAR-ANCE": aar,
@@ -578,6 +614,7 @@ if __name__ == "__main__":
         "ircot": ircot,
         "trace": trace,
         "adaptive": adaptive,
+        "rqrag": rqrag,
     }
 
     args = parser.parse_args()

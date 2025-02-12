@@ -37,6 +37,7 @@ class LLMLinguaRefiner(BaseRefiner):
     def __init__(self, config):
         super().__init__(config)
         default_config = {
+            'use_llmlingua2': False,
             "rate": 0.55,
             "condition_in_question": "after_condition",
             "reorder_context": "sort",
@@ -52,7 +53,11 @@ class LLMLinguaRefiner(BaseRefiner):
 
         from flashrag.refiner.llmlingua_compressor import PromptCompressor
 
-        self.refiner = PromptCompressor(model_name=self.model_path)
+        if 'use_llmlingua2' in self.compress_config:
+            use_llmlingua2 = self.compress_config.pop('use_llmlingua2')
+        else:
+            use_llmlingua2 = False
+        self.refiner = PromptCompressor(model_name=self.model_path, use_llmlingua2=use_llmlingua2)
 
     def format_reference(self, retrieval_result):
         format_reference = ""
@@ -68,7 +73,6 @@ class LLMLinguaRefiner(BaseRefiner):
         output = []
         for item in tqdm(dataset, desc="Refining process: "):
             question = item.question
-            retrieval_result = item.retrieval_result
             # TODO: suit more cases
             if self.input_prompt_flag:
                 input_prompt = item.prompt
@@ -83,6 +87,7 @@ class LLMLinguaRefiner(BaseRefiner):
                     **self.compress_config,
                 )
             else:
+                retrieval_result = item.retrieval_result
                 docs = self.format_reference(retrieval_result).split("\n")
                 docs = [i for i in docs if i != ""]
                 item_output = self.refiner.compress_prompt(

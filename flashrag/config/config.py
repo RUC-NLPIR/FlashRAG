@@ -1,5 +1,6 @@
 import re
 import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import yaml
 import random
 import datetime
@@ -23,7 +24,8 @@ class Config:
 
         self._init_device()
         self._set_seed()
-        self._prepare_dir()
+        if not self.final_config.get('disable_save', False):
+            self._prepare_dir()
 
     def _build_yaml_loader(self):
         loader = yaml.FullLoader
@@ -102,55 +104,116 @@ class Config:
         gpu_id = self.final_config["gpu_id"]
         if gpu_id is not None:
             os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
+        try:
+            # import pynvml 
+            # pynvml.nvmlInit()
+            # gpu_num = pynvml.nvmlDeviceGetCount()
             import torch
-
-            self.final_config["device"] = torch.device("cuda")
+            gpu_num = torch.cuda.device_count()
+        except:
+            gpu_num = 0
+        self.final_config['gpu_num'] = gpu_num
+        if gpu_num > 0:
+            self.final_config["device"] = "cuda"
         else:
-            import torch
-
-            self.final_config["device"] = torch.device("cpu")
+            self.final_config['device'] = 'cpu'
 
     def _set_additional_key(self):
-        # set dataset
-        dataset_name = self.final_config["dataset_name"]
-        data_dir = self.final_config["data_dir"]
-        self.final_config["dataset_path"] = os.path.join(data_dir, dataset_name)
-
-        # set model path
-        retrieval_method = self.final_config["retrieval_method"]
-        model2path = self.final_config["model2path"]
-        model2pooling = self.final_config["model2pooling"]
-        method2index = self.final_config["method2index"]
-
-        generator_model = self.final_config["generator_model"]
-
-        if self.final_config["index_path"] is None:
-            try:
-                self.final_config["index_path"] = method2index[retrieval_method]
-            except:
-                print("Index is empty!!")
-                assert False
-
-        if self.final_config.get("retrieval_model_path") is None:
-            self.final_config["retrieval_model_path"] = model2path.get(retrieval_method, retrieval_method)
-        # TODO: not support when `retrieval_model` is path
-
         def set_pooling_method(method, model2pooling):
             for key, value in model2pooling.items():
                 if key.lower() in method.lower():
                     return value
             return "mean"
 
-        if self.final_config.get("retrieval_pooling_method") is None:
-            self.final_config["retrieval_pooling_method"] = set_pooling_method(retrieval_method, model2pooling)
+        def set_retrieval_keys(model2path, model2pooling, method2index, config):
+            retrieval_method = config["retrieval_method"]
+            if config["index_path"] is None:
+                try:
+                    config["index_path"] = method2index[retrieval_method]
+                except:
+                    print("Index is empty!!")
 
-        rerank_model_name = self.final_config["rerank_model_name"]
-        if self.final_config.get("rerank_model_path") is None:
-            if rerank_model_name is not None:
-                self.final_config["rerank_model_path"] = model2path.get(rerank_model_name, rerank_model_name)
-        if self.final_config["rerank_pooling_method"] is None:
-            if rerank_model_name is not None:
-                self.final_config["rerank_pooling_method"] = set_pooling_method(rerank_model_name, model2pooling)
+            if config.get("retrieval_model_path") is None:
+                config["retrieval_model_path"] = model2path.get(retrieval_method, retrieval_method)
+
+            if config.get("retrieval_pooling_method") is None:
+                config["retrieval_pooling_method"] = set_pooling_method(retrieval_method, model2pooling)
+
+            rerank_model_name = config.get("rerank_model_name", None)
+            if config.get("rerank_model_path", None) is None:
+                if rerank_model_name is not None:
+                    config["rerank_model_path"] = model2path.get(rerank_model_name, rerank_model_name)
+            if config.get("rerank_pooling_method", None) is None:
+                if rerank_model_name is not None:
+                    config["rerank_pooling_method"] = set_pooling_method(rerank_model_name, model2pooling)
+            return config
+
+        # set dataset
+        dataset_name = self.final_config["dataset_name"]
+        data_dir = self.final_config["data_dir"]
+        self.final_config["dataset_path"] = os.path.join(data_dir, dataset_name)
+
+        # set retrieval-related keys
+        model2path = self.final_config["model2path"]
+        model2pooling = self.final_config["model2pooling"]
+        method2index = self.final_config["method2index"]
+        self.final_config = set_retrieval_keys(model2path, model2pooling, method2index, self.final_config)
+        # set keys for multi retriever
+        if "multi_retriever_setting" in self.final_config:
+            multi_retriever_config = self.final_config["multi_retriever_setting"]
+            retriever_config_list = multi_retriever_config.get("retriever_list", [])
+            # set for reranker merge method
+            assert multi_retriever_config['merge_method'] in ['concat', 'rrf', 'rerank', None]
+            if multi_retriever_config['merge_method'] == 'rerank':
+                rerank_model_name = multi_retriever_config.get("rerank_model_name", None)
+                assert rerank_model_name is not None
+                multi_retriever_config['rerank_max_length'] = multi_retriever_config.get("rerank_max_length", 512)
+                multi_retriever_config['rerank_batch_size'] = multi_retriever_config.get("rerank_batch_size", 256)
+                multi_retriever_config['rerank_use_fp16'] = multi_retriever_config.get("rerank_use_fp16", True)
+                
+                if multi_retriever_config.get("rerank_model_path", None) is None:
+                    if rerank_model_name is not None:
+                        multi_retriever_config["rerank_model_path"] = model2path.get(rerank_model_name, rerank_model_name)
+                if multi_retriever_config.get("rerank_pooling_method", None) is None:
+                    if rerank_model_name is not None:
+                        multi_retriever_config["rerank_pooling_method"] = set_pooling_method(rerank_model_name, model2pooling)
+            
+            # set config for each retriever
+            for retriever_config in retriever_config_list:
+                if "instruction" not in retriever_config:
+                    retriever_config["instruction"] = None
+                if "bm25_backend" not in retriever_config:
+                    retriever_config["bm25_backend"] = "bm25s"
+                if "use_reranker" not in retriever_config:
+                    retriever_config["use_reranker"] = False
+                if "index_path" not in retriever_config:
+                    retriever_config["index_path"] = None
+                if "corpus_path" not in retriever_config:
+                    retriever_config["corpus_path"] = None
+                if "use_sentence_transformer" not in retriever_config:
+                    retriever_config["use_sentence_transformer"] = False
+                retriever_config = set_retrieval_keys(model2path, model2pooling, method2index, retriever_config)
+                
+                # set other necessary keys as base setting
+                keys = [
+                    "retrieval_use_fp16",
+                    "retrieval_query_max_length",
+                    "faiss_gpu",
+                    "retrieval_topk",
+                    "retrieval_batch_size",
+                    "use_reranker",
+                    "rerank_model_name",
+                    "rerank_model_path",
+                    "retrieval_cache_path",
+                ]
+                for key in keys:
+                    if key not in retriever_config:
+                        retriever_config[key] = self.final_config.get(key, None)
+                retriever_config["save_retrieval_cache"] = False
+                retriever_config["use_retrieval_cache"] = False
+        
+        # set model path
+        generator_model = self.final_config["generator_model"]
 
         if self.final_config.get("generator_model_path") is None:
             self.final_config["generator_model_path"] = model2path.get(generator_model, generator_model)
@@ -159,8 +222,8 @@ class Config:
             refiner_model = self.final_config["refiner_name"]
             if "refiner_model_path" not in self.final_config or self.final_config["refiner_model_path"] is None:
                 self.final_config["refiner_model_path"] = model2path.get(refiner_model, None)
-        if 'instruction' not in self.final_config:
-            self.final_config['instruction'] = None
+        if "instruction" not in self.final_config:
+            self.final_config["instruction"] = None
 
         # set model path in metric setting
         metric_setting = self.final_config["metric_setting"]
@@ -174,22 +237,31 @@ class Config:
 
     def _prepare_dir(self):
         save_note = self.final_config["save_note"]
+        save_dir = self.final_config['save_dir']
+        if not save_dir.endswith("/"):
+            save_dir += "/"
+
         current_time = datetime.datetime.now()
+
         self.final_config["save_dir"] = os.path.join(
-            self.final_config["save_dir"],
+            save_dir,
             f"{self.final_config['dataset_name']}_{current_time.strftime('%Y_%m_%d_%H_%M')}_{save_note}",
         )
         os.makedirs(self.final_config["save_dir"], exist_ok=True)
         # save config parameters
         config_save_path = os.path.join(self.final_config["save_dir"], "config.yaml")
         with open(config_save_path, "w") as f:
-            yaml.dump(self.final_config, f)
+            yaml.dump(self.final_config, f, indent=4, sort_keys=False)
 
     def _set_seed(self):
         import torch
         import numpy as np
-
-        seed = self.final_config["seed"]
+        seed = self.final_config['seed']
+        try:
+            seed = int(seed)
+        except:
+            seed = 2025
+        self.final_config['seed'] = seed
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)

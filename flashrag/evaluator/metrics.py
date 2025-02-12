@@ -1,4 +1,5 @@
 import re
+import numpy as np
 import warnings
 from collections import Counter
 from flashrag.evaluator.utils import normalize_answer
@@ -281,7 +282,8 @@ class Retrieval_Precision(BaseMetric):
 
 class Rouge_Score(BaseMetric):
     metric_name = "rouge_score"
-
+    cached_scores = {}
+    
     def __init__(self, config):
         super().__init__(config)
         from rouge import Rouge
@@ -289,6 +291,8 @@ class Rouge_Score(BaseMetric):
         self.scorer = Rouge()
 
     def calculate_rouge(self, pred, golden_answers):
+        if (pred, tuple(golden_answers)) in self.cached_scores:
+            return self.cached_scores[(pred, tuple(golden_answers))]
         output = {}
         for answer in golden_answers:
             scores = self.scorer.get_scores(pred, answer)
@@ -299,7 +303,10 @@ class Rouge_Score(BaseMetric):
         for k, v in output.items():
             output[k] = max(v)
 
+        self.cached_scores[(pred, tuple(golden_answers))] = output
         return output
+
+
 
 
 class Rouge_1(Rouge_Score):
@@ -359,6 +366,99 @@ class Rouge_L(Rouge_Score):
         return {"rouge-l": score}, metric_score_list
 
 
+
+class ZH_Rouge_Score(BaseMetric):
+    metric_name = "zh_rouge_score"
+    cached_scores = {}
+    
+    def __init__(self, config):
+        super().__init__(config)
+        from rouge_chinese import Rouge
+
+        self.scorer = Rouge()
+
+    def calculate_rouge(self, pred, golden_answers):
+        import jieba
+        if (pred, tuple(golden_answers)) in self.cached_scores:
+            return self.cached_scores[(pred, tuple(golden_answers))]
+        output = {}
+        pred = ' '.join(jieba.cut(pred))
+        for answer in golden_answers:
+            answer = ' '.join(jieba.cut(answer))
+            scores = self.scorer.get_scores(pred, answer)
+            for key in ["rouge-1", "rouge-2", "rouge-l"]:
+                if key not in output:
+                    output[key] = []
+                output[key].append(scores[0][key]["f"])
+        for k, v in output.items():
+            output[k] = max(v)
+
+        self.cached_scores[(pred, tuple(golden_answers))] = output
+        return output
+
+
+
+
+class ZH_Rouge_1(ZH_Rouge_Score):
+    metric_name = "zh_rouge-1"
+
+    def __init__(self, config):
+        super().__init__(config)
+        
+
+    def calculate_metric(self, data):
+        golden_answers_list = self.get_dataset_answer(data)
+        pred_list = data.pred
+
+        metric_score_list = [
+            self.calculate_rouge(pred, golden_answers)["rouge-1"]
+            for pred, golden_answers in zip(pred_list, golden_answers_list)
+        ]
+        score = sum(metric_score_list) / len(metric_score_list)
+
+        return {"zh_rouge-1": score}, metric_score_list
+
+
+class ZH_Rouge_2(ZH_Rouge_Score):
+    metric_name = "zh_rouge-2"
+
+    def __init__(self, config):
+        super().__init__(config)
+
+    def calculate_metric(self, data):
+        golden_answers_list = self.get_dataset_answer(data)
+        pred_list = data.pred
+
+        metric_score_list = [
+            self.calculate_rouge(pred, golden_answers)["rouge-2"]
+            for pred, golden_answers in zip(pred_list, golden_answers_list)
+        ]
+        score = sum(metric_score_list) / len(metric_score_list)
+
+        return {"zh_rouge-2": score}, metric_score_list
+
+
+class ZH_Rouge_L(ZH_Rouge_Score):
+    metric_name = "zh_rouge-l"
+
+    def __init__(self, config):
+        super().__init__(config)
+
+    def calculate_metric(self, data):
+        golden_answers_list = self.get_dataset_answer(data)
+        pred_list = data.pred
+
+        metric_score_list = [
+            self.calculate_rouge(pred, golden_answers)["rouge-l"]
+            for pred, golden_answers in zip(pred_list, golden_answers_list)
+        ]
+        score = sum(metric_score_list) / len(metric_score_list)
+
+        return {"zh_rouge-l": score}, metric_score_list
+
+
+
+
 class BLEU(BaseMetric):
     metric_name = "bleu"
 
@@ -393,8 +493,8 @@ class BLEU(BaseMetric):
             pred = [pred]
             golden_answers = [golden_answers]
             score = compute_bleu(
-                reference_corpus=golden_answers_list,
-                translation_corpus=pred_list,
+                reference_corpus=golden_answers,
+                translation_corpus=pred,
                 max_order=self.max_order,
                 smooth=self.smooth,
             )
@@ -506,3 +606,39 @@ class CountToken(BaseMetric):
         avg_tokens = sum(token_counts) / len(token_counts)
 
         return {"avg_input_tokens": avg_tokens}, token_counts
+
+class GAOKAOMM_Accuracy(BaseMetric):
+    metric_name = 'gaokao_acc'
+    def __init__(self, config):
+        super().__init__(config)
+    
+    def calculate_metric(self, data):
+        metric_dict = {}
+        acc_list = []
+        for item in data:
+            golden_answers = item.golden_answers
+            golden_answers = [i.lower() for i in golden_answers]
+            golden_answer = "".join(golden_answers)
+            pred = item.pred.lower()
+            subject = item.subject
+
+            question_type = item.question_type
+            if question_type == 'single_choice':
+                acc = 1.0 if pred == golden_answer else 0.0
+            else:
+                if pred == golden_answer:
+                    acc = 1.0
+                elif pred in golden_answer:
+                    acc = 0.5
+                else:
+                    acc = 0.0
+            acc_list.append(acc)
+            if subject not in metric_dict:
+                metric_dict[subject] = []
+            metric_dict[subject].append(acc)
+        for key, value in metric_dict.items():
+            metric_dict[key] = np.mean(value)
+        
+        metric_dict['avg_score'] = np.mean(acc_list)
+        return metric_dict, acc_list 
+                

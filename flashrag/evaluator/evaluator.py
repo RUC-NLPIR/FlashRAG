@@ -15,7 +15,7 @@ class Evaluator:
 
         self.avaliable_metrics = self._collect_metrics()
 
-        self.metric_class = {}
+        self.metric_class = {}  
         for metric in self.metrics:
             if metric in self.avaliable_metrics:
                 self.metric_class[metric] = self.avaliable_metrics[metric](self.config)
@@ -55,8 +55,7 @@ class Evaluator:
                 for metric_score, item in zip(metric_scores, data):
                     item.update_evaluation_score(metric, metric_score)
             except Exception as e:
-                print(f"Error in {metric}!")
-                print(e)
+                print(f"Error in {metric}: {e}")
                 continue
 
         if self.save_metric_flag:

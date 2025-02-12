@@ -1,19 +1,25 @@
 import re
 from tqdm import tqdm
+from typing import List, Tuple
+import math
 import numpy as np
 from transformers import AutoTokenizer, PreTrainedTokenizer, PreTrainedTokenizerFast
 from flashrag.utils import get_retriever, get_generator, selfask_pred_parse, ircot_pred_parse
 from flashrag.pipeline import BasicPipeline
-from flashrag.dataset import get_batch_dataset, merge_batch_dataset
+from flashrag.dataset.utils import get_batch_dataset, merge_batch_dataset
 from flashrag.prompt import PromptTemplate
 
 
 class IterativePipeline(BasicPipeline):
-    def __init__(self, config, prompt_template=None, iter_num=3):
+    def __init__(self, config, prompt_template=None, iter_num=3, retriever=None, generator=None):
         super().__init__(config, prompt_template)
         self.iter_num = iter_num
-        self.generator = get_generator(config)
-        self.retriever = get_retriever(config)
+        if generator is None:
+            generator = get_generator(config)
+        if retriever is None:
+            retriever = get_retriever(config)
+        self.generator = generator
+        self.retriever = retriever
         
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):
@@ -92,7 +98,7 @@ class SelfRAGPipeline(BasicPipeline):
     def __init__(
         self,
         config,
-        threhsold=0.2,
+        threshold=0.2,
         max_depth=2,
         beam_width=2,
         w_rel=1.0,
@@ -104,11 +110,17 @@ class SelfRAGPipeline(BasicPipeline):
         ignore_cont=True,
         mode="adaptive_retrieval",
         prompt_template=None,
+        retriever=None,
+        generator=None
     ):
 
         super().__init__(config, prompt_template)
-        self.generator = get_generator(config)
-        self.retriever = get_retriever(config)
+        if generator is None:
+            generator = get_generator(config)
+        if retriever is None:
+            retriever = get_retriever(config)
+        self.generator = generator
+        self.retriever = retriever
 
         assert mode in ["adaptive_retrieval", "always_retrieve", "no_retrieval"]
 
@@ -123,7 +135,7 @@ class SelfRAGPipeline(BasicPipeline):
                 config, user_prompt="### Instruction:\n" + question_inst + "\n\n### Response:\n", enable_chat=False
             )
 
-        self.threshold = threhsold
+        self.threshold = threshold
         self.max_depth = max_depth
         self.beam_width = beam_width
         self.w_rel, self.w_sup, self.w_use = w_rel, w_sup, w_use
@@ -188,7 +200,7 @@ class SelfRAGPipeline(BasicPipeline):
                     score_dict = {}
                     for tok, tok_id in self.ret_tokens.items():
                         if tok_id not in all_pred_log_probs[idx][0]:
-                            score_dict[tok] = -100
+                            score_dict[tok] = np.exp(-100)
                         else:
                             prob = all_pred_log_probs[idx][0][tok_id].logprob
                             score_dict[tok] = np.exp(prob)
@@ -685,11 +697,16 @@ class FLAREPipeline(BasicPipeline):
         max_generation_length=256,
         max_iter_num=5,
         prompt_template=None,
+        retriever=None,
+        generator=None
     ):
         super().__init__(config, prompt_template)
-
-        self.generator = get_generator(config)
-        self.retriever = get_retriever(config)
+        if generator is None:
+            generator = get_generator(config)
+        if retriever is None:
+            retriever = get_retriever(config)
+        self.generator = generator
+        self.retriever = retriever
 
         self.threshold = threshold
         self.max_generation_length = max_generation_length
@@ -789,12 +806,16 @@ class FLAREPipeline(BasicPipeline):
 class SelfAskPipeline(BasicPipeline):
     FOLLOW_UP_PATTERN = r"Follow up:.*\n"
 
-    def __init__(self, config, prompt_template=None, max_iter=5, single_hop=True):
+    def __init__(self, config, prompt_template=None, max_iter=5, single_hop=True, retriever=None, generator=None):
         super().__init__(config, prompt_template)
         from flashrag.prompt.selfask_examplars import SELF_ASK_PROMPT_SINGLE_HOP, SELF_ASK_PROMPT_MULTI_HOP
 
-        self.generator = get_generator(config)
-        self.retriever = get_retriever(config)
+        if generator is None:
+            generator = get_generator(config)
+        if retriever is None:
+            retriever = get_retriever(config)
+        self.generator = generator
+        self.retriever = retriever
 
         self.single_hop = single_hop
         self.max_iter = max_iter
@@ -905,7 +926,9 @@ class IRCOTPipeline(BasicPipeline):
     IRCOT_INSTRUCTION = 'You serve as an intelligent assistant, adept at facilitating users through complex, multi-hop reasoning across multiple documents. This task is illustrated through demonstrations, each consisting of a document set paired with a relevant question and its multi-hop reasoning thoughts. Your task is to generate one thought for current step, DON\'T generate the whole thoughts at once! If you reach what you believe to be the final step, start with "So the answer is:".'
     IRCOT_EXAMPLE = "Wikipedia Title: Kurram Garhi\nKurram Garhi is a small village located near the city of Bannu, which is the part of Khyber Pakhtunkhwa province of Pakistan. Its population is approximately 35000. Barren hills are near this village. This village is on the border of Kurram Agency. Other nearby villages are Peppal, Surwangi and Amandi Kala.\n\nWikipedia Title: 2001–02 UEFA Champions League second group stage\nEight winners and eight runners- up from the first group stage were drawn into four groups of four teams, each containing two group winners and two runners- up. Teams from the same country or from the same first round group could not be drawn together. The top two teams in each group advanced to the quarter- finals.\n\nWikipedia Title: Satellite tournament\nA satellite tournament is either a minor tournament or event on a competitive sporting tour or one of a group of such tournaments that form a series played in the same country or region.\n\nWikipedia Title: Trojkrsti\nTrojkrsti is a village in Municipality of Prilep, Republic of Macedonia.\n\nWikipedia Title: Telephone numbers in Ascension Island\nCountry Code:+ 247< br> International Call Prefix: 00 Ascension Island does not share the same country code( +290) with the rest of St Helena.\n\nQuestion: Are both Kurram Garhi and Trojkrsti located in the same country?\nThought: Kurram Garhi is located in the country of Pakistan. Trojkrsti is located in the country of Republic of Macedonia. Thus, they are not in the same country. So the answer is: no.\n\n"
 
-    def __init__(self, config, prompt_template=None, retriever=None, generator=None, max_iter=5):
+    def __init__(
+        self, config, prompt_template=None, max_iter=2, retriever=None, generator=None
+    ):
         # if not provide prompt template, use default template provided by IRCOT
         if prompt_template is None:
             prompt_template = PromptTemplate(
@@ -981,8 +1004,6 @@ class IRCOTPipeline(BasicPipeline):
 
             # Perform batch retrieval for new thoughts of active items
             if active_item_ids:
-                print(len(active_item_ids))
-                print(active_item_ids)
                 new_thoughts_for_retrieval = [batch_thoughts[item_id][-1] for item_id in active_item_ids]
                 new_retrieval_results, new_scoress = self.retriever.batch_search(new_thoughts_for_retrieval, return_score=True)
 
@@ -1016,3 +1037,218 @@ class IRCOTPipeline(BasicPipeline):
 
         dataset = self.evaluate(dataset, do_eval=do_eval, pred_process_fun=pred_process_fun)
         return dataset
+
+class RQRAGPipeline(BasicPipeline):
+    expand_on_tokens = [
+        "[S_Rewritten_Query]",
+        "[S_Decomposed_Query]",
+        "[S_Disambiguated_Query]",
+        "[A_Response]"
+    ]
+    
+    system_prompt = {
+        "qa": "Given a question that requires multi-hop reasoning, you need to decompose the question and answer based on the given context. Please provide a short and concise response."
+    }
+    
+    response_generation_params = {
+        "temperature": 0,
+        "top_p": 0.9,
+        "stop": ["[EOS]", "</s>"],
+        "skip_special_tokens": False,
+        "include_stop_str_in_output": True,
+        "logprobs": 1,
+        "spaces_between_special_tokens": False,
+        "max_tokens": 4096
+    }
+    
+    other_generation_params = {
+        "temperature": 1,
+        "top_p": 0.9,
+        "stop": ["[EOS]", "</s>"],
+        "skip_special_tokens": False,
+        "include_stop_str_in_output": True,
+        "logprobs": 1,
+        "spaces_between_special_tokens": False,
+        "max_tokens": 4096
+    }
+
+    def __init__(
+        self,
+        config: dict,
+        prompt_template = None,
+        retriever = None,
+        generator = None,
+        max_depth = 3,
+        batch_size = 32
+    ):
+        super().__init__(config, prompt_template)
+
+        self.generator = generator if generator is not None else get_generator(config)
+        self.tokenizer = AutoTokenizer.from_pretrained(config["generator_model_path"], padding_side = "left")
+        self.retriever = retriever if retriever is not None else get_retriever(config)
+        
+        self.max_depth = max_depth
+        self.batch_size = batch_size
+        
+        # Due to the low effiency of original method, it only supports vllm now.
+    
+    def preprocess_eval_data(self, items: List) -> List[str]:
+        eval_examples = []
+
+        for item in items:
+            eval_example = f"<s><|system|>\n{self.system_prompt['qa']}" + self.tokenizer.eos_token + "\n<|user|>\n" + item.question + self.tokenizer.eos_token + "\n"
+            eval_example += "<|assistant|>\n"
+            eval_examples.append(eval_example)
+
+        return eval_examples
+
+    def format_evidences(self, evidences: List[str]):
+        format_evidence = ""
+        for evidence in evidences:
+            title = evidence['contents'].split('\n')[0]
+            text = "\n".join(evidence['contents'].split('\n')[1:])
+            format_evidence += f"Title: {title}\n"
+            format_evidence += f"Text: {text}\n"
+        return format_evidence
+
+    def generate_tree_of_thoughts_batch(self, initial_prompts_batch: List[str]):
+        paths_batch_dict = {
+            idx: [{
+                "prompt": initial_prompt,
+                "depth": 0,
+                "done": False
+            }]
+            for idx, initial_prompt in enumerate(initial_prompts_batch)
+        }
+        
+        final_outputs_batch = {idx: [] for idx in range(len(initial_prompts_batch))}
+        
+        while any(paths for paths in paths_batch_dict.values()):
+            current_batch = []
+            for i, _ in paths_batch_dict.items():
+                if paths_batch_dict[i]:
+                    current_path = paths_batch_dict[i].pop(0)
+                    current_batch.append(current_path)
+                else:
+                    continue
+            
+            if not current_batch:
+                break
+            
+            for special_token in self.expand_on_tokens:
+                
+                if current_batch[0]["depth"] >= self.max_depth and special_token != "[A_Response]":
+                    continue
+                
+                # Prepare for inputs
+                input_texts = [path["prompt"] + special_token for path in current_batch]
+            
+                # Generate outputs
+                if special_token != "[A_Response]":
+                    init_outputs = self.generator.generate(
+                        input_list = input_texts,
+                        return_raw_output = True,
+                        **self.response_generation_params
+                    )
+                else:
+                    init_outputs = self.generator.generate(
+                        input_list = input_texts,
+                        return_raw_output = True,
+                        **self.other_generation_params
+                    )
+
+                # Decode outputs
+                decoded_outputs = [output.outputs[0].text for output in init_outputs]
+                # Initialize lists to collect queries for batch retrieval
+                queries_for_search = []
+                
+                # Process outputs and prepare for retrieval
+                for i, decoded_output in enumerate(decoded_outputs):
+                    current_path = current_batch[i]
+                    decoded_output = decoded_output.replace("<s> ", "<s>")
+                    
+                    if special_token == "[A_Response]":
+                        pattern = r"(.*?)\[EOS\]"
+                        matches = re.findall(pattern, decoded_output, re.DOTALL)
+                        result = matches[-1].strip() if matches else "Unable to detect valid answer"
+                        token_ids = init_outputs[i].outputs[0].token_ids[1:-1]
+                        logprobs = init_outputs[i].outputs[0].logprobs[1:-1]
+                        confidence = 0
+                        for token_id, logprobs in zip(token_ids, logprobs):
+                            logprob = logprobs[token_id].logprob
+                            prob = math.exp(logprob)
+                            confidence += prob
+                        
+                        if len(token_ids) > 0:
+                            confidence /= len(token_ids)
+                        
+                        new_path = {
+                            "prompt": input_texts[i] + decoded_output,
+                            "depth": current_path["depth"],
+                            "done": True,
+                            "final_answer": result,
+                            "confidence": confidence
+                        }
+                        final_outputs_batch[i].append(new_path)
+                    else:
+                        # Extract the query
+                        pattern = r"(.*?)\[EOS\]"
+                        matches = re.findall(pattern, decoded_output, re.DOTALL)
+                        query_for_search = matches[-1].strip() if matches else "dummy"
+                        queries_for_search.append(query_for_search)
+                
+                # Perform batch retrieval
+                if queries_for_search:
+                    batch_search_results = self.retriever.batch_search(queries_for_search)
+                    
+                    for i, decoded_output in enumerate(decoded_outputs):
+                        search_results = batch_search_results[i]
+                        format_evidence = self.format_evidences(search_results)
+                        new_prompt = decoded_output + "[R_Evidences]" + format_evidence + "[/R_Evidences]"
+                        new_path = {
+                            "prompt": input_texts[i] + new_prompt,
+                            "depth": current_path["depth"] + 1,
+                            "done": False,
+                        }
+                        paths_batch_dict[i].append(new_path)
+
+        final_outputs_batch_list = [final_outputs_batch[i] for i in range(len(initial_prompts_batch))]
+        
+        return final_outputs_batch_list
+
+    def select_best_path_single_turn(self, final_outputs):
+        # After generating all paths, we can select the best answer
+        # Compute perplexity and confidence for each path
+        
+        scores = []
+        for path in final_outputs:
+            confidence = path["confidence"]
+            path["confidence"] = confidence
+            scores.append((path, confidence))
+
+        # Select the path with the highest confidence
+        best_path = max(scores, key = lambda x: x[1])[0]  # x[2] is confidence
+        pred = best_path["final_answer"]
+
+        return pred, best_path
+
+    def run(self, dataset, do_eval = True):
+        preds = []
+        meta_results = []
+
+        for i in tqdm(range(0, len(dataset), self.batch_size), position=0, desc='RQRAG Process'):
+            batch_items = dataset[i : i + self.batch_size]
+            eval_datas = self.preprocess_eval_data(batch_items)
+            paths_batch = self.generate_tree_of_thoughts_batch(initial_prompts_batch = eval_datas)
+            for paths in paths_batch:
+                pred, best_path = self.select_best_path_single_turn(paths)
+                preds.append(pred)
+                meta_results.append(best_path)
+
+
+        dataset.update_output("paths", meta_results)
+        dataset.update_output("pred", preds)
+
+        dataset = self.evaluate(dataset, do_eval = do_eval)
+        return dataset
+    

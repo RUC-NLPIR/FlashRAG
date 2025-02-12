@@ -2,9 +2,9 @@ import os
 import json
 import random
 import warnings
+import datasets
 from typing import List, Dict, Any, Optional, Generator
 import numpy as np
-
 
 class Item:
     """A container class used to store and manipulate a sample within a dataset.
@@ -52,22 +52,24 @@ class Item:
         """Convert all information within the data sample into a dict. Information generated
         during the inference will be saved into output field.
         """
-        from flashrag.dataset.utils import convert_numpy
+        from flashrag.dataset.utils import convert_numpy, remove_images, clean_prompt_image
 
-        output = {
-            "id": self.id,
-            "question": self.question,
-            "golden_answers": self.golden_answers,
-            "output": convert_numpy(self.output),
-        }
+        
+        output = remove_images(self.data)
+
+        # clean base64 image
+        if 'prompt' in self.output:
+            self.output['prompt'] = clean_prompt_image(self.output['prompt'])
+            
+        output['output'] = remove_images(convert_numpy(self.output))
         if self.metadata:
-            output["metadata"] = self.metadata
+            output["metadata"] = remove_images(self.metadata)
 
         return output
 
     def __str__(self) -> str:
         """Return a string representation of the item with its main attributes."""
-        return json.dumps(self.to_dict(), indent=4)
+        return json.dumps(self.to_dict(), indent=4, ensure_ascii=False)
 
 
 class Dataset:
@@ -113,12 +115,23 @@ class Dataset:
             raise FileNotFoundError(f"Dataset file {dataset_path} not found.")
 
         data = []
-        with open(dataset_path, "r", encoding="utf-8") as f:
-            for line in f:
-                item_dict = json.loads(line)
-                item = Item(item_dict)
+        if dataset_path.endswith(".jsonl") or dataset_path.endswith(".json"):
+            with open(dataset_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    item_dict = json.loads(line)
+                    item = Item(item_dict)
+                    data.append(item)
+        elif dataset_path.endswith('parquet'):
+            hf_data = datasets.load_dataset('parquet', data_files=dataset_path, split="train")
+            hf_data = hf_data.cast_column('image', datasets.Image())
+            for item in hf_data:
+                item = Item(item)
                 data.append(item)
+        else:
+            raise NotImplementedError
+        
         if self.sample_num is not None:
+            self.sample_num = int(self.sample_num)
             if self.random_sample:
                 print(f"Random sample {self.sample_num} items in test set.")
                 data = random.sample(data, self.sample_num)
@@ -174,14 +187,9 @@ class Dataset:
         """Save the dataset into the original format."""
 
         save_data = [item.to_dict() for item in self.data]
-        def custom_serializer(obj):
-            if isinstance(obj, np.float32):  
-                return float(obj)      
-            if isinstance(obj, np.bool_):
-                return str(obj)     
-            raise TypeError(f"Type {type(obj)} not serializable")
         with open(save_path, "w", encoding="utf-8") as f:
-            json.dump(save_data, f, indent=4, default=custom_serializer)
+            json.dump(save_data, f, indent=4, ensure_ascii=False)
+
 
     def __str__(self) -> str:
         """Return a string representation of the dataset with a summary of items."""

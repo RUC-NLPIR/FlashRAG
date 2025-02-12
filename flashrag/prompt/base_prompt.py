@@ -79,6 +79,8 @@ class PromptTemplate:
             return truncated_messages
 
         else:
+            if self.tokenizer is None:
+                self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path, trust_remote_code=True)
             assert isinstance(prompt, str)
             tokenized_prompt = self.tokenizer(prompt, truncation=False, return_tensors="pt").input_ids[0]
 
