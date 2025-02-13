@@ -17,7 +17,7 @@
 * 组件
     * [检索器](zh-cn/component/retriever.md)
     * [生成器](zh-cn/component/generator.md)
-    * [评估器](zh-cn/component/judger.md)
+    * [判别器](zh-cn/component/judger.md)
     * [精炼器](zh-cn/component/refiner.md)
 
 * 提示模板
