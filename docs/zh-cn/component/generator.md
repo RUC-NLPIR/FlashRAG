@@ -126,6 +126,9 @@ generator = get_generator(config)
 
 每个`content`可以包含若干个`image`和一个`text`块。需要注意的是，需要确认使用的VLM是否支持多个`image`的输入。对于`image`输入，支持使用`pil.Image`对象或者本地图片路径或者url链接。对于`text`输入，支持直接传入文本。
 
+> [!TIP]
+> 与纯文本模态的Generator的不同，多模态生成器不需要使用`prompt_template`进行构造，可以直接构造成现在支持的格式。
+
 一个输入完整的输入示例如下:
 
 ```python
