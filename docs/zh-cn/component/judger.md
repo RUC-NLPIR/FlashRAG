@@ -64,17 +64,18 @@ judger = get_judger(config)
 
 ### 使用判别器
 
-判别器的使用通过`judge`接口进行调用，其输入为`flashrag.dataset`对象，输出为`List`，每个item对应一个query的判别结果。
+判别器的使用通过`judge`接口进行调用，其支持下面三种输入类型:
+- `flashrag.dataset.Dataset`对象
+- `List[str]`: 包含需要判别的query列表
+- `str`: 直接输入需要判别的query
 
-- 对于`skr`判别器，判别结果为`True`或者`False`。
-- 对于`adaptive`判别器，判别结果为`0`, `1`, `2`。其中`0`对应明确的问题，`1`对应简单问题，`2`对应复杂问题。
-
-在某些情况下，可能希望直接对某个query进行单独的判别，可以通过构建一个仅包含一条query的`dataset`来作为输入。参考代码如下:
+使用代码:
 
 ```python
-from flashrag.dataset import Dataset
-# 需要判别的query
-query = 'who is the president of USA?'
-dataset = Dataset(data=[{'question': query}])
-judge_result = judger.judge(dataset)[0]
+output = judger.judge(['who is the president of the united states?'])
+# 期望输出: [True]
+print(output)
 ```
+
+- 对于`skr`判别器，判别结果为`True`或者`False`，`True`表示需要进行检索增强，`False`表示不需要进行检索增强。
+- 对于`adaptive`判别器，判别结果为`0`, `1`, `2`。其中`0`对应明确的问题，`1`对应简单问题，`2`对应复杂问题。

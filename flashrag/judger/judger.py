@@ -7,6 +7,7 @@ import torch
 import faiss
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from flashrag.retriever.utils import load_model, pooling
+from flashrag.dataset import Dataset
 
 
 class BaseJudger:
@@ -84,8 +85,15 @@ class SKRJudger(BaseJudger):
         return all_embeddings
 
     def judge(self, dataset):
-        questions = dataset.question
-
+        if isinstance(dataset, Dataset):
+            questions = dataset.question
+        elif isinstance(dataset, list):
+            questions = dataset
+        elif isinstance(dataset, str):
+            questions = [dataset]
+        else:
+            raise TypeError("dataset must be a Dataset or a list of str.")
+        
         all_judgements = []
         for start_idx in range(0, len(questions), self.batch_size):
             batch_question = questions[start_idx : start_idx + self.batch_size]
@@ -138,7 +146,15 @@ class AdaptiveJudger(BaseJudger):
 
     @torch.inference_mode(mode=True)
     def judge(self, dataset):
-        questions = dataset.question
+        if isinstance(dataset, Dataset):
+            questions = dataset.question
+        elif isinstance(dataset, list):
+            questions = dataset
+        elif isinstance(dataset, str):
+            questions = [dataset]
+        else:
+            raise TypeError("dataset must be a Dataset or a list of str.")
+            
         questions = [q.strip() for q in questions]
 
         all_preds = []
