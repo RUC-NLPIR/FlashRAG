@@ -140,11 +140,15 @@ def get_refiner(config, retriever=None, generator=None):
         print("Warning", e)
         model_config, arch = "", ""
 
-    if "recomp" in refiner_name or "bert" in arch:
+    if "recomp" in refiner_name:
         if model_config.model_type == "t5":
             refiner_class = "AbstractiveRecompRefiner"
         else:
             refiner_class = "ExtractiveRefiner"
+    elif 'bert' in arch:
+        refiner_class = "ExtractiveRefiner"
+    elif 'T5' in arch or 'Bart' in arch:
+        refiner_class = "AbstractiveRecompRefiner"
     elif "lingua" in refiner_name:
         refiner_class = "LLMLinguaRefiner"
     elif "selective-context" in refiner_name or "sc" in refiner_name:
