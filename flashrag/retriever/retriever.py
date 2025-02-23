@@ -255,6 +255,8 @@ class BM25Retriever(BaseTextRetriever):
             else:
                 stemmer = Stemmer.Stemmer("english")
                 self.tokenizer = bm25s.tokenization.Tokenizer(stopwords='en', stemmer=stemmer)
+                self.tokenizer.load_stopwords(self.index_path)
+                self.tokenizer.load_vocab(self.index_path)
 
             self.searcher.corpus = self.corpus
             self.searcher.backend = "numba"
