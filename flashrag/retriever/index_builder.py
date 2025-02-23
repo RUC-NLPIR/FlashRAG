@@ -210,6 +210,8 @@ class Index_Builder:
         retriever = bm25s.BM25(corpus=corpus, backend="numba")
         retriever.index(corpus_tokens)
         retriever.save(self.save_dir, corpus=None)
+        tokenizer.save_vocab(self.save_dir)
+        tokenizer.save_stopwords(self.save_dir)
 
         print("Finish!")
 
