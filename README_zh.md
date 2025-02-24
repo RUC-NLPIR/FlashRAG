@@ -75,6 +75,10 @@ FlashRAG仍在开发中，存在许多问题和改进空间。我们将继续更
 - [ ] 增强代码的适应性和可读性
 
 ## :page_with_curl: 更新日志
+[25/02/24] 我们新增了对多模态RAG的支持，包括Llava、Qwen、InternVL等MLLM，以及基于Clip结构的各类检索器。
+
+[25/01/21] 我们的论文 FlashRAG: A Python Toolkit for Efficient RAG Research 已经被 **Resource Track of the 2025 ACM Web Conference (WWW 2025)** 接收! 
+
 [25/01/12] 介绍 <strong>FlashRAG-UI</strong>，一个易于使用的界面。您可以通过它轻松快捷地配置和体验支持的RAG方法，并在基准上评估这些方法。
 
 [25/01/11] 我们添加了对新方法[<u>RQRAG</u>](https://arxiv.org/abs/2404.00610)方法的支持，详见[**复现实验**](docs/reproduce_experiment_zh.md)。
