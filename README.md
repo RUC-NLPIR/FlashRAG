@@ -79,7 +79,7 @@ FlashRAG is still under development and there are many issues and room for impro
 - [ ] Enhance code adaptability and readability
 
 ## :page_with_curl: Changelog
-[25/02/24] We have added support for **multimodal RAG**, including **MLLMs like Llava, Qwen, InternVL**, and various **multimodal retrievers with Clip architecture**. More information can be found in our new version of arxiv article. Try it!
+[25/02/24] We have added support for **multimodal RAG**, including **MLLMs like Llava, Qwen, InternVL**, and various **multimodal retrievers with Clip architecture**. More information can be found in our new version of arxiv article. Try it🔥!
 
 [25/01/21] Our technical paper [FlashRAG: A Python Toolkit for Efficient RAG Research](https://arxiv.org/abs/2405.13576) is honored to have been accepted to the Resource Track of the 2025 **ACM Web Conference (WWW 2025)**. Please Check it out!
 
