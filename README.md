@@ -73,6 +73,7 @@ FlashRAG is still under development and there are many issues and room for impro
 - [x] Support OpenAI models
 - [x] Provdide instructions for each component
 - [x] Integrate sentence Transformers
+- [ ] Support multimodal RAG
 - [ ] Inlcude more RAG approaches
 - [ ] Add more evaluation metrics (e.g., Unieval, name-entity F1) and benchmarks (e.g., RGB benchmark)
 - [ ] Enhance code adaptability and readability
