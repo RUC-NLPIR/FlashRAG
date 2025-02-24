@@ -520,7 +520,7 @@ class ToyPipeline(BasicPipeline):
 #### 体验我们精心设计的FlashRAG-UI——不仅好用，更让人赏心悦目:
 要使用FlashRAG-UI，您需要确保您的`Python >= 3.10`并安装以下依赖：
 ```bash
-pip install gradio=5.9.1
+pip install gradio==5.9.1
 ```
 
 然后运行以下命令：
