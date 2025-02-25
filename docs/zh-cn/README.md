@@ -39,17 +39,22 @@ FlashRAG 根据 [<u>MIT 许可证</u>](https://github.com/RUC-NLPIR/FlashRAG/blo
 
 ```BibTex
 @article{FlashRAG,
-    author={Jiajie Jin and
-            Yutao Zhu and
-            Xinyu Yang and
-            Chenghao Zhang and
-            Zhicheng Dou},
-    title={FlashRAG: A Modular Toolkit for Efficient Retrieval-Augmented Generation Research},
-    journal={CoRR},
-    volume={abs/2405.13576},
-    year={2024},
-    url={https://arxiv.org/abs/2405.13576},
-    eprinttype={arXiv},
-    eprint={2405.13576}
+  author       = {Jiajie Jin and
+                  Yutao Zhu and
+                  Xinyu Yang and
+                  Chenghao Zhang and
+                  Zhicheng Dou},
+  title        = {FlashRAG: {A} Modular Toolkit for Efficient Retrieval-Augmented Generation
+                  Research},
+  journal      = {CoRR},
+  volume       = {abs/2405.13576},
+  year         = {2024},
+  url          = {https://doi.org/10.48550/arXiv.2405.13576},
+  doi          = {10.48550/ARXIV.2405.13576},
+  eprinttype    = {arXiv},
+  eprint       = {2405.13576},
+  timestamp    = {Tue, 18 Jun 2024 09:26:37 +0200},
+  biburl       = {https://dblp.org/rec/journals/corr/abs-2405-13576.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 ```
