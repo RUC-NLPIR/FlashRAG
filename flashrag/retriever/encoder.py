@@ -128,7 +128,6 @@ class STEncoder:
         query_emb = self.model.encode_multi_process(
             query_list,
             pool,
-            convert_to_numpy=True,
             normalize_embeddings=True,
             batch_size=batch_size,
             show_progress_bar=True,
