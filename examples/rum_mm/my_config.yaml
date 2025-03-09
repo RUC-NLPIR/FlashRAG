@@ -1,0 +1,115 @@
+# ----Global Paths----
+# Paths to retrieval models
+model2path:
+  e5: intfloat/e5-base-v2
+  bge: BAAI/bge-base-en-v1.5
+  bge-zh: BAAI/bge-large-zh-v1.5
+  jina: jinaai/jina-embeddings-v2-base-en
+  contriever: facebook/contriever-msmarco
+  llama2-13B: meta-llama/Llama-2-13b-hf
+  llama2-13B-chat: meta-llama/Llama-2-13b-chat-hf
+  llama2-7B: meta-llama/Llama-2-7b-hf
+  llama2-7B-chat: meta-llama/Llama-2-7b-chat-hf
+  selfrag-llama2-7B: selfrag/selfrag-llama2-7b
+  llama3-8B-instruct: meta-llama/Llama-2-8b-instruct-hf
+  phi-3: microsoft/phi-3-mini-4k-instruct
+  qwen-14B: Qwen/Qwen1.5-14B-Chat
+  qwen2-7B-instruct: Qwen/Qwen2-7B-Instruct
+  gemma-7B: google/gemma-7b
+  baichuan2-7B-chat: baichuan-inc/Baichuan2-7B-Chat
+  proposition: google/flan-t5-large
+  mistral-7B-instruct: mistralai/Mistral-7B-Instruct-v0.3
+  bge-m3: BAAI/bge-m3
+  glm-4-9b-chat: THUDM/glm-4-9b-chat
+  qwen2.5-7B-instruct: Qwen/Qwen2.5-7B-Instruct
+  llama3.1-8B-instruct: meta-llama/Llama-3.1-8B-Instruct
+  qwen2-vl-2B: Qwen/Qwen2-VL-2B-Instruct
+  qwen2-vl-7B: Qwen/Qwen2-VL-7B-Instruct
+  internvl2-2B: OpenGVLab/InternVL2-2B
+  internvl2-8B: OpenGVLab/InternVL2-8B
+  internvl2.5-8B: OpenGVLab/InternVL2.5-8B
+  llava-7B: liuhaotian/llava-v1.6-mistral-7b
+  llava-7B-onevision-ov: liuhaotian/llava-onevision-7b-ov
+  openai-clip: openai/clip-vit-large-patch14
+  openai-clip-336: openai/clip-vit-large-patch14-336
+  chinese-clip: OFA-Sys/chinese-clip-vit-large-patch14
+  jina-clip-v2: jinaai/jina-clip-v2
+
+# Pooling methods for each embedding model
+model2pooling:
+  default: "pooler"
+  e5: "mean"
+  bge: "cls"
+  bge-zh: "cls"
+  contriever: "mean"
+  bge-m3: "cls"
+
+# Indexes path for retrieval models
+method2index:
+  e5: ~
+  bm25: ~
+  contriever: ~
+  bge: ~
+  bge-m3: ~
+
+# ----Environment Settings----
+gpu_id: "1,2"
+dataset_name: "nq"
+split: ["dev",'test']
+
+# Sampling configurations for testing
+test_sample_num: 1000
+random_sample: False
+save_intermediate_data: True
+# Seed for reproducibility
+seed: 2024
+
+# Directory paths for data and outputs
+data_dir: "datasets/"
+#save_dir: "/data00/jiajie_jin/test_project/output"
+save_dir: "result/"
+
+# ----Retrieval Settings----
+retrieval_method: "e5" # name or path of the retrieval model
+index_path: ~ # Set automatically if not provided
+corpus_path: ~
+retrieval_pooling_method: ~
+
+retrieval_topk: 5
+retrieval_batch_size: 256
+retrieval_use_fp16: True
+retrieval_query_max_length: 128
+save_retrieval_cache: False
+use_retrieval_cache: False
+retrieval_cache_path: ~
+
+use_reranker: False
+rerank_model_name: e5
+rerank_model_path: ~
+rerank_pooling_method: ~
+rerank_use_fp16: True
+rerank_topk: 5
+rerank_max_length: 512
+rerank_batch_size: 256
+
+# ----Generator Settings----
+framework: vllm # inference frame work of LLM, supporting: 'hf','vllm','fschat'
+generator_model: "llama3-8B-instruct"  # name or path of the generator
+generator_max_input_len: 4096
+generator_batch_size: 4
+generation_params:
+  do_sample: False
+  max_tokens: 200
+  temperature: 0.1
+  top_p: 1.0
+vllm_gpu_memory_utilization: 0.95
+
+# ----Evaluation Settings----
+# Metrics to evaluate the result
+metrics: ['em','f1','acc','precision','recall','input_tokens'] 
+# Specify setting for metric, will be called within certain metrics
+metric_setting: 
+  retrieval_recall_topk: 5
+  tokenizer_name: 'gpt-4'
+save_metric_score: True #　whether to save the metric score into txt file
+
