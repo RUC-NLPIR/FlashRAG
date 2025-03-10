@@ -646,6 +646,12 @@ To facilitate easier replication of the experiments, we now provide a preprocess
 
 The index was created using the e5-base-v2 retriever on our uploaded wiki18_100w dataset, which is consistent with the index used in our experiments.
 
+## :lollipop: Awesome Work using FlashRAG
+
+- [R1-Searcher](https://github.com/SsmallSong/R1-Searcher), a method that incentivizes the search capability in LLMs via reinforcement learning
+- [ReSearch](https://github.com/Agent-RL/ReSearch), a method that learns to reason with search for LLMs via reinforcement learning
+- [AutoCoA](https://github.com/ADaM-BJTU/AutoCoA), a method that internalizes chain-of-action generation into reasoning models
+
 ## :raised_hands: Additional FAQs
 
 - [How should I set different experimental parameters?](./docs/configuration.md)
