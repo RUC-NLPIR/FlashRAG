@@ -154,6 +154,7 @@ class BaseRetriever:
             assert self.cache_path is not None
             with open(self.cache_path, "r") as f:
                 self.cache = json.load(f)
+        self.silent = self._config["silent_retrieval"] if "silent_retrieval" in self._config else False
     def update_additional_setting(self):
         pass
     def _save_cache(self):
@@ -378,6 +379,7 @@ class DenseRetriever(BaseTextRetriever):
                 max_length = self.query_max_length,
                 use_fp16 = self.use_fp16,
                 instruction = self.instruction,
+                silent = self.silent
             )
         else:
             self.encoder = Encoder(
@@ -387,6 +389,7 @@ class DenseRetriever(BaseTextRetriever):
                 max_length = self.query_max_length,
                 use_fp16 = self.use_fp16,
                 instruction = self.instruction,
+                silent = self.silent
             )
 
     def _search(self, query: str, num: int = None, return_score=False):
@@ -413,17 +416,18 @@ class DenseRetriever(BaseTextRetriever):
 
         results = []
         scores = []
-
+        print("begin encode")
         emb = self.encoder.encode(query, batch_size=batch_size, is_query=True)
-        print("Begin faiss searching...")
+        print("end encode")
         scores, idxs = self.index.search(emb, k=num)
-        print("End faiss searching")
+        print("end search")
         scores = scores.tolist()
         idxs = idxs.tolist()
 
         flat_idxs = sum(idxs, [])
         results = load_docs(self.corpus, flat_idxs)
         results = [results[i * num : (i + 1) * num] for i in range(len(idxs))]
+        print("end load docs")
 
         if return_score:
             return results, scores
@@ -459,6 +463,7 @@ class MultiModalRetriever(BaseRetriever):
         self.encoder = ClipEncoder(
             model_name=self.retrieval_method,
             model_path=config["retrieval_model_path"],
+            silent=self.silent
         )
 
     def _judge_input_modal(self, query):
@@ -519,7 +524,7 @@ class MultiModalRetriever(BaseRetriever):
         results = []
         scores = []
 
-        for start_idx in tqdm(range(0, len(query), batch_size), desc="Retrieval process: "):
+        for start_idx in tqdm(range(0, len(query), batch_size), desc="Retrieval process: ", disable=self.silent):
             query_batch = query[start_idx : start_idx + batch_size]
             batch_emb = self.encoder.encode(query_batch, modal=query_modal)
             batch_scores, batch_idxs = self.index_dict[target_modal].search(batch_emb, k=num)

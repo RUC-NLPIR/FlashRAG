@@ -37,6 +37,7 @@ Table of Contents:
 - [Spring](#spring)
 - [Adaptive-RAG](#adaptive-rag)
 - [RQRAG](#rqrag)
+- [R1-Searcher](#r1-searcher)
 
 #### AAR
 
@@ -130,3 +131,13 @@ The method can be selected from the following:
 ```
 naive zero-shot AAR-contriever llmlingua recomp selective-context sure replug skr flare iterretgen ircot trace
 ```
+
+
+#### R1-Searcher
+
+This method requires downloading the R1-Searcher model.
+
+- Additional Step1: Download R1-Searcher model from huggingface repo: [XXsongLALA/Qwen-2.5-7B-base-RAG-RL](https://huggingface.co/XXsongLALA/Qwen-2.5-7B-base-RAG-RL)
+- Additional Step2: Modify the `generator_model_path` in the `r1searcher` function.
+
+

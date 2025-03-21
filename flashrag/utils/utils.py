@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import importlib
 from transformers import AutoConfig
@@ -173,3 +174,10 @@ def hash_object(o) -> str:
         dill.dump(o, buffer)
         m.update(buffer.getbuffer())
         return base58.b58encode(m.digest()).decode()
+
+def extract_between(text: str, start_tag: str, end_tag: str):
+    pattern = re.escape(start_tag) + r"(.*?)" + re.escape(end_tag)
+    matches = re.findall(pattern, text, flags=re.DOTALL)
+    if matches:
+        return matches[-1].strip()
+    return None

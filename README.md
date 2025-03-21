@@ -24,7 +24,7 @@
 </h4>
 
 
-FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 36 pre-processed benchmark RAG datasets and 16 state-of-the-art RAG algorithms.
+FlashRAG is a Python toolkit for the reproduction and development of Retrieval Augmented Generation (RAG) research. Our toolkit includes 36 pre-processed benchmark RAG datasets and 17 state-of-the-art RAG algorithms.
 
 <p align="center">
 <img src="asset/framework.jpg">
@@ -58,7 +58,7 @@ https://github.com/user-attachments/assets/8ca00873-5df2-48a7-b853-89e7b18bc6e9
 
 - **Comprehensive Benchmark Datasets**: A collection of 36 pre-processed RAG benchmark datasets to test and validate RAG models' performances.
 
-- **Pre-implemented Advanced RAG Algorithms**: Features 16 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
+- **Pre-implemented Advanced RAG Algorithms**: Features 17 advancing RAG algorithms with reported results, based on our framework. Easily reproducing results under different settings.
 
 - **Efficient Preprocessing Stage**: Simplifies the RAG workflow preparation by providing various scripts like corpus processing for retrieval, retrieval index building, and pre-retrieval of documents.
 
@@ -79,6 +79,8 @@ FlashRAG is still under development and there are many issues and room for impro
 - [ ] Enhance code adaptability and readability
 
 ## :page_with_curl: Changelog
+[25/03/21] We have added support for **Reasoning Pipeline**, which is a new paradigm that combines reasoning ability and retrieval, representing work that includes [Search-o1](https://github.com/sunnynexus/Search-o1), [R1-Searcher](https://github.com/SsmallSong/R1-Searcher), [ReSearch](https://github.com/Agent-RL/ReSearch). We evaluate the performance of the pipeline on various RAG benchmarks, it can achieve F1 scores close to 60 on multi hop inference datasets such as Hotpotqe. See it in [**result table**](#robot-supporting-methods).
+
 [25/02/24] 🔥🔥🔥 We have added support for **multimodal RAG**, including [**MLLMs like Llava, Qwen, InternVL**](https://ruc-nlpir.github.io/FlashRAG/#/zh-cn/component/generator?id=%e5%a4%9a%e6%a8%a1%e6%80%81%e7%94%9f%e6%88%90%e5%99%a8), and various [**multimodal retrievers with Clip architecture**](https://ruc-nlpir.github.io/FlashRAG/#/zh-cn/component/retriever?id=%e5%a4%9a%e6%a8%a1%e6%80%81%e6%a3%80%e7%b4%a2%e5%99%a8). More information can be found in our new version of arxiv article and our documentation. Try it!
 
 [25/01/21] Our technical paper [FlashRAG: A Python Toolkit for Efficient RAG Research](https://arxiv.org/abs/2405.13576) is honored to have been accepted to the Resource Track of the 2025 **ACM Web Conference (WWW 2025)**. Please Check it out!
@@ -465,7 +467,7 @@ In each category, we have implemented corresponding common pipelines. Some pipel
           <td>Ranking and merging generated results based on each document</td>
         </tr>
         <tr>
-            <td rowspan="5">Loop</td>
+            <td rowspan="6">Loop</td>
             <td>Iterative Pipeline</td>
             <td>Alternating retrieval and generation</td>
         </tr>
@@ -484,6 +486,10 @@ In each category, we have implemented corresponding common pipelines. Some pipel
         <tr>
             <td>IRCoT Pipeline</td>
             <td>Integrate retrieval process with CoT</td>
+        </tr>
+        <tr>
+            <td>Reasoning Pipeline</td>
+            <td>Reasoning with retrieval</td>
         </tr>
     </tbody>
 </table>
@@ -565,6 +571,8 @@ It’s important to note that, to ensure consistency, we have utilized a uniform
 | [Iter-Retgen](https://arxiv.org/abs/2305.15294), [ITRG](https://arxiv.org/abs/2310.05149) | Loop        | 36.8    | 60.1          | 38.3          | 21.6       | 37.9       | 18.2      |                                                 |
 | [IRCoT](https://aclanthology.org/2023.acl-long.557.pdf)                                   | Loop        | 33.3    | 56.9          | 41.5          | 32.4       | 45.6       | 20.7      |                                                 |
 | [RQRAG](https://arxiv.org/abs/2404.00610)                                   | Loop        | 32.6    | 52.5          | 33.5          | 35.8       | 46.4       | 26.2      |  Use trained rqrag-llama2-7B                                               |
+| [R1-Searcher](https://arxiv.org/pdf/2503.05592) | Reasoning | 37.3 | 58.7 | 59.5 | 55.5 | 43.9 | 27.5 | Using trained Qwen2.5-7B model |
+ 
 
 
 ## :notebook: Supporting Datasets & Document Corpus
