@@ -1,6 +1,7 @@
 import json
 import os
 import time
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import warnings
 from typing import List, Dict, Union
@@ -116,7 +117,7 @@ class BaseRetriever:
     def __init__(self, config):
         self._config = config
         self.update_config()
-    
+
     @property
     def config(self):
         return self._config
@@ -125,11 +126,11 @@ class BaseRetriever:
     def config(self, config_data):
         self._config = config_data
         self.update_config()
-    
+
     def update_config(self):
         self.update_base_setting()
         self.update_additional_setting()
-    
+
     def update_base_setting(self):
         self.retrieval_method = self._config["retrieval_method"]
         self.topk = self._config["retrieval_topk"]
@@ -157,6 +158,7 @@ class BaseRetriever:
         self.silent = self._config["silent_retrieval"] if "silent_retrieval" in self._config else False
     def update_additional_setting(self):
         pass
+
     def _save_cache(self):
         self.cache = convert_numpy(self.cache)
 
@@ -164,6 +166,7 @@ class BaseRetriever:
             if isinstance(obj, np.float32):
                 return float(obj)
             raise TypeError(f"Type {type(obj)} not serializable")
+
         with open(self.cache_save_path, "w") as f:
             json.dump(self.cache, f, indent=4, default=custom_serializer)
 
@@ -221,9 +224,10 @@ class BM25Retriever(BaseTextRetriever):
     def __init__(self, config, corpus=None):
         super().__init__(config)
         self.load_model_corpus(corpus)
+
     def update_additional_setting(self):
         self.backend = self._config["bm25_backend"]
-    
+
     def load_model_corpus(self, corpus):
         if self.backend == "pyserini":
             # Warning: the method based on pyserini will be deprecated
@@ -238,24 +242,24 @@ class BM25Retriever(BaseTextRetriever):
                     self.corpus = corpus
             self.max_process_num = 8
 
-            is_zh = judge_zh(self.corpus[0]['contents'])
+            is_zh = judge_zh(self.corpus[0]["contents"])
             if is_zh:
-                self.searcher.set_language('zh')
+                self.searcher.set_language("zh")
         elif self.backend == "bm25s":
             import Stemmer
             import bm25s
 
             self.corpus = load_corpus(self.corpus_path)
-            is_zh = judge_zh(self.corpus[0]['contents'])
+            is_zh = judge_zh(self.corpus[0]["contents"])
 
             self.searcher = bm25s.BM25.load(self.index_path, mmap=True, load_corpus=False)
             if is_zh:
-                self.tokenizer = bm25s.tokenization.Tokenizer(stopwords='zh')
+                self.tokenizer = bm25s.tokenization.Tokenizer(stopwords="zh")
                 self.tokenizer.load_stopwords(self.index_path)
                 self.tokenizer.load_vocab(self.index_path)
             else:
                 stemmer = Stemmer.Stemmer("english")
-                self.tokenizer = bm25s.tokenization.Tokenizer(stopwords='en', stemmer=stemmer)
+                self.tokenizer = bm25s.tokenization.Tokenizer(stopwords="en", stemmer=stemmer)
                 self.tokenizer.load_stopwords(self.index_path)
                 self.tokenizer.load_vocab(self.index_path)
 
@@ -299,7 +303,7 @@ class BM25Retriever(BaseTextRetriever):
             else:
                 results = load_docs(self.corpus, [hit.docid for hit in hits])
         elif self.backend == "bm25s":
-            query_tokens = self.tokenizer.tokenize([query], return_as='tuple', update_vocab=False)
+            query_tokens = self.tokenizer.tokenize([query], return_as="tuple", update_vocab=False)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
             results = list(results[0])
             scores = list(scores[0])
@@ -321,12 +325,12 @@ class BM25Retriever(BaseTextRetriever):
                 results.append(item_result)
                 scores.append(item_score)
         elif self.backend == "bm25s":
-            query_tokens = self.tokenizer.tokenize(query, return_as='tuple', update_vocab=False)
+            query_tokens = self.tokenizer.tokenize(query, return_as="tuple", update_vocab=False)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
         else:
             assert False, "Invalid bm25 backend!"
-        results = results.tolist() if isinstance(results,np.ndarray) else results
-        scores = scores.tolist() if isinstance(scores,np.ndarray) else scores
+        results = results.tolist() if isinstance(results, np.ndarray) else results
+        scores = scores.tolist() if isinstance(scores, np.ndarray) else scores
         if return_score:
             return results, scores
         else:
@@ -338,17 +342,17 @@ class DenseRetriever(BaseTextRetriever):
 
     def __init__(self, config: dict, corpus=None):
         super().__init__(config)
-        
+
         self.load_corpus(corpus)
         self.load_index()
         self.load_model()
-    
+
     def load_corpus(self, corpus):
         if corpus is None:
             self.corpus = load_corpus(self.corpus_path)
         else:
             self.corpus = corpus
-    
+
     def load_index(self):
         if self.index_path is None or not os.path.exists(self.index_path):
             raise Warning(f"Index file {self.index_path} does not exist!")
@@ -359,17 +363,16 @@ class DenseRetriever(BaseTextRetriever):
             co.shard = True
             self.index = faiss.index_cpu_to_all_gpus(self.index, co=co)
 
-    
     def update_additional_setting(self):
         self.query_max_length = self._config["retrieval_query_max_length"]
-        self.pooling_method = self._config['retrieval_pooling_method']
-        self.use_fp16 = self._config['retrieval_use_fp16']
+        self.pooling_method = self._config["retrieval_pooling_method"]
+        self.use_fp16 = self._config["retrieval_use_fp16"]
         self.batch_size = self._config["retrieval_batch_size"]
         self.instruction = self._config["instruction"]
 
-        self.retreival_model_path = self._config['retrieval_model_path']
+        self.retreival_model_path = self._config["retrieval_model_path"]
         self.use_st = self._config["use_sentence_transformer"]
-        self.use_faiss_gpu = self._config['faiss_gpu']
+        self.use_faiss_gpu = self._config["faiss_gpu"]
 
     def load_model(self):
         if self.use_st:
@@ -382,6 +385,8 @@ class DenseRetriever(BaseTextRetriever):
                 silent = self.silent
             )
         else:
+            # check pooling method
+            self._check_pooling_method(self.retrieval_model_path, self.pooling_method)
             self.encoder = Encoder(
                 model_name = self.retrieval_method,
                 model_path = self.retreival_model_path,
@@ -485,10 +490,12 @@ class MultiModalRetriever(BaseRetriever):
         )
         if query_modal == "image" and isinstance(query, str):
             from PIL import Image
+
             if os.path.exists(query):
                 query = Image.open(query)
             else:
                 import requests
+
                 query = Image.open(requests.get(query, stream=True).raw)
 
         query_emb = self.encoder.encode(query, modal=query_modal)
@@ -516,6 +523,7 @@ class MultiModalRetriever(BaseRetriever):
         if query_modal == "image" and isinstance(query[0], str):
             from PIL import Image
             import requests
+
             if os.path.exists(query[0]):
                 query = [Image.open(q) for q in query]
             else:
@@ -552,10 +560,10 @@ class MultiRetrieverRouter:
         self.retriever_list = self.load_all_retriever(config)
         self.config = config
 
-        if self.merge_method == 'rerank':
-            config['multi_retriever_setting']['rerank_topk'] = self.final_topk
-            config['multi_retriever_setting']['device'] = config['device']
-            self.reranker = get_reranker(config['multi_retriever_setting'])
+        if self.merge_method == "rerank":
+            config["multi_retriever_setting"]["rerank_topk"] = self.final_topk
+            config["multi_retriever_setting"]["device"] = config["device"]
+            self.reranker = get_reranker(config["multi_retriever_setting"])
 
     def load_all_retriever(self, config):
         retriever_config_list = config["multi_retriever_setting"]["retriever_list"]
@@ -591,7 +599,7 @@ class MultiRetrieverRouter:
                 try:
                     model_config = AutoConfig.from_pretrained(retrieval_model_path)
                     arch = model_config.architectures[0]
-                    print("arch: ",arch)
+                    print("arch: ", arch)
                     if "clip" in arch.lower():
                         retriever = MultiModalRetriever(retriever_config, corpus)
                     else:
@@ -614,11 +622,11 @@ class MultiRetrieverRouter:
                 for _item in item:
                     _item["source"] = retrieval_method
                     _item["corpus_path"] = corpus_path
-                    _item['is_multimodal'] = is_multimodal
+                    _item["is_multimodal"] = is_multimodal
             else:
                 item["source"] = retrieval_method
                 item["corpus_path"] = corpus_path
-                item['is_multimodal'] = is_multimodal
+                item["is_multimodal"] = is_multimodal
         return result
 
     def _search_or_batch_search(self, query: Union[str, list], target_modal, num, return_score, method, retriever_list):
@@ -631,7 +639,7 @@ class MultiRetrieverRouter:
         def process_retriever(retriever):
             is_multimodal = isinstance(retriever, MultiModalRetriever)
             params = {"query": query, "return_score": return_score}
-            
+
             if is_multimodal:
                 params["target_modal"] = target_modal
 
@@ -650,7 +658,9 @@ class MultiRetrieverRouter:
             return result, score
 
         with ThreadPoolExecutor(max_workers=4) as executor:
-            future_to_retriever = {executor.submit(process_retriever, retriever): retriever for retriever in retriever_list}
+            future_to_retriever = {
+                executor.submit(process_retriever, retriever): retriever for retriever in retriever_list
+            }
             for future in as_completed(future_to_retriever):
                 try:
                     result, score = future.result()
@@ -666,7 +676,6 @@ class MultiRetrieverRouter:
         else:
             return result_list
 
-
     def reorder(self, result_list, score_list, retriever_list):
         """
         batch_search:
@@ -675,7 +684,7 @@ class MultiRetrieverRouter:
 
         navie search:
         original result like: [bm25-d1, bm25-d2, e5-d1, e5-d2]
-        
+
         """
 
         retriever_num = len(retriever_list)
@@ -710,8 +719,8 @@ class MultiRetrieverRouter:
                 for query_idx, query_doc_list in enumerate(result_list):
                     exist_id = set()
                     for doc_idx, doc in enumerate(query_doc_list):
-                        if doc['id'] not in exist_id:
-                            exist_id.add(doc['id'])
+                        if doc["id"] not in exist_id:
+                            exist_id.add(doc["id"])
                         else:
                             query_doc_list.remove(doc)
                             if score_list != []:
@@ -731,14 +740,14 @@ class MultiRetrieverRouter:
             else:
                 result_list, score_list = self.rrf_merge(result_list, num, k=60)
             return result_list, score_list
-        elif self.merge_method == 'rerank':
+        elif self.merge_method == "rerank":
             if isinstance(result_list[0], dict):
                 query, result_list, score_list = [query], [result_list], [score_list]
             # parse the result of multimodal corpus
             for item_result in result_list:
                 for item in item_result:
-                    if item['is_multimodal']:
-                        item['contents'] = item['text']
+                    if item["is_multimodal"]:
+                        item["contents"] = item["text"]
             # rerank all docs
             print(result_list)
             result_list, score_list = self.reranker.rerank(query, result_list, topk=num)
@@ -798,50 +807,75 @@ class MultiRetrieverRouter:
         # query: str or PIL.Image
         # judge query type: text or image
         if judge_image(query):
-            retriever_list = [retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)]
+            retriever_list = [
+                retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)
+            ]
         else:
             retriever_list = self.retriever_list
-        if target_modal == 'image':
+        if target_modal == "image":
             # remove text retriever
             retriever_list = [retriever for retriever in retriever_list if isinstance(retriever, MultiModalRetriever)]
 
-        return self._search_or_batch_search(query, target_modal, num, return_score, method="search", retriever_list=retriever_list)
+        return self._search_or_batch_search(
+            query, target_modal, num, return_score, method="search", retriever_list=retriever_list
+        )
 
     def batch_search(self, query, target_modal="text", num: Union[list, int, None] = None, return_score=False):
         # judge query type: text or image
         if not isinstance(query, list):
             query = [query]
-        if target_modal == 'image':
-            self._retriever_list = [retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)]
+        if target_modal == "image":
+            self._retriever_list = [
+                retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)
+            ]
         else:
             self._retriever_list = self.retriever_list
         query_type_list = [judge_image(q) for q in query]
         if all(query_type_list):
             # all query is image
-            if self.merge_method == 'rerank':
-                warnings.warn('merge_method is rerank, but all query is image, use default method `concat` instead')
-                self.merge_method = 'concat'
-            retriever_list = [retriever for retriever in self._retriever_list if isinstance(retriever, MultiModalRetriever)]
+            if self.merge_method == "rerank":
+                warnings.warn("merge_method is rerank, but all query is image, use default method `concat` instead")
+                self.merge_method = "concat"
+            retriever_list = [
+                retriever for retriever in self._retriever_list if isinstance(retriever, MultiModalRetriever)
+            ]
 
-            return self._search_or_batch_search(query, target_modal, num, return_score, method="batch_search", retriever_list=retriever_list)
+            return self._search_or_batch_search(
+                query, target_modal, num, return_score, method="batch_search", retriever_list=retriever_list
+            )
         elif all([not t for t in query_type_list]):
             # all query is text
             # if exist text retriever, don't use mm retriever for text-text search
             if any([isinstance(retriever, BaseTextRetriever) for retriever in self._retriever_list]):
-                self._retriever_list = [retriever for retriever in self._retriever_list if not isinstance(retriever, MultiModalRetriever)]
-            return self._search_or_batch_search(query, target_modal, num, return_score, method="batch_search", retriever_list=self._retriever_list)
+                self._retriever_list = [
+                    retriever for retriever in self._retriever_list if not isinstance(retriever, MultiModalRetriever)
+                ]
+            return self._search_or_batch_search(
+                query, target_modal, num, return_score, method="batch_search", retriever_list=self._retriever_list
+            )
         else:
             # query list is the mix of image and text
-            if self.merge_method == 'rerank':
-                warnings.warn('merge_method is rerank, but some query is image, use default method `concat` instead')
-                self.merge_method = 'concat'
+            if self.merge_method == "rerank":
+                warnings.warn("merge_method is rerank, but some query is image, use default method `concat` instead")
+                self.merge_method = "concat"
             image_query_idx = [i for i, t in enumerate(query_type_list) if t]
             image_query_list = [query[i] for i in image_query_idx]
             text_query_list = [q for q in query if q not in image_query_list]
 
-            text_output = self._search_or_batch_search(text_query_list, target_modal, num, return_score, method="batch_search", retriever_list=self._retriever_list)
-            retriever_list = [retriever for retriever in self._retriever_list if isinstance(retriever, MultiModalRetriever)]
-            image_output = self._search_or_batch_search(text_query_list, target_modal, num, return_score, method="batch_search", retriever_list=retriever_list)
+            text_output = self._search_or_batch_search(
+                text_query_list,
+                target_modal,
+                num,
+                return_score,
+                method="batch_search",
+                retriever_list=self._retriever_list,
+            )
+            retriever_list = [
+                retriever for retriever in self._retriever_list if isinstance(retriever, MultiModalRetriever)
+            ]
+            image_output = self._search_or_batch_search(
+                text_query_list, target_modal, num, return_score, method="batch_search", retriever_list=retriever_list
+            )
 
             # merge text output and image output
             if return_score:
@@ -859,7 +893,7 @@ class MultiRetrieverRouter:
                     else:
                         final_result.append(image_result[image_idx])
                         final_score.append(image_score[image_idx])
-                        image_idx += 1 
+                        image_idx += 1
                 return final_result, final_score
             else:
                 final_result = []
@@ -871,6 +905,5 @@ class MultiRetrieverRouter:
                         text_idx += 1
                     else:
                         final_result.append(image_result[image_idx])
-                        image_idx += 1 
+                        image_idx += 1
                 return final_result
-
