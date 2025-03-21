@@ -421,18 +421,14 @@ class DenseRetriever(BaseTextRetriever):
 
         results = []
         scores = []
-        print("begin encode")
         emb = self.encoder.encode(query, batch_size=batch_size, is_query=True)
-        print("end encode")
         scores, idxs = self.index.search(emb, k=num)
-        print("end search")
         scores = scores.tolist()
         idxs = idxs.tolist()
 
         flat_idxs = sum(idxs, [])
         results = load_docs(self.corpus, flat_idxs)
         results = [results[i * num : (i + 1) * num] for i in range(len(idxs))]
-        print("end load docs")
 
         if return_score:
             return results, scores
