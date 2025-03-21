@@ -73,21 +73,23 @@ FlashRAG is still under development and there are many issues and room for impro
 - [x] Support OpenAI models
 - [x] Provdide instructions for each component
 - [x] Integrate sentence Transformers
+- [x] Support multimodal RAG
 - [ ] Inlcude more RAG approaches
 - [ ] Add more evaluation metrics (e.g., Unieval, name-entity F1) and benchmarks (e.g., RGB benchmark)
 - [ ] Enhance code adaptability and readability
 
 ## :page_with_curl: Changelog
+[25/02/24] 🔥🔥🔥 We have added support for **multimodal RAG**, including [**MLLMs like Llava, Qwen, InternVL**](https://ruc-nlpir.github.io/FlashRAG/#/zh-cn/component/generator?id=%e5%a4%9a%e6%a8%a1%e6%80%81%e7%94%9f%e6%88%90%e5%99%a8), and various [**multimodal retrievers with Clip architecture**](https://ruc-nlpir.github.io/FlashRAG/#/zh-cn/component/retriever?id=%e5%a4%9a%e6%a8%a1%e6%80%81%e6%a3%80%e7%b4%a2%e5%99%a8). More information can be found in our new version of arxiv article and our documentation. Try it!
 
 [25/01/21] Our technical paper [FlashRAG: A Python Toolkit for Efficient RAG Research](https://arxiv.org/abs/2405.13576) is honored to have been accepted to the Resource Track of the 2025 **ACM Web Conference (WWW 2025)**. Please Check it out!
 
 [25/01/12] Introduce <strong>FlashRAG-UI</strong>, an easy to use interface. You can easily and quickly configure and experience the supported RAG methods and evaluate them on the benchmarks.
 
-[25/01/11] We have added support for a new method [<u>RQRAG</u>](https://arxiv.org/abs/2404.00610) method, see it in [**reproduce_experiment**](docs/reproduce_experiment.md).
+[25/01/11] We have added support for a new method [<u>RQRAG</u>](https://arxiv.org/abs/2404.00610) method, see it in [**reproduce_experiment**](docs/original_docs/reproduce_experiment.md).
 
-[25/01/07] We have currently support the aggregation of multiple retrievers, see it in [**multi retriever usage**](https://github.com/RUC-NLPIR/FlashRAG/blob/main/docs/multi_retriever_usage.md).
+[25/01/07] We have currently support the aggregation of multiple retrievers, see it in [**multi retriever usage**](https://github.com/RUC-NLPIR/FlashRAG/blob/main/docs/original_docs/multi_retriever_usage.md).
 
-[25/01/07] We have integrated a very flexible and lightweight corpus chunking library [**Chunkie**](https://github.com/chonkie-ai/chonkie?tab=readme-ov-file#usage), which supports various custom chunking methods (tokens, sentences, semantic, etc.). Use it in [<u>chunking doc corpus</u>](docs/chunk-doc-corpus.md).
+[25/01/07] We have integrated a very flexible and lightweight corpus chunking library [**Chunkie**](https://github.com/chonkie-ai/chonkie?tab=readme-ov-file#usage), which supports various custom chunking methods (tokens, sentences, semantic, etc.). Use it in [<u>chunking doc corpus</u>](docs/original_docs/chunk-doc-corpus.md).
 
 [24/10/21] We have released a version based on the Paddle framework that supports Chinese hardware platforms. Please refer to [FlashRAG Paddle](https://github.com/RUC-NLPIR/FlashRAG-Paddle) for details.
 
@@ -106,7 +108,7 @@ FlashRAG is still under development and there are many issues and room for impro
 
 [24/07/17] Due to some unknown issues with HuggingFace, our original dataset link has been invalid. We have updated it. Please check the [new link](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/) if you encounter any problems.
 
-[24/07/06] We add support for a new method: [<u>Trace</u>](https://arxiv.org/abs/2406.11460), which refine text by constructing a knowledge graph. See it [<u>results</u>](#robot-supporting-methods) and [<u>details</u>](./docs/baseline_details.md).
+[24/07/06] We add support for a new method: [<u>Trace</u>](https://arxiv.org/abs/2406.11460), which refine text by constructing a knowledge graph. See it [<u>results</u>](#robot-supporting-methods) and [<u>details</u>](./docs/original_docs/baseline_details.md).
 
 [24/06/19] We add support for a new method: [<u>IRCoT</u>](https://arxiv.org/abs/2212.10509), and update the [<u>result table</u>](#robot-supporting-methods).
 
@@ -114,9 +116,9 @@ FlashRAG is still under development and there are many issues and room for impro
 
 [24/06/11] We have integrated `sentence transformers` in the retriever module. Now it's easier to use the retriever without setting pooling methods.
 
-[24/06/05] We have provided detailed document for reproducing existing methods (see [how to reproduce](./docs/reproduce_experiment.md), [baseline details](./docs/baseline_details.md)), and [<u>configurations settings</u>](./docs/configuration.md).
+[24/06/05] We have provided detailed document for reproducing existing methods (see [how to reproduce](./docs/original_docs/reproduce_experiment.md), [baseline details](./docs/original_docs/baseline_details.md)), and [<u>configurations settings</u>](./docs/original_docs/configuration.md).
 
-[24/06/02] We have provided an introduction of FlashRAG for beginners, see [<u>an introduction to flashrag</u>](./docs/introduction_for_beginners_en.md) ([<u>中文版</u>](./docs/introduction_for_beginners_zh.md) [<u>한국어</u>](./docs/introduction_for_beginners_kr.md)).
+[24/06/02] We have provided an introduction of FlashRAG for beginners, see [<u>an introduction to flashrag</u>](./docs/original_docs/introduction_for_beginners_en.md) ([<u>中文版</u>](./docs/original_docs/introduction_for_beginners_zh.md) [<u>한국어</u>](./docs/original_docs/introduction_for_beginners_kr.md)).
 
 [24/05/31] We supported Openai-series models as generator.
 
@@ -181,7 +183,7 @@ To build an index, you first need to save your corpus as a `jsonl` file with eac
 {"id": "1", "contents": "..."}
 ```
 
-If you want to use Wikipedia as your corpus, you can refer to our documentation [Processing Wikipedia](./docs/process-wiki.md) to convert it into an indexable format.
+If you want to use Wikipedia as your corpus, you can refer to our documentation [Processing Wikipedia](./docs/original_docs/process-wiki.md) to convert it into an indexable format.
 
 ### Index Construction
 
@@ -270,7 +272,7 @@ my_config = Config(
     config_dict = config_dict
 ```
 
-We provide comprehensive guidance on how to set configurations, you can see our [<u>configuration guidance</u>](./docs/configuration.md).
+We provide comprehensive guidance on how to set configurations, you can see our [<u>configuration guidance</u>](./docs/original_docs/configuration.md).
 You can also refer to the [<u>basic yaml file</u>](./flashrag/config/basic_config.yaml) we provide to set your own parameters.
 
 Next, load the corresponding dataset and initialize the pipeline. The components in the pipeline will be automatically loaded.
@@ -341,11 +343,11 @@ class ToyPipeline(BasicPipeline):
     return dataset
 ```
 
-Please first understand the input and output forms of the components you need to use from our [<u>documentation</u>](./docs/basic_usage.md).
+Please first understand the input and output forms of the components you need to use from our [<u>documentation</u>](./docs/original_docs/basic_usage.md).
 
 ### Just use components
 
-If you already have your own code and only want to use our components to embed the original code, you can refer to the [<u>basic introduction of the components</u>](./docs/basic_usage.md) to obtain the input and output formats of each component.
+If you already have your own code and only want to use our components to embed the original code, you can refer to the [<u>basic introduction of the components</u>](./docs/original_docs/basic_usage.md) to obtain the input and output formats of each component.
 
 ## :gear: Components
 
@@ -535,11 +537,11 @@ We have implemented 15 works with a consistent setting of:
 
 - **Generator:** LLAMA3-8B-instruct with input length of 2048
 - **Retriever:** e5-base-v2 as embedding model, retrieve 5 docs per query
-- **Prompt:** A consistent default prompt, template can be found in the [<u>method details</u>](./docs/baseline_details.md).
+- **Prompt:** A consistent default prompt, template can be found in the [<u>method details</u>](./docs/original_docs/baseline_details.md).
 
 For open-source methods, we implemented their processes using our framework. For methods where the author did not provide source code, we will try our best to follow the methods in the original paper for implementation.
 
-For necessary settings and hyperparameters specific to some methods, we have documented them in the **specific settings** column. For more details, please consult our [<u>reproduce guidance</u>](./docs/reproduce_experiment.md) and [<u>method details</u>](./docs/baseline_details.md).
+For necessary settings and hyperparameters specific to some methods, we have documented them in the **specific settings** column. For more details, please consult our [<u>reproduce guidance</u>](./docs/original_docs/reproduce_experiment.md) and [<u>method details</u>](./docs/original_docs/baseline_details.md).
 
 It’s important to note that, to ensure consistency, we have utilized a uniform setting. However, this setting may differ from the original setting of the method, leading to variations in results compared to the original outcomes.
 
@@ -634,7 +636,7 @@ Our toolkit supports jsonl format for retrieval document collections, with the f
 
 The `contents` key is essential for building the index. For documents that include both text and title, we recommend setting the value of `contents` to `{title}\n{text}`. The corpus file can also contain other keys to record additional characteristics of the documents.
 
-In the academic research, Wikipedia and MS MARCO are the most commonly used retrieval document collections. For Wikipedia, we provide a [<u>comprehensive script</u>](./docs/process-wiki.md) to process any Wikipedia dump into a clean corpus. Additionally, various processed versions of the Wikipedia corpus are available in many works, and we have listed some reference links.
+In the academic research, Wikipedia and MS MARCO are the most commonly used retrieval document collections. For Wikipedia, we provide a [<u>comprehensive script</u>](./docs/original_docs/process-wiki.md) to process any Wikipedia dump into a clean corpus. Additionally, various processed versions of the Wikipedia corpus are available in many works, and we have listed some reference links.
 
 For MS MARCO, it is already processed upon release and can be directly downloaded from its [<u>hosting link</u>](https://huggingface.co/datasets/Tevatron/msmarco-passage-corpus) on Hugging Face.
 
@@ -644,12 +646,18 @@ To facilitate easier replication of the experiments, we now provide a preprocess
 
 The index was created using the e5-base-v2 retriever on our uploaded wiki18_100w dataset, which is consistent with the index used in our experiments.
 
+## :lollipop: Awesome Work using FlashRAG
+
+- [R1-Searcher](https://github.com/SsmallSong/R1-Searcher), a method that incentivizes the search capability in LLMs via reinforcement learning
+- [ReSearch](https://github.com/Agent-RL/ReSearch), a method that learns to reason with search for LLMs via reinforcement learning
+- [AutoCoA](https://github.com/ADaM-BJTU/AutoCoA), a method that internalizes chain-of-action generation into reasoning models
+
 ## :raised_hands: Additional FAQs
 
-- [How should I set different experimental parameters?](./docs/configuration.md)
-- [How to build my own corpus, such as a specific segmented Wikipedia?](./docs/process-wiki.md)
-- [How to index my own corpus?](./docs/building-index.md)
-- [How to reproduce supporting methods?](./docs/reproduce_experiment.md)
+- [How should I set different experimental parameters?](./docs/original_docs/configuration.md)
+- [How to build my own corpus, such as a specific segmented Wikipedia?](./docs/original_docs/process-wiki.md)
+- [How to index my own corpus?](./docs/original_docs/building-index.md)
+- [How to reproduce supporting methods?](./docs/original_docs/reproduce_experiment.md)
 
 ## :bookmark: License
 
@@ -661,17 +669,26 @@ Please kindly cite our paper if helps your research:
 
 ```BibTex
 @article{FlashRAG,
-    author={Jiajie Jin and
-            Yutao Zhu and
-            Xinyu Yang and
-            Chenghao Zhang and
-            Zhicheng Dou},
-    title={FlashRAG: A Modular Toolkit for Efficient Retrieval-Augmented Generation Research},
-    journal={CoRR},
-    volume={abs/2405.13576},
-    year={2024},
-    url={https://arxiv.org/abs/2405.13576},
-    eprinttype={arXiv},
-    eprint={2405.13576}
+  author       = {Jiajie Jin and
+                  Yutao Zhu and
+                  Xinyu Yang and
+                  Chenghao Zhang and
+                  Zhicheng Dou},
+  title        = {FlashRAG: {A} Modular Toolkit for Efficient Retrieval-Augmented Generation
+                  Research},
+  journal      = {CoRR},
+  volume       = {abs/2405.13576},
+  year         = {2024},
+  url          = {https://doi.org/10.48550/arXiv.2405.13576},
+  doi          = {10.48550/ARXIV.2405.13576},
+  eprinttype    = {arXiv},
+  eprint       = {2405.13576},
+  timestamp    = {Tue, 18 Jun 2024 09:26:37 +0200},
+  biburl       = {https://dblp.org/rec/journals/corr/abs-2405-13576.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 ```
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=RUC-NLPIR/FlashRAG&type=Date)](https://star-history.com/#RUC-NLPIR/FlashRAG&Date)

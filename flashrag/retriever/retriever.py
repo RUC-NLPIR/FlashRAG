@@ -255,6 +255,8 @@ class BM25Retriever(BaseTextRetriever):
             else:
                 stemmer = Stemmer.Stemmer("english")
                 self.tokenizer = bm25s.tokenization.Tokenizer(stopwords='en', stemmer=stemmer)
+                self.tokenizer.load_stopwords(self.index_path)
+                self.tokenizer.load_vocab(self.index_path)
 
             self.searcher.corpus = self.corpus
             self.searcher.backend = "numba"
@@ -322,7 +324,8 @@ class BM25Retriever(BaseTextRetriever):
             results, scores = self.searcher.retrieve(query_tokens, k=num)
         else:
             assert False, "Invalid bm25 backend!"
-
+        results = results.tolist() if isinstance(results,np.ndarray) else results
+        scores = scores.tolist() if isinstance(scores,np.ndarray) else scores
         if return_score:
             return results, scores
         else:

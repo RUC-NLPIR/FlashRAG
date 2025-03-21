@@ -35,7 +35,7 @@ class OpenaiGenerator:
         try:
             self.tokenizer = tiktoken.encoding_for_model(self.model_name)
         except Exception as e:
-            print("Error: ", e)
+            print("Warning: ", e)
             warnings.warn("This model is not supported by tiktoken. Use gpt-3.5-turbo instead.")
             self.tokenizer = tiktoken.encoding_for_model('gpt-3.5-turbo')
     @property
