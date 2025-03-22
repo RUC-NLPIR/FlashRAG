@@ -83,7 +83,7 @@ class ReasoningPipeline(BasicPipeline):
         prompts = [self.prompt_template.get_string(question=question) for question in dataset.question]
         dataset.update_output('prompt', prompts)
         dataset.update_output('finish_flag', [False] * len(prompts))
-        dataset.update_output('retrieval_results', [{}] * len(prompts))
+        dataset.update_output('retrieval_results', [{} for _ in range(len(prompts))])
         dataset.update_output('retrieved_times', [0] * len(prompts))
 
         # Logic of reasoning
