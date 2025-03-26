@@ -370,7 +370,7 @@ class DenseRetriever(BaseTextRetriever):
         self.batch_size = self._config["retrieval_batch_size"]
         self.instruction = self._config["instruction"]
 
-        self.retreival_model_path = self._config["retrieval_model_path"]
+        self.retrieval_model_path = self._config["retrieval_model_path"]
         self.use_st = self._config["use_sentence_transformer"]
         self.use_faiss_gpu = self._config["faiss_gpu"]
 
@@ -388,7 +388,7 @@ class DenseRetriever(BaseTextRetriever):
             self._check_pooling_method(self.retrieval_model_path, self.pooling_method)
             self.encoder = Encoder(
                 model_name=self.retrieval_method,
-                model_path=self.retreival_model_path,
+                model_path=self.retrieval_model_path,
                 pooling_method=self.pooling_method,
                 max_length=self.query_max_length,
                 use_fp16=self.use_fp16,
