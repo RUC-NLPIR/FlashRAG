@@ -24,13 +24,14 @@ class Encoder:
             Encodes a list of queries into embeddings.
     """
 
-    def __init__(self, model_name, model_path, pooling_method, max_length, use_fp16, instruction):
+    def __init__(self, model_name, model_path, pooling_method, max_length, use_fp16, instruction, silent=False):
         self.model_name = model_name
         self.model_path = model_path
         self.pooling_method = pooling_method
         self.max_length = max_length
         self.use_fp16 = use_fp16
         self.instruction = instruction
+        self.silent = silent
         self.gpu_num = torch.cuda.device_count()
         self.model, self.tokenizer = load_model(model_path=model_path, use_fp16=use_fp16)
 
@@ -67,7 +68,7 @@ class Encoder:
     @torch.inference_mode()
     def encode(self, query_list: List[str], batch_size=64, is_query=True) -> np.ndarray:
         query_emb = []
-        for i in tqdm(range(0, len(query_list), batch_size), desc="Encoding process: "):
+        for i in tqdm(range(0, len(query_list), batch_size), desc="Encoding process: ", disable=self.silent):
             query_emb.append(self.single_batch_encode(query_list[i : i + batch_size], is_query))
         query_emb = np.concatenate(query_emb, axis=0)
         return query_emb
@@ -98,7 +99,7 @@ class STEncoder:
             Encodes a list of queries into embeddings using multiple GPUs.
     """
 
-    def __init__(self, model_name, model_path, max_length, use_fp16, instruction):
+    def __init__(self, model_name, model_path, max_length, use_fp16, instruction, silent=False):
         import torch
         from sentence_transformers import SentenceTransformer
 
@@ -107,6 +108,7 @@ class STEncoder:
         self.max_length = max_length
         self.use_fp16 = use_fp16
         self.instruction = instruction
+        self.silent = silent
         self.model = SentenceTransformer(
             model_path, trust_remote_code=True, model_kwargs={"torch_dtype": torch.float16 if use_fp16 else torch.float}
         )
@@ -115,7 +117,7 @@ class STEncoder:
     def encode(self, query_list: Union[List[str], str], batch_size=64, is_query=True) -> np.ndarray:
         query_list = parse_query(self.model_name, query_list, self.instruction, is_query)
         query_emb = self.model.encode(
-            query_list, batch_size=batch_size, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=True
+            query_list, batch_size=batch_size, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=not self.silent
         )
         query_emb = query_emb.astype(np.float32, order="C")
 
@@ -130,7 +132,7 @@ class STEncoder:
             pool,
             normalize_embeddings=True,
             batch_size=batch_size,
-            show_progress_bar=True,
+            show_progress_bar=not self.silent,
         )
         self.model.stop_multi_process_pool(pool)
         query_emb = query_emb.astype(np.float32, order="C")
@@ -190,7 +192,7 @@ class ClipEncoder:
         if not isinstance(query_list, list):
             query_list = [query_list]
         query_emb = []
-        for i in tqdm(range(0, len(query_list), batch_size), desc="Encoding process: "):
+        for i in tqdm(range(0, len(query_list), batch_size), desc="Encoding process: ", disable=self.silent):
             query_emb.append(self.single_batch_encode(query_list[i : i + batch_size], modal))
         query_emb = np.concatenate(query_emb, axis=0)
         return query_emb

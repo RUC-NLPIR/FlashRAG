@@ -8,6 +8,8 @@ import re
 import langid
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
+_has_printed_instruction = False  # trigger instruction print once
+
 def convert_numpy(obj: Union[Dict, list, np.ndarray, np.generic]) -> Any:
     """Recursively convert numpy objects in nested dictionaries or lists to native Python types."""
     if isinstance(obj, dict):
@@ -101,6 +103,7 @@ def parse_query(model_name, query_list, instruction=None, is_query=True):
     """
     processing query for different encoders
     """
+    global _has_printed_instruction
 
     if isinstance(query_list, str):
         query_list = [query_list]
@@ -109,10 +112,14 @@ def parse_query(model_name, query_list, instruction=None, is_query=True):
         instruction = instruction.strip() + " "
     else:
         instruction = set_default_instruction(model_name, is_query=is_query, is_zh=judge_zh(query_list[0]))
-    print(f"Use `{instruction}` as retreival instruction")
-    if instruction == "":
-        warnings.warn('Instruction is not set')
-
+    
+    if not _has_printed_instruction:
+        if instruction == "":
+            warnings.warn('Instruction is not set')
+        else:
+            print(f"Use `{instruction}` as retreival instruction")
+        _has_printed_instruction = True
+        
     query_list = [instruction + query for query in query_list]
 
     return query_list

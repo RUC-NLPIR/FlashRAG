@@ -588,6 +588,32 @@ def rqrag(args):
     result = pipeline.run(test_data)
 
 
+def r1searcher(args):
+    """
+    Function to run the R1-Searcher.
+    """
+    save_note = "r1-searcher"
+    config_dict = {
+        "save_note": save_note,
+        "gpu_id": args.gpu_id,
+        'framework': 'vllm',
+        'generator_max_input_len': 16384,
+        'generation_params': {'max_tokens': 512, 'skip_special_tokens': False},
+        'generator_model_path': 'XXsongLALA/Qwen-2.5-7B-base-RAG-RL',
+        "dataset_name": args.dataset_name,
+        "split": args.split,
+    }
+
+    config = Config("my_config.yaml", config_dict)
+    
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+    
+    from flashrag.pipeline import ReasoningPipeline
+    pipeline = ReasoningPipeline(config)
+    result = pipeline.run(test_data)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Running exp")
     parser.add_argument("--method_name", type=str)
@@ -615,6 +641,7 @@ if __name__ == "__main__":
         "trace": trace,
         "adaptive": adaptive,
         "rqrag": rqrag,
+        "r1-searcher": r1searcher,
     }
 
     args = parser.parse_args()

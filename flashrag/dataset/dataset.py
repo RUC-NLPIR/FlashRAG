@@ -48,6 +48,13 @@ class Item:
                 except AttributeError:
                     raise AttributeError(f"Attribute `{attr_name}` not found")
 
+    def __setattr__(self, attr_name: str, value: Any) -> None:
+        predefined_attrs = ["id", "question", "golden_answers", "metadata", "output", "choices", 'data']
+        if attr_name in predefined_attrs:
+            super().__setattr__(attr_name, value)
+        else:
+            self.update_output(attr_name, value)
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert all information within the data sample into a dict. Information generated
         during the inference will be saved into output field.

@@ -21,7 +21,7 @@
 </p>
 </h4>
 
-FlashRAG是一个用于复现和开发检索增强生成（RAG）研究的Python工具包。我们的工具包包括36个预处理的基准RAG数据集和16个最先进的RAG算法。
+FlashRAG是一个用于复现和开发检索增强生成（RAG）研究的Python工具包。我们的工具包包括36个预处理的基准RAG数据集和17个最先进的RAG算法。
 
 <p align="center">
 <img src="asset/framework.jpg">
@@ -55,7 +55,7 @@ https://github.com/user-attachments/assets/e34a90c0-5e0f-4f76-886e-e30de8a6f8d1
 
 - **全面的基准数据集**：收集了36个预处理的RAG基准数据集，用于测试和验证RAG模型的性能。
 
-- **预实现的先进RAG算法**：基于我们的框架，提供16个先进的RAG算法及其报告结果。轻松在不同设置下复现结果。
+- **预实现的先进RAG算法**：基于我们的框架，提供17个先进的RAG算法及其报告结果。轻松在不同设置下复现结果。
 
 - **高效的预处理过程**：通过提供各种脚本，如**语料处理**、**索引构建**和**文档预检索**，简化RAG工作流准备。
 
@@ -75,6 +75,9 @@ FlashRAG仍在开发中，存在许多问题和改进空间。我们将继续更
 - [ ] 增强代码的适应性和可读性
 
 ## :page_with_curl: 更新日志
+[25/03/21] 我们新增了对**推理流程**的支持，这是一种结合推理能力和检索的新范式，代表工作包括[Search-o1](https://github.com/sunnynexus/Search-o1)、[R1-Searcher](https://github.com/SsmallSong/R1-Searcher)、[ReSearch](https://github.com/Agent-RL/ReSearch)。我们在各种RAG基准上评估了流程的性能，在多跳推理数据集（如Hotpotqe）上可以达到接近60的F1分数。详见[**结果表**](#robot-supporting-methods)。
+
+
 [25/02/24] 我们新增了对多模态RAG的支持，包括Llava、Qwen、InternVL等MLLM，以及基于Clip结构的各类检索器。
 
 [25/01/21] 我们的论文 FlashRAG: A Python Toolkit for Efficient RAG Research 已经被 **Resource Track of the 2025 ACM Web Conference (WWW 2025)** 接收! 
@@ -457,7 +460,7 @@ class ToyPipeline(BasicPipeline):
           <td>根据每个文档对生成的结果进行排序和合并</td>
         </tr>
         <tr>
-            <td rowspan="5">循环</td>
+            <td rowspan="6">循环</td>
             <td>Iterative Pipeline</td>
             <td>交替检索和生成</td>
         </tr>
@@ -476,6 +479,10 @@ class ToyPipeline(BasicPipeline):
         <tr>
             <td>IRCoT Pipeline</td>
             <td>将检索过程与思维链集成</td>
+        </tr>
+        <tr>
+            <td>Reasoning Pipeline</td>
+            <td>推理流程</td>
         </tr>
     </tbody>
 </table>
@@ -562,7 +569,7 @@ python interface.py
 | [Iter-Retgen](https://arxiv.org/abs/2305.15294),      [ITRG](https://arxiv.org/abs/2310.05149)   | Loop | 36.8    | 60.1          | 38.3          | 21.6| 37.9| 18.2| |
 | [IRCoT](https://aclanthology.org/2023.acl-long.557.pdf) | 循环 | 33.3| 56.9|41.5|32.4 |45.6 |20.7 | |
 | [RQRAG](https://arxiv.org/abs/2404.00610)                                   | Loop        | 32.6    | 52.5          | 33.5          | 35.8       | 46.4       | 26.2      |  使用训练的 rqrag-llama2-7B                                               |
-
+| [R1-Searcher](https://arxiv.org/pdf/2503.05592) | 推理 | 37.3 | 58.7 | 59.5 | 55.5 | 43.9 | 27.5 | 使用训练的 Qwen2.5-7B-base-RAG-RL |
 ## :notebook: 支持的数据集和文档语料库
 
 ### 数据集

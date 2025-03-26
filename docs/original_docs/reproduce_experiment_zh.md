@@ -35,6 +35,7 @@
 - [Spring](#spring)
 - [Adaptive-RAG](#adaptive-rag)
 - [RQRAG](#rqrag)
+- [R1-Searcher](#r1-searcher)
 
 #### AAR
 
@@ -129,3 +130,11 @@ python run_exp.py --method_name 'naive' \
 ```
 naive zero-shot AAR-contriever llmlingua recomp selective-context sure replug skr flare iterretgen ircot trace
 ```
+
+
+#### R1-Searcher
+
+这种方法需要下载 R1-Searcher 模型。
+
+- 额外步骤1：从 Huggingface 仓库下载 R1-Searcher 模型：[XXsongLALA/Qwen-2.5-7B-base-RAG-RL](https://huggingface.co/XXsongLALA/Qwen-2.5-7B-base-RAG-RL)
+- 额外步骤2：在 `r1searcher` 函数中修改 `generator_model_path`
