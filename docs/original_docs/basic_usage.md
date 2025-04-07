@@ -13,11 +13,11 @@ retriever = get_retriever(config)
 Then, you can use `retriever.search` (for a single query) or `retriever.batch_search` (for a list of queries) to perform retrieval.
 
 ```python
-# if you set `return_scores=True`
-retrieval_results, scores = self.retriever.batch_search(input_query_list, return_scores=True)
+# if you set `return_score=True`
+retrieval_results, scores = retriever.batch_search(input_query_list, return_score=True)
 
-# if you set `return_scores=False`
-retrieval_results = self.retriever.batch_search(input_query_list, return_scores=False)
+# if you set `return_score=False`
+retrieval_results = retriever.batch_search(input_query_list, return_score=False)
 ```
 
 When using `batch_search`, `retrieval_results` is a two-level nested list like:
