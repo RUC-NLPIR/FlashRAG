@@ -88,6 +88,8 @@ FlashRAG仍在开发中，存在许多问题和改进空间。我们将继续更
 
 [25/01/07] 我们目前支持多个检索器的聚合，详见[**多检索器使用**](https://github.com/RUC-NLPIR/FlashRAG/blob/main/docs/multi_retriever_usage.md)。
 
+[25/01/07] 我们集成了一个非常灵活且轻量级的语料库分块库[**Chunkie**](https://github.com/chonkie-ai/chonkie?tab=readme-ov-file#usage)，支持各种自定义分块方法（tokens、句子、语义等）。在[<u>分块文档语料库</u>](docs/chunk-doc-corpus.md)中使用它。
+
 [24/10/21] 我们发布了一个基于Paddle框架的版本，支持中国硬件平台。详情请参阅[FlashRAG Paddle](https://github.com/RUC-NLPIR/FlashRAG-Paddle)。
 
 [24/10/13] 添加了一个新的领域内数据集和语料库 - [DomainRAG](https://arxiv.org/pdf/2406.05654)，基于中国人民大学的内部招生数据，涵盖七种任务类型，可用于进行领域特定的RAG测试。
