@@ -10,8 +10,6 @@ import shutil
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Pool
 
-import chonkie
-
 
 def load_corpus(dir_path):
     def iter_files(path):
@@ -150,12 +148,28 @@ def single_worker(docs):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate clean wiki corpus file for indexing.")
     parser.add_argument("--dump_path", type=str)
-    parser.add_argument("--chunk_by", default="token", choices=["token", "word", "sentence", "recursive"], type=str)
+    parser.add_argument(
+        "--use_chunkie",
+        type=bool,
+        default=True,
+        actrion="store_true",
+    )
+    parser.add_argument("--chunk_by", default="token", choices=["token", "sentence", "recursive", "100w"], type=str)
     parser.add_argument("--chunk_size", default=512, type=int)
-    parser.add_argument("--tokenizer_name_or_path", default='o200k_base', type=str)
+    parser.add_argument("--tokenizer_name_or_path", default="o200k_base", type=str)
+    parser.add_argument("--seg_size", default=None, type=int)
+    parser.add_argument("--stride", default=None, type=int)
     parser.add_argument("--num_workers", default=4, type=int)
     parser.add_argument("--save_path", type=str, default="clean_corpus.jsonl")
     args = parser.parse_args()
+
+    if args.use_chunkie:
+        import chonkie
+    else:
+        assert args.chunk_by in ["100w", "sentence"], "Only supports sentence and 100w chunking without chunkie!"
+        import spacy
+
+        nlp = spacy.load("en_core_web_lg")
 
     # extract wiki dump
     temp_dir = os.path.join(Path(args.save_path).parent, "temp")
@@ -202,23 +216,75 @@ if __name__ == "__main__":
     idx = 0
     clean_corpus = []
 
-    # Initialize a Chonkie chunker, based on the chunk_by argument
-    if args.chunk_by == "token":
-        chunker = chonkie.TokenChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
-    elif args.chunk_by == "sentence":
-        chunker = chonkie.SentenceChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
-    elif args.chunk_by == "recursive":
-        chunker = chonkie.RecursiveChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size, min_characters_per_chunk=1)
-    elif args.chunk_by == "word":
-        chunker = chonkie.WordChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
+    if args.use_chunkie:
+        print("Using Chonkie chunker...")
     else:
-        raise ValueError(f"Invalid chunking method: {args.chunk_by}")
+        print("Using default chunker...")
 
-    # Chunk the text into segments, with chunker
-    for title, text in tqdm(zip(all_title, all_text), total=len(all_text)):
-        chunks = chunker.chunk(text)
-        for chunk in chunks:
-            clean_corpus.append({"title": title, "text": chunk.text})
+    if args.use_chunkie:
+        # Initialize a Chonkie chunker, based on the chunk_by argument
+        if args.chunk_by == "token":
+            chunker = chonkie.TokenChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
+        elif args.chunk_by == "sentence":
+            chunker = chonkie.SentenceChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
+        elif args.chunk_by == "recursive":
+            chunker = chonkie.RecursiveChunker(
+                tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size, min_characters_per_chunk=1
+            )
+        else:
+            raise ValueError(f"Invalid chunking method: {args.chunk_by}")
+
+        # Chunk the text into segments, with chunker
+        for title, text in tqdm(zip(all_title, all_text), total=len(all_text)):
+            chunks = chunker.chunk(text)
+            for chunk in chunks:
+                clean_corpus.append({"title": title, "text": chunk.text})
+    else:
+        if args.chunk_by == "sentence":
+            for doc in tqdm(nlp.pipe(all_text, n_process=args.num_workers, batch_size=2000), total=len(all_text)):
+                title = all_title[idx]
+                idx += 1
+                sentences = [sent.text.strip() for sent in doc.sents]
+                segments = []
+                for i in range(0, len(sentences), args.stride):
+                    segment = " ".join(sentences[i : i + args.seg_size])
+                    segments.append(segment)
+                    if i + args.seg_size >= len(sentences):
+                        break
+                for segment in segments:
+                    text = segment.replace("\n", " ").replace("\t", " ")
+                    clean_corpus.append({"title": title, "text": text})
+
+        elif args.chunk_by == "100w":
+            for doc in tqdm(nlp.pipe(all_text, n_process=args.num_workers, batch_size=2000), total=len(all_text)):
+                title = all_title[idx]
+                idx += 1
+                segments = []
+                word_count = 0
+                segment_tokens = []
+                for token in doc:
+                    segment_tokens.append(token.text_with_ws)
+                    if not token.is_space and not token.is_punct:
+                        word_count += 1
+                        if word_count == 100:
+                            word_count = 0
+                            segments.append("".join([token for token in segment_tokens]))
+                            segment_tokens = []
+                if word_count != 0:
+                    for token in doc:
+                        segment_tokens.append(token.text_with_ws)
+                        if not token.is_space and not token.is_punct:
+                            word_count += 1
+                            if word_count == 100:
+                                word_count = 0
+                                segments.append("".join([token for token in segment_tokens]))
+                                break
+                if word_count != 0:
+                    segments.append("".join([token for token in segment_tokens]))
+
+                for segment in segments:
+                    text = segment.replace("\n", " ").replace("\t", " ")
+                    clean_corpus.append({"title": title, "text": text})
 
     shutil.rmtree(temp_dir)
 

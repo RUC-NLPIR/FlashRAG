@@ -21,8 +21,10 @@ cd scripts
 python preprocess_wiki.py --dump_path ../enwikinews-20240420-pages-articles.xml.bz2  \
                         --save_path ../test_sample.jsonl \
                         --chunk_by sentence \
-                        --chunk_size 512 \
+                        --seg_size 6 \
+                        --stride 1 \
                         --num_workers 1
 ```
+
 
 We also provide the version we used for experiments. Download link: https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/tree/main/retrieval-corpus
