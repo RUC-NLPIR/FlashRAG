@@ -149,10 +149,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate clean wiki corpus file for indexing.")
     parser.add_argument("--dump_path", type=str)
     parser.add_argument(
-        "--use_chunkie",
+        "--use_chonkie",
         type=bool,
         default=True,
-        actrion="store_true",
+        action="store_true",
     )
     parser.add_argument("--chunk_by", default="token", choices=["token", "sentence", "recursive", "100w"], type=str)
     parser.add_argument("--chunk_size", default=512, type=int)
@@ -163,10 +163,10 @@ if __name__ == "__main__":
     parser.add_argument("--save_path", type=str, default="clean_corpus.jsonl")
     args = parser.parse_args()
 
-    if args.use_chunkie:
+    if args.use_chonkie:
         import chonkie
     else:
-        assert args.chunk_by in ["100w", "sentence"], "Only supports sentence and 100w chunking without chunkie!"
+        assert args.chunk_by in ["100w", "sentence"], "Only supports sentence and 100w chunking without chonkie!"
         import spacy
 
         nlp = spacy.load("en_core_web_lg")
@@ -216,21 +216,23 @@ if __name__ == "__main__":
     idx = 0
     clean_corpus = []
 
-    if args.use_chunkie:
+    if args.use_chonkie:
         print("Using Chonkie chunker...")
     else:
         print("Using default chunker...")
 
-    if args.use_chunkie:
+    if args.use_chonkie:
         # Initialize a Chonkie chunker, based on the chunk_by argument
         if args.chunk_by == "token":
             chunker = chonkie.TokenChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
         elif args.chunk_by == "sentence":
-            chunker = chonkie.SentenceChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
+            chunker = chonkie.SentenceChunker(tokenizer_or_token_counter=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
         elif args.chunk_by == "recursive":
             chunker = chonkie.RecursiveChunker(
-                tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size, min_characters_per_chunk=1
+                tokenizer_or_token_counter=args.tokenizer_name_or_path, chunk_size=args.chunk_size, min_characters_per_chunk=1
             )
+        elif args.chunk_by == "100w":
+            chunker = chonkie.TokenChunker(tokenizer="word", chunk_size=100)
         else:
             raise ValueError(f"Invalid chunking method: {args.chunk_by}")
 

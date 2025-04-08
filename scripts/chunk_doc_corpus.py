@@ -43,11 +43,13 @@ if __name__ == "__main__":
     # Initialize chunker
     if args.chunk_by == "token":
         chunker = chonkie.TokenChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
+    elif args.chunk_by == "word":
+        chunker = chonkie.TokenChunker(tokenizer="word", chunk_size=args.chunk_size)
     elif args.chunk_by == "sentence":
-        chunker = chonkie.SentenceChunker(tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
+        chunker = chonkie.SentenceChunker(tokenizer_or_token_counter=args.tokenizer_name_or_path, chunk_size=args.chunk_size)
     elif args.chunk_by == "recursive":
         chunker = chonkie.RecursiveChunker(
-            tokenizer=args.tokenizer_name_or_path, chunk_size=args.chunk_size, min_characters_per_chunk=1
+            tokenizer_or_token_counter=args.tokenizer_name_or_path, chunk_size=args.chunk_size, min_characters_per_chunk=1
         )
     else:
         raise ValueError(f"Invalid chunking method: {args.chunk_by}")
