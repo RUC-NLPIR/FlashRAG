@@ -931,12 +931,17 @@ class IRCOTPipeline(BasicPipeline):
     ):
         # if not provide prompt template, use default template provided by IRCOT
         if prompt_template is None:
+            if config['framework'] == 'openai':
+                enable_chat = True
+            else:
+                enable_chat = False
+            
             prompt_template = PromptTemplate(
                 config=config,
                 system_prompt=f"{self.IRCOT_INSTRUCTION}\n\n{self.IRCOT_EXAMPLE}",
                 user_prompt="{reference}Question: {question}\nThought:",
                 reference_template="Wikipedia Title: {title}\n{text}\n\n",
-                enable_chat=False,
+                enable_chat=enable_chat,
             )
 
         super().__init__(config, prompt_template)
@@ -957,7 +962,6 @@ class IRCOTPipeline(BasicPipeline):
         questions = [item.question for item in items]
         retrieval_results, scoress = self.retriever.batch_search(questions, return_score=True)
         for retrieval_result, scores in zip(retrieval_results,scoress):   
-            
             doc2score = {doc_item['id']: score for doc_item, score in zip(retrieval_result, scores)}
             id2doc = {doc_item['id']: doc_item for doc_item in retrieval_result}
             batch_retrieval_results.append(retrieval_result)
@@ -976,6 +980,7 @@ class IRCOTPipeline(BasicPipeline):
                 )
                 for item_id in active_item_ids
             ]
+            
 
             # Batch generation for active items
             new_thoughts_batch = self.generator.generate(input_prompts, stop=['.', '\n'])
@@ -988,15 +993,14 @@ class IRCOTPipeline(BasicPipeline):
                 
                 # Check for termination condition
                 # Store intermediate outputs
-                if "So the answer is:" in new_thought:
-                    items[item_id].update_output(
+                items[item_id].update_output(
                         f'intermediate_output_iter{iter_num}', 
                         {
                             'input_prompt': input_prompts[idx],
                             'new_thought': new_thought,
                         },
                     )
-                else:
+                if "So the answer is:" not in new_thought:
                     new_active_item_ids.append(item_id)
 
             # Update active item IDs for the next iteration

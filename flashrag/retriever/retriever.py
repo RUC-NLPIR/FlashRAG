@@ -242,10 +242,7 @@ class BM25Retriever(BaseTextRetriever):
                 else:
                     self.corpus = corpus
             self.max_process_num = 8
-
-            is_zh = judge_zh(self.corpus[0]["contents"])
-            if is_zh:
-                self.searcher.set_language("zh")
+               
         elif self.backend == "bm25s":
             import Stemmer
             import bm25s
@@ -278,6 +275,9 @@ class BM25Retriever(BaseTextRetriever):
         if num is None:
             num = self.topk
         if self.backend == "pyserini":
+            is_zh = judge_zh(query)
+            if is_zh:
+                self.searcher.set_language("zh")
             hits = self.searcher.search(query, num)
             if len(hits) < 1:
                 if return_score:
@@ -295,11 +295,12 @@ class BM25Retriever(BaseTextRetriever):
                 all_contents = [json.loads(self.searcher.doc(hit.docid).raw())["contents"] for hit in hits]
                 results = [
                     {
+                        "id": hit.docid, 
                         "title": content.split("\n")[0].strip('"'),
                         "text": "\n".join(content.split("\n")[1:]),
                         "contents": content,
                     }
-                    for content in all_contents
+                    for content, hit in zip(all_contents, hits)
                 ]
             else:
                 results = load_docs(self.corpus, [hit.docid for hit in hits])
