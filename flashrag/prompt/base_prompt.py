@@ -58,23 +58,29 @@ class PromptTemplate:
 
     def truncate_prompt(self, prompt):
         if self.is_openai:
-            truncated_messages = []
-            total_tokens = 0
-            assert isinstance(prompt, list)
-            for message in prompt:
-                role_content = message['content']
-                encoded_message = self.tokenizer.encode(role_content)
+            if self.enable_chat:
+                truncated_messages = []
+                total_tokens = 0
+                assert isinstance(prompt, list)
+                for message in prompt:
+                    role_content = message['content']
+                    encoded_message = self.tokenizer.encode(role_content)
 
-                if total_tokens + len(encoded_message) <= self.max_input_len:
-                    truncated_messages.append(message)
-                    total_tokens += len(encoded_message)
-                else:
-                    print(f"The input text length is greater than the maximum length ({total_tokens + len(encoded_message)} > {self.max_input_len}) and has been truncated!")
-                    remaining_tokens = self.max_input_len - total_tokens
-                    truncated_message = self.encoding.decode(encoded_message[:remaining_tokens])
-                    message['content'] = truncated_message
-                    truncated_messages.append(message)
-                    break
+                    if total_tokens + len(encoded_message) <= self.max_input_len:
+                        truncated_messages.append(message)
+                        total_tokens += len(encoded_message)
+                    else:
+                        print(f"The input text length is greater than the maximum length ({total_tokens + len(encoded_message)} > {self.max_input_len}) and has been truncated!")
+                        remaining_tokens = self.max_input_len - total_tokens
+                        truncated_message = self.encoding.decode(encoded_message[:remaining_tokens])
+                        message['content'] = truncated_message
+                        truncated_messages.append(message)
+                        break
+            else:
+                assert isinstance(prompt, str)
+                tokenized_prompt = self.tokenizer.encode(prompt,allowed_special={'<|endoftext|>'})
+                half = int(self.max_input_len / 2)
+                truncated_messages = self.tokenizer.decode(tokenized_prompt[:half]) + self.tokenizer.decode(tokenized_prompt[-half:])
 
             return truncated_messages
 
@@ -134,8 +140,15 @@ class PromptTemplate:
         else:
             input = "\n\n".join([prompt for prompt in [system_prompt, user_prompt] if prompt != ""])
 
-        if previous_gen is not None and previous_gen not in ["", " "] and self.is_openai is False:
-            input += previous_gen
+        if previous_gen is not None and previous_gen not in ["", " "]:
+            if self.is_openai:
+                if self.enable_chat:
+                    input.append({"role": 'assistant', 'content': previous_gen})
+                else:    
+                    input += f'<|endoftext|>{previous_gen}'
+                
+            else:
+                input += previous_gen
 
         return self.truncate_prompt(input)
 
