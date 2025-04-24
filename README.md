@@ -77,6 +77,7 @@ FlashRAG is still under development and there are many issues and room for impro
 - [ ] Inlcude more RAG approaches
 - [ ] Add more evaluation metrics (e.g., Unieval, name-entity F1) and benchmarks (e.g., RGB benchmark)
 - [ ] Enhance code adaptability and readability
+- [ ] Add support for api-based retriever (vllm server)
 
 ## :page_with_curl: Changelog
 [25/03/21] We have added support for **Reasoning Pipeline**, which is a new paradigm that combines reasoning ability and retrieval, representing work that includes [Search-o1](https://github.com/sunnynexus/Search-o1), [R1-Searcher](https://github.com/SsmallSong/R1-Searcher), [ReSearch](https://github.com/Agent-RL/ReSearch). We evaluate the performance of the pipeline on various RAG benchmarks, it can achieve F1 scores close to 60 on multi hop inference datasets such as Hotpotqe. See it in [**result table**](#robot-supporting-methods).

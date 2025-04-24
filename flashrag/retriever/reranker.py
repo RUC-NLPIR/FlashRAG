@@ -44,7 +44,7 @@ class BaseReranker:
             doc_list = [doc_list]
 
         assert len(query_list) == len(doc_list)
-        if topk < min([len(docs) for docs in doc_list]):
+        if topk > min([len(docs) for docs in doc_list]):
             warnings.warn("The number of doc returned by the retriever is less than the topk.")
 
         # get doc contents

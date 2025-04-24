@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Union
 from copy import deepcopy
 import warnings
 from tqdm import tqdm
@@ -63,16 +63,26 @@ class OpenaiGenerator:
     def update_additional_setting(self):
         pass
     
-    async def _get_response(self, messages: List, **params):
-        response = await self.client.chat.completions.create(
-            model=self.model_name, messages=messages, **params
-        )
-        if not response.choices:
-            raise ValueError("No choices returned from API.")
-        return response.choices[0]
+    async def _get_response(self, messages: Union[list, str], mode: str = 'chat', **params):
+        print(messages)
+        print("----asd-asd-a--------")
+        if mode == 'chat':
+            response = await self.client.chat.completions.create(
+                model=self.model_name, messages=messages, **params
+            )
+            if not response.choices:
+                raise ValueError("No choices returned from API.")
+            return response.choices[0]
+        else:
+            response = await self.client.completions.create(
+                model=self.model_name, prompt=messages, **params
+            )
+            if not response.choices:
+                raise ValueError("No choices returned from API.")
+            return response.choices[0]
 
-    async def _get_batch_response(self, input_list: List[List], batch_size, **params):
-        tasks = [self._get_response(messages, **params) for messages in input_list]
+    async def _get_batch_response(self, input_list: List[List], batch_size, mode, **params):
+        tasks = [self._get_response(messages, mode, **params) for messages in input_list]
         all_results = []
         for idx in tqdm(range(0, len(tasks), batch_size), desc="Generation process: "):
             batch_tasks = tasks[idx: idx + batch_size]
@@ -85,6 +95,10 @@ class OpenaiGenerator:
             input_list = [[input_list]]
         elif isinstance(input_list[0], dict):
             input_list = [input_list]
+        if isinstance(input_list[0], list):
+            mode = 'chat'
+        else:
+            mode = 'completion'
 
         if batch_size is None:
             batch_size = self.batch_size
@@ -107,15 +121,26 @@ class OpenaiGenerator:
             warnings.warn("Set logprobs to True to get generation scores.")
 
 
-        results = await self._get_batch_response(input_list, batch_size, **generation_params)
+        results = await self._get_batch_response(input_list, batch_size, mode, **generation_params)
 
         response_texts = []
         scores = []
         for res in results:
-            response_texts.append(res.message.content)
+            if mode == 'chat':
+                text = res.message.content
+            else:
+                text = res.text
+            if 'stop' in generation_params and not any([text.endswith(stop_str) for stop_str in generation_params['stop']]):
+                # current openai api not support including stop, so need to add the stop token
+                text += generation_params['stop'][0]
+            response_texts.append(text)
             if return_scores:
-                score = np.exp([item.logprob for item in res.logprobs.content])
-                scores.append(score)
+                try:
+                    score = np.exp([item.logprob for item in res.logprobs.content])
+                    scores.append(score)
+                except:
+                    warnings.warn('Fail to get logprobs in openai generation!')
+                    scores.append(None)
         return (response_texts, scores) if return_scores else response_texts
 
     # ----------------- 同步包装接口 -----------------
