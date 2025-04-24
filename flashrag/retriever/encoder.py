@@ -24,7 +24,7 @@ class Encoder:
             Encodes a list of queries into embeddings.
     """
 
-    def __init__(self, model_name, model_path, pooling_method, max_length, use_fp16, instruction, silent=False):
+    def __init__(self, model_name, model_path, pooling_method, max_length, use_fp16=True, instruction="", silent=False):
         self.model_name = model_name
         self.model_path = model_path
         self.pooling_method = pooling_method
@@ -44,7 +44,9 @@ class Encoder:
         )
         inputs = {k: v.cuda() for k, v in inputs.items()}
 
-        if "T5" in type(self.model).__name__ or (isinstance(self.model, torch.nn.DataParallel) and "T5" in type(self.model.module).__name__):
+        if "T5" in type(self.model).__name__ or (
+            isinstance(self.model, torch.nn.DataParallel) and "T5" in type(self.model.module).__name__
+        ):
             # T5-based retrieval model
             decoder_input_ids = torch.zeros((inputs["input_ids"].shape[0], 1), dtype=torch.long).to(
                 inputs["input_ids"].device
@@ -54,11 +56,9 @@ class Encoder:
 
         else:
             output = self.model(**inputs, return_dict=True)
-            pooler_output = output.get('pooler_output', None)
-            last_hidden_state = output.get('last_hidden_state', None)
-            query_emb = pooling(
-                pooler_output, last_hidden_state, inputs["attention_mask"], self.pooling_method
-            )
+            pooler_output = output.get("pooler_output", None)
+            last_hidden_state = output.get("last_hidden_state", None)
+            query_emb = pooling(pooler_output, last_hidden_state, inputs["attention_mask"], self.pooling_method)
         if "dpr" not in self.model_name:
             query_emb = torch.nn.functional.normalize(query_emb, dim=-1)
         query_emb = query_emb.detach().cpu().numpy()
@@ -117,7 +117,11 @@ class STEncoder:
     def encode(self, query_list: Union[List[str], str], batch_size=64, is_query=True) -> np.ndarray:
         query_list = parse_query(self.model_name, query_list, self.instruction, is_query)
         query_emb = self.model.encode(
-            query_list, batch_size=batch_size, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=not self.silent
+            query_list,
+            batch_size=batch_size,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+            show_progress_bar=not self.silent,
         )
         query_emb = query_emb.astype(np.float32, order="C")
 
@@ -173,11 +177,10 @@ class ClipEncoder:
         # set model max length for model that not specified in config.json
         if self.processor is not None and self.processor.tokenizer.model_max_length > 100000:
             try:
-                model_max_length = config['text_config']['max_position_embeddings']
+                model_max_length = config["text_config"]["max_position_embeddings"]
             except:
                 model_max_length = 512
-            self.processor.tokenizer.model_max_length = model_max_length    
-
+            self.processor.tokenizer.model_max_length = model_max_length
 
     @torch.inference_mode()
     def single_batch_encode(self, query_list: Union[List[str], str], modal="image") -> np.ndarray:
@@ -207,7 +210,7 @@ class ClipEncoder:
     @torch.inference_mode()
     def encode_image(self, image_list: List) -> np.ndarray:
         # Each item in image_list: PIL Image, local path, or URL
-        if self.model_type == "CLIPModel" or self.model_type == 'ChineseCLIPModel':
+        if self.model_type == "CLIPModel" or self.model_type == "ChineseCLIPModel":
             # need handle image
             image_list = [parse_image(image) for image in image_list]
             inputs = self.processor(images=image_list, return_tensors="pt")
@@ -224,7 +227,7 @@ class ClipEncoder:
     @torch.inference_mode()
     def encode_text(self, text_list: List[str]) -> np.ndarray:
         # Each item in image_list: PIL Image, local path, or URL
-        if self.model_type == "CLIPModel" or self.model_type == 'ChineseCLIPModel':
+        if self.model_type == "CLIPModel" or self.model_type == "ChineseCLIPModel":
             inputs = self.processor(
                 text=text_list,
                 padding=True,
