@@ -128,6 +128,9 @@ FlashRAG is still under development and there are many issues and room for impro
 </details>
 
 ## :wrench: Installation
+![PyPI - Version](https://img.shields.io/pypi/v/flashrag-dev) 
+![PyPI - Downloads](https://img.shields.io/pypi/dw/flashrag-dev) 
+![PyPI - Downloads](https://img.shields.io/pypi/dm/flashrag-dev)
 
 To get started with FlashRAG, you can simply install it with pip:
 
