@@ -168,7 +168,7 @@ class ExtractiveRefiner(BaseRefiner):
 
         # split into sentences: [[sent1, sent2,...], [...]]
         sent_lists = [
-            [i.strip() for i in re.split(r"(?<=[.!?])\s+", " ".join(res)) if len(i.strip()) > 5]
+            [i.strip() for i in re.split(r"(?<![A-Za-z]\.)(?<=[.!?])\s+", " ".join(res)) if len(i.strip()) > 5]
             for res in retrieval_results
         ]
         score_lists = []  # matching scores, size == sent_lists
