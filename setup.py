@@ -11,7 +11,7 @@ with open("flashrag/version.py", encoding="utf8") as fp:
 extras_require = {
     'core': requirements,
     'retriever': ['pyserini', 'sentence-transformers>=3.0.1'],
-    'generator': ['vllm==0.5.5'],
+    'generator': ['vllm'],
     'multimodal': ['timm', 'torchvision', 'pillow', 'qwen_vl_utils']
 }
 extras_require['full'] = sum(extras_require.values(), [])
