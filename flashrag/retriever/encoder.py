@@ -147,12 +147,12 @@ class STEncoder:
 class ClipEncoder:
     """ClipEncoder class for encoding queries using CLIP."""
 
-    def __init__(self, model_name, model_path, slient=False):
+    def __init__(self, model_name, model_path, silent=False):
 
         self.model_name = model_name
         self.model_path = model_path
         self.load_clip_model()
-        self.slient = slient
+        self.silent = silent
 
     def load_clip_model(self):
         from transformers import AutoModel, AutoProcessor
