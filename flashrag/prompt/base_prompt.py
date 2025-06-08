@@ -23,16 +23,9 @@ class PromptTemplate:
             self.is_chat = False
             if "chat" in model_name or "instruct" in model_name:
                 self.is_chat = True
-            self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path, trust_remote_code=True)
         else:
             self.is_chat = True
             self.enable_chat = True
-            try:
-                self.tokenizer = tiktoken.encoding_for_model(config['generator_model'])
-            except Exception as e:
-                print("Error: ", e)
-                warnings.warn("This model is not supported by tiktoken. Use gpt-3.5-turbo instead.")
-                self.tokenizer = tiktoken.encoding_for_model('gpt-3.5-turbo')
 
         if len(system_prompt) == 0 and len(user_prompt) == 0:
             system_prompt = self.base_system_prompt
@@ -41,8 +34,22 @@ class PromptTemplate:
         self.user_prompt = user_prompt
         self.enable_chat = enable_chat
         self.reference_template = reference_template
+        self.tokenizer = None
 
         # self._check_placeholder()
+    def _get_tokenizer(self):
+        if self.tokenizer is None:
+            if self.is_openai:
+                try:
+                    self.tokenizer = tiktoken.encoding_for_model(self.config['generator_model'])
+                except Exception as e:
+                    print("Error: ", e)
+                    warnings.warn("This model is not supported by tiktoken. Use gpt-3.5-turbo instead.")
+                    self.tokenizer = tiktoken.encoding_for_model('gpt-3.5-turbo')
+            else:
+                self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path, trust_remote_code=True)
+        return self.tokenizer
+
 
     def _check_placeholder(self):
         # check placeholder in prompt
@@ -64,7 +71,7 @@ class PromptTemplate:
                 assert isinstance(prompt, list)
                 for message in prompt:
                     role_content = message['content']
-                    encoded_message = self.tokenizer.encode(role_content)
+                    encoded_message = self._get_tokenizer().encode(role_content)
 
                     if total_tokens + len(encoded_message) <= self.max_input_len:
                         truncated_messages.append(message)
@@ -78,23 +85,22 @@ class PromptTemplate:
                         break
             else:
                 assert isinstance(prompt, str)
-                tokenized_prompt = self.tokenizer.encode(prompt,allowed_special={'<|endoftext|>'})
+                tokenized_prompt = self._get_tokenizer().encode(prompt,allowed_special={'<|endoftext|>'})
                 half = int(self.max_input_len / 2)
-                truncated_messages = self.tokenizer.decode(tokenized_prompt[:half]) + self.tokenizer.decode(tokenized_prompt[-half:])
+                truncated_messages = self._get_tokenizer().decode(tokenized_prompt[:half]) + self._get_tokenizer().decode(tokenized_prompt[-half:])
 
             return truncated_messages
 
         else:
-            if self.tokenizer is None:
-                self.tokenizer = AutoTokenizer.from_pretrained(self.generator_path, trust_remote_code=True)
             assert isinstance(prompt, str)
-            tokenized_prompt = self.tokenizer(prompt, truncation=False, return_tensors="pt").input_ids[0]
+            # tokenized_prompt = self._get_tokenizer().encode(prompt, truncation=False, return_tensors="pt").input_ids[0]
+            tokenized_prompt = self._get_tokenizer().encode(prompt,truncation=False,return_tensors="pt")
 
             if len(tokenized_prompt) > self.max_input_len:
                 print(f"The input text length is greater than the maximum length ({len(tokenized_prompt)} > {self.max_input_len}) and has been truncated!")
                 half = int(self.max_input_len / 2)
-                prompt = self.tokenizer.decode(tokenized_prompt[:half], skip_special_tokens=True) + \
-                        self.tokenizer.decode(tokenized_prompt[-half:], skip_special_tokens=True)
+                prompt = self._get_tokenizer().decode(tokenized_prompt[:half], skip_special_tokens=True) + \
+                        self._get_tokenizer().decode(tokenized_prompt[-half:], skip_special_tokens=True)
             return prompt
 
 
@@ -107,7 +113,7 @@ class PromptTemplate:
                 if self.is_openai:
                     self.truncate_prompt(messages)
                 else:
-                    prompt = self.tokenizer.apply_chat_template(
+                    prompt = self._get_tokenizer().apply_chat_template(
                         messages, tokenize=False, add_generation_prompt=True
                     )
                     return self.truncate_prompt(prompt)
@@ -136,7 +142,7 @@ class PromptTemplate:
             if user_prompt != "":
                 input.append({"role": "user", "content": user_prompt})
             if not self.is_openai:
-                input = self.tokenizer.apply_chat_template(input, tokenize=False, add_generation_prompt=True)
+                input = self._get_tokenizer().apply_chat_template(input, tokenize=False, add_generation_prompt=True)
         else:
             input = "\n\n".join([prompt for prompt in [system_prompt, user_prompt] if prompt != ""])
 
