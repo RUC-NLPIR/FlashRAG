@@ -1,3 +1,5 @@
+import os
+os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
 from flashrag.config import Config
 from flashrag.utils import get_dataset
 import argparse
