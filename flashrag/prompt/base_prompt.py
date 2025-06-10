@@ -79,7 +79,7 @@ class PromptTemplate:
                     else:
                         print(f"The input text length is greater than the maximum length ({total_tokens + len(encoded_message)} > {self.max_input_len}) and has been truncated!")
                         remaining_tokens = self.max_input_len - total_tokens
-                        truncated_message = self.encoding.decode(encoded_message[:remaining_tokens])
+                        truncated_message = self._get_tokenizer().decode(encoded_message[:remaining_tokens])
                         message['content'] = truncated_message
                         truncated_messages.append(message)
                         break
@@ -142,7 +142,11 @@ class PromptTemplate:
             if user_prompt != "":
                 input.append({"role": "user", "content": user_prompt})
             if not self.is_openai:
-                input = self._get_tokenizer().apply_chat_template(input, tokenize=False, add_generation_prompt=True)
+                try:
+                    input = self._get_tokenizer().apply_chat_template(input, tokenize=False, add_generation_prompt=True)
+                except:
+                    print("Warning: the generator tokenizer not support `apply_chat_template`")
+                    input = system_prompt + '\n\n' + user_prompt
         else:
             input = "\n\n".join([prompt for prompt in [system_prompt, user_prompt] if prompt != ""])
 
@@ -186,7 +190,7 @@ class PromptTemplate:
                     **params,
                 )
 
-                possible_prompt_tokens = tokenizer.encode(possible_prompt)
+                possible_prompt_tokens = self._get_tokenizer().encode(possible_prompt)
                 if len(possible_prompt_tokens) <= max_length:
                     final_examplars = examplars[:num]
                     break
