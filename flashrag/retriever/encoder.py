@@ -248,3 +248,73 @@ class ClipEncoder:
         else:
             raise NotImplementedError(f"Unsupported model type: {self.model_type}")
         return text_emb
+
+
+from openai import OpenAI
+
+
+class ApiEncoder:
+    """
+    Encoder class for encoding queries using OpenAI's API.
+
+    Attributes:
+        model_name (str): Name identifier for the model.
+        base_url (str): Base URL of the API endpoint.
+        api_key (str): API key for authentication.
+        max_length (int): The maximum length of the input sequences.
+        instruction (str): Additional instructions for parsing queries.
+        encoding_format (str): Format of the output embeddings.
+
+    Methods:
+        encode(query_list: List[str], is_query=True) -> np.ndarray:
+            Encodes a list of queries into embeddings.
+    """
+
+    def __init__(self, model_name, base_url, api_key, max_length, instruction="", silent=False,
+                 encoding_format="float"):
+        self.model_name = model_name
+        self.base_url = base_url
+        self.api_key = api_key
+        self.max_length = max_length
+        self.instruction = instruction
+        self.silent = silent
+        self.encoding_format = encoding_format
+
+        self.client = OpenAI(
+            api_key=self.api_key,
+            base_url=self.base_url
+        )
+
+    def _create_embeddings(self, input_batch: List[str]) -> List[List[float]]:
+        """Create embeddings for a batch of input texts"""
+        response = self.client.embeddings.create(
+            model=self.model_name,
+            input=input_batch, # 阿里的v3和v4限制输入10行，v2就行
+            # dimensions=self.dimensions,
+            encoding_format=self.encoding_format
+        )
+        return [embedding.embedding for embedding in response.data]
+
+    @torch.inference_mode()
+    def encode(self, query_list: List[str], batch_size=64, is_query=True) -> np.ndarray:
+        if not query_list:
+            return np.zeros((0, self.dimensions), dtype=np.float32)
+
+        query_list = parse_query(self.model_name, query_list, self.instruction, is_query)
+        embeddings = []
+
+        for i in tqdm(
+                range(0, len(query_list), batch_size),
+                desc=f"API Encoding ({self.model_name})",
+                disable=self.silent
+        ):
+            batch = query_list[i:i + batch_size]
+            batch_embeddings = self._create_embeddings(batch)
+            embeddings.extend(batch_embeddings)
+
+        return np.array(embeddings, dtype=np.float32)
+
+    @torch.inference_mode()
+    def multi_gpu_encode(self, query_list: List[str], batch_size=64, is_query=True) -> np.ndarray:
+        """To make it the same interface as others"""
+        return self.encode(query_list, batch_size, is_query)

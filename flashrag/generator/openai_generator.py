@@ -37,7 +37,8 @@ class OpenaiGenerator:
         except Exception as e:
             print("Warning: ", e)
             warnings.warn("This model is not supported by tiktoken. Use gpt-3.5-turbo instead.")
-            self.tokenizer = tiktoken.encoding_for_model('gpt-3.5-turbo')
+            # self.tokenizer = tiktoken.encoding_for_model('gpt-3.5-turbo')
+            self.tokenizer = AsyncOpenAI(**self.text_embedding_setting)
     @property
     def config(self):
         return self._config
@@ -59,6 +60,7 @@ class OpenaiGenerator:
         self.openai_setting = self._config["openai_setting"]
         if self.openai_setting["api_key"] is None:
             self.openai_setting["api_key"] = os.getenv("OPENAI_API_KEY")
+        self.text_embedding_setting = self._config["text_embedding_setting"]
 
     def update_additional_setting(self):
         pass

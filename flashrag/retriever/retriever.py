@@ -378,6 +378,12 @@ class DenseRetriever(BaseTextRetriever):
         self.use_st = self._config["use_sentence_transformer"]
         self.use_faiss_gpu = self._config["faiss_gpu"]
 
+        self.text_embedding_setting = self._config["text_embedding_setting"]
+        if self.text_embedding_setting is not None:
+            self.api_key = self.text_embedding_setting.get("api_key")
+            self.base_url = self.text_embedding_setting.get("base_url")
+            self.model_name = self._config["embedding_model"]
+
     def load_model(self):
         if self.use_st:
             self.encoder = STEncoder(
@@ -385,6 +391,16 @@ class DenseRetriever(BaseTextRetriever):
                 model_path=self._config["retrieval_model_path"],
                 max_length=self.query_max_length,
                 use_fp16=self.use_fp16,
+                instruction=self.instruction,
+                silent=self.silent,
+            )
+        elif self.text_embedding_setting is not None:
+            from flashrag.retriever.encoder import ApiEncoder
+            self.encoder = ApiEncoder(
+                model_name=self.model_name,
+                base_url=self.base_url,
+                api_key=self.api_key,
+                max_length=self.query_max_length,
                 instruction=self.instruction,
                 silent=self.silent,
             )
