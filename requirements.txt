@@ -13,7 +13,7 @@ tiktoken
 torch
 tqdm
 transformers>=4.40.0
-bm25s[core]==0.2.0
+bm25s[core]==0.2.1
 fschat
 streamlit
 chonkie>=1.0.2, <1.1.0

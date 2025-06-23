@@ -305,6 +305,8 @@ class BM25Retriever(BaseTextRetriever):
             else:
                 results = load_docs(self.corpus, [hit.docid for hit in hits])
         elif self.backend == "bm25s":
+            import bm25s
+
             # query_tokens = self.tokenizer.tokenize([query], return_as="tuple", update_vocab=False)
             query_tokens = bm25s.tokenize([query])
             results, scores = self.searcher.retrieve(query_tokens, k=num)
@@ -328,6 +330,8 @@ class BM25Retriever(BaseTextRetriever):
                 results.append(item_result)
                 scores.append(item_score)
         elif self.backend == "bm25s":
+            import bm25s
+
             # query_tokens = self.tokenizer.tokenize(query, return_as="tuple", update_vocab=False)
             query_tokens = bm25s.tokenize(query)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
