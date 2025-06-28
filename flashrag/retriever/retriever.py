@@ -1060,8 +1060,6 @@ class SparseRetriever(BaseTextRetriever):
         embeddings = []
         batch = []
         
-        query_time = {'encode_time': 0, 'query_time': 0}
-        start = time.time()
         # Encode
         for i in range(len(query)):
             # Process batch
@@ -1075,13 +1073,8 @@ class SparseRetriever(BaseTextRetriever):
             query_vec = self._encode(batch)
             embeddings.extend(query_vec)
 
-        query_time['encode_time'] = time.time() - start
-
         # Search
-        start = time.time()
         search_results = self._seismic_batch_search(embeddings, num)
-        query_time['search_time'] = time.time() - start
-        query_time['sum_time'] = query_time['encode_time'] + query_time['search_time']
 
         results = []
         scores = []
@@ -1097,9 +1090,9 @@ class SparseRetriever(BaseTextRetriever):
             scores.append(tmp_scores)
         
         if return_score:
-            return results, scores, query_time
+            return results, scores
         else:
-            return results, query_time
+            return results
 
     def _seismic_search(self, query_vec: List[Dict[str, float]], k: int) -> (List[Dict], List[float]):
         """Search using Seismic backend."""
@@ -1146,4 +1139,3 @@ class SparseRetriever(BaseTextRetriever):
             num_threads=int(self.cores)
         )
         return search_results
-
