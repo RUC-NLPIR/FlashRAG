@@ -1078,7 +1078,7 @@ class SparseRetriever(BaseTextRetriever):
 
         results = []
         scores = []
-        for result in sorted(search_results, key=lambda e: e[0][0]):
+        for result in sorted(search_results, key=lambda e: int(e[0][0])):
             tmp_results = []
             tmp_scores = []
 
