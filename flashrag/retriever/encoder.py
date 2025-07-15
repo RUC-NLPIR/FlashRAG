@@ -24,7 +24,7 @@ class Encoder:
             Encodes a list of queries into embeddings.
     """
 
-    def __init__(self, model_name, model_path, pooling_method, max_length, use_fp16=True, instruction="", silent=False):
+    def __init__(self, model_name, model_path, pooling_method, max_length, use_fp16=True, instruction=None, silent=False):
         self.model_name = model_name
         self.model_path = model_path
         self.pooling_method = pooling_method
