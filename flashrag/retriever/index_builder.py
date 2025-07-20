@@ -1,45 +1,62 @@
-import os
 import re
+import time
+from concurrent.futures import ThreadPoolExecutor
+
 import faiss
 import json
 import warnings
 import numpy as np
-from typing import cast
+from typing import Dict, List
 import shutil
 import subprocess
 import argparse
 import datasets
 import torch
+from seismic import SeismicIndex
 from tqdm import tqdm
 from flashrag.retriever.utils import load_model, load_corpus, pooling, set_default_instruction, judge_zh
+from transformers import AutoTokenizer, AutoModelForMaskedLM
+
+import os
+import multiprocessing
+
+cores = str(multiprocessing.cpu_count())
+os.environ["RAYON_NUM_THREADS"] = cores
 
 
 class Index_Builder:
     r"""A tool class used to build an index used in retrieval."""
 
     def __init__(
-        self,
-        retrieval_method,
-        model_path,
-        corpus_path,
-        save_dir,
-        max_length,
-        batch_size,
-        use_fp16,
-        pooling_method=None,
-        instruction=None,
-        faiss_type=None,
-        embedding_path=None,
-        save_embedding=False,
-        faiss_gpu=False,
-        use_sentence_transformer=False,
-        bm25_backend="bm25s",
-        index_modal="all",
+            self,
+            retrieval_method,
+            model_path,
+            corpus_path,
+            save_dir,
+            max_length,
+            batch_size,
+            use_fp16,
+            n_postings=1000,
+            centroid_fraction=0.2,
+            min_cluster_size=2,
+            summary_energy=0.4,
+            batched_indexing=10000,
+            corpus_embedded_path=None,
+            pooling_method=None,
+            instruction=None,
+            faiss_type=None,
+            embedding_path=None,
+            save_embedding=False,
+            faiss_gpu=False,
+            use_sentence_transformer=False,
+            bm25_backend="bm25s",
+            index_modal="all",
+            nknn=0,
     ):
-
         self.retrieval_method = retrieval_method.lower()
         self.model_path = model_path
         self.corpus_path = corpus_path
+        self.corpus_embedded_path = corpus_embedded_path
         self.save_dir = save_dir
         self.max_length = max_length
         self.batch_size = batch_size
@@ -52,6 +69,12 @@ class Index_Builder:
         self.use_sentence_transformer = use_sentence_transformer
         self.bm25_backend = bm25_backend
         self.index_modal = index_modal
+        self.n_postings = n_postings
+        self.centroid_fraction = centroid_fraction
+        self.min_cluster_size = min_cluster_size
+        self.summary_energy = summary_energy
+        self.batched_indexing = batched_indexing
+        self.nknn = nknn
 
         # judge if the retrieval model is clip
         self.is_clip = ("clip" in self.retrieval_method) or (self.model_path is not None and "clip" in self.model_path)
@@ -127,8 +150,235 @@ class Index_Builder:
                 self.build_bm25_index_bm25s()
             else:
                 assert False, "Invalid bm25 backend!"
+        elif self.retrieval_method == "splade":
+            self.build_seismic_index()
         else:
             self.build_dense_index()
+
+    def build_seismic_index(self):
+        """Build Seismic index after saving documents in required JSONL format using batch processing."""
+
+        r"""Full Command:
+        # Use "splade" (sparse embedding neural model) as retrieval method to trigger sysmic index costruction.
+        python -m flashrag.retriever.index_builder \ # builder
+        --retrieval_method splade \ # Model name to trigger seismic index (splade only available)
+        --model_path retriever/splade-v3 \ # Local path or repository path are both supported.
+        --corpus_embedded_path data/ms_marco/ms_marco_embedded_corpus.jsonl \  # Use cached embedded corpus if corpus is already available ins seismic expected format
+        --corpus_path data/ms_marco/ms_marco_corpus.jsonl \ # Corpus path in format {id, contents} jsonl file to be embedded if not already built
+        --save_dir indexes/ \ # save index directory
+        --use_fp16 \ # tell to use fp16 for splade model
+        --max_length 512 \ # max tokens for each document
+        --batch_size 4 \ # batch size for splade model (Suggested between 2 and 24 for 16GB VRAM)
+        --n_postings 1000 \ # seismic number of posting lists
+        --centroid_fraction 0.2 \ # seismic centroids
+        --min_cluster_size 2 \ # seismic min cluster
+        --summary_energy 0.4 \ # seismic energy
+        --batched_indexing 10000 # seismic batch
+        --nknn 32
+        """
+
+        if self.pooling_method != 'max':
+            print(
+                f'Pooling method: {self.pooling_method.upper()} not supported on sparse neural retrieval models. fallback to: MAX.')
+        # Load document encoder model (only splade i currently implemented at the moment)
+        tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        model = AutoModelForMaskedLM.from_pretrained(self.model_path)
+        # Use half precision
+        if self.use_fp16:
+            model = model.half()
+        # Use more devices if available
+        if torch.cuda.device_count() > 1:
+            print(f"Using {torch.cuda.device_count()} GPUs")
+            model = torch.nn.DataParallel(model)
+
+        # Load to cuda
+        model = model.to('cuda' if torch.cuda.is_available() else 'cpu')
+        model.eval()
+
+        # Create file for embedded corpus
+        corpus_name = os.path.splitext(os.path.basename(self.corpus_path))[0]
+        output_path = os.path.join(self.save_dir, f"{corpus_name}_{self.retrieval_method}_embedded.jsonl")
+
+        # Init vars
+        total_docs = len(self.corpus)
+        processed_docs = 0
+        start_time = time.time()
+        last_update = start_time
+
+        if self.corpus_embedded_path:
+            print("Using cached corpus in seismic format.")
+            if self.nknn > 0:
+                index = SeismicIndex.build(
+                    self.corpus_embedded_path,
+                    n_postings=self.n_postings,
+                    centroid_fraction=self.centroid_fraction,
+                    min_cluster_size=self.min_cluster_size,
+                    summary_energy=self.summary_energy,
+                    batched_indexing=self.batched_indexing,
+                    num_threads=int(cores),
+                    nknn=self.nknn
+                )
+            else:
+                index = SeismicIndex.build(
+                    self.corpus_embedded_path,
+                    n_postings=self.n_postings,
+                    centroid_fraction=self.centroid_fraction,
+                    min_cluster_size=self.min_cluster_size,
+                    summary_energy=self.summary_energy,
+                    batched_indexing=self.batched_indexing,
+                    num_threads=int(cores)
+                )
+            index.save(os.path.join(self.save_dir, f"{corpus_name}_{self.retrieval_method}"))
+            return index
+
+
+        with open(output_path, 'w') as f_out, ThreadPoolExecutor(max_workers=1) as pool:
+            # create progress bar
+            progress_bar = tqdm(
+                desc="Processing Documents",
+                total=total_docs,
+                unit="doc",
+                bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]"
+            )
+
+            batch = []
+            for doc in self.corpus:
+                # Load batch
+                batch.append(doc)
+
+                # On batch ready process batch
+                if len(batch) >= self.batch_size:
+                    self._process_batch(batch, f_out, model, tokenizer, pool)
+                    processed_docs += len(batch)
+                    batch = []
+
+                    # Progress updates
+                    current_time = time.time()
+                    if processed_docs % 100 == 0 or (current_time - last_update) > 5.0:
+                        elapsed = current_time - start_time
+                        docs_per_sec = processed_docs / elapsed
+                        remaining = (total_docs - processed_docs) / docs_per_sec
+
+                        progress_bar.set_postfix({
+                            'speed': f"{docs_per_sec:.1f} docs/s",
+                            'ETA': f"{remaining / 60:.1f} min"
+                        })
+                        progress_bar.update(100 if processed_docs % 100 == 0 else processed_docs % 100)
+                        last_update = current_time
+
+            # Handle final leftover batch
+            if batch:
+                self._process_batch(batch, f_out, model, tokenizer, pool)
+                progress_bar.update(len(batch))
+
+            progress_bar.close()
+
+        if self.nknn > 0:
+            index = SeismicIndex.build(
+                output_path,
+                n_postings=self.n_postings,
+                centroid_fraction=self.centroid_fraction,
+                min_cluster_size=self.min_cluster_size,
+                summary_energy=self.summary_energy,
+                batched_indexing=self.batched_indexing,
+                num_threads=int(cores),
+                nknn=self.nknn
+            )
+        else:
+            # Create index on embedded corpus file and save it
+            index = SeismicIndex.build(
+                output_path,
+                n_postings=self.n_postings,
+                centroid_fraction=self.centroid_fraction,
+                min_cluster_size=self.min_cluster_size,
+                summary_energy=self.summary_energy,
+                batched_indexing=self.batched_indexing,
+                num_threads=int(cores)
+            )
+
+        index.save(os.path.join(self.save_dir, f"{corpus_name}_{self.retrieval_method}"))
+        return index
+
+    def _process_batch(self, batch, f_out, model, tokenizer, pool):
+        # Get embeddings
+        texts = [doc['contents'] for doc in batch]
+        vectors = self._get_sparse_embedding(texts, model, tokenizer)
+
+        # create json for the batch
+        def save(docs, embs):
+            for doc, vector in zip(docs, embs):
+                if 'vector' not in doc:
+                    doc['vector'] = vector
+                f_out.write(json.dumps({
+                    "id": str(doc['id']),
+                    "contents": doc['contents'],
+                    "vector": doc['vector']
+                }) + "\n")
+        pool.submit(save, batch, vectors)
+
+    def _get_sparse_embedding(self, texts: List[str], model, tokenizer) -> List[Dict[str, float]]:
+        """Generate sparse embeddings for a batch of texts."""
+        inputs = tokenizer(
+            texts,
+            return_tensors="pt",
+            truncation=True,
+            padding=True,
+            max_length=self.max_length,
+            add_special_tokens=True
+        ).to(model.device)
+
+        with torch.no_grad():
+            logits = model(**inputs).logits  # [batch_size, seq_len, vocab_size]
+            attention_mask = inputs["attention_mask"].unsqueeze(-1)
+
+            scores = torch.log1p(torch.relu(logits)) * attention_mask
+
+            v_repr = torch.max(scores, dim=1)[0]  # [batch_size, vocab_size]
+
+            # Move to CPU (it seems much faster)
+            v_repr = v_repr.cpu()
+            nonzero_mask = v_repr > 1e-4
+
+            # Get sparse values and indices in batch
+            batch_indices, token_indices = torch.nonzero(nonzero_mask, as_tuple=True)
+            token_scores = v_repr[batch_indices, token_indices]
+
+            # Convert once all token IDs to strings (batched)
+            unique_token_ids = torch.unique(token_indices)
+            token_id_to_token = {
+                idx.item(): tok for idx, tok in zip(
+                    unique_token_ids, tokenizer.convert_ids_to_tokens(unique_token_ids.tolist())
+                )
+            }
+
+            # Build final embeddings
+            from collections import defaultdict
+            embeddings = defaultdict(dict)
+            for b_idx, t_idx, score in zip(batch_indices, token_indices, token_scores):
+                embeddings[b_idx.item()][token_id_to_token[t_idx.item()]] = round(score.item(), 4)
+
+            # Convert to list for each document
+            return [embeddings[i] for i in range(len(texts))]
+
+    @staticmethod
+    def get_tokens_and_weights(sparse_embedding, tokenizer):
+        token_weight_dict = {}
+        for i in range(len(sparse_embedding.indices)):
+            token = tokenizer.decode([sparse_embedding.indices[i]])
+            weight = sparse_embedding.values[i]
+            token_weight_dict[token] = round(weight, 4)
+
+        # Sort the dictionary by weights
+        token_weight_dict = dict(sorted(token_weight_dict.items(), key=lambda item: item[1], reverse=True))
+        return token_weight_dict
+
+    @staticmethod
+    def clean_text(self, text: str) -> str:
+        """Preprocess the text by removing special characters that seems to cause some problems in seismic index build resulting in a parse error."""
+        text = re.sub(r'<[^>]+>', '', text)  # Remove HTML tags
+        text = re.sub(r'\s+', ' ', text)  # Normalize multiple spaces
+        text = text.strip()  # Remove leading/trailing whitespaces
+        return text
 
     def build_bm25_index_pyserini(self):
         """Building BM25 index based on Pyserini library.
@@ -147,7 +397,7 @@ class Index_Builder:
             shutil.copyfile(self.corpus_path, temp_file_path)
             # check if the language is chinese
             with open(self.corpus_path, 'r', encoding='utf-8') as file:
-                first_item = json.loads(file.readline()) 
+                first_item = json.loads(file.readline())
                 contents = first_item.get("contents", "")  # 获取 contents 字段
                 zh_flag = judge_zh(contents)
         elif self.corpus_path.endswith(".parquet"):
@@ -204,7 +454,7 @@ class Index_Builder:
         else:
             stemmer = Stemmer.Stemmer("english")
             tokenizer = bm25s.tokenization.Tokenizer(stopwords='en', stemmer=stemmer)
-            
+
         corpus_text = corpus["contents"]
         corpus_tokens = tokenizer.tokenize(corpus_text, return_as='tuple')
         retriever = bm25s.BM25(corpus=corpus, backend="numba")
@@ -313,7 +563,7 @@ class Index_Builder:
             if self.index_modal == "all":
                 assert all_embeddings.shape[0] % 2 == 0
                 text_embedding = all_embeddings[: len(all_embeddings) // 2, :]
-                image_embedding = all_embeddings[len(all_embeddings) // 2 :, :]
+                image_embedding = all_embeddings[len(all_embeddings) // 2:, :]
                 text_index_save_path = os.path.join(
                     self.save_dir, f"{self.retrieval_method}_{self.faiss_type}_text.index"
                 )
@@ -336,10 +586,10 @@ class Index_Builder:
         print("Finish!")
 
     def save_faiss_index(
-        self,
-        all_embeddings,
-        faiss_type,
-        index_save_path,
+            self,
+            all_embeddings,
+            faiss_type,
+            index_save_path,
     ):
         # build index
         print("Creating index")
@@ -363,6 +613,9 @@ class Index_Builder:
         faiss.write_index(faiss_index, index_save_path)
 
 
+import argparse
+
+
 def main():
     parser = argparse.ArgumentParser(description="Creating index.")
 
@@ -370,6 +623,7 @@ def main():
     parser.add_argument("--retrieval_method", type=str)
     parser.add_argument("--model_path", type=str, default=None)
     parser.add_argument("--corpus_path", type=str)
+    parser.add_argument("--corpus_embedded_path", type=str, default=None)
     parser.add_argument("--save_dir", default="indexes/", type=str)
 
     # Parameters for building dense index
@@ -387,6 +641,14 @@ def main():
 
     # Parameters for build multi-modal retriever index
     parser.add_argument("--index_modal", type=str, default="all", choices=["text", "image", "all"])
+
+    # New arguments for seismic index
+    parser.add_argument("--n_postings", type=int, default=1000)
+    parser.add_argument("--centroid_fraction", type=float, default=0.2)
+    parser.add_argument("--min_cluster_size", type=int, default=2)
+    parser.add_argument("--summary_energy", type=float, default=0.4)
+    parser.add_argument("--nknn", type=int, default=0)
+    parser.add_argument("--batched_indexing", type=int, default=10000)
 
     args = parser.parse_args()
 
@@ -407,6 +669,13 @@ def main():
         use_sentence_transformer=args.sentence_transformer,
         bm25_backend=args.bm25_backend,
         index_modal=args.index_modal,
+        n_postings=args.n_postings,
+        centroid_fraction=args.centroid_fraction,
+        min_cluster_size=args.min_cluster_size,
+        summary_energy=args.summary_energy,
+        batched_indexing=args.batched_indexing,
+        corpus_embedded_path=args.corpus_embedded_path,
+        nknn=args.nknn
     )
     index_builder.build_index()
 

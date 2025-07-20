@@ -15,6 +15,7 @@ from flashrag.utils import get_reranker
 from flashrag.retriever.utils import load_corpus, load_docs, convert_numpy, judge_image, judge_zh
 from flashrag.retriever.encoder import Encoder, STEncoder, ClipEncoder
 
+import torch
 
 def cache_manager(func):
     """
@@ -932,3 +933,209 @@ class MultiRetrieverRouter:
                         final_result.append(image_result[image_idx])
                         image_idx += 1
                 return final_result
+
+
+class SparseRetriever(BaseTextRetriever):
+    """Sparse embedding retriever supporting only SPLADE with Seismic backend for now."""
+
+    def __init__(self, config):
+        super().__init__(config)
+
+        import multiprocessing
+        self.cores = str(multiprocessing.cpu_count())
+        os.environ["RAYON_NUM_THREADS"] = self.cores
+
+        self.progress_bar = None
+
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.corpus = load_corpus(config["corpus_path"])
+        self.tokenizer, self.model = self._load_sparse_model()
+
+        self.id = 0
+
+        self.update_additional_setting()
+
+        self.seismic_query_cut = self.config["seismic_query_cut"]
+        self.seismic_heap_factor = self.config["seismic_heap_factor"]
+        self.index_max_tokens = self.config["seismic_max_tokens_length"]
+        self._init_seismic_index()
+
+    def update_additional_setting(self):
+        """Load config shared for all the models supported"""
+        self.query_max_length = self._config["retrieval_query_max_length"]
+        self.use_fp16 = self._config["retrieval_use_fp16"]
+        self.batch_size = self._config["retrieval_batch_size"]
+        self.retrieval_model_path = self._config["retrieval_model_path"]
+        self.pooling_method = self._config["retrieval_pooling_method"]
+
+    def _init_seismic_index(self):
+        """Initialize Seismic index."""
+        from seismic import SeismicIndex  # Assuming this is available
+        self.seismic_index = SeismicIndex.load(self.index_path)
+        self.string_type = f'U{self.index_max_tokens}'  # For Seismic string dtype
+
+    def _load_sparse_model(self):
+        """Load tokenizer and model based on sparse type."""
+        from transformers import AutoModelForMaskedLM, AutoTokenizer
+        # Load model
+        tokenizer = AutoTokenizer.from_pretrained(self.retrieval_model_path)
+        model = AutoModelForMaskedLM.from_pretrained(self.retrieval_model_path)
+
+        if self.use_fp16:
+            model = model.half()
+
+        # Use more gpus if available
+        if torch.cuda.device_count() > 1:
+            model = torch.nn.DataParallel(model, device_ids=self.config['gpu_id'].split(','))
+
+        model = model.to(self.device)
+        model.eval()
+        return tokenizer, model
+
+    def _encode(self, query):
+        inputs = self.tokenizer(
+            query,
+            return_tensors="pt",
+            truncation=True,
+            padding=True,
+            max_length=self.query_max_length,
+            add_special_tokens=True
+        ).to(self.model.device)
+
+        with torch.no_grad():
+            logits = self.model(**inputs).logits  # [batch_size, seq_len, vocab_size]
+            attention_mask = inputs["attention_mask"].unsqueeze(-1)  # [batch, seq_len, 1]
+
+            scores = torch.log1p(torch.relu(logits)) * attention_mask
+            v_repr = torch.max(scores, dim=1)[0]  # [batch_size, vocab_size]
+
+            # Move to CPU (it seems much faster)
+            v_repr = v_repr.cpu()
+            nonzero_mask = v_repr > 1e-4
+
+            # Get sparse values and indices in batch
+            batch_indices, token_indices = torch.nonzero(nonzero_mask, as_tuple=True)
+            token_scores = v_repr[batch_indices, token_indices]
+
+            # Convert once all token IDs to strings (batched)
+            unique_token_ids = torch.unique(token_indices)
+            token_id_to_token = {
+                idx.item(): tok for idx, tok in zip(
+                    unique_token_ids, self.tokenizer.convert_ids_to_tokens(unique_token_ids.tolist())
+                )
+            }
+
+            # Build final embeddings
+            from collections import defaultdict
+            embeddings = defaultdict(dict)
+            for b_idx, t_idx, score in zip(batch_indices, token_indices, token_scores):
+                embeddings[b_idx.item()][token_id_to_token[t_idx.item()]] = round(score.item(), 4)
+
+            # Convert to list for each document
+            return [embeddings[i] for i in range(len(query))]
+
+    def search(self, query: list, num: int = None, return_score=False) -> (List[Dict], List[float]):
+        """Search using sparse vector."""
+        num = num or self.topk
+
+        query_vec = self._encode(query)
+        results, scores = self._seismic_search(query_vec, num)
+
+        if return_score:
+            return results, scores
+        else:
+            return results
+
+    def batch_search(self, query, num=None, return_score=False):
+        """Search using sparse vector."""
+        if isinstance(query, str):
+            query = [query]
+
+        if self.pooling_method != 'max':
+            print(
+                f'Pooling method: {self.pooling_method.upper()} not supported on sparse neural retrieval models. fallback to: MAX.')
+
+        num = num or self.topk
+
+        embeddings = []
+        batch = []
+        
+        # Encode
+        for i in range(len(query)):
+            # Process batch
+            batch.append(query[i])
+            if len(batch) >= self.batch_size:
+                query_vec = self._encode(batch)
+                embeddings.extend(query_vec)
+                batch = []
+
+        if batch:
+            query_vec = self._encode(batch)
+            embeddings.extend(query_vec)
+
+        # Search
+        search_results = self._seismic_batch_search(embeddings, num)
+
+        results = []
+        scores = []
+        for result in sorted(search_results, key=lambda e: int(e[0][0])):
+            tmp_results = []
+            tmp_scores = []
+
+            for query_id, score, doc_id in result:
+                tmp_results.append(self.corpus[int(doc_id)])
+                tmp_scores.append(score)
+
+            results.append(tmp_results)
+            scores.append(tmp_scores)
+        
+        if return_score:
+            return results, scores
+        else:
+            return results
+
+    def _seismic_search(self, query_vec: List[Dict[str, float]], k: int) -> (List[Dict], List[float]):
+        """Search using Seismic backend."""
+        # Convert query to Seismic format
+        results, scores = self.index_search(k, query_vec)
+        return results[0], scores[0]
+
+    def _seismic_batch_search(self, query_vecs: List[Dict[str, float]], k: int) -> (
+            List[List[Dict]], List[List[float]]):
+        """Batch search using Seismic backend (one query at a time)."""
+        return self.index_search(k, query_vecs)
+
+    def index_search(self, k, query_vec):
+        max_len = max(len(query) for query in query_vec)
+        pad_token = ""  # or whatever default is appropriate
+
+        query_components = []
+        query_values = []
+        ids = []
+
+        for query in query_vec:
+            keys = list(query.keys())
+            values = list(query.values())
+
+            # Pad to max_len
+            padded_keys = keys + [pad_token] * (max_len - len(keys))
+            padded_values = values + [0.0] * (max_len - len(values))
+
+            query_components.append(np.array(padded_keys, dtype='U30'))
+            query_values.append(np.array(padded_values, dtype=np.float32))
+            ids.append(self.id)
+            self.id += 1
+
+        ids = np.array(ids, dtype='U30')
+        # Execute search
+        search_results = self.seismic_index.batch_search(
+            queries_ids=ids,  # Placeholder ID
+            query_components=query_components,
+            query_values=query_values,
+            query_cut=self.seismic_query_cut,
+            heap_factor=self.seismic_heap_factor,
+            k=k,
+            sorted=True,  # specified even if default value
+            num_threads=int(self.cores)
+        )
+        return search_results

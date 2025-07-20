@@ -28,7 +28,7 @@ def get_dataset(config):
             continue
         else:
             print(f"Loading {split} dataset from: {split_path}...")
-        if split in ["test", "val", "dev"]:
+        if split in ["test", "val", "dev", "train"]:
             split_dict[split] = Dataset(
                 config, split_path, sample_num=config["test_sample_num"], random_sample=config["random_sample"]
             )
@@ -84,6 +84,8 @@ def get_retriever(config):
 
     if config["retrieval_method"] == "bm25":
         return getattr(importlib.import_module("flashrag.retriever"), "BM25Retriever")(config)
+    elif config["retrieval_method"] == "splade":
+        return getattr(importlib.import_module("flashrag.retriever"), "SparseRetriever")(config)
     else:
         try:
             model_config = AutoConfig.from_pretrained(config["retrieval_model_path"])
