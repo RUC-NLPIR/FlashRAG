@@ -261,6 +261,32 @@ python -m flashrag.retriever.index_builder \
   --save_dir indexes/ 
 ```
 
+### For Sparse Neural Retrieval Methods (SPLADE)
+
+##### Install Seismic Index:
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Install Rust for compiling
+pip install pyseismic-lsr # Install Seismic
+```
+
+##### Then build the index with Seismic:
+```bash
+python -m flashrag.retriever.index_builder \ # builder
+        --retrieval_method splade \ # Model name to trigger seismic index (splade only available)
+        --model_path retriever/splade-v3 \ # Local path or repository path are both supported.
+        --corpus_embedded_path data/ms_marco/ms_marco_embedded_corpus.jsonl \  # Use cached embedded corpus if corpus is already available in seismic expected format
+        --corpus_path data/ms_marco/ms_marco_corpus.jsonl \ # Corpus path in format {id, contents} jsonl file to be embedded if not already built
+        --save_dir indexes/ \ # save index directory
+        --use_fp16 \ # tell to use fp16 for splade model
+        --max_length 512 \ # max tokens for each document
+        --batch_size 4 \ # batch size for splade model (4-5 seems the best size for Tesla T4 16GB)
+        --n_postings 1000 \ # seismic number of posting lists
+        --centroid_fraction 0.2 \ # seismic centroids
+        --min_cluster_size 2 \ # seismic min cluster
+        --summary_energy 0.4 \ # seismic energy
+        --batched_indexing 10000000 # seismic batch
+        --nknn 32 # Optional parameter. Tell to seismic to use also knn graph. if not present seismic will work without knn graph
+```
 ### Using the ready-made pipeline
 
 You can use the pipeline class we have already built (as shown in [<u>pipelines</u>](#pipelines)) to implement the RAG process inside. In this case, you just need to configure the config and load the corresponding pipeline.
