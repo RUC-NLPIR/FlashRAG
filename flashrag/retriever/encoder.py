@@ -5,6 +5,7 @@ import torch
 import numpy as np
 from tqdm import tqdm
 from flashrag.retriever.utils import load_model, pooling, parse_query, parse_image
+from flashrag.utils import get_device
 
 
 class Encoder:
@@ -42,7 +43,7 @@ class Encoder:
         inputs = self.tokenizer(
             query_list, max_length=self.max_length, padding=True, truncation=True, return_tensors="pt"
         )
-        inputs = {k: v.cuda() for k, v in inputs.items()}
+        inputs = {k: v.to(get_device()) for k, v in inputs.items()}
 
         if "T5" in type(self.model).__name__ or (
             isinstance(self.model, torch.nn.DataParallel) and "T5" in type(self.model.module).__name__

@@ -11,10 +11,12 @@ import faiss
 import copy
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from flashrag.utils import get_reranker
+from flashrag.utils import get_reranker, get_device
 from flashrag.retriever.utils import load_corpus, load_docs, convert_numpy, judge_image, judge_zh
 from flashrag.retriever.encoder import Encoder, STEncoder, ClipEncoder
 
+if get_device() == "cpu":
+    faiss.omp_set_num_threads(1)
 
 def cache_manager(func):
     """

@@ -7,6 +7,7 @@ import datasets
 import re
 import langid
 from transformers import AutoTokenizer, AutoModel, AutoConfig
+from flashrag.utils import get_device
 
 _has_printed_instruction = False  # trigger instruction print once
 
@@ -57,7 +58,7 @@ def load_model(model_path: str, use_fp16: bool = False):
     model_config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
     model = AutoModel.from_pretrained(model_path, trust_remote_code=True)
     model.eval()
-    model.cuda()
+    model.to(get_device())
     if use_fp16:
         model = model.half()
     tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True, trust_remote_code=True)
