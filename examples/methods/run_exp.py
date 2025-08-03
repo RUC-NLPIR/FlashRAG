@@ -616,6 +616,162 @@ def r1searcher(args):
     result = pipeline.run(test_data)
 
 
+def searchr1(args):
+    """
+    Function to run the search-r1.
+    """
+    save_note = "search-r1"
+    config_dict = {
+        "save_note": save_note,
+        "gpu_id": args.gpu_id,
+        'framework': 'vllm',
+        'generator_max_input_len': 16384,
+        'generation_params': {'max_tokens': 512, 'skip_special_tokens': False},
+        'generator_model_path':'PeterJinGo/SearchR1-nq_hotpotqa_train-qwen2.5-7b-em-ppo',
+        "dataset_name": args.dataset_name,
+        "split": args.split,
+    }
+
+    config = Config("my_config.yaml", config_dict)
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+    
+    from flashrag.pipeline import SearchR1Pipeline
+    pipeline = SearchR1Pipeline(config)
+    result = pipeline.run(test_data)
+    
+def autorefine(args):
+    """
+    Function to run the AutoRefine.
+    """
+    save_note = "autorefine"
+    config_dict = {
+        "save_note": save_note,
+        "gpu_id": args.gpu_id,
+        'framework': 'vllm',
+        'generator_max_input_len': 16384,
+        'generation_params': {'max_tokens': 512, 'skip_special_tokens': False},
+        'generator_model_path': 'yrshi/AutoRefine-Qwen2.5-3B-Base',
+        "dataset_name": args.dataset_name,
+        "split": args.split,
+    }
+
+    config = Config("my_config.yaml", config_dict)
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+    
+    from flashrag.pipeline import AutoRefinePipeline
+    pipeline = AutoRefinePipeline(config)
+    result = pipeline.run(test_data)
+
+
+def o2searcher(args):
+    """
+    Function to run the O2searcher.
+    """
+    save_note = "O2searcher"
+    config_dict = {
+        "save_note": save_note,
+        "gpu_id": args.gpu_id,
+        'framework': 'vllm',
+        'retrieval_topk': 3,
+        'generator_max_input_len': 16384,
+        'generation_params': {'max_tokens': 512, 'skip_special_tokens': False},
+        'generator_model_path': 'Jianbiao/O2-Searcher-Qwen2.5-3B-GRPO',
+        "dataset_name": args.dataset_name,
+        "split": args.split,
+    }
+
+    config = Config("my_config.yaml", config_dict)
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+    
+    from flashrag.pipeline import O2SearcherPipeline
+    pipeline = O2SearcherPipeline(config)
+    result = pipeline.run(test_data)
+    
+def rearag(args):
+    """
+    Function to run the rearag.
+    """
+    save_note = "rearag"
+    config_dict = {
+        "save_note": save_note,
+        "gpu_id": args.gpu_id,
+        'framework': 'vllm',
+        'is_reasoning': True,
+        'generator_max_input_len': 8192 - 2 - 1024,
+        'generation_params': {'max_tokens': 1024, 'do_sample': True},
+        'generator_model_path': 'THU-KEG/ReaRAG-9B',
+        "dataset_name": args.dataset_name,
+        "split": args.split,
+    }
+
+    config = Config("my_config.yaml", config_dict)
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+    
+    from flashrag.pipeline import ReaRAGPipeline
+    pipeline = ReaRAGPipeline(config)
+    result = pipeline.run(test_data)
+    
+def corag(args):
+    """
+    Function to run the CoRAG.
+    """
+    save_note = "corag"
+    task_desc = 'Given a search query, retrieve relevant documents that can help answer the query'
+    if args.dataset_name in ['hotpotqa', 'musique', '2wikimultihopqa', 'bamboogle']:
+        task_desc = 'Given a multi-hop question, retrieve documents that can help answer the question'
+    if args.dataset_name in ['nq', 'triviaqa']:
+        task_desc = 'Given a question, retrieve Wikipedia passages that answer the question'
+    config_dict = {
+        "save_note": save_note,
+        "gpu_id": args.gpu_id,
+        'task_desc': task_desc,
+        'framework': 'vllm',
+        'is_reasoning': True,
+        'generator_max_input_len': 4096,
+        'generation_params': {'max_tokens': 512, 'skip_special_tokens': False},
+        'generator_model_path': 'corag/CoRAG-Llama3.1-8B-MultihopQA',
+        "dataset_name": args.dataset_name,
+        "split": args.split,
+    }
+
+    config = Config("my_config.yaml", config_dict)
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]
+
+    from flashrag.pipeline import CoRAGPipeline
+    pipeline = CoRAGPipeline(config)
+    result = pipeline.run(test_data)
+    
+def simpledeepsearcher(args):
+    """
+    Function to run the SimpleDeepSearcher.
+    """
+    save_note = "simpledeepsearcher"
+    config_dict = {
+        "save_note": save_note,
+        "gpu_id": args.gpu_id,
+        'framework': 'vllm',
+        'generator_max_input_len': 20480,
+        'generation_params': {'max_tokens': 2048, 'skip_special_tokens': False},
+        'generator_model_path': 'RUC-AIBOX/Qwen-7B-SimpleDeepSearcher',
+        "dataset_name": args.dataset_name,
+        "split": args.split,
+    }
+
+    config = Config("my_config.yaml", config_dict)
+    all_split = get_dataset(config)
+    test_data = all_split[args.split]   
+
+    from flashrag.pipeline import SimpleDeepSearcherPipeline
+    pipeline = SimpleDeepSearcherPipeline(config)
+    result = pipeline.run(test_data)
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Running exp")
     parser.add_argument("--method_name", type=str)
@@ -644,9 +800,14 @@ if __name__ == "__main__":
         "adaptive": adaptive,
         "rqrag": rqrag,
         "r1-searcher": r1searcher,
+        "search-r1": searchr1,
+        "autorefine":autorefine,
+        "o2-searcher": o2searcher,
+        "rearag": rearag,
+        "corag": corag,
+        "simpledeepsearcher": simpledeepsearcher,
     }
 
     args = parser.parse_args()
-
     func = func_dict[args.method_name]
     func(args)
