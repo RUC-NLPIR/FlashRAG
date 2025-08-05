@@ -21,7 +21,7 @@ class PromptTemplate:
             model_config = AutoConfig.from_pretrained(self.generator_path, trust_remote_code=True)
             model_name = model_config._name_or_path.lower()
             self.is_chat = False
-            if "chat" in model_name or "instruct" in model_name:
+            if "chat" in model_name or "instruct" in model_name or config['is_reasoning']:
                 self.is_chat = True
         else:
             self.is_chat = True
