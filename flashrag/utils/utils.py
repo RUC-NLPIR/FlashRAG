@@ -4,7 +4,7 @@ import json
 import importlib
 from transformers import AutoConfig
 from flashrag.dataset.dataset import Dataset
-
+import torch
 
 def get_dataset(config):
     """Load dataset from config."""
@@ -183,3 +183,6 @@ def extract_between(text: str, start_tag: str, end_tag: str):
     if matches:
         return matches[-1].strip()
     return None
+
+def get_device() -> str:
+    return "cuda" if torch.cuda.is_available() else "cpu"

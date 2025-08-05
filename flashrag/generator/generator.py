@@ -12,6 +12,7 @@ from transformers import (
     AutoConfig,
 )
 from flashrag.generator.utils import resolve_max_tokens
+from flashrag.utils import get_device
 
 
 class BaseGenerator:
@@ -553,13 +554,13 @@ class FastChatGenerator(HFCausalLMGenerator):
             max_gpu_memory = None
             import torch
             self.gpu_num = torch.cuda.device_count()
-            if self.gpu_num != 1:
+            if self.gpu_num > 1:
                 available_gpu_memory = get_gpu_memory()
                 max_gpu_memory = str(int(min(available_gpu_memory) * gpu_memory_utilization)) + "GiB"
 
             model, tokenizer = load_model(
                 self.model_path,
-                device="cuda",
+                device=get_device(),
                 num_gpus=self.gpu_num,
                 max_gpu_memory=max_gpu_memory,
                 load_8bit=False,
