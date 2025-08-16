@@ -184,5 +184,12 @@ def extract_between(text: str, start_tag: str, end_tag: str):
         return matches[-1].strip()
     return None
 
+def extract_between_all(text:str, start_tag:str, end_tag:str):
+    pattern = re.escape(start_tag) + r"(.*?)" + re.escape(end_tag)
+    matches = re.findall(pattern, text, flags=re.DOTALL)
+    if matches:
+        return matches
+    return None
+
 def get_device() -> str:
     return "cuda" if torch.cuda.is_available() else "cpu"
