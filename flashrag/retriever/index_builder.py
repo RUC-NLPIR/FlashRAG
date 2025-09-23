@@ -12,7 +12,6 @@ import subprocess
 import argparse
 import datasets
 import torch
-from seismic import SeismicIndex
 from tqdm import tqdm
 from flashrag.retriever.utils import load_model, load_corpus, pooling, set_default_instruction, judge_zh
 from transformers import AutoTokenizer, AutoModelForMaskedLM
@@ -151,6 +150,7 @@ class Index_Builder:
             else:
                 assert False, "Invalid bm25 backend!"
         elif self.retrieval_method == "splade":
+            from seismic import SeismicIndex
             self.build_seismic_index()
         else:
             self.build_dense_index()
