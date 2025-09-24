@@ -722,24 +722,31 @@ FlashRAG is licensed under the [<u>MIT License</u>](./LICENSE).
 Please kindly cite our paper if helps your research:
 
 ```BibTex
-@article{FlashRAG,
+@inproceedings{FlashRAG,
   author       = {Jiajie Jin and
                   Yutao Zhu and
+                  Zhicheng Dou and
+                  Guanting Dong and
                   Xinyu Yang and
                   Chenghao Zhang and
-                  Zhicheng Dou},
+                  Tong Zhao and
+                  Zhao Yang and
+                  Ji{-}Rong Wen},
+  editor       = {Guodong Long and
+                  Michale Blumestein and
+                  Yi Chang and
+                  Liane Lewin{-}Eytan and
+                  Zi Helen Huang and
+                  Elad Yom{-}Tov},
   title        = {FlashRAG: {A} Modular Toolkit for Efficient Retrieval-Augmented Generation
                   Research},
-  journal      = {CoRR},
-  volume       = {abs/2405.13576},
-  year         = {2024},
-  url          = {https://doi.org/10.48550/arXiv.2405.13576},
-  doi          = {10.48550/ARXIV.2405.13576},
-  eprinttype    = {arXiv},
-  eprint       = {2405.13576},
-  timestamp    = {Tue, 18 Jun 2024 09:26:37 +0200},
-  biburl       = {https://dblp.org/rec/journals/corr/abs-2405-13576.bib},
-  bibsource    = {dblp computer science bibliography, https://dblp.org}
+  booktitle    = {Companion Proceedings of the {ACM} on Web Conference 2025, {WWW} 2025,
+                  Sydney, NSW, Australia, 28 April 2025 - 2 May 2025},
+  pages        = {737--740},
+  publisher    = {{ACM}},
+  year         = {2025},
+  url          = {https://doi.org/10.1145/3701716.3715313},
+  doi          = {10.1145/3701716.3715313}
 }
 ```
 
