@@ -750,6 +750,7 @@ Please kindly cite our paper if helps your research:
 }
 ```
 
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=RUC-NLPIR/FlashRAG&type=Date)](https://star-history.com/#RUC-NLPIR/FlashRAG&Date)
