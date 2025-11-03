@@ -1,6 +1,7 @@
 import json
 import os
 import time
+import requests
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import warnings
@@ -1141,3 +1142,150 @@ class SparseRetriever(BaseTextRetriever):
             num_threads=int(self.cores)
         )
         return search_results
+
+# 最基础的web检索器，基于Google Serper API实现，可以作为参考
+class SerperRetriever(BaseRetriever):
+    """Retriever based on Google Serper API for web search."""
+
+    def __init__(self, config):
+        super().__init__(config)
+        
+        # Serper API specific configuration
+        self.api_key = config["serper_api_key"]
+        if not self.api_key:
+            raise ValueError("serper_api_key is required in config")
+        
+        self.api_url = "https://google.serper.dev/search"
+        self.search_type = config["serper_search_type"] if config["serper_search_type"] else "search"  # search, news, images, etc.
+        self.location = config["serper_location"] if config["serper_location"] else None  # e.g., "United States"
+        self.gl = config["serper_gl"] if config["serper_gl"] else None  # Country code, e.g., "us"
+        self.hl = config["serper_hl"] if config["serper_hl"] else "en"  # Language, e.g., "en"
+        
+    def _search(self, query: str, num: int) -> List[Dict[str, str]]:
+        """
+        Retrieve top-k relevant documents using Google Serper API.
+        
+        Args:
+            query: Search query string
+            num: Number of results to return
+            return_score: Whether to return relevance scores
+            
+        Returns:
+            List of dictionaries containing search results with keys:
+                - contents: The snippet/description
+                - title: Page title
+                - text: Full text (same as contents for web search)
+                - url: Page URL
+                - score: Relevance score (if return_score=True)
+        """
+        headers = {
+            'X-API-KEY': self.api_key,
+            'Content-Type': 'application/json'
+        }
+        
+        payload = {
+            'q': query,
+            'num': num,
+            'hl': self.hl
+        }
+        
+        if self.location:
+            payload['location'] = self.location
+        if self.gl:
+            payload['gl'] = self.gl
+        
+        try:
+            response = requests.post(
+                self.api_url,
+                headers=headers,
+                json=payload,
+                timeout=30
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            results = []
+            
+            # Parse organic results
+            organic_results = data.get('organic', [])
+            for idx, item in enumerate(organic_results[:num]):
+                result = {
+                    'title': item.get('title', ''),
+                    'text': item.get('snippet', ''),
+                    'url': item.get('link', ''),
+                }
+                
+                results.append(result)
+            
+            return results
+            
+        except requests.exceptions.RequestException as e:
+            print(f"Error calling Serper API: {e}")
+            return []
+        except Exception as e:
+            print(f"Unexpected error in _search: {e}")
+            return []
+    
+    def search(self, query: str, num: int = None) -> List[Dict[str, str]]:
+        """
+        Single search wrapper for SerperRetriever.
+        """
+        if num is None:
+            num = self.topk
+        return self._search(query, num)
+    
+    def _batch_search(self, query_list: List[str], num: int) -> List[List[Dict[str, str]]]:
+        """
+        Batch search for multiple queries.
+        
+        Args:
+            query_list: List of query strings
+            num: Number of results per query
+            return_score: Whether to return relevance scores
+            
+        Returns:
+            List of result lists, one for each query
+        """
+        results = []
+        if num is None:
+            num = self.topk
+        
+        for query in query_list:
+            result = self._search(query, num)
+            results.append(result)
+            # Add a small delay to avoid rate limiting
+            time.sleep(0.1)
+        
+        return results
+
+    def batch_search(self, query_list: List[str], num: int = None):
+        return self._batch_search(query_list, num)
+
+def main():
+# Example configuration
+    config = {
+        # Base retriever config
+        "retrieval_method": "serper",
+        "retrieval_topk": 10,
+        "index_path": None,  # Not used for Serper
+        "corpus_path": None,  # Not used for Serper
+        "save_dir": "./output",
+        
+        # Serper specific config
+        "serper_api_key": "c040a611afbcfa4c15261c396633d9ef5c4f11d8",
+        "serper_search_type": "search",
+        "serper_location": "United States",
+        "serper_gl": "us",
+        "serper_hl": "en"
+    }
+    from flashrag.config import Config
+    config = Config("/data00/yangzhao/FlashRAG/flashrag/config/basic_config.yaml",config)
+    retriever = SerperRetriever(config)
+
+    # Batch search
+    queries = ["Python programming", "Machine learning"]
+    batch_results = retriever.batch_search(queries)
+    print(batch_results)
+
+if __name__ == "__main__":
+    main()
