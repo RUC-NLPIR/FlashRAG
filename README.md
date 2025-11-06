@@ -83,6 +83,8 @@ FlashRAG is still under development and there are many issues and room for impro
 - [ ] Add support for api-based retriever (vllm server)
 
 ## :page_with_curl: Changelog
+[25/11/06] 🎯 NEW Retriever! We have integrated a Web Search Engine-based Retriever, which seamlessly integrates with existing methods and can be enabled quickly with just a Serper API key! This enhancement significantly expands retrieval coverage and real-time capability, supporting dynamic information access and external knowledge augmentation. Experience a more flexible and powerful retrieval workflow now! 
+
 [25/08/06] 🎯 **NEW!** We have added support for **Reasoning Pipeline**, which is a new paradigm that combines reasoning ability and retrieval, representing work that includes [R1-Searcher](https://github.com/SsmallSong/R1-Searcher), [Search-R1](https://github.com/PeterGriffinJin/Search-R1),.... We evaluate the performance of the pipeline on various RAG benchmarks, it can achieve F1 scores close to 60 on multi hop inference datasets such as HotpotQA. See it in [**result table**](#robot-supporting-methods).
 
 [25/03/21] 🚀 **Major Update!** We have expanded our toolkit to support **23 state-of-the-art RAG algorithms**, including **7 reasoning-based methods** that significantly improve performance on complex reasoning tasks. This represents a major milestone in our toolkit's evolution!
