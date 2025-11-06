@@ -1143,7 +1143,6 @@ class SparseRetriever(BaseTextRetriever):
         )
         return search_results
 
-# 最基础的web检索器，基于Google Serper API实现，可以作为参考
 class SerperRetriever(BaseRetriever):
     """Retriever based on Google Serper API for web search."""
 
@@ -1272,14 +1271,14 @@ def main():
         "save_dir": "./output",
         
         # Serper specific config
-        "serper_api_key": "c040a611afbcfa4c15261c396633d9ef5c4f11d8",
+        "serper_api_key": "your-api-key",
         "serper_search_type": "search",
         "serper_location": "United States",
         "serper_gl": "us",
         "serper_hl": "en"
     }
     from flashrag.config import Config
-    config = Config("/data00/yangzhao/FlashRAG/flashrag/config/basic_config.yaml",config)
+    config = Config("basic_config.yaml",config)
     retriever = SerperRetriever(config)
 
     # Batch search
