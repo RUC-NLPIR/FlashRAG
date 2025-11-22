@@ -113,7 +113,7 @@ class PromptTemplate:
                 return self.truncate_prompt(messages)
             if self.is_chat and self.enable_chat:
                 if self.is_openai:
-                    self.truncate_prompt(messages)
+                    return self.truncate_prompt(messages)
                 else:
                     prompt = self._get_tokenizer().apply_chat_template(
                         messages, tokenize=False, add_generation_prompt=True
