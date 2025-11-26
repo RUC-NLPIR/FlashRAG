@@ -45,6 +45,7 @@ seed: 2024
 # Whether save intermediate data
 save_intermediate_data: True
 save_note: "experiment"
+is_reasoning: false
 
 # -------------------------------------------------Retrieval Settings------------------------------------------------#
 # If set the name, the model path will be find in global paths
