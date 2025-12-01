@@ -188,6 +188,8 @@ class SelectiveContext:
             unit_self_info = [[] for _ in range(len(units))]
 
             for idx, (token, info) in enumerate(zip(tokens, self_info)):
+                if current_unit_idx >= len(units):
+                    break  # Add this check to ensure within the bounds
                 current_position += len(token)
                 if current_position == len(units[current_unit_idx]):
                     unit_self_info[current_unit_idx].append(info)
