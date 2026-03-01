@@ -714,6 +714,7 @@ The index was created using the e5-base-v2 retriever on our uploaded wiki18_100w
 - [How to build my own corpus, such as a specific segmented Wikipedia?](./docs/original_docs/process-wiki.md)
 - [How to index my own corpus?](./docs/original_docs/building-index.md)
 - [How to reproduce supporting methods?](./docs/original_docs/reproduce_experiment.md)
+- [How can I debug common RAG failure modes when using FlashRAG?](./docs/rag_failure_modes_and_debug_checklist.md)
 
 ## :bookmark: License
 
