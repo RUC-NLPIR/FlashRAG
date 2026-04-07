@@ -6,7 +6,7 @@ import gradio as gr
 
 def create_chat(engine: "Engine") -> Dict[str, "Component"]:
     with gr.Tab() as chat_tab:
-        chatbot = gr.Chatbot(show_copy_button = True)
+        chatbot = gr.Chatbot(show_copy_button=True)
         input_elems = set(engine.manager.get_elem_list_without_accordion())
 
         with gr.Row():
