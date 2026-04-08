@@ -15,7 +15,7 @@ conda install -c pytorch -c nvidia faiss-gpu=1.8.0 -y
 # 3. Install the core dependencies
 echo "📦 Installing the core dependencies"
 pip install -e .[core]
-pip install vllm>=0.4.1 sentence-transformers termcolor
+pip install vllm>=0.4.1 sentence-transformers termcolor "numpy<2.0.0"
 
 # 4. Block WebUI dependencies to fix serialization bugs
 echo "📦 Release notes for Gradio and Pydantic"
