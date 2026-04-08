@@ -1,3 +1,12 @@
+datasets/*
+indexes/*
+models/*
+results/*
+tests/*
+webui_configs/*
+
+!.gitkeep
+
 **/.history
 *.pyc
 *.egg-info
@@ -5,4 +14,4 @@ build/
 .idea/
 dist/*
 upload_pypi.sh
-tests/*
+=0.4.1
