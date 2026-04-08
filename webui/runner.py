@@ -282,7 +282,7 @@ class Runner:
     def get_data_subfolders(self, folder_path: str):
         """Used in evaluate module to update the dataset_name dropdown."""
 
-        if os.path.exists(folder_path) and os.path.isdir(folder_path):
+        if folder_path is not None and os.path.exists(folder_path) and os.path.isdir(folder_path):
             subfolders = [f.name for f in os.scandir(folder_path) if f.is_dir()]
             if subfolders:
                 return gr.update(choices=subfolders, value=subfolders[0])
