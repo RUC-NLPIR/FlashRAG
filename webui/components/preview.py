@@ -14,7 +14,7 @@ def create_preview(engine: "Engine") -> Dict[str, "Component"]:
         config_save_btn = gr.Button()
 
     with gr.Row(variant = "panel"):
-        output_box = gr.Markdown(height = 300, show_copy_button = True)
+        output_box = gr.Markdown(height=300, show_copy_button=True)
     
     preview_output_elems = [output_box]
     
