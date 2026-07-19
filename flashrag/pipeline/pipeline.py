@@ -141,9 +141,10 @@ class ConditionalPipeline(BasicPipeline):
 
         self.judger = get_judger(config)
         if generator is None:
-            self.generator = get_generator(config)
+            generator = get_generator(config)
         if retriever is None:
-            self.retriever = get_retriever(config)
+            retriever = get_retriever(config)
+
         self.generator = generator
         self.retriever = retriever
 
