@@ -855,7 +855,7 @@ class SelfAskPipeline(BasicPipeline):
                 self.P_INS
                 + "\n"
                 + self.format_reference(retrieval_result)
-                + f"\nQuesiton: {question}"
+                + f"\nQuestion: {question}"
                 + "\nAre follow up questions needed here: "
                 + follow_ups
                 + "\n"
@@ -891,7 +891,7 @@ class SelfAskPipeline(BasicPipeline):
             if "So the final answer is: " in gen_out:
                 res = (
                     self.format_reference(retrieval_result)
-                    + f"\nQuesiton: {question}"
+                    + f"\nQuestion: {question}"
                     + "\nAre follow up questions needed here: "
                     + follow_ups
                     + "\n"
@@ -904,7 +904,7 @@ class SelfAskPipeline(BasicPipeline):
         if not early_exit:
             res = (
                 self.format_reference(retrieval_result)
-                + f"\nQuesiton: {question}"
+                + f"\nQuestion: {question}"
                 + "\nAre follow up questions needed here: "
                 + follow_ups
                 + "\n"
