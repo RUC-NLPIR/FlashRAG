@@ -107,7 +107,7 @@ FlashRAG仍在开发中，存在许多问题和改进空间。我们将继续更
 
 [24/07/17] 由于HuggingFace的一些未知问题，我们的原始数据集链接已失效。我们已更新链接。如果遇到任何问题，请检查[新链接](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets/)。
 
-[24/07/06] 我们添加了对新方法[<u>Trace</u>](https://arxiv.org/abs/2406.11460)的支持，通过构建知识图谱来优化文本。请参阅[<u>结果</u>](#robot-supporting-methods)和[<u>详情</u>](./docs/original_docs/baseline_details.md)。
+[24/07/06] 我们添加了对新方法[<u>Trace</u>](https://arxiv.org/abs/2406.11460)的支持，通过构建知识图谱来优化文本。请参阅[<u>结果</u>](#robot-supporting-methods)和[<u>详情</u>](./docs/original_docs/baseline_details_zh.md)。
 
 [24/06/19] 我们添加了对新方法[<u>IRCoT</u>](https://arxiv.org/abs/2212.10509)的支持，并更新了[<u>结果表</u>](#robot-supporting-methods)。
 
@@ -115,7 +115,7 @@ FlashRAG仍在开发中，存在许多问题和改进空间。我们将继续更
 
 [24/06/11] 我们在检索器模块中集成了`句子转换器`。现在使用检索器时无需设置池化方法。
 
-[24/06/05] 我们提供了详细的文档来复现现有方法（参见[如何复现](./docs/original_docs/reproduce_experiment.md)，[基线详情](./docs/original_docs/baseline_details.md)），以及[<u>配置设置</u>](./docs/original_docs/configuration.md)。
+[24/06/05] 我们提供了详细的文档来复现现有方法（参见[如何复现](./docs/original_docs/reproduce_experiment_zh.md)，[基线详情](./docs/original_docs/baseline_details_zh.md)），以及[<u>配置设置</u>](./docs/original_docs/configuration.md)。
 
 [24/06/02] 我们为初学者提供了FlashRAG的介绍，参见[<u>FlashRAG介绍</u>](./docs/original_docs/introduction_for_beginners_en.md)（[<u>中文版</u>](./docs/original_docs/introduction_for_beginners_zh.md) [<u>한국어</u>](./docs/original_docs/introduction_for_beginners_kr.md)）。
 
@@ -541,11 +541,11 @@ python interface.py
 我们在一致的设置下评测了15种RAG基线模型：
 - **生成器**：LLAMA3-8B-instruct，输入长度为2048
 - **检索器**：e5-base-v2作为嵌入模型，每个查询检索5个文档
-- **提示**：使用一致的默认提示，模板可以在[<u>方法详情</u>](./docs/original_docs/baseline_details.md)中找到。
+- **提示**：使用一致的默认提示，模板可以在[<u>方法详情</u>](./docs/original_docs/baseline_details_zh.md)中找到。
 
 对于开源方法，我们使用我们的框架实现了它们的流程。对于作者未提供源代码的方法，我们尽最大努力按照原始论文中的方法进行实现。
 
-对于某些方法的必要设置和超参数，我们在**特定设置**列中进行了记录。更多详情请参阅我们的[<u>复现指南</u>](./docs/original_docs/reproduce_experiment.md)和[<u>方法详情</u>](./docs/original_docs/baseline_details.md)。
+对于某些方法的必要设置和超参数，我们在**特定设置**列中进行了记录。更多详情请参阅我们的[<u>复现指南</u>](./docs/original_docs/reproduce_experiment_zh.md)和[<u>方法详情</u>](./docs/original_docs/baseline_details_zh.md)。
 
 需要注意的是，为了确保一致性，我们使用了统一的设置。然而，这一设置可能与方法的原始设置不同，导致结果与原始结果有所差异。
 
@@ -651,7 +651,7 @@ python interface.py
 - [如何设置不同的实验参数？](./docs/original_docs/configuration.md)
 - [如何构建我自己的语料库，例如特定分段的维基百科？](./docs/original_docs/process-wiki.md)
 - [如何索引我自己的语料库？](./docs/original_docs/building-index.md)
-- [如何复现支持的方法？](./docs/original_docs/reproduce_experiment.md)
+- [如何复现支持的方法？](./docs/original_docs/reproduce_experiment_zh.md)
 
 ## :bookmark: 许可证
 
