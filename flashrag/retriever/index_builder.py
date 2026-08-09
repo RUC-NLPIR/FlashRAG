@@ -481,15 +481,24 @@ class Index_Builder:
         else:
             memmap[:] = all_embeddings
 
-    def encode_all(self):
+    def encode_all(self, hidden_size=None):
         encode_data = [item["contents"] for item in self.corpus]
         if self.gpu_num > 1:
             print("Use multi gpu!")
             self.batch_size = self.batch_size * self.gpu_num
-            all_embeddings = self.encoder.multi_gpu_encode(encode_data, batch_size=self.batch_size, is_query=False)
-        else:
-            all_embeddings = self.encoder.encode(encode_data, batch_size=self.batch_size, is_query=False)
+            return self.encoder.multi_gpu_encode(encode_data, batch_size=self.batch_size, is_query=False)
+        if self.use_sentence_transformer:
+            return self.encoder.encode(encode_data, batch_size=self.batch_size, is_query=False)
 
+        # Stream each batch straight into the on-disk memmap instead of buffering the whole corpus in RAM.
+        corpus_size = len(encode_data)
+        all_embeddings = np.memmap(
+            self.embedding_save_path, shape=(corpus_size, hidden_size), mode="w+", dtype=np.float32
+        )
+        for i in tqdm(range(0, corpus_size, self.batch_size), desc="Encoding process: ", disable=self.encoder.silent):
+            batch_emb = self.encoder.single_batch_encode(encode_data[i : i + self.batch_size], is_query=False)
+            all_embeddings[i : i + batch_emb.shape[0]] = batch_emb
+        all_embeddings.flush()
         return all_embeddings
 
     def encode_all_clip(self):
@@ -549,12 +558,14 @@ class Index_Builder:
             )
             hidden_size = self.encoder.model.config.hidden_size
 
+        streamed_embedding_to_disk = False
         if self.embedding_path is not None:
             corpus_size = len(self.corpus)
             all_embeddings = self._load_embedding(self.embedding_path, corpus_size, hidden_size)
         else:
-            all_embeddings = self.encode_all_clip() if self.is_clip else self.encode_all()
-            if self.save_embedding:
+            streamed_embedding_to_disk = not self.is_clip and self.gpu_num <= 1 and not self.use_sentence_transformer
+            all_embeddings = self.encode_all_clip() if self.is_clip else self.encode_all(hidden_size)
+            if self.save_embedding and not streamed_embedding_to_disk:
                 self._save_embedding(all_embeddings)
             del self.corpus
 
@@ -583,6 +594,10 @@ class Index_Builder:
             if os.path.exists(self.index_save_path):
                 print("The index file already exists and will be overwritten.")
             self.save_faiss_index(all_embeddings, self.faiss_type, self.index_save_path)
+
+        if streamed_embedding_to_disk and not self.save_embedding:
+            del all_embeddings
+            os.remove(self.embedding_save_path)
         print("Finish!")
 
     def save_faiss_index(
