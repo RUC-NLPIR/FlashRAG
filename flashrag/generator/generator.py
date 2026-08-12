@@ -306,6 +306,7 @@ class HFCausalLMGenerator(BaseGenerator):
                 self.model_path,
                 torch_dtype="auto",
                 device_map="auto",
+                attn_implementation="flash_attention_2",
                 trust_remote_code=True,
             )
         else:
@@ -314,6 +315,8 @@ class HFCausalLMGenerator(BaseGenerator):
         tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
         if "qwen" not in self.model_name:
             tokenizer.pad_token = tokenizer.eos_token
+            tokenizer.pad_token_id = tokenizer.eos_token_id
+        
         tokenizer.padding_side = "left"
 
         return model, tokenizer

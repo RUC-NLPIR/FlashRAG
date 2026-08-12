@@ -339,6 +339,7 @@ class BM25Retriever(BaseTextRetriever):
             # query_tokens = self.tokenizer.tokenize(query, return_as="tuple", update_vocab=False)
             query_tokens = bm25s.tokenize(query)
             results, scores = self.searcher.retrieve(query_tokens, k=num)
+            results, scores = results.tolist(), scores.tolist()
         else:
             assert False, "Invalid bm25 backend!"
         results = results.tolist() if isinstance(results, np.ndarray) else results
