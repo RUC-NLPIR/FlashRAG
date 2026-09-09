@@ -269,6 +269,7 @@ class VLLMGenerator(BaseGenerator):
         if return_scores:
             scores = []
             for output in outputs:
+                output_scores = []
                 for single_output in output.outputs:
                     if single_output.logprobs:
                         token_probs = [np.exp(list(score_dict.values())[0].logprob) 
