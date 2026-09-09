@@ -150,7 +150,6 @@ class Index_Builder:
             else:
                 assert False, "Invalid bm25 backend!"
         elif self.retrieval_method == "splade":
-            from seismic import SeismicIndex
             self.build_seismic_index()
         else:
             self.build_dense_index()
@@ -176,6 +175,7 @@ class Index_Builder:
         --batched_indexing 10000 # seismic batch
         --nknn 32
         """
+        from seismic import SeismicIndex
 
         if self.pooling_method != 'max':
             print(
