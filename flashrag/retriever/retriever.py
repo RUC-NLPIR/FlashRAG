@@ -68,6 +68,8 @@ def cache_manager(func):
                 [t[0] for t in cache_results],
                 [t[1] for t in cache_results],
             )
+            if "batch" not in func.__name__:
+                results, scores = results[0], scores[0]
 
         else:
             results, scores = func(self, query=query, num=num, return_score=True)
