@@ -439,11 +439,9 @@ class DenseRetriever(BaseTextRetriever):
             num = self.topk
         query_emb = self.encoder.encode(query)
         scores, idxs = self.index.search(query_emb, k=num)
-        scores = scores.tolist()
-        idxs = idxs[0]
-        scores = scores[0]
-
-        results = load_docs(self.corpus, idxs)
+        valid = idxs[0] >= 0
+        results = load_docs(self.corpus, idxs[0][valid])
+        scores = scores[0][valid].tolist()
         if return_score:
             return results, scores
         else:
@@ -460,12 +458,8 @@ class DenseRetriever(BaseTextRetriever):
         scores = []
         emb = self.encoder.encode(query, batch_size=batch_size, is_query=True)
         scores, idxs = self.index.search(emb, k=num)
-        scores = scores.tolist()
-        idxs = idxs.tolist()
-
-        flat_idxs = [idx for sublist in idxs for idx in sublist]
-        results = load_docs(self.corpus, flat_idxs)
-        results = [results[i * num : (i + 1) * num] for i in range(len(idxs))]
+        results = [load_docs(self.corpus, row[row >= 0]) for row in idxs]
+        scores = [row_scores[row_idxs >= 0].tolist() for row_scores, row_idxs in zip(scores, idxs)]
 
         if return_score:
             return results, scores
