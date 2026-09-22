@@ -109,7 +109,7 @@ class Dataset:
             self.data = self._load_data(self.dataset_name, self.dataset_path)
         else:
             print("Load data from provided data")
-            if isinstance(data[0], dict):
+            if not data or isinstance(data[0], dict):
                 self.data = [Item(item_dict) for item_dict in data]
             else:
                 assert isinstance(data[0], Item)
