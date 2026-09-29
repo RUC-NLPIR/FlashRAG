@@ -543,7 +543,8 @@ class LLMJudge(BaseMetric):
 
         self.llm_pipeline = pipeline("text2text-generation", model=model_path, device=0)
 
-    def extract_judge_score(answer: str, split_str: str = "Total rating:") -> int:
+    @staticmethod
+    def extract_judge_score(answer: str, split_str: str = "Total rating:") -> float:
         try:
             if split_str in answer:
                 rating = answer.split(split_str)[1]
@@ -565,7 +566,7 @@ class LLMJudge(BaseMetric):
 
         metric_score_list = [self.extract_judge_score(o) for o in judge_output]
         # rescale score
-        metric_score_list = [score / 10 + 1 for score in metric_score_list]
+        metric_score_list = [score / 10 for score in metric_score_list]
 
         score = sum(metric_score_list) / len(metric_score_list)
 
