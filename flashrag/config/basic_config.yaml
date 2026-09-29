@@ -124,6 +124,7 @@ metrics: ["em", "f1", "acc", "precision", "recall", "input_tokens"]
 # Specify setting for metric, will be called within certain metrics
 metric_setting:
   retrieval_recall_topk: 5
+  golden_document_id_field: "golden_doc_ids"
+  document_id_field: ~
   tokenizer_name: "gpt-4"
 save_metric_score: True #　whether to save the metric score into txt file
-
