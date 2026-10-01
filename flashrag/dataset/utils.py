@@ -24,10 +24,7 @@ def convert_numpy(data: Any) -> Any:
 def filter_dataset(dataset: Dataset, filter_func=None):
     if filter_func is None:
         return dataset
-    data = dataset.data
-    for item in data:
-        if not filter_func(item):
-            data.remove(item)
+    data = [item for item in dataset.data if filter_func(item)]
     return Dataset(config=dataset.config, data=data)
 
 
