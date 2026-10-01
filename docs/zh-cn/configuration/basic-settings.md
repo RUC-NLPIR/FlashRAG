@@ -63,6 +63,8 @@ metrics: ["em", "f1", "acc", "precision", "recall", "input_tokens"]
 # 评测指标中涉及的特殊设置
 metric_setting:
   retrieval_recall_topk: 5
+  golden_document_id_field: "golden_doc_ids"
+  document_id_field: ~
   tokenizer_name: "gpt-4"
 # 是否保存最终的评测分数
 save_metric_score: True 
@@ -79,6 +81,10 @@ save_metric_score: True
      - `input_tokens`: 输入模型的 tokens 的数量，用于记录每个样本的输入长度。
      - `retrieval_recall`: 检索的召回率，衡量检索文档是否包含正确答案。
      - `retrieval_precision`: 检索的精确性
+     - `retrieval_doc_recall`: 基于文档 ID 计算 Recall@K。
+     - `retrieval_doc_precision`: 基于文档 ID 计算 Precision@K。
+     - `retrieval_doc_f1`: 基于文档 ID 计算 F1@K。
+     - `retrieval_doc_map`: 基于文档 ID 计算 MAP@K。
      - `rouge-1`, `rouge-2`, `rouge-l`
      - `zh_rouge-1`, `zh_rouge-2`, `zh_rouge-l`: 中文版本
      - `bleu`
@@ -87,7 +93,10 @@ save_metric_score: True
 
 * metric_setting: 该部分定义了与评估指标相关的额外设置：
      - `retrieval_recall_topk`: 在检索任务中，指定需要考虑的召回结果数量，这里设置为 5，意味着评估时考虑前 5 个候选结果。
+     - `golden_document_id_field`: 每条评测数据中存放标准相关文档 ID 列表的字段，默认为 `golden_doc_ids`，且列表不能为空。
+     - `document_id_field`: 检索结果中的文档 ID 字段。未设置时优先使用 `doc_id`，否则使用 `id`。分块语料建议用 `id` 保存 chunk ID、用 `doc_id` 保存原始文档 ID；计算前会按原始文档 ID 去重。
      - `tokenizer_name`: 用于计算输入token数量，可指定openai系列的分词器以及HF支持的各类tokenizer。
 
-* save_metric_score: 是否将评估结果保存到txt文件中。设置为 `True` 表示会将每个评估指标的得分保存在实验文件夹下的`metric_score.txt`文件中。
+文档级 `Precision@K` 始终以 K 为分母，即使实际返回的唯一文档少于 K；空检索结果得分为 0。`MAP@K` 的分母为 K 与标准相关文档数量中的较小值。缺少标准相关文档或列表为空时会直接报错，避免将无标注样本误记为检索失败。
 
+* save_metric_score: 是否将评估结果保存到txt文件中。设置为 `True` 表示会将每个评估指标的得分保存在实验文件夹下的`metric_score.txt`文件中。

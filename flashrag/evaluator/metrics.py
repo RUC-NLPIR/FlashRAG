@@ -280,6 +280,158 @@ class Retrieval_Precision(BaseMetric):
         return {f"retrieval_precision_top{self.topk}": precision_score}, precision_score_list
 
 
+class _DocumentLevelRetrievalMetric:
+    """Shared document-ID based retrieval metric behavior."""
+
+    def __init__(self, config):
+        super().__init__(config)
+        metric_setting = config["metric_setting"]
+        self.topk = metric_setting["retrieval_recall_topk"]
+        self.golden_document_id_field = metric_setting.get(
+            "golden_document_id_field", "golden_doc_ids"
+        )
+        self.document_id_field = metric_setting.get("document_id_field")
+
+        if self.topk <= 0:
+            raise ValueError("retrieval_recall_topk must be greater than 0")
+
+    @staticmethod
+    def _normalize_document_id(document_id, field_name):
+        if document_id is None or str(document_id) == "":
+            raise ValueError(f"`{field_name}` contains an empty document ID")
+        return str(document_id)
+
+    def _get_golden_document_ids(self, item):
+        try:
+            raw_document_ids = getattr(item, self.golden_document_id_field)
+        except (AttributeError, KeyError) as exc:
+            raise ValueError(
+                f"Missing `{self.golden_document_id_field}` in the evaluation sample"
+            ) from exc
+
+        if not isinstance(raw_document_ids, (list, tuple, set)):
+            raise TypeError(
+                f"`{self.golden_document_id_field}` must be a list, tuple, or set"
+            )
+
+        document_ids = {
+            self._normalize_document_id(document_id, self.golden_document_id_field)
+            for document_id in raw_document_ids
+        }
+        if not document_ids:
+            raise ValueError(
+                f"`{self.golden_document_id_field}` must contain at least one document ID"
+            )
+        return document_ids
+
+    def _get_retrieved_document_ids(self, retrieved_documents):
+        document_ids = []
+        seen_document_ids = set()
+
+        for document in retrieved_documents:
+            if not isinstance(document, dict):
+                raise TypeError("Each retrieval result must be a dictionary")
+
+            if self.document_id_field is not None:
+                id_field = self.document_id_field
+            elif "doc_id" in document:
+                id_field = "doc_id"
+            else:
+                id_field = "id"
+
+            if id_field not in document:
+                raise ValueError(
+                    f"Missing document ID field `{id_field}` in a retrieval result"
+                )
+
+            document_id = self._normalize_document_id(document[id_field], id_field)
+            if document_id in seen_document_ids:
+                continue
+
+            seen_document_ids.add(document_id)
+            document_ids.append(document_id)
+            if len(document_ids) == self.topk:
+                break
+
+        return document_ids
+
+    def _calculate_sample_score(self, retrieved_document_ids, golden_document_ids):
+        raise NotImplementedError
+
+    def calculate_metric(self, data):
+        if len(data) == 0:
+            raise ValueError("Document-level retrieval metrics require at least one sample")
+
+        metric_score_list = []
+        for index, item in enumerate(data):
+            try:
+                golden_document_ids = self._get_golden_document_ids(item)
+                retrieved_document_ids = self._get_retrieved_document_ids(
+                    item.retrieval_result
+                )
+            except (AttributeError, KeyError, TypeError, ValueError) as exc:
+                raise type(exc)(f"Sample {index}: {exc}") from exc
+
+            metric_score_list.append(
+                self._calculate_sample_score(
+                    retrieved_document_ids, golden_document_ids
+                )
+            )
+
+        score = sum(metric_score_list) / len(metric_score_list)
+        return {f"{self.metric_name}_top{self.topk}": score}, metric_score_list
+
+
+class DocumentRetrievalRecall(_DocumentLevelRetrievalMetric, BaseMetric):
+    """Recall@K based on retrieved and ground-truth document IDs."""
+
+    metric_name = "retrieval_doc_recall"
+
+    def _calculate_sample_score(self, retrieved_document_ids, golden_document_ids):
+        hit_count = len(set(retrieved_document_ids) & golden_document_ids)
+        return hit_count / len(golden_document_ids)
+
+
+class DocumentRetrievalPrecision(_DocumentLevelRetrievalMetric, BaseMetric):
+    """Precision@K based on retrieved and ground-truth document IDs."""
+
+    metric_name = "retrieval_doc_precision"
+
+    def _calculate_sample_score(self, retrieved_document_ids, golden_document_ids):
+        hit_count = len(set(retrieved_document_ids) & golden_document_ids)
+        return hit_count / self.topk
+
+
+class DocumentRetrievalF1(_DocumentLevelRetrievalMetric, BaseMetric):
+    """F1@K based on retrieved and ground-truth document IDs."""
+
+    metric_name = "retrieval_doc_f1"
+
+    def _calculate_sample_score(self, retrieved_document_ids, golden_document_ids):
+        hit_count = len(set(retrieved_document_ids) & golden_document_ids)
+        precision = hit_count / self.topk
+        recall = hit_count / len(golden_document_ids)
+        if precision + recall == 0:
+            return 0.0
+        return 2 * precision * recall / (precision + recall)
+
+
+class DocumentRetrievalMAP(_DocumentLevelRetrievalMetric, BaseMetric):
+    """Average Precision@K based on ranked document IDs."""
+
+    metric_name = "retrieval_doc_map"
+
+    def _calculate_sample_score(self, retrieved_document_ids, golden_document_ids):
+        hit_count = 0
+        precision_sum = 0.0
+        for rank, document_id in enumerate(retrieved_document_ids, start=1):
+            if document_id in golden_document_ids:
+                hit_count += 1
+                precision_sum += hit_count / rank
+
+        return precision_sum / min(len(golden_document_ids), self.topk)
+
+
 class Rouge_Score(BaseMetric):
     metric_name = "rouge_score"
     cached_scores = {}

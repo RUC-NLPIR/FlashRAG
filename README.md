@@ -636,9 +636,12 @@ For each dataset, we save each split as a `jsonl` file, and each line is a dict 
   'id': str,
   'question': str,
   'golden_answers': List[str],
+  'golden_doc_ids': List[str],  # optional, for document-level retrieval metrics
   'metadata': dict
 }
 ```
+
+When `golden_doc_ids` is available, FlashRAG can evaluate retrieved source documents with `retrieval_doc_recall`, `retrieval_doc_precision`, `retrieval_doc_f1`, and `retrieval_doc_map`.
 
 Below is the list of datasets along with the corresponding sample sizes:
 

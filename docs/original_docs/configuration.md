@@ -165,6 +165,8 @@ metrics: ['em','f1','acc,'precision','recall']
 # Specify setting for metric, will be called within certain metrics
 metric_setting: 
   retrieval_recall_topk: 5
+  golden_document_id_field: golden_doc_ids
+  document_id_field: ~
 save_metric_score: True #　whether to save the metric score into txt file
 ```
 
@@ -305,7 +307,25 @@ metrics: ['em','f1','acc','precision','recall']
 # Specify setting for metric, will be called within certain metrics
 metric_setting: 
   retrieval_recall_topk: 5
+  golden_document_id_field: golden_doc_ids
+  document_id_field: ~
 save_metric_score: True #　whether to save the metric score into txt file
 ```
 
 - `metrics`: The specific evaluation metrics to be used. The values are the `metric_name` of the evaluation metrics. Currently supported evaluation metrics can be found [<u>here</u>](../flashrag/evaluator/metrics.py).
+- `retrieval_recall_topk`: The cutoff used by answer-string retrieval metrics and document-level retrieval metrics.
+- `golden_document_id_field`: The per-sample field containing a non-empty list of relevant document IDs. It defaults to `golden_doc_ids`.
+- `document_id_field`: The document ID field in each retrieval result. When unset, document-level metrics use `doc_id` if present and otherwise use `id`.
+
+Document-level retrieval evaluation is available through `retrieval_doc_recall`, `retrieval_doc_precision`, `retrieval_doc_f1`, and `retrieval_doc_map`. For example:
+
+```json
+{
+  "id": "question-1",
+  "question": "Who wrote Pride and Prejudice?",
+  "golden_answers": ["Jane Austen"],
+  "golden_doc_ids": ["article-42"]
+}
+```
+
+When a corpus is chunked, keep the chunk ID in `id` and the source document ID in `doc_id`. The metrics deduplicate `doc_id` values before selecting the top K documents, so multiple chunks from one source do not count as multiple retrieved documents. `Precision@K` always uses K as its denominator, including when fewer than K unique documents are returned; an empty retrieval therefore scores 0. `MAP@K` divides by `min(K, number of relevant documents)`. Samples without a non-empty document label list are rejected instead of being silently scored as retrieval failures.

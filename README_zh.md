@@ -581,9 +581,12 @@ python interface.py
     'id': str,
     'question': str,
     'golden_answers': List[str],
+    'golden_doc_ids': List[str],  # 可选，用于文档级检索指标
     'metadata': dict
 }
 ```
+
+当数据包含 `golden_doc_ids` 时，可以使用 `retrieval_doc_recall`、`retrieval_doc_precision`、`retrieval_doc_f1` 和 `retrieval_doc_map` 评估检索到的源文档。
 
 以下是数据集列表及其对应的样本数量：
 
