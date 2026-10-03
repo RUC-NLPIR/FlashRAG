@@ -150,7 +150,8 @@ def get_refiner(config, retriever=None, generator=None):
             refiner_class = "ExtractiveRefiner"
     elif 'bert' in arch:
         refiner_class = "ExtractiveRefiner"
-    elif 'T5' in arch or 'Bart' in arch:
+    elif 't5' in arch or 'bart' in arch:
+        # `arch` is lower-cased above, so match lower-case names here.
         refiner_class = "AbstractiveRecompRefiner"
     elif "lingua" in refiner_name:
         refiner_class = "LLMLinguaRefiner"
