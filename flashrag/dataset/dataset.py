@@ -45,8 +45,10 @@ class Item:
             else:
                 try:
                     return self.data[attr_name]
-                except AttributeError:
-                    raise AttributeError(f"Attribute `{attr_name}` not found")
+                except KeyError:
+                    # AttributeError (not KeyError) keeps hasattr(), getattr()
+                    # defaults, copy and pickle working on items.
+                    raise AttributeError(f"Attribute `{attr_name}` not found") from None
 
     def __setattr__(self, attr_name: str, value: Any) -> None:
         predefined_attrs = ["id", "question", "golden_answers", "metadata", "output", "choices", 'data']
@@ -173,16 +175,22 @@ class Dataset:
         """Get an attribute of dataset items in batch."""
         for i in range(0, len(self.data), batch_size):
             batch_items = self.data[i : i + batch_size]
-            yield [item[attr_name] for item in batch_items]
+            yield [getattr(item, attr_name) for item in batch_items]
 
     def __getattr__(self, attr_name: str) -> List[Any]:
+        # Only reached for attributes that are not set on the dataset. Do not
+        # map `data` itself or special methods to the items: while copy or
+        # pickle rebuild a dataset, `data` does not exist yet, and looking it
+        # up here would recurse forever.
+        if attr_name == "data" or (attr_name.startswith("__") and attr_name.endswith("__")):
+            raise AttributeError(attr_name)
         return [item.__getattr__(attr_name) for item in self.data]
 
     def get_attr_data(self, attr_name: str) -> List[Any]:
         """For the attributes constructed later (not implemented using property),
         obtain a list of this attribute in the entire dataset.
         """
-        return [item[attr_name] for item in self.data]
+        return [getattr(item, attr_name) for item in self.data]
 
     def __getitem__(self, index: int) -> Item:
         return self.data[index]
