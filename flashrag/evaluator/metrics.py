@@ -273,7 +273,7 @@ class Retrieval_Precision(BaseMetric):
                         break
                 else:
                     hit_list.append(False)
-            score = sum(hit_list) / len(hit_list)
+            score = sum(hit_list) / len(hit_list) if hit_list else 0.0
             precision_score_list.append(score)
         precision_score = sum(precision_score_list) / len(precision_score_list)
 
