@@ -45,7 +45,7 @@ class Item:
             else:
                 try:
                     return self.data[attr_name]
-                except AttributeError:
+                except (AttributeError, KeyError):
                     raise AttributeError(f"Attribute `{attr_name}` not found")
 
     def __setattr__(self, attr_name: str, value: Any) -> None:
