@@ -526,11 +526,9 @@ class MultiModalRetriever(BaseRetriever):
         query_emb = self.encoder.encode(query, modal=query_modal)
 
         scores, idxs = self.index_dict[target_modal].search(query_emb, k=num)
-        scores = scores.tolist()
-        idxs = idxs[0]
-        scores = scores[0]
-
-        results = load_docs(self.corpus, idxs)
+        valid = idxs[0] >= 0
+        results = load_docs(self.corpus, idxs[0][valid])
+        scores = scores[0][valid].tolist()
         if return_score:
             return results, scores
         else:
@@ -562,12 +560,8 @@ class MultiModalRetriever(BaseRetriever):
             batch_emb = self.encoder.encode(query_batch, modal=query_modal)
             batch_scores, batch_idxs = self.index_dict[target_modal].search(batch_emb, k=num)
 
-            batch_scores = batch_scores.tolist()
-            batch_idxs = batch_idxs.tolist()
-
-            flat_idxs = flat_idxs = [idx for sublist in batch_idxs for idx in sublist]
-            batch_results = load_docs(self.corpus, flat_idxs)
-            batch_results = [batch_results[i * num : (i + 1) * num] for i in range(len(batch_idxs))]
+            batch_results = [load_docs(self.corpus, row[row >= 0]) for row in batch_idxs]
+            batch_scores = [row_scores[row_idxs >= 0].tolist() for row_scores, row_idxs in zip(batch_scores, batch_idxs)]
 
             scores.extend(batch_scores)
             results.extend(batch_results)

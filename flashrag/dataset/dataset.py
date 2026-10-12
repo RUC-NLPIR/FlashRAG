@@ -45,10 +45,8 @@ class Item:
             else:
                 try:
                     return self.data[attr_name]
-                except KeyError:
-                    # AttributeError (not KeyError) keeps hasattr(), getattr()
-                    # defaults, copy and pickle working on items.
-                    raise AttributeError(f"Attribute `{attr_name}` not found") from None
+                except (AttributeError, KeyError):
+                    raise AttributeError(f"Attribute `{attr_name}` not found")
 
     def __setattr__(self, attr_name: str, value: Any) -> None:
         predefined_attrs = ["id", "question", "golden_answers", "metadata", "output", "choices", 'data']

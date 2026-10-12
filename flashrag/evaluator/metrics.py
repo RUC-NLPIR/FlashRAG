@@ -273,7 +273,7 @@ class Retrieval_Precision(BaseMetric):
                         break
                 else:
                     hit_list.append(False)
-            score = sum(hit_list) / len(hit_list)
+            score = sum(hit_list) / len(hit_list) if hit_list else 0.0
             precision_score_list.append(score)
         precision_score = sum(precision_score_list) / len(precision_score_list)
 
@@ -447,7 +447,11 @@ class Rouge_Score(BaseMetric):
             return self.cached_scores[(pred, tuple(golden_answers))]
         output = {}
         for answer in golden_answers:
-            scores = self.scorer.get_scores(pred, answer)
+            # The rouge package raises on empty text, so score an empty prediction or answer as 0.
+            if pred.strip() and answer.strip():
+                scores = self.scorer.get_scores(pred, answer)
+            else:
+                scores = [{key: {"f": 0.0} for key in ["rouge-1", "rouge-2", "rouge-l"]}]
             for key in ["rouge-1", "rouge-2", "rouge-l"]:
                 if key not in output:
                     output[key] = []
@@ -537,7 +541,11 @@ class ZH_Rouge_Score(BaseMetric):
         pred = ' '.join(jieba.cut(pred))
         for answer in golden_answers:
             answer = ' '.join(jieba.cut(answer))
-            scores = self.scorer.get_scores(pred, answer)
+            # The rouge package raises on empty text, so score an empty prediction or answer as 0.
+            if pred.strip() and answer.strip():
+                scores = self.scorer.get_scores(pred, answer)
+            else:
+                scores = [{key: {"f": 0.0} for key in ["rouge-1", "rouge-2", "rouge-l"]}]
             for key in ["rouge-1", "rouge-2", "rouge-l"]:
                 if key not in output:
                     output[key] = []
