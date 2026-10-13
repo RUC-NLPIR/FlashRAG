@@ -4,3 +4,5 @@ from flashrag.pipeline.branching_pipeline import REPLUGPipeline, SuRePipeline
 from flashrag.pipeline.active_pipeline import IterativePipeline, SelfRAGPipeline, FLAREPipeline, SelfAskPipeline, IRCOTPipeline, RQRAGPipeline
 from flashrag.pipeline.reasoning_pipeline import *
 from flashrag.pipeline.ReaRAG_utils import *
+
+from flashrag.pipeline.thinkretrieve_pipeline import ThinkRetrievePipeline
