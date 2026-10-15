@@ -81,8 +81,9 @@ class SequentialPipeline(BasicPipeline):
 
     def run(self, dataset, do_eval=True, pred_process_fun=None):
         input_query = dataset.question
-        retrieval_results = self.retriever.batch_search(input_query)
+        retrieval_results, doc_scores = self.retriever.batch_search(input_query, return_score=True)
         dataset.update_output("retrieval_result", retrieval_results)
+        dataset.update_output("doc_scores", doc_scores)
 
         if self.refiner:
             input_prompt_flag = self.refiner.input_prompt_flag
