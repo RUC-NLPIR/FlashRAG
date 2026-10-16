@@ -64,7 +64,9 @@ def gaokaomm_pred_parse(dataset):
             answer = ''
             content = re.sub(r'\s+', '', model_output)
             answer_index = content.find('【答案】')
-            if answer_index > 0:
+            # find() is 0 when the marker opens the output. That is still a hit;
+            # only -1 means the marker is absent.
+            if answer_index >= 0:
                 temp = content[answer_index:]
                 if len(re.findall(r'[A-D]', temp)) > 0:
                     for t in re.findall(r'[A-D]', temp):
