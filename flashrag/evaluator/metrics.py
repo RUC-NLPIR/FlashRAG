@@ -191,6 +191,11 @@ class Sub_ExactMatch(BaseMetric):
         score = 0.0
         for golden_answer in golden_answers:
             if self.is_regex:
+                if not golden_answer.strip():
+                    if not normalized_prediction:
+                        score = 1.0
+                        break
+                    continue
                 print("Consider answer as regex!")
                 golden_answer = re.compile(golden_answer, re.IGNORECASE)
                 match = re.search(golden_answer, normalized_prediction)
@@ -199,6 +204,11 @@ class Sub_ExactMatch(BaseMetric):
                     break
             else:
                 golden_answer = normalize_answer(golden_answer)
+                if not golden_answer:
+                    if not normalized_prediction:
+                        score = 1.0
+                        break
+                    continue
                 if golden_answer in normalized_prediction:
                     score = 1.0
                     break
