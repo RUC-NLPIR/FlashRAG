@@ -356,6 +356,22 @@ output_dataset = pipeline.run(test_data, do_eval=True)
 The `output_dataset` contains the intermediate results and metric scores for each item in the input dataset.
 Meanwhile, the dataset with intermediate results and the overall evaluation score will also be saved as a file (if `save_intermediate_data` and `save_metric_score` are specified).
 
+When you enable `save_intermediate_data`, each saved item stores pipeline outputs under `output`. To count the documents returned for each question, read `output.retrieval_result`:
+
+```python
+import json
+
+with open("dataset/intermediate_data.json", encoding="utf-8") as f:
+    items = json.load(f)
+
+retrieval_counts = [
+    (item.get("id"), len(item.get("output", {}).get("retrieval_result", [])))
+    for item in items
+]
+```
+
+Each count is the number of retrieved documents recorded for that item.
+
 ### Build your own pipeline!
 
 Sometimes you may need to implement more complex RAG process, and you can build your own pipeline to implement it.
