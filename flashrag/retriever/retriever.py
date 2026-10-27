@@ -768,7 +768,6 @@ class MultiRetrieverRouter:
                     if item["is_multimodal"]:
                         item["contents"] = item["text"]
             # rerank all docs
-            print(result_list)
             result_list, score_list = self.reranker.rerank(query, result_list, topk=num)
             if isinstance(query, str):
                 result_list, score_list = result_list[0], score_list[0]
