@@ -124,10 +124,19 @@ class Dataset:
         data = []
         if dataset_path.endswith(".jsonl") or dataset_path.endswith(".json"):
             with open(dataset_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    item_dict = json.loads(line)
-                    item = Item(item_dict)
-                    data.append(item)
+                first_char = ""
+                if dataset_path.endswith(".json"):
+                    first_char = f.read(1)
+                    while first_char and first_char.isspace():
+                        first_char = f.read(1)
+                    f.seek(0)
+
+                # Dataset.save writes JSON arrays; older .json files can
+                # still contain one JSON object per line, just like .jsonl.
+                if first_char == "[":
+                    data = [Item(item_dict) for item_dict in json.load(f)]
+                else:
+                    data = [Item(json.loads(line)) for line in f]
         elif dataset_path.endswith('parquet'):
             hf_data = datasets.load_dataset('parquet', data_files=dataset_path, split="train")
             hf_data = hf_data.cast_column('image', datasets.Image())
