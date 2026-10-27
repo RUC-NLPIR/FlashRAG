@@ -541,8 +541,9 @@ class ZH_Rouge_Score(BaseMetric):
 
     def calculate_rouge(self, pred, golden_answers):
         import jieba
-        if (pred, tuple(golden_answers)) in self.cached_scores:
-            return self.cached_scores[(pred, tuple(golden_answers))]
+        cache_key = (pred, tuple(golden_answers))
+        if cache_key in self.cached_scores:
+            return self.cached_scores[cache_key]
         output = {}
         pred = ' '.join(jieba.cut(pred))
         for answer in golden_answers:
@@ -559,7 +560,7 @@ class ZH_Rouge_Score(BaseMetric):
         for k, v in output.items():
             output[k] = max(v)
 
-        self.cached_scores[(pred, tuple(golden_answers))] = output
+        self.cached_scores[cache_key] = output
         return output
 
 
