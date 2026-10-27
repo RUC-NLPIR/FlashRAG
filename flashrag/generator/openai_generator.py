@@ -64,8 +64,6 @@ class OpenaiGenerator:
         pass
     
     async def _get_response(self, messages: Union[list, str], mode: str = 'chat', **params):
-        print(messages)
-        print("----asd-asd-a--------")
         if mode == 'chat':
             response = await self.client.chat.completions.create(
                 model=self.model_name, messages=messages, **params
