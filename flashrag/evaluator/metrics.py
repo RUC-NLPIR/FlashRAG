@@ -31,16 +31,12 @@ class BaseMetric:
         return {}, []
 
     def get_dataset_answer(self, data):
-        if any(choice == [] for choice in data.choices):
-            golden_answers_list = data.golden_answers
-        else:
-            # multi-choice dataset
-            all_choices_list = data.choices
-            golden_choice_idx_list = data.golden_answers
-            golden_answers_list = [
-                [choices[idx] for idx in idx_list]
-                for choices, idx_list in zip(all_choices_list, golden_choice_idx_list)
-            ]
+        """Resolve answer text according to each sample's optional choices."""
+        golden_answers_list = []
+        for choices, golden_answers in zip(data.choices, data.golden_answers):
+            if choices:
+                golden_answers = [choices[idx] for idx in golden_answers]
+            golden_answers_list.append(golden_answers)
 
         return golden_answers_list
 
