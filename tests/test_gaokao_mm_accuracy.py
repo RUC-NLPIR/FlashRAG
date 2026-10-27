@@ -52,6 +52,23 @@ class TestGAOKAOMMAccuracy(unittest.TestCase):
 
         self.assertEqual(scores, [1.0, 0.5, 0.0])
 
+    def test_answer_marker_at_start_is_parsed(self):
+        # Whitespace is stripped before the marker is located, so an answer
+        # block that opens the output sits at index 0. Letters after that
+        # marker still have to be read when later text pushes them out of
+        # the last-10-character fallback.
+        _, scores = self.score(
+            [
+                (
+                    "multiple_choice",
+                    ["B", "D"],
+                    "【答案】 BD <eoa>\nThe two right options are listed above.",
+                )
+            ]
+        )
+
+        self.assertEqual(scores, [1.0])
+
     def test_single_choice_scoring(self):
         _, scores = self.score(
             [
