@@ -63,12 +63,12 @@ class Item:
 
         
         output = remove_images(self.data)
-
-        # clean base64 image
-        if 'prompt' in self.output:
-            self.output['prompt'] = clean_prompt_image(self.output['prompt'])
-            
         output['output'] = remove_images(convert_numpy(self.output))
+
+        # Clean prompt images only in the exported copy.
+        if 'prompt' in output['output']:
+            output['output']['prompt'] = clean_prompt_image(output['output']['prompt'])
+            
         if self.metadata:
             output["metadata"] = remove_images(self.metadata)
 
