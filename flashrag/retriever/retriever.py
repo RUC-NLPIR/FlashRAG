@@ -724,26 +724,40 @@ class MultiRetrieverRouter:
     def post_process_result(self, query: Union[str, list], result_list, score_list, num):
         # based on self.merge_method
         if self.merge_method == "concat":
-            # remove duplicate doc
+            # remove duplicate doc, keeping the first occurrence of each doc id and
+            # its parallel score. Rebuild by first-seen order instead of mutating the
+            # list while iterating: in-place ``remove`` shifts later elements left
+            # while the enumerate counter keeps advancing, which skips adjacent
+            # duplicates and leaves residual duplicate doc ids. Removing scores by
+            # value (``score_list.remove(idx)``) could also drop the wrong score.
             if isinstance(result_list[0], dict):
                 exist_id = set()
+                deduped_result = []
+                deduped_score = []
+                has_score = score_list != []
                 for idx, doc in enumerate(result_list):
                     if doc["id"] not in exist_id:
                         exist_id.add(doc["id"])
-                    else:
-                        result_list.remove(doc)
-                        if score_list != []:
-                            score_list.remove(idx)
+                        deduped_result.append(doc)
+                        if has_score:
+                            deduped_score.append(score_list[idx])
+                result_list = deduped_result
+                score_list = deduped_score
             else:
                 for query_idx, query_doc_list in enumerate(result_list):
                     exist_id = set()
+                    deduped_result = []
+                    deduped_score = []
+                    has_score = score_list != [] and len(score_list) > query_idx
                     for doc_idx, doc in enumerate(query_doc_list):
                         if doc["id"] not in exist_id:
                             exist_id.add(doc["id"])
-                        else:
-                            query_doc_list.remove(doc)
-                            if score_list != []:
-                                score_list[query_idx].remove(doc_idx)
+                            deduped_result.append(doc)
+                            if has_score:
+                                deduped_score.append(score_list[query_idx][doc_idx])
+                    result_list[query_idx] = deduped_result
+                    if has_score:
+                        score_list[query_idx] = deduped_score
             return result_list, score_list
         elif self.merge_method == "rrf":
             if (isinstance(result_list[0], dict) and len(set([doc["corpus_path"] for doc in result_list])) > 1) or (
@@ -832,7 +846,7 @@ class MultiRetrieverRouter:
             retriever_list = self.retriever_list
         if target_modal == "image":
             # remove text retriever
-            retriever_list = [retriever for retriever in retriever_list if isinstance(retriever, MultiModalRetriever)]
+            retriever_list = [retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)]
 
         return self._search_or_batch_search(
             query, target_modal, num, return_score, method="search", retriever_list=retriever_list
@@ -978,7 +992,7 @@ class SparseRetriever(BaseTextRetriever):
 
         # Use more gpus if available
         if torch.cuda.device_count() > 1:
-            model = torch.nn.DataParallel(model, device_ids=self.config['gpu_id'].split(','))
+            model = model.half().to(self.device)
 
         model = model.to(self.device)
         model.eval()
@@ -996,7 +1010,7 @@ class SparseRetriever(BaseTextRetriever):
 
         with torch.no_grad():
             logits = self.model(**inputs).logits  # [batch_size, seq_len, vocab_size]
-            attention_mask = inputs["attention_mask"].unsqueeze(-1)  # [batch, seq_len, 1]
+            attention_mask = inputs["attention_mask"].unsqueeze(-1)  # [batch_size, seq_len, 1]
 
             scores = torch.log1p(torch.relu(logits)) * attention_mask
             v_repr = torch.max(scores, dim=1)[0]  # [batch_size, vocab_size]
@@ -1111,7 +1125,7 @@ class SparseRetriever(BaseTextRetriever):
 
             # Pad to max_len
             padded_keys = keys + [pad_token] * (max_len - len(keys))
-            padded_values = values + [0.0] * (max_len - len(values))
+            padded_values = values + [0.0] * (max_len - len(keys))
 
             query_components.append(np.array(padded_keys, dtype='U30'))
             query_values.append(np.array(padded_values, dtype=np.float32))
@@ -1154,17 +1168,17 @@ class SerperRetriever(BaseRetriever):
         Retrieve top-k relevant documents using Google Serper API.
         
         Args:
-            query: Search query string
+            query (str): Search query string
             num: Number of results to return
             return_score: Whether to return relevance scores
             
         Returns:
             List of dictionaries containing search results with keys:
-                - contents: The snippet/description
-                - title: Page title
-                - text: Full text (same as contents for web search)
-                - url: Page URL
-                - score: Relevance score (if return_score=True)
+                contents: The snippet/description
+                title: Page title
+                text: Full text (same as contents for web search)
+                url: Page URL
+                score: Relevance score (if return_score=True)
         """
         headers = {
             'X-API-KEY': self.api_key,
@@ -1227,7 +1241,7 @@ class SerperRetriever(BaseRetriever):
         Batch search for multiple queries.
         
         Args:
-            query_list: List of query strings
+            query_list (List[str]): List of query strings
             num: Number of results per query
             return_score: Whether to return relevance scores
             
