@@ -846,7 +846,7 @@ class MultiRetrieverRouter:
             retriever_list = self.retriever_list
         if target_modal == "image":
             # remove text retriever
-            retriever_list = [retriever for retriever in self.retriever_list if isinstance(retriever, MultiModalRetriever)]
+            retriever_list = [retriever for retriever in retriever_list if isinstance(retriever, MultiModalRetriever)]
 
         return self._search_or_batch_search(
             query, target_modal, num, return_score, method="search", retriever_list=retriever_list
@@ -992,7 +992,7 @@ class SparseRetriever(BaseTextRetriever):
 
         # Use more gpus if available
         if torch.cuda.device_count() > 1:
-            model = model.half().to(self.device)
+            model = torch.nn.DataParallel(model, device_ids=self.config['gpu_id'].split(','))
 
         model = model.to(self.device)
         model.eval()
@@ -1010,7 +1010,7 @@ class SparseRetriever(BaseTextRetriever):
 
         with torch.no_grad():
             logits = self.model(**inputs).logits  # [batch_size, seq_len, vocab_size]
-            attention_mask = inputs["attention_mask"].unsqueeze(-1)  # [batch_size, seq_len, 1]
+            attention_mask = inputs["attention_mask"].unsqueeze(-1)  # [batch, seq_len, 1]
 
             scores = torch.log1p(torch.relu(logits)) * attention_mask
             v_repr = torch.max(scores, dim=1)[0]  # [batch_size, vocab_size]
@@ -1125,7 +1125,7 @@ class SparseRetriever(BaseTextRetriever):
 
             # Pad to max_len
             padded_keys = keys + [pad_token] * (max_len - len(keys))
-            padded_values = values + [0.0] * (max_len - len(keys))
+            padded_values = values + [0.0] * (max_len - len(values))
 
             query_components.append(np.array(padded_keys, dtype='U30'))
             query_values.append(np.array(padded_values, dtype=np.float32))
@@ -1168,17 +1168,17 @@ class SerperRetriever(BaseRetriever):
         Retrieve top-k relevant documents using Google Serper API.
         
         Args:
-            query (str): Search query string
+            query: Search query string
             num: Number of results to return
             return_score: Whether to return relevance scores
             
         Returns:
             List of dictionaries containing search results with keys:
-                contents: The snippet/description
-                title: Page title
-                text: Full text (same as contents for web search)
-                url: Page URL
-                score: Relevance score (if return_score=True)
+                - contents: The snippet/description
+                - title: Page title
+                - text: Full text (same as contents for web search)
+                - url: Page URL
+                - score: Relevance score (if return_score=True)
         """
         headers = {
             'X-API-KEY': self.api_key,
@@ -1241,7 +1241,7 @@ class SerperRetriever(BaseRetriever):
         Batch search for multiple queries.
         
         Args:
-            query_list (List[str]): List of query strings
+            query_list: List of query strings
             num: Number of results per query
             return_score: Whether to return relevance scores
             
