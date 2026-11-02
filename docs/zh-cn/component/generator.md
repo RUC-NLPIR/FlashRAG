@@ -37,7 +37,7 @@ Openai接口支持各类基于API进行调用的LLM。
 
 ## 生成器的配置与加载
 
-生成器的配置可以参考[配置文件相关说明](../configuration/generator.md)。
+生成器的配置可以参考[配置文件相关说明](../configuration/generator-setting.md)。
 
 要使用生成器，只需按照以下步骤进行加载：
 

@@ -41,7 +41,7 @@ In FlashRAG, we support combining both methods.
 
 The priority of configuration methods is: Parameter Dict > Config File > Default Settings
 
-The default settings are recorded in [basic_config.yaml](../flashrag/config/basic_config.yaml).
+The default settings are recorded in [basic_config.yaml](../../flashrag/config/basic_config.yaml).
 
 ##### Path Settings
 
@@ -64,7 +64,7 @@ This rule applies to the following parameters:
 
 ## Example Configuration
 
-An example configuration file can be found in [basic_config.yaml](../flashrag/config/basic_config.yaml). Below we will go through each section in the configuration file.
+An example configuration file can be found in [basic_config.yaml](../../flashrag/config/basic_config.yaml). Below we will go through each section in the configuration file.
 
 ```yaml
 # basic settings
@@ -312,7 +312,7 @@ metric_setting:
 save_metric_score: True #　whether to save the metric score into txt file
 ```
 
-- `metrics`: The specific evaluation metrics to be used. The values are the `metric_name` of the evaluation metrics. Currently supported evaluation metrics can be found [<u>here</u>](../flashrag/evaluator/metrics.py).
+- `metrics`: The specific evaluation metrics to be used. The values are the `metric_name` of the evaluation metrics. Currently supported evaluation metrics can be found [<u>here</u>](../../flashrag/evaluator/metrics.py).
 - `retrieval_recall_topk`: The cutoff used by answer-string retrieval metrics and document-level retrieval metrics.
 - `golden_document_id_field`: The per-sample field containing a non-empty list of relevant document IDs. It defaults to `golden_doc_ids`.
 - `document_id_field`: The document ID field in each retrieval result. When unset, document-level metrics use `doc_id` if present and otherwise use `id`.
