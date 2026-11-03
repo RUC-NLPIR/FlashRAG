@@ -100,14 +100,6 @@ class ReasoningPipeline(BasicPipeline):
             if len(exist_items) == 0:
                 print("All prompts are finished")
                 break
-            if current_step_idx == self.max_retrieval_num:
-                print("Max retrieval number reached")
-                for item in exist_items:
-                    item.pred = 'No valid answer found'
-                    item.finish_flag = True
-                    item.finish_reason = 'Reach max retrieval number'
-                break
-
             step_outputs = self.generator.generate(exist_prompts, stop=self.stop_tokens)
             step_query_list = [] # store generated queries for retrieval
 
@@ -133,6 +125,16 @@ class ReasoningPipeline(BasicPipeline):
                     item.finish_flag = True
                     item.finish_reason = 'Normal finish without answer pattern'
                 
+            # Consume the last retrieved documents before enforcing the search budget.
+            # Completed answers survive; unfinished items cannot request another search.
+            if current_step_idx == self.max_retrieval_num:
+                for item in exist_items:
+                    if not item.finish_flag:
+                        item.pred = 'No valid answer found'
+                        item.finish_flag = True
+                        item.finish_reason = 'Reach max retrieval number'
+                break
+
             # do retrieval and add retrieved docs to prompt
             if len(step_query_list) > 0:
                 retrieved_docs = self.retriever.batch_search([it['query'] for it in step_query_list])
@@ -222,14 +224,6 @@ class SimpleDeepSearcherPipeline(ReasoningPipeline):
             if len(exist_items) == 0:
                 print("All prompts are finished")
                 break
-            if current_step_idx == self.max_retrieval_num:
-                print("Max retrieval number reached")
-                for item in exist_items:
-                    item.pred = 'No valid answer found'
-                    item.finish_flag = True
-                    item.finish_reason = 'Reach max retrieval number'
-                break
-
             step_outputs = self.generator.generate(exist_prompts, stop=self.stop_tokens)
             step_query_list = [] # store generated queries for retrieval
 
@@ -253,6 +247,17 @@ class SimpleDeepSearcherPipeline(ReasoningPipeline):
                     item.finish_flag = True
                     item.finish_reason = 'Normal finish without answer pattern'
 
+            # Consume the last retrieved documents before enforcing the search budget.
+            # Completed answers survive; unfinished items cannot request another search.
+            if current_step_idx == self.max_retrieval_num:
+                for item in exist_items:
+                    if not item.finish_flag:
+                        item.pred = 'No valid answer found'
+                        item.finish_flag = True
+                        item.finish_reason = 'Reach max retrieval number'
+                break
+
+            # do retrieval and add retrieved docs to prompt
             if len(step_query_list) > 0:
                 retrieved_docs = self.retriever.batch_search([it['query'] for it in step_query_list])
                 for it, item_retrieved_docs in zip(step_query_list, retrieved_docs):
@@ -418,14 +423,6 @@ class O2SearcherPipeline(ReasoningPipeline):
             if len(exist_items) == 0:
                 print("All prompts are finished")
                 break
-            if current_step_idx == self.max_retrieval_num:
-                print("Max retrieval number reached")
-                for item in exist_items:
-                    item.pred = 'No valid answer found'
-                    item.finish_flag = True
-                    item.finish_reason = 'Reach max retrieval number'
-                break
-
             step_outputs = self.generator.generate(exist_prompts, stop=self.stop_tokens)
             step_query_list = [] # store generated queries for retrieval
 
@@ -459,6 +456,16 @@ class O2SearcherPipeline(ReasoningPipeline):
                     # item.finish_flag = False
                     # item.finish_reason = 'Normal finish without answer pattern'
                 
+            # Consume the last retrieved documents before enforcing the search budget.
+            # Completed answers survive; unfinished items cannot request another search.
+            if current_step_idx == self.max_retrieval_num:
+                for item in exist_items:
+                    if not item.finish_flag:
+                        item.pred = 'No valid answer found'
+                        item.finish_flag = True
+                        item.finish_reason = 'Reach max retrieval number'
+                break
+
             # do retrieval and add retrieved docs to prompt
             if len(step_query_list) > 0:
                 # print(dataset.question)
