@@ -52,6 +52,19 @@ class TestGAOKAOMMAccuracy(unittest.TestCase):
 
         self.assertEqual(scores, [1.0, 0.5, 0.0])
 
+    def test_multiple_choice_partial_credit_for_non_adjacent_subset(self):
+        # A correct subset earns partial credit even when its letters are not
+        # adjacent in the golden answer.
+        _, scores = self.score(
+            [
+                ("multiple_choice", ["A", "B", "C"], "【答案】 AC <eoa>"),
+                ("multiple_choice", ["A", "B", "D"], "【答案】 BD <eoa>"),
+                ("multiple_choice", ["A", "B", "C"], "【答案】 AD <eoa>"),
+            ]
+        )
+
+        self.assertEqual(scores, [0.5, 0.5, 0.0])
+
     def test_answer_marker_at_start_is_parsed(self):
         # Whitespace is stripped before the marker is located, so an answer
         # block that opens the output sits at index 0. Letters after that

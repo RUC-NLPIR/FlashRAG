@@ -796,10 +796,11 @@ class GAOKAOMM_Accuracy(BaseMetric):
             else:
                 if pred == golden_answer:
                     acc = 1.0
-                elif pred and pred in golden_answer:
-                    # Partial credit is for a correct subset of the answer.
+                elif pred and all(choice in golden_answer for choice in pred):
+                    # Partial credit is for a correct subset of the answer,
+                    # whose letters need not be adjacent in the answer.
                     # An empty prediction (nothing could be parsed) is a
-                    # substring of every answer, but it must score 0.
+                    # subset of every answer, but it must score 0.
                     acc = 0.5
                 else:
                     acc = 0.0
