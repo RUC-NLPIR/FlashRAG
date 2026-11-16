@@ -1,4 +1,5 @@
 import asyncio
+import importlib.util
 import json
 import unittest
 from pathlib import Path
@@ -125,3 +126,54 @@ class TestParallelRetriever(unittest.TestCase):
         with patch.object(retriever, "_search_queries", return_value=[[], [{"id": "b"}]]) as remote:
             self.assertEqual(asyncio.run(search()), ([[], [{"id": "b"}]], [[], [1.0]]))
         remote.assert_awaited_once_with(["first", "second"], 2)
+
+    @unittest.skipUnless(importlib.util.find_spec("mcp"), "requires the parallel extra")
+    def test_slow_session_close_does_not_delay_search(self):
+        import httpx
+
+        class SlowBody(httpx.AsyncByteStream):
+            exhausted = False
+            closed = False
+
+            async def __aiter__(self):
+                for _ in range(12):
+                    await asyncio.sleep(0.25)
+                    yield b"x"
+                self.exhausted = True
+
+            async def aclose(self):
+                self.closed = True
+
+        body = SlowBody()
+
+        async def respond(transport, request):
+            if request.method == "DELETE":
+                return httpx.Response(200, stream=body)
+            if request.method == "GET":
+                return httpx.Response(405)
+            message = json.loads(request.content)
+            method = message["method"]
+            if method == "notifications/initialized":
+                return httpx.Response(202)
+            if method == "initialize":
+                result = {
+                    "protocolVersion": message["params"]["protocolVersion"],
+                    "serverInfo": {"name": "fixture", "version": "1"},
+                    "capabilities": {"tools": {}},
+                }
+            elif method == "tools/list":
+                result = {"tools": [{"name": "web_search", "inputSchema": {"type": "object"}}]}
+            else:
+                self.assertEqual(method, "tools/call")
+                result = {"content": [], "structuredContent": {"results": [
+                    {"url": "https://example.org", "title": "Example", "excerpts": ["A passage"]},
+                ]}}
+            payload = {"jsonrpc": "2.0", "id": message["id"], "result": result}
+            return httpx.Response(200, headers={"Mcp-Session-Id": "fixture"}, json=payload)
+
+        retriever = self.get_parallel_retriever()
+        with patch.object(httpx.AsyncHTTPTransport, "handle_async_request", respond):
+            documents = retriever.search("a test query")
+        self.assertEqual(documents[0]["url"], "https://example.org")
+        self.assertTrue(body.closed)
+        self.assertFalse(body.exhausted)

@@ -8,12 +8,6 @@ from flashrag.version import __version__
 _PARALLEL_MCP_URL = "https://mcp.parallel.ai/mcp"
 
 
-async def _limit_session_close(request):
-    if request.method == "DELETE":
-        # The cleanup request should not hold up a completed search.
-        request.extensions["timeout"] = dict.fromkeys(("connect", "read", "write", "pool"), 1.0)
-
-
 async def _normalize_media_type(response):
     # The SSE reader expects a lowercase media type.
     media_type, separator, parameters = response.headers.get("Content-Type", "").partition(";")
@@ -64,14 +58,20 @@ class ParallelRetriever(BaseTextRetriever):
                 "Run pip install -e '.[parallel]' from the FlashRAG checkout."
             ) from exc
 
-        headers = {"User-Agent": f"FlashRAG/{__version__}"}
+        class SessionClient(httpx.AsyncClient):
+            async def send(self, request, *, stream=False, **kwargs):
+                if request.method == "DELETE":
+                    # Bound the whole cleanup, including a slowly streamed response body.
+                    return await asyncio.wait_for(super().send(request, stream=False, **kwargs), timeout=1.0)
+                return await super().send(request, stream=stream, **kwargs)
+
         async with (
-            httpx.AsyncClient(
-                headers=headers,
+            SessionClient(
+                headers={"User-Agent": f"FlashRAG/{__version__}"},
                 timeout=30.0,
                 follow_redirects=False,
                 max_redirects=0,  # The MCP SDK also handles same-origin redirects.
-                event_hooks={"request": [_limit_session_close], "response": [_normalize_media_type]},
+                event_hooks={"response": [_normalize_media_type]},
             ) as client,
             streamable_http_client(_PARALLEL_MCP_URL, http_client=client) as (read, write, _),
             ClientSession(read, write, read_timeout_seconds=timedelta(seconds=30)) as session,

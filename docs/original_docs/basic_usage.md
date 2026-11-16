@@ -45,7 +45,13 @@ The `search` and `batch_search` functions of the retriever implement three addit
 
 ### Parallel web retrieval
 
-On Python 3.10 or newer, run `pip install -e '.[parallel]'` from your FlashRAG checkout. Add these settings to your existing pipeline configuration.
+Use Python 3.10 or newer and install Faiss as described in the [FlashRAG README](../../README.md). From your FlashRAG checkout, install the Parallel extra and the standard pipeline's `termcolor` dependency.
+
+```bash
+pip install -e '.[parallel]' termcolor
+```
+
+Add these settings to your existing pipeline configuration.
 
 ```yaml
 retrieval_method: parallel
