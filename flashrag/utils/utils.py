@@ -86,6 +86,8 @@ def get_retriever(config):
         return getattr(importlib.import_module("flashrag.retriever"), "BM25Retriever")(config)
     elif config["retrieval_method"] == "splade":
         return getattr(importlib.import_module("flashrag.retriever"), "SparseRetriever")(config)
+    elif config["retrieval_method"] == "parallel":
+        return getattr(importlib.import_module("flashrag.retriever"), "ParallelRetriever")(config)
     else:
         try:
             model_config = AutoConfig.from_pretrained(config["retrieval_model_path"])

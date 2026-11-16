@@ -314,6 +314,8 @@ my_config = Config(
 We provide comprehensive guidance on how to set configurations, you can see our [<u>configuration guidance</u>](./docs/original_docs/configuration.md).
 You can also refer to the [<u>basic yaml file</u>](./flashrag/config/basic_config.yaml) we provide to set your own parameters.
 
+To use live web passages as retrieval context, see [Parallel web retrieval](./docs/original_docs/basic_usage.md#parallel-web-retrieval).
+
 Next, load the corresponding dataset and initialize the pipeline. The components in the pipeline will be automatically loaded.
 
 ```python

@@ -4,7 +4,7 @@
 
 The retriever takes a series of queries and retrieves the top k documents from a corpus corresponding to each query.
 
-You can load the Retriever using `flashrag.utils.get_retriever`, which determines the type of retriever (BM25 or Dense) based on the `retrieval_method` specified in the config , and initializes the corpus and model needed internally by the retriever.
+Load the retriever with `flashrag.utils.get_retriever`. It uses `retrieval_method` to select the retriever and loads any corpus, index, or model that retriever needs.
 
 ```python
 retriever = get_retriever(config)
@@ -42,6 +42,20 @@ The `search` and `batch_search` functions of the retriever implement three addit
 - **Pre-load retrieval results**: Suitable for cases where you provide some retrieval results for queries yourself. If `use_retrieval_cache` is set in the config and a cache file is provided, it first checks whether the cache file contains the retrieval results for the corresponding queries and returns them if available.
 - **Save retrieval results**: If `save_retrieval_cache` is set to True, the retriever will save the retrieval results for each query as a cache, making it easy to use the cache directly next time.
 - **Rerank**: If `use_reranker=True`, the `search` function will integrate reranking to further sort the retrieval results.
+
+### Parallel web retrieval
+
+On Python 3.10 or newer, install the `parallel` extra with `pip install 'flashrag-dev[parallel]'`, or `pip install -e '.[parallel]'` from a checkout. Add these settings to your existing pipeline configuration.
+
+```yaml
+retrieval_method: parallel
+use_multi_retriever: false
+retrieval_topk: 5
+```
+
+`SequentialPipeline(config)` selects Parallel through the retriever factory. It sends uncached text queries to `https://mcp.parallel.ai/mcp` and uses returned excerpts as context. Parallel retrieval works without a local index, corpus, or API key. The pipeline uses the generator configured for your experiment.
+
+Each result includes the source URL, title, excerpt text, and `contents` in FlashRAG's title-then-text format. The URL also serves as the document ID. `retrieval_topk` caps the number of results locally. When scores are requested, they are the reciprocal ranks of the returned documents.
 
 ## Generator
 

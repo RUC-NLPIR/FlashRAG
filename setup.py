@@ -12,7 +12,8 @@ extras_require = {
     'core': requirements,
     'retriever': ['pyserini', 'sentence-transformers>=3.0.1'],
     'generator': ['vllm'],
-    'multimodal': ['timm', 'torchvision', 'pillow', 'qwen_vl_utils']
+    'multimodal': ['timm', 'torchvision', 'pillow', 'qwen_vl_utils'],
+    'parallel': ['httpx>=0.27.1,<1', "mcp>=1.30,<2; python_version >= '3.10'"],
 }
 extras_require['full'] = sum(extras_require.values(), [])
 

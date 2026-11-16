@@ -22,6 +22,7 @@ method2index:
   e5: ~
   bm25: ~
   contriever: ~
+  parallel: ~ # web search does not use a local index
   clip:
     "text": "path/to/text_index"
     "image": "path/to/image_index"
@@ -49,7 +50,7 @@ is_reasoning: false
 
 # -------------------------------------------------Retrieval Settings------------------------------------------------#
 # If set the name, the model path will be find in global paths
-retrieval_method: "e5" # name or path of the retrieval model.
+retrieval_method: "e5" # retrieval model name or path, or "parallel" for web search
 retrieval_model_path: ~ # path to the retrieval model
 index_path: ~ # set automatically if not provided.
 multimodal_index_path_dict: ~ # use for multimodal retreiver, example format: {'text': 'path/to/text_index' or None, 'image': 'path/to/image_index' or None}
