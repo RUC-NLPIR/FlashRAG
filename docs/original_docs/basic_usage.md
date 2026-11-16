@@ -45,10 +45,12 @@ The `search` and `batch_search` functions of the retriever implement three addit
 
 ### Parallel web retrieval
 
-Use Python 3.10 or newer and install Faiss as described in the [FlashRAG README](../../README.md). From your FlashRAG checkout, install the Parallel extra and the standard pipeline's `termcolor` dependency.
+Use Python 3.10 or newer and a Faiss build that supports NumPy 2. From your FlashRAG checkout, create a fresh environment and install the Parallel extra and the standard pipeline's `termcolor` dependency. This example uses Python 3.12 with CPU Faiss. See the [Faiss installation guide](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md) for platform support and GPU builds.
 
 ```bash
-pip install -e '.[parallel]' termcolor
+conda create -n flashrag-parallel -c pytorch -c conda-forge python=3.12 pip faiss-cpu=1.16.0
+conda activate flashrag-parallel
+python -m pip install -e '.[parallel]' termcolor
 ```
 
 Add these settings to your existing pipeline configuration.
