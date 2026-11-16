@@ -45,7 +45,7 @@ The `search` and `batch_search` functions of the retriever implement three addit
 
 ### Parallel web retrieval
 
-On Python 3.10 or newer, install the `parallel` extra with `pip install 'flashrag-dev[parallel]'`, or `pip install -e '.[parallel]'` from a checkout. Add these settings to your existing pipeline configuration.
+On Python 3.10 or newer, run `pip install -e '.[parallel]'` from your FlashRAG checkout. Add these settings to your existing pipeline configuration.
 
 ```yaml
 retrieval_method: parallel
@@ -55,7 +55,7 @@ retrieval_topk: 5
 
 `SequentialPipeline(config)` selects Parallel through the retriever factory. It sends uncached text queries to `https://mcp.parallel.ai/mcp` and uses returned excerpts as context. Parallel retrieval works without a local index, corpus, or API key. The pipeline uses the generator configured for your experiment.
 
-Each result includes the source URL, title, excerpt text, and `contents` in FlashRAG's title-then-text format. The URL also serves as the document ID. `retrieval_topk` caps the number of results locally. When scores are requested, they are the reciprocal ranks of the returned documents.
+Each result includes the source URL, title, excerpt text, and `contents` in FlashRAG's title-then-text format. The URL also serves as the document ID. `retrieval_topk` caps the number of results locally. Before any configured reranking, scores are the reciprocal ranks of the returned documents.
 
 ## Generator
 

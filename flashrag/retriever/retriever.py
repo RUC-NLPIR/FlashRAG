@@ -104,7 +104,7 @@ def rerank_manager(func):
     @functools.wraps(func)
     def wrapper(self, query, num=None, return_score=False):
         results, scores = func(self, query=query, num=num, return_score=True)
-        if self.use_reranker:
+        if self.use_reranker and any(results):
             results, scores = self.reranker.rerank(query, results)
             if "batch" not in func.__name__:
                 results = results[0]

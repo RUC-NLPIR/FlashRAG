@@ -44,7 +44,7 @@ class TestParallelRetriever(unittest.TestCase):
         retriever = self.get_parallel_retriever()
         with (
             patch.dict("sys.modules", {"mcp": None}),
-            self.assertRaisesRegex(ImportError, r"flashrag-dev\[parallel\]"),
+            self.assertRaisesRegex(ImportError, r"pip install -e '\.\[parallel\]'"),
         ):
             retriever.search("orbital period")
 
@@ -98,6 +98,23 @@ class TestParallelRetriever(unittest.TestCase):
             self.assertEqual(retriever.batch_search([" ", ""], return_score=True), ([[], []], [[], []]))
             self.assertEqual(retriever.search("regular query", num=0), [])
         remote.assert_not_called()
+
+    def test_reranker_only_runs_when_there_are_documents(self):
+        with patch("flashrag.retriever.retriever.get_reranker") as load_reranker:
+            retriever = self.get_parallel_retriever(use_reranker=True)
+        rerank = load_reranker.return_value.rerank
+        with patch.object(retriever, "_search_queries", side_effect=lambda queries, num: [[] for _ in queries]):
+            self.assertEqual(retriever.search("no results", return_score=True), ([], []))
+            self.assertEqual(retriever.batch_search(["blank", "empty"], return_score=True), ([[], []], [[], []]))
+            self.assertEqual(retriever.batch_search([], return_score=True), ([], []))
+        rerank.assert_not_called()
+
+        query = ["empty", "matched"]
+        doc = {"id": "https://example.org", "contents": "Example\nPassage"}
+        rerank.return_value = ([[], [doc]], [[], [0.9]])
+        with patch.object(retriever, "_search_queries", return_value=[[], [doc]]):
+            self.assertEqual(retriever.batch_search(query, return_score=True), rerank.return_value)
+        rerank.assert_called_once_with(query, [[], [doc]])
 
     def test_search_works_inside_a_running_event_loop(self):
         retriever = self.get_parallel_retriever()

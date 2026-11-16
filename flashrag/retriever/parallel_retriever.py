@@ -61,7 +61,7 @@ class ParallelRetriever(BaseTextRetriever):
                 raise
             raise ImportError(
                 "Parallel retrieval requires Python 3.10+ and the parallel extra. "
-                "Install it with pip install 'flashrag-dev[parallel]'."
+                "Run pip install -e '.[parallel]' from the FlashRAG checkout."
             ) from exc
 
         headers = {"User-Agent": f"FlashRAG/{__version__}"}
