@@ -241,8 +241,17 @@ class Retrieval_Recall(BaseMetric):
             doc_list = [doc["contents"] for doc in doc_list[: self.topk]]
             hit_list = []
             for doc in doc_list:
+                normalized_doc = normalize_answer(doc)
                 for golden_answer in golden_answers:
-                    if normalize_answer(golden_answer) in normalize_answer(doc):
+                    normalized_golden_answer = normalize_answer(golden_answer)
+                    # An empty reference is a substring of every document, so it
+                    # only matches an empty document (as in Sub_ExactMatch).
+                    if not normalized_golden_answer:
+                        if not normalized_doc:
+                            hit_list.append(True)
+                            break
+                        continue
+                    if normalized_golden_answer in normalized_doc:
                         hit_list.append(True)
                         break
                 else:
@@ -273,8 +282,17 @@ class Retrieval_Precision(BaseMetric):
             doc_list = [doc["contents"] for doc in doc_list[: self.topk]]
             hit_list = []
             for doc in doc_list:
+                normalized_doc = normalize_answer(doc)
                 for golden_answer in golden_answers:
-                    if normalize_answer(golden_answer) in normalize_answer(doc):
+                    normalized_golden_answer = normalize_answer(golden_answer)
+                    # An empty reference is a substring of every document, so it
+                    # only matches an empty document (as in Sub_ExactMatch).
+                    if not normalized_golden_answer:
+                        if not normalized_doc:
+                            hit_list.append(True)
+                            break
+                        continue
+                    if normalized_golden_answer in normalized_doc:
                         hit_list.append(True)
                         break
                 else:
