@@ -70,7 +70,7 @@ class Item:
             output['output']['prompt'] = clean_prompt_image(output['output']['prompt'])
             
         if self.metadata:
-            output["metadata"] = remove_images(self.metadata)
+            output["metadata"] = remove_images(convert_numpy(self.metadata))
 
         return output
 

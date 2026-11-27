@@ -2,6 +2,8 @@ import json
 import random
 import tempfile
 import unittest
+
+import numpy as np
 from pathlib import Path
 
 from flashrag.dataset import Dataset
@@ -38,6 +40,28 @@ class TestDatasetJson(unittest.TestCase):
         self.assertEqual(restored[0].output["metric_score"], {"em": 1.0})
         self.assertEqual(restored[0].metadata, {"source": "合成样本"})
         self.assertEqual(restored[0].choices, ["甲", "乙"])
+
+    def test_numpy_metadata_can_be_saved_without_mutating_the_item(self):
+        metadata = {
+            "rank": np.int64(2),
+            "score": np.float32(0.5),
+            "selected": np.bool_(True),
+            "embeddings": np.array([[1.0, 2.0]]),
+            "nested": [{"count": np.int32(3)}],
+        }
+        self.records[0]["metadata"] = metadata
+        dataset = Dataset(config=self.config, data=self.records)
+
+        dataset.save(str(self.path))
+
+        restored = self.load()
+        self.assertEqual(restored[0].metadata, {
+            "rank": 2, "score": 0.5, "selected": True,
+            "embeddings": [[1.0, 2.0]], "nested": [{"count": 3}],
+        })
+        self.assertIsInstance(dataset[0].metadata["rank"], np.int64)
+        np.testing.assert_array_equal(dataset[0].metadata["embeddings"], [[1.0, 2.0]])
+        self.assertEqual(json.loads(str(dataset[0]))["metadata"], restored[0].metadata)
 
     def test_json_arrays_accept_compact_pretty_and_leading_whitespace(self):
         for indent, prefix in [(None, ""), (4, ""), (2, " \n\t")]:
