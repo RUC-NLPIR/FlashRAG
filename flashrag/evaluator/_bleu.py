@@ -197,7 +197,7 @@ def compute_bleu(reference_corpus, translation_corpus, max_order=4, smooth=False
     else:
         geo_mean = 0
 
-    ratio = float(translation_length) / reference_length
+    ratio = float(translation_length) / reference_length if reference_length else 0.0
 
     if ratio > 1.0:
         bp = 1.0

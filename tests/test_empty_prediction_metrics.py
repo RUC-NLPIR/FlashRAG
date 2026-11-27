@@ -138,6 +138,19 @@ class TestBleu(unittest.TestCase):
                 # 6 predicted tokens against 7 reference tokens over the corpus
                 self.assertAlmostEqual(result["bleu"], math.exp(1 - 7 / 6))
 
+    def test_empty_reference_scores_zero(self):
+        data = build_data(["", "hallucinated answer"], [[""], [""]])
+
+        for smooth in (False, True):
+            with self.subTest(smooth=smooth):
+                config = {
+                    "dataset_name": "nq",
+                    "metric_setting": {"bleu_smooth": smooth},
+                }
+                result, sample_scores = BLEU(config).calculate_metric(data)
+                self.assertEqual(sample_scores, [0.0, 0.0])
+                self.assertEqual(result["bleu"], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()
