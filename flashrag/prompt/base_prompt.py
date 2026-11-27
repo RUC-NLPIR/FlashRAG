@@ -86,6 +86,8 @@ class PromptTemplate:
             else:
                 assert isinstance(prompt, str)
                 tokenized_prompt = self._get_tokenizer().encode(prompt,allowed_special={'<|endoftext|>'})
+                if len(tokenized_prompt) <= self.max_input_len:
+                    return prompt
                 half = int(self.max_input_len / 2)
                 truncated_messages = self._get_tokenizer().decode(tokenized_prompt[:half]) + self._get_tokenizer().decode(tokenized_prompt[-half:])
 
