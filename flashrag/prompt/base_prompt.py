@@ -80,8 +80,9 @@ class PromptTemplate:
                         print(f"The input text length is greater than the maximum length ({total_tokens + len(encoded_message)} > {self.max_input_len}) and has been truncated!")
                         remaining_tokens = self.max_input_len - total_tokens
                         truncated_message = self._get_tokenizer().decode(encoded_message[:remaining_tokens])
-                        message['content'] = truncated_message
-                        truncated_messages.append(message)
+                        truncated_messages.append(
+                            {**message, "content": truncated_message}
+                        )
                         break
             else:
                 assert isinstance(prompt, str)
