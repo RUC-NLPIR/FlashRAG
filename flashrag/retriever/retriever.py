@@ -724,26 +724,40 @@ class MultiRetrieverRouter:
     def post_process_result(self, query: Union[str, list], result_list, score_list, num):
         # based on self.merge_method
         if self.merge_method == "concat":
-            # remove duplicate doc
+            # remove duplicate doc, keeping the first occurrence of each doc id and
+            # its parallel score. Rebuild by first-seen order instead of mutating the
+            # list while iterating: in-place ``remove`` shifts later elements left
+            # while the enumerate counter keeps advancing, which skips adjacent
+            # duplicates and leaves residual duplicate doc ids. Removing scores by
+            # value (``score_list.remove(idx)``) could also drop the wrong score.
             if isinstance(result_list[0], dict):
                 exist_id = set()
+                deduped_result = []
+                deduped_score = []
+                has_score = score_list != []
                 for idx, doc in enumerate(result_list):
                     if doc["id"] not in exist_id:
                         exist_id.add(doc["id"])
-                    else:
-                        result_list.remove(doc)
-                        if score_list != []:
-                            score_list.remove(idx)
+                        deduped_result.append(doc)
+                        if has_score:
+                            deduped_score.append(score_list[idx])
+                result_list = deduped_result
+                score_list = deduped_score
             else:
                 for query_idx, query_doc_list in enumerate(result_list):
                     exist_id = set()
+                    deduped_result = []
+                    deduped_score = []
+                    has_score = score_list != [] and len(score_list) > query_idx
                     for doc_idx, doc in enumerate(query_doc_list):
                         if doc["id"] not in exist_id:
                             exist_id.add(doc["id"])
-                        else:
-                            query_doc_list.remove(doc)
-                            if score_list != []:
-                                score_list[query_idx].remove(doc_idx)
+                            deduped_result.append(doc)
+                            if has_score:
+                                deduped_score.append(score_list[query_idx][doc_idx])
+                    result_list[query_idx] = deduped_result
+                    if has_score:
+                        score_list[query_idx] = deduped_score
             return result_list, score_list
         elif self.merge_method == "rrf":
             if (isinstance(result_list[0], dict) and len(set([doc["corpus_path"] for doc in result_list])) > 1) or (
