@@ -142,7 +142,9 @@ class ExactMatch(BaseMetric):
     def calculate_em(self, prediction: str, golden_answers: list) -> float:
         if isinstance(golden_answers, str):
             golden_answers = [golden_answers]
-        normalized_prediction = normalize_answer(prediction)
+        normalized_prediction = (
+            prediction.strip() if self.is_regex else normalize_answer(prediction)
+        )
         score = 0.0
         for golden_answer in golden_answers:
             if self.is_regex:
@@ -183,7 +185,9 @@ class Sub_ExactMatch(BaseMetric):
     def calculate_sub_em(self, prediction: str, golden_answers: list) -> float:
         if isinstance(golden_answers, str):
             golden_answers = [golden_answers]
-        normalized_prediction = normalize_answer(prediction)
+        normalized_prediction = (
+            prediction.strip() if self.is_regex else normalize_answer(prediction)
+        )
         score = 0.0
         for golden_answer in golden_answers:
             if self.is_regex:
