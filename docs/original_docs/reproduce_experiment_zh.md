@@ -10,7 +10,7 @@
 
 ## 复现步骤
 
-所有使用的代码都基于仓库的 [example/methods](../examples/methods/)。我们为各种方法设置了适当的超参数。如果你需要自己调整它们，可以参考为每种方法提供的配置字典以及每种方法的原始论文。
+所有使用的代码都基于仓库的 [example/methods](../../examples/methods/)。我们为各种方法设置了适当的超参数。如果你需要自己调整它们，可以参考为每种方法提供的配置字典以及每种方法的原始论文。
 
 ### 1. 设置基本配置
 
@@ -81,7 +81,7 @@
 这种方法需要一个嵌入模型和推理阶段使用的训练数据。我们提供了作者给定的训练数据。如果你想使用自己的训练数据，可以根据训练数据的格式和原始论文生成它。
 
 - 额外步骤1：下载嵌入模型（从[这里](https://huggingface.co/princeton-nlp/sup-simcse-bert-base-uncased)）
-- 额外步骤2：下载训练数据（从[这里](../examples/methods/sample_data/skr_training.json)）
+- 额外步骤2：下载训练数据（从[这里](../../examples/methods/sample_data/skr_training.json)）
 - 额外步骤3：在 `skr` 函数的 `model_path` 中填写嵌入模型路径
 - 额外步骤4：在 `skr` 函数的 `training_data_path` 中填写训练数据路径
 

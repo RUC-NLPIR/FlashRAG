@@ -16,9 +16,9 @@
 
 1. 프로젝트 및 종속 항목(dependencies) 설치
 2. 필요한 모델 다운로드
-3. 필요한 데이터셋 다운로드 ([토이 데이터셋](../examples/quick_start/dataset/nq) 제공)
-4. 검색을 위한 문서 컬렉션 다운로드 ([토이 코퍼스](../examples/quick_start/indexes/general_knowledge.jsonl) 제공)
-5. 검색을 위한 인덱스 빌드 ([토이 인덱스](../examples/quick_start/indexes/e5_Flat.index) 제공)
+3. 필요한 데이터셋 다운로드 ([토이 데이터셋](../../examples/quick_start/dataset/nq) 제공)
+4. 검색을 위한 문서 컬렉션 다운로드 ([토이 코퍼스](../../examples/quick_start/indexes/general_knowledge.jsonl) 제공)
+5. 검색을 위한 인덱스 빌드 ([토이 인덱스](../../examples/quick_start/indexes/e5_Flat.index) 제공)
 
 시작 시간을 절약하기 위해 토이 데이터셋, 문서 컬렉션 및 해당 인덱스를 제공합니다. 따라서 첫 두 단계를 완료하기만 하면 전체 프로세스를 성공적으로 실행할 수 있습니다.
 
@@ -47,13 +47,13 @@ pip install -e .
 
 데이터셋에는 쿼리 및 해당 표준 답변이 포함되어 있어 RAG 시스템의 효과를 평가할 수 있습니다.
 
-간단히 하기 위해 NQ에서 17개의 데이터를 샘플링한 토이 데이터셋을 제공하며, 이는 [examples/quick_start/dataset/nq](../examples/quick_start/dataset/nq/)에 있습니다. 이후의 RAG 프로세스는 이 질문들에 대해 수행될 것입니다.
+간단히 하기 위해 NQ에서 17개의 데이터를 샘플링한 토이 데이터셋을 제공하며, 이는 [examples/quick_start/dataset/nq](../../examples/quick_start/dataset/nq/)에 있습니다. 이후의 RAG 프로세스는 이 질문들에 대해 수행될 것입니다.
 
 저희 리포지토리에는 많은 양의 처리된 벤치마크 데이터셋도 제공합니다. [huggingface datasets](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets)에서 다운로드하여 사용할 수 있습니다.
 
 ### 2.4 문서 컬렉션 다운로드
 
-문서 컬렉션은 RAG 시스템의 외부 지식 원천 역할을 하는 많은 분할된(segmented) 단락을 포함합니다. 일반적으로 사용되는 문서 컬렉션은 매우 크기 때문에 (~5G 이상), [general knowledge dataset](https://huggingface.co/datasets/MuskumPillerum/General-Knowledge)을 토이 컬렉션으로 사용하며, 이는 [examples/quick_start/indexes/general_knowledge.jsonl](../examples/quick_start/indexes/general_knowledge.jsonl)에 위치해 있습니다.
+문서 컬렉션은 RAG 시스템의 외부 지식 원천 역할을 하는 많은 분할된(segmented) 단락을 포함합니다. 일반적으로 사용되는 문서 컬렉션은 매우 크기 때문에 (~5G 이상), [general knowledge dataset](https://huggingface.co/datasets/MuskumPillerum/General-Knowledge)을 토이 컬렉션으로 사용하며, 이는 [examples/quick_start/indexes/general_knowledge.jsonl](../../examples/quick_start/indexes/general_knowledge.jsonl)에 위치해 있습니다.
 
 > 문서 수가 적기 때문에 많은 쿼리가 관련 텍스트를 찾지 못할 수 있으며, 이는 최종 검색 결과에 영향을 미칠 수 있습니다.
 
@@ -63,20 +63,20 @@ pip install -e .
 
 검색 효율성을 높이기 위해 검색 인덱스를 사전에 빌드해야 합니다. BM25 방법의 경우, 인덱스는 보통 역색인(우리 프로젝트에서는 디렉토리)입니다. 다양한 임베딩 방법의 경우 인덱스는 문서 컬렉션의 모든 텍스트 임베딩을 포함하는 Faiss 데이터베이스(.index 파일)입니다. **각 인덱스는 하나의 코퍼스와 하나의 검색 방법에 대응됩니다**. 즉 새로운 임베딩 모델을 사용할 때마다 인덱스를 다시 빌드해야 합니다.
 
-여기서는 E5-base-v2와 앞서 언급한 토이 코퍼스를 사용하여 빌드한 [토이 인덱스](../examples/quick_start/indexes/e5_Flat.index)를 제공합니다.
+여기서는 E5-base-v2와 앞서 언급한 토이 코퍼스를 사용하여 빌드한 [토이 인덱스](../../examples/quick_start/indexes/e5_Flat.index)를 제공합니다.
 
 자신의 검색 모델과 문서를 사용하려면 [index building document](./building-index.md)를 참조하여 인덱스를 빌드할 수 있습니다.
 
 
 ## 3. Running the RAG Process
 
-다음 단계에서는 각 단계를 세분화하고 해당 코드를 시연할 것입니다. 전체 코드는 마지막에 제공되거나 [simple_pipeline.py](../examples/quick_start/simple_pipeline.py) 파일을 참조할 수 있습니다.
+다음 단계에서는 각 단계를 세분화하고 해당 코드를 시연할 것입니다. 전체 코드는 마지막에 제공되거나 [simple_pipeline.py](../../examples/quick_start/simple_pipeline.py) 파일을 참조할 수 있습니다.
 
 ### 3.1 Loading the Config
 
 먼저 `Config`를 로드하고 앞서 다운로드한 항목들의 경로를 채워야 합니다.
 
-`Config`는 실험의 모든 경로와 하이퍼파라미터를 관리합니다. FlashRAG에서는 다양한 매개변수를 yaml 파일 또는 Python 딕셔너리를 통해 Config에 전달할 수 있습니다. 전달된 매개변수는 기본 내부 매개변수를 대체합니다. 자세한 매개변수 정보와 기본값은 [`basic_config.yaml`](../flashrag/config/basic_config.yaml)을 참조할 수 있습니다.
+`Config`는 실험의 모든 경로와 하이퍼파라미터를 관리합니다. FlashRAG에서는 다양한 매개변수를 yaml 파일 또는 Python 딕셔너리를 통해 Config에 전달할 수 있습니다. 전달된 매개변수는 기본 내부 매개변수를 대체합니다. 자세한 매개변수 정보와 기본값은 [`basic_config.yaml`](../../flashrag/config/basic_config.yaml)을 참조할 수 있습니다.
 
 여기서는 딕셔너리를 통해 경로를 직접 전달합니다.
 

@@ -12,7 +12,7 @@ In this document, we will introduce how to reproduce the results of various meth
 
 ## Reproduce Step
 
-All the code used is based on the repository's [example/methods](../examples/methods/). We have set appropriate hyperparameters for various methods. If you need to adjust them yourself, you can refer to the config dictionary provided for each method and the original papers of each method.
+All the code used is based on the repository's [example/methods](../../examples/methods/). We have set appropriate hyperparameters for various methods. If you need to adjust them yourself, you can refer to the config dictionary provided for each method and the original papers of each method.
 
 ### 1. Set Basic Config
 
@@ -83,7 +83,7 @@ We recommend adjusting the `single_hop` parameter in the `SelfAskPipeline` accor
 This method requires an embedding model and training data used during the inference stage. We provide the training data given by the authors. If you wish to use your own training data, you can generate it according to the format of the training data and the original paper.
 
 - Additional Step1: Download the embedding model (from [here](https://huggingface.co/princeton-nlp/sup-simcse-bert-base-uncased))
-- Additional Step2: Download the training data (from [here](../examples/methods/sample_data/skr_training.json))
+- Additional Step2: Download the training data (from [here](../../examples/methods/sample_data/skr_training.json))
 - Additional Step3: Fill in the embedding model path in the `model_path` of the `skr` function
 - Additional Step4: Fill in the training data path in the `training_data_path` of the `skr` function
 

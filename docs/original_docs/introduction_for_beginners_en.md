@@ -15,9 +15,9 @@ To smoothly run the entire RAG process, you need to complete the following five 
 
 1. Install the project and its dependencies.
 2. Download the required models.
-3. Download the necessary datasets (a [toy dataset](../examples/quick_start/dataset/nq) is provided).
-4. Download the document collection for retrieval (a [toy corpus](../examples/quick_start/indexes/general_knowledge.jsonl) is provided).
-5. Build the index for retrieval (a [toy index](../examples/quick_start/indexes/e5_Flat.index) is provided).
+3. Download the necessary datasets (a [toy dataset](../../examples/quick_start/dataset/nq) is provided).
+4. Download the document collection for retrieval (a [toy corpus](../../examples/quick_start/indexes/general_knowledge.jsonl) is provided).
+5. Build the index for retrieval (a [toy index](../../examples/quick_start/indexes/e5_Flat.index) is provided).
 
 To save time in getting started, we provide toy datasets, document collections, and corresponding indices. Therefore, you only need to complete the first two steps to successfully run the entire process.
 
@@ -46,13 +46,13 @@ You can download the models from [Huggingface](https://huggingface.co/intfloat/e
 
 The datasets include queries and corresponding standard answers, allowing us to evaluate the effectiveness of the RAG system.
 
-For simplicity, we have sampled 17 pieces of data from NQ as a toy dataset, located at [examples/quick_start/dataset/nq](../examples/quick_start/dataset/nq/). The subsequent RAG process will be conducted on these questions.
+For simplicity, we have sampled 17 pieces of data from NQ as a toy dataset, located at [examples/quick_start/dataset/nq](../../examples/quick_start/dataset/nq/). The subsequent RAG process will be conducted on these questions.
 
 Our repository also provides a large number of processed benchmark datasets. You can visit our  [huggingface datasets](https://huggingface.co/datasets/ignore/FlashRAG_datasets) to download and use them.
 
 ### 2.4 Downloading the Document Collection
 
-The document collection contains a large number of segmented paragraphs, serving as the external knowledge source for the RAG system. Since commonly used document collections are often very large (~5G or more), we use a [general knowledge dataset](https://huggingface.co/datasets/MuskumPillerum/General-Knowledge) as a toy collection, located at  [examples/quick_start/indexes/general_knowledge.jsonl](../examples/quick_start/indexes/general_knowledge.jsonl)。
+The document collection contains a large number of segmented paragraphs, serving as the external knowledge source for the RAG system. Since commonly used document collections are often very large (~5G or more), we use a [general knowledge dataset](https://huggingface.co/datasets/MuskumPillerum/General-Knowledge) as a toy collection, located at  [examples/quick_start/indexes/general_knowledge.jsonl](../../examples/quick_start/indexes/general_knowledge.jsonl)。
 
 > Due to the small number of documents, many queries may not find relevant texts, which could affect the final retrieval results.
 
@@ -64,21 +64,21 @@ If you need to obtain the full document collection, you can visit our [huggingfa
 
 To improve retrieval efficiency, we often need to build the retrieval index in advance. For the BM25 method, the index is usually an inverted index (a directory in our project). For various embedding methods, the index is a Faiss database containing the embeddings of all texts in the document collection (an .index file). **Each index corresponds to a corpus and a retrieval method**, meaning that every time you want to use a new embedding model, you need to rebuild the index.
 
-Here, we provide a [toy index](../examples/quick_start/indexes/e5_Flat.index), built using E5-base-v2 and the aforementioned toy corpus.
+Here, we provide a [toy index](../../examples/quick_start/indexes/e5_Flat.index), built using E5-base-v2 and the aforementioned toy corpus.
 
 If you want to use your own retrieval model and documents, you can refer to our [index building document](./building-index.md) to build your index.
 
 
 ## 3. Running the RAG Process
 
-In the following steps, we will break down each step and demonstrate the corresponding code. The complete code will be provided at the end, or you can refer to the [simple_pipeline.py](../examples/quick_start/simple_pipeline.py) file.
+In the following steps, we will break down each step and demonstrate the corresponding code. The complete code will be provided at the end, or you can refer to the [simple_pipeline.py](../../examples/quick_start/simple_pipeline.py) file.
 
 
 ### 3.1 Loading the Config
 
 First, we need to load the `Config` and fill in the paths of the previously downloaded items.
 
-`Config` manages all the paths and hyperparameters in the experiment. In FlashRAG, various parameters can be passed into the Config via a yaml file or a Python dictionary. The passed parameters will replace the default internal parameters. For detailed parameter information and their default values, you can refer to our [`basic_config.yaml`](../flashrag/config/basic_config.yaml).
+`Config` manages all the paths and hyperparameters in the experiment. In FlashRAG, various parameters can be passed into the Config via a yaml file or a Python dictionary. The passed parameters will replace the default internal parameters. For detailed parameter information and their default values, you can refer to our [`basic_config.yaml`](../../flashrag/config/basic_config.yaml).
 
 
 Here, we directly pass the paths via a dictionary.

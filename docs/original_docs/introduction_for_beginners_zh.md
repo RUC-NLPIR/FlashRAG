@@ -16,9 +16,9 @@ Standard RAG的流程包括以下三个步骤:
 
 1. 安装本项目以及对应的依赖库
 2. 下载需要的各种模型
-3. 下载需要的数据集 (已提供[toy dataset](../examples/quick_start/dataset/nq))
-4. 下载用于检索的文档集合(已提供[toy corpus](../examples/quick_start/indexes/general_knowledge.jsonl))
-5. 构建用于检索的index (已提供[toy index](../examples/quick_start/indexes/e5_Flat.index))
+3. 下载需要的数据集 (已提供[toy dataset](../../examples/quick_start/dataset/nq))
+4. 下载用于检索的文档集合(已提供[toy corpus](../../examples/quick_start/indexes/general_knowledge.jsonl))
+5. 构建用于检索的index (已提供[toy index](../../examples/quick_start/indexes/e5_Flat.index))
 
 
 为了能够节省入门所需要的时间，我们提供了玩具数据集、文档集合以及对应的index。因此实际上只需要进行前两步就可以顺利完成整个流程。
@@ -48,13 +48,13 @@ pip install -e .
 
 数据集包含了query和对应的标准答案，能够让我们评估构建的RAG系统的效果。
 
-为了简便，我们从NQ中采样了17条数据作为toy dataset, 其地址在 [examples/quick_start/dataset/nq](../examples/quick_start/dataset/nq/)。后续RAG流程将在这些questions上进行。
+为了简便，我们从NQ中采样了17条数据作为toy dataset, 其地址在 [examples/quick_start/dataset/nq](../../examples/quick_start/dataset/nq/)。后续RAG流程将在这些questions上进行。
 
 我们的仓库中同样提供了大量处理好的基准数据集，可以访问我们[huggingface上的数据集](https://huggingface.co/datasets/RUC-NLPIR/FlashRAG_datasets)进行下载和使用。
 
 ### 2.4 下载文档集合
 
-文档集合包含了大量的切分好的段落，是RAG系统的外部知识来源。由于常用的文档集合往往非常大(~5G以上)，我们使用了一个通用知识数据集作为检索文档， 地址为 [examples/quick_start/indexes/general_knowledge.jsonl](../examples/quick_start/indexes/general_knowledge.jsonl)。
+文档集合包含了大量的切分好的段落，是RAG系统的外部知识来源。由于常用的文档集合往往非常大(~5G以上)，我们使用了一个通用知识数据集作为检索文档， 地址为 [examples/quick_start/indexes/general_knowledge.jsonl](../../examples/quick_start/indexes/general_knowledge.jsonl)。
 > 由于文档数量较少，可能很多query都无法搜到相关的文本，这可能会影响最终的检索结果。
 
 
@@ -65,21 +65,21 @@ pip install -e .
 
 为了提高检索的查询效率，我们往往需要提前构建检索的索引。对于BM25方法，索引往往是倒排表(在我们项目中是一个文件夹)。对于各类embedding方法，索引是一个包含检索文档集合中所有文本的embedding的faiss数据库(一个.index文件)。**每个索引对应着一个corpus和一种检索方式**，也就是每当想使用一种新的embedding模型，都得重新构建索引。
 
-在这里我们提供了一个[toy index](../examples/quick_start/indexes/e5_Flat.index)，其使用E5-base-v2以及前面的toy corpus进行构建。
+在这里我们提供了一个[toy index](../../examples/quick_start/indexes/e5_Flat.index)，其使用E5-base-v2以及前面的toy corpus进行构建。
 
 如果想使用自己的检索模型和检索文档，可以参考我们的[索引构建文档](./building-index.md)来构建。
 
 
 ## 3. 运行RAG流程
 
-我们在下面的步骤中会依次拆解各个步骤，并展示相应的代码。完整的代码会在最后放出，或者可以参考[simple_pipeline.py](../examples/quick_start/simple_pipeline.py)文件。
+我们在下面的步骤中会依次拆解各个步骤，并展示相应的代码。完整的代码会在最后放出，或者可以参考[simple_pipeline.py](../../examples/quick_start/simple_pipeline.py)文件。
 
 
 ### 3.1 加载Config
 
 首先我们需要加载``Config``，并填入之前下载的各种东西的路径。
 
-`Config`管理着实验中所有的路径以及超参数。在FlashRAG中，各种参数可以通过`yaml`文件或者python内的字典传入Config中。传入的参数会替换默认的内部参数，具体的各种参数以及其默认值可以参考我们的[`basic_config.yaml`](../flashrag/config/basic_config.yaml)。
+`Config`管理着实验中所有的路径以及超参数。在FlashRAG中，各种参数可以通过`yaml`文件或者python内的字典传入Config中。传入的参数会替换默认的内部参数，具体的各种参数以及其默认值可以参考我们的[`basic_config.yaml`](../../flashrag/config/basic_config.yaml)。
 
 在这里我们直接通过字典传入各种路径。
 

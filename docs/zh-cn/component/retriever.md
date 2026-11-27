@@ -32,7 +32,7 @@ FlashRAG支持以下几种检索器：
 
 ## 检索器的配置与加载
 
-检索器的配置可以参考[配置文件相关说明](../configuration/retriever.md)。
+检索器的配置可以参考[配置文件相关说明](../configuration/retriever-settings.md)。
 
 如需单独使用检索器，只需使用下面的代码进行加载：
 ```python
